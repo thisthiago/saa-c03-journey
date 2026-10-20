@@ -58,7 +58,7 @@ export const F04: PhaseDef = {
   ],
   availability: 'available',
   estimatedMinutes: 40,
-  map: { x: 430, y: 280 },
+  map: { x: 560, y: 356 },
   simplifications: [
     'O avaliador modela kms:Decrypt e kms:GenerateDataKey com key policy e IAM. Não modela grants, contexto de criptografia, cotas de requisição do KMS nem chaves multirregionais.',
     'A chave gerenciada pela AWS (aws/s3) é tratada como utilizável apenas por identidades da própria conta, via S3.',

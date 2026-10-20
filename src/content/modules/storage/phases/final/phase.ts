@@ -294,7 +294,7 @@ export const FINAL: PhaseDef = {
   ],
   availability: 'available',
   estimatedMinutes: 60,
-  map: { x: 800, y: 350 },
+  map: { x: 820, y: 400 },
   simplifications: [
     'A rubrica é uma avaliação pedagógica das decisões, com pesos definidos por este projeto — não é uma métrica da AWS.',
     'As regras entre etapas cobrem os conflitos mais importantes; uma arquitetura real exige outras verificações.',

@@ -43,7 +43,7 @@ export const F10: PhaseDef = {
   concepts: ['sgw.overview', 'sgw.s3-file', 'sgw.fsx-file', 'sgw.volume-cached', 'sgw.volume-stored', 'sgw.tape', 's3.restore'],
   availability: 'available',
   estimatedMinutes: 35,
-  map: { x: 430, y: 590 },
+  map: { x: 300, y: 510 },
   simplifications: [
     'O simulador escolhe o gateway por protocolo e requisitos; não considera tamanho de cache, banda nem cotas.',
     'O comportamento durante quedas de conexão é apresentado de forma conceitual.',

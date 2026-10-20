@@ -118,7 +118,7 @@ export const F08: PhaseDef = {
   concepts: ['ev.notifications', 'ev.destination-permissions', 'ev.filter-overlap', 'ev.fanout', 'ev.eventbridge', 'ev.at-least-once', 'ev.recursion'],
   availability: 'available',
   estimatedMinutes: 45,
-  map: { x: 600, y: 200 },
+  map: { x: 560, y: 212 },
   simplifications: [
     'Cada evento é entregue uma vez e na hora; na AWS, a entrega é "pelo menos uma vez", em geral em segundos, e duplicatas acontecem.',
     'Com o EventBridge habilitado, todos os eventos do bucket vão para o barramento padrão; as permissões dos alvos do EventBridge não são simuladas.',

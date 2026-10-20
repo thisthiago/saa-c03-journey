@@ -65,7 +65,7 @@ export const F05: PhaseDef = {
   ],
   availability: 'available',
   estimatedMinutes: 40,
-  map: { x: 260, y: 500 },
+  map: { x: 300, y: 360 },
   simplifications: [
     'Version IDs são gerados de forma determinística; na AWS são cadeias opacas e aleatórias.',
     'As operações são feitas pelo dono do bucket, sem avaliação de permissões.',

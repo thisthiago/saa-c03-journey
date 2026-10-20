@@ -59,7 +59,7 @@ export const F09: PhaseDef = {
   concepts: ['rp.basics', 'rp.header', 'rp.assumed-role', 'rp.403', 'rp.limits', 's3.data-transfer'],
   availability: 'available',
   estimatedMinutes: 30,
-  map: { x: 430, y: 80 },
+  map: { x: 560, y: 50 },
   simplifications: [
     'A autorização (IAM e bucket policy) aparece como "permite" ou "não permite".',
     'Os custos usam a primeira faixa de preço de transferência; na AWS, grandes volumes têm faixas mais baratas.',

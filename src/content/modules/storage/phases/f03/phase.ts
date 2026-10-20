@@ -64,7 +64,7 @@ export const F03: PhaseDef = {
   ],
   availability: 'available',
   estimatedMinutes: 50,
-  map: { x: 260, y: 350 },
+  map: { x: 300, y: 210 },
   simplifications: [
     'O avaliador de acesso cobre políticas de identidade, bucket policy, Block Public Access, ACLs e Object Ownership. Não modela SCPs, RCPs, permission boundaries, session policies, Access Points nem políticas de VPC endpoint.',
     'Só quatro ações do S3 (ListBucket, GetObject, PutObject e DeleteObject) e poucas chaves de condição são simuladas.',

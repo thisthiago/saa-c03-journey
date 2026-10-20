@@ -128,7 +128,7 @@ export const F06: PhaseDef = {
   concepts: ['lc.rules', 'lc.waterfall', 'lc.min-duration-rule', 'lc.small-objects', 'lc.expiration', 'lc.noncurrent', 'lc.mpu-cleanup', 'lc.expired-delete-markers', 'lc.conflicts'],
   availability: 'available',
   estimatedMinutes: 45,
-  map: { x: 430, y: 430 },
+  map: { x: 560, y: 518 },
   simplifications: [
     'Cada conjunto de dados é uma coorte criada no dia 0, com padrão de acesso constante; as ações acontecem no dia exato (na AWS, a execução é assíncrona).',
     'Custos com meses de 30 dias, preços da tabela versionada (us-east-1), primeira faixa e sem nível gratuito.',

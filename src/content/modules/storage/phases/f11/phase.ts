@@ -93,7 +93,7 @@ export const F11: PhaseDef = {
   ],
   availability: 'available',
   estimatedMinutes: 35,
-  map: { x: 600, y: 590 },
+  map: { x: 300, y: 680 },
   simplifications: [
     'Tempo de rede = volume × 8 ÷ (banda utilizável × 80% de aproveitamento), com TB decimal.',
     'Prazos de provisionamento do Direct Connect e de logística até o Data Transfer Terminal são premissas dos cenários, não dados da AWS.',

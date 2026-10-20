@@ -78,7 +78,7 @@ export const F02: PhaseDef = {
   ],
   availability: 'available',
   estimatedMinutes: 45,
-  map: { x: 260, y: 180 },
+  map: { x: 300, y: 50 },
   simplifications: [
     'Preços da AWS Price List (us-east-1 e sa-east-1) na data indicada no simulador, apenas a primeira faixa de cada item, sem nível gratuito nem impostos.',
     'Cada perfil assume objetos de tamanho médio igual e volume estável mês a mês.',

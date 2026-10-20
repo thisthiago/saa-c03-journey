@@ -41,6 +41,8 @@ export const S3_EXPEDITION: TrackDef = {
   serviceIds: ['aws.s3', 'aws.iam', 'aws.kms', 'aws.storage-gateway', 'aws.datasync'],
   phases: [F01, F02, F03, F04, F05, F06, F07, F08, F09, F10, F11],
   final: FINAL,
+  // Colunas com cinco fases cada: o mapa precisa de mais altura que o padrão.
+  mapHeight: 800,
 }
 
 export const storageModule: ContentModule = {

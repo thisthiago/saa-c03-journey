@@ -32,7 +32,7 @@ export const F01: PhaseDef = {
   ],
   availability: 'available',
   estimatedMinutes: 35,
-  map: { x: 90, y: 350 },
+  map: { x: 90, y: 210 },
   simplifications: [
     'O explorador de bucket mostra uma listagem completa, sem paginação, e não aplica permissões.',
     'ETags exibidos são ilustrativos; no S3 real, para uploads simples sem SSE-KMS, o ETag é o MD5 do conteúdo.',

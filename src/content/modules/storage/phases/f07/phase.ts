@@ -110,7 +110,7 @@ export const F07: PhaseDef = {
   concepts: ['repl.crr-srr', 'repl.requirements', 'repl.what-not', 'repl.delete-markers', 'repl.kms', 'repl.rtc', 'repl.batch', 'dr.rpo-rto'],
   availability: 'available',
   estimatedMinutes: 45,
-  map: { x: 600, y: 420 },
+  map: { x: 560, y: 662 },
   simplifications: [
     'O tempo de replicação não é simulado: o RTC aparece como o SLA publicado (99,9% em até 15 minutos).',
     'Permissões do papel de replicação e a bucket policy do destino aparecem como caixas de seleção.',
