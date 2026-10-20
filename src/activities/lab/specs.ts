@@ -22,6 +22,13 @@ import type { LayersLabConfig } from '../../simulators/policy/layers'
 import type { TrustLabConfig } from '../../simulators/sts/lab'
 import type { IdentityLabConfig } from '../../simulators/identity/lab'
 import type { OrgLabConfig } from '../../simulators/org/lab'
+import type { InstancePickerLabConfig } from '../../simulators/instances/lab'
+import type { VolumesLabConfig } from '../../simulators/ebs/lab'
+import type { PurchaseLabConfig } from '../../simulators/purchase/lab'
+import type { LbLabConfig } from '../../simulators/loadbalancer/lab'
+import type { ScalingLabConfig } from '../../simulators/scaling/lab'
+import type { LambdaLabConfig } from '../../simulators/lambda/lab'
+import type { ChooserLabConfig } from '../../simulators/chooser/lab'
 
 export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'; config: CostLabConfig } | { lab: 'access'; config: AccessLabConfig }
   | { lab: 'versioning'; config: VersioningLabConfig }
@@ -44,5 +51,12 @@ export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'
   | { lab: 'trust'; config: TrustLabConfig }
   | { lab: 'identity'; config: IdentityLabConfig }
   | { lab: 'org'; config: OrgLabConfig }
+  | { lab: 'instance-picker'; config: InstancePickerLabConfig }
+  | { lab: 'volumes'; config: VolumesLabConfig }
+  | { lab: 'purchase'; config: PurchaseLabConfig }
+  | { lab: 'load-balancer'; config: LbLabConfig }
+  | { lab: 'scaling'; config: ScalingLabConfig }
+  | { lab: 'lambda-concurrency'; config: LambdaLabConfig }
+  | { lab: 'compute-chooser'; config: ChooserLabConfig }
 
 export type LabId = LabSpec['lab']
