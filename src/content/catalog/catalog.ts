@@ -44,10 +44,9 @@ export const TERRITORIES: TerritoryDef[] = [
   {
     id: 'computacao',
     title: 'Computação',
-    summary: 'Instâncias, contêineres e funções sem servidor.',
+    summary: 'Instâncias, volumes, balanceamento, escalonamento, contêineres e funções sem servidor.',
     glyph: 'server',
-    status: 'planned',
-    plannedServices: ['Amazon EC2', 'AWS Lambda', 'Amazon ECS', 'Amazon EKS'],
+    status: 'active',
   },
   {
     id: 'redes',
