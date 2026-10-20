@@ -10,6 +10,8 @@ import type { ActivityDef } from '../activities/types'
 import { trackPhases } from '../engine/registry'
 import { validateRegistry } from '../engine/registry'
 import { validateBucketName } from '../simulators/bucket/model'
+import { layoutProblems } from '../features/map/layout'
+import { mapEdges } from '../features/map/status'
 import { registry } from './index'
 
 const allActivities: ActivityDef[] = [...registry.activities.values()].map((r) => r.activity)
@@ -89,10 +91,12 @@ describe('integridade do conteúdo', () => {
     expect(missing).toEqual([])
   })
 
-  it('o banco de questões cobre as três trilhas, com as três dificuldades em cada uma', () => {
+  it('o banco de questões cobre toda trilha jogável, com as três dificuldades em cada uma', () => {
     const questions = [...registry.questions.values()]
     expect(questions.length).toBeGreaterThanOrEqual(90)
-    for (const track of registry.tracks.values()) {
+    // Trilhas ainda inteiramente em construção ficam de fora até a primeira fase ser liberada.
+    const playable = [...registry.tracks.values()].filter((t) => trackPhases(t).some((p) => p.availability === 'available'))
+    for (const track of playable) {
       const mine = questions.filter((r) => r.track?.id === track.id).map((r) => r.question)
       expect(mine.length, track.id).toBeGreaterThanOrEqual(15)
       expect(new Set(mine.map((q) => q.difficulty)), track.id).toEqual(new Set([1, 2, 3]))
@@ -143,6 +147,15 @@ describe('integridade do conteúdo', () => {
       expect(registry.reviewItems.get(core)?.length ?? 0, `${theme}: revisão de ${core}`).toBeGreaterThanOrEqual(2)
       expect(questions.filter((q) => q.concept === core).length, `${theme}: questões sobre ${core}`).toBeGreaterThanOrEqual(1)
       expect(questions.filter((q) => ids.includes(q.concept)).length, `${theme}: questões do tema`).toBeGreaterThanOrEqual(4)
+    }
+  })
+
+  it('o mapa de cada trilha não tem nós sobrepostos nem linhas por cima de nós', () => {
+    // Vale para qualquer largura: os nós escalam com o mapa (ver features/map/layout.ts).
+    // Se falhar, reposicione as fases (campo map) ou aumente a altura do mapa da trilha (mapHeight).
+    for (const track of registry.tracks.values()) {
+      const phases = trackPhases(track)
+      expect(layoutProblems(phases, mapEdges(phases), track.final?.id, track.mapHeight), track.id).toEqual([])
     }
   })
 
