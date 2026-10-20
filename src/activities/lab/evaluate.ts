@@ -28,6 +28,13 @@ import { evaluateLayersLab, layersInitial, type LayersLabResponse } from '../../
 import { evaluateTrustLab, trustInitial, type TrustLabResponse } from '../../simulators/sts/lab'
 import { evaluateIdentityLab, identitySolution, type IdentityLabResponse } from '../../simulators/identity/lab'
 import { evaluateOrgLab, orgInitial, type OrgLabResponse } from '../../simulators/org/lab'
+import { evaluateInstancePickerLab, instancePickerSolution, type InstancePickerLabResponse } from '../../simulators/instances/lab'
+import { evaluateVolumesLab, volumesSolution, type VolumesLabResponse } from '../../simulators/ebs/lab'
+import { evaluatePurchaseLab, purchaseSolution, type PurchaseLabResponse } from '../../simulators/purchase/lab'
+import { evaluateLbLab, lbInitial, type LbLabResponse } from '../../simulators/loadbalancer/lab'
+import { evaluateScalingLab, type ScalingLabResponse } from '../../simulators/scaling/lab'
+import { evaluateLambdaLab, type LambdaLabResponse } from '../../simulators/lambda/lab'
+import { chooserSolution, evaluateChooserLab, type ChooserLabResponse } from '../../simulators/chooser/lab'
 import type { LabActivity } from '../types'
 
 export interface LabItemScore {
@@ -108,6 +115,20 @@ export function evaluateLab(activity: LabActivity, response: unknown): LabResult
       return evaluateIdentityLab(activity.config, (response as IdentityLabResponse | undefined) ?? { placements: {} })
     case 'org':
       return evaluateOrgLab(activity.config, (response as OrgLabResponse | undefined) ?? orgInitial(activity.config))
+    case 'instance-picker':
+      return evaluateInstancePickerLab(activity.config, (response as InstancePickerLabResponse | undefined) ?? { picks: {} })
+    case 'volumes':
+      return evaluateVolumesLab(activity.config, (response as VolumesLabResponse | undefined) ?? { volumes: {} })
+    case 'purchase':
+      return evaluatePurchaseLab(activity.config, (response as PurchaseLabResponse | undefined) ?? { choices: {} })
+    case 'load-balancer':
+      return evaluateLbLab(activity.config, (response as LbLabResponse | undefined) ?? lbInitial(activity.config))
+    case 'scaling':
+      return evaluateScalingLab(activity.config, (response as ScalingLabResponse | undefined) ?? structuredClone(activity.config.initial))
+    case 'lambda-concurrency':
+      return evaluateLambdaLab(activity.config, (response as LambdaLabResponse | undefined) ?? { settings: structuredClone(activity.config.initial) })
+    case 'compute-chooser':
+      return evaluateChooserLab(activity.config, (response as ChooserLabResponse | undefined) ?? { placements: {} })
   }
 }
 
@@ -156,6 +177,19 @@ export function labSolution(activity: LabActivity): unknown {
       return identitySolution(activity.config)
     case 'org':
       return structuredClone(activity.config.solution)
+    case 'instance-picker':
+      return instancePickerSolution(activity.config)
+    case 'volumes':
+      return volumesSolution(activity.config)
+    case 'purchase':
+      return purchaseSolution(activity.config)
+    case 'load-balancer':
+    case 'scaling':
+      return structuredClone(activity.config.solution)
+    case 'lambda-concurrency':
+      return { settings: structuredClone(activity.config.solution) }
+    case 'compute-chooser':
+      return chooserSolution(activity.config)
   }
 }
 
@@ -205,5 +239,19 @@ export function labInitialResponse(activity: LabActivity): unknown {
       return { placements: {} }
     case 'org':
       return orgInitial(activity.config)
+    case 'instance-picker':
+      return { picks: {} }
+    case 'volumes':
+      return { volumes: {} }
+    case 'purchase':
+      return { choices: {} }
+    case 'load-balancer':
+      return lbInitial(activity.config)
+    case 'scaling':
+      return structuredClone(activity.config.initial)
+    case 'lambda-concurrency':
+      return { settings: structuredClone(activity.config.initial) }
+    case 'compute-chooser':
+      return { placements: {} }
   }
 }
