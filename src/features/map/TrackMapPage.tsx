@@ -13,10 +13,8 @@ import { Glyph } from '../../ui/Glyph'
 import { NotFound } from '../NotFound'
 import { phaseLabel, phaseMention } from '../../app/format'
 import { MEDAL_LABEL, MISSION_STATUS, PHASE_STATUS, mapEdges } from './status'
+import { MAP_H, MAP_W, NODE, labelLines, mapRoutes } from './layout'
 import s from './map.module.css'
-
-const VIEW_W = 900
-const VIEW_H = 720
 
 function StatusIcon({ status }: { status: PhaseStatus }) {
   if (status === 'locked') return <Lock size={14} aria-hidden="true" />
@@ -32,7 +30,7 @@ export function TrackMapPage() {
   useDocumentTitle(track?.title ?? 'Trilha')
   const progress = useGame((st) => st.progress)
   const phases = useMemo(() => (track ? trackPhases(track) : []), [track])
-  const edges = useMemo(() => mapEdges(phases), [phases])
+  const routes = useMemo(() => mapRoutes(phases, mapEdges(phases)), [phases])
   const firstOpen = phases.find((p) => ['available', 'in-progress'].includes(phaseStatus(progress, registry, p.id)))
   const selectedId = params.get('fase') ?? firstOpen?.id ?? phases[0]?.id
   const selected = phases.find((p) => p.id === selectedId)
@@ -40,7 +38,7 @@ export function TrackMapPage() {
   const [userPicked, setUserPicked] = useState(false)
 
   useEffect(() => {
-    if (userPicked && window.matchMedia('(max-width: 900px)').matches) panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (userPicked && window.matchMedia('(max-width: 1099px)').matches) panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [selectedId, userPicked])
 
   if (!track) return <NotFound />
@@ -49,10 +47,11 @@ export function TrackMapPage() {
     setUserPicked(true)
     setParams({ fase: id }, { replace: true })
   }
-  const byId = new Map(phases.map((p) => [p.id, p]))
   const territory = registry.territories.find((t) => t.id === track.territory)
   const trackMissing = unmetTrackRequirements(progress, registry, track)
   const trackRecommended = unmetTrackRecommendations(progress, registry, track)
+  const viewH = track.mapHeight ?? MAP_H
+  const isOpen = (from: string) => phaseStatus(progress, registry, from) === 'completed'
 
   return (
     <div className="page">
@@ -119,19 +118,18 @@ export function TrackMapPage() {
       <div className={s.layout}>
         <div className={s.mapWrap}>
           {/* Mapa em grafo (telas médias e grandes) */}
-          <div className={s.map} style={{ aspectRatio: `${VIEW_W} / ${VIEW_H}` }}>
-            <svg className={s.edges} viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} preserveAspectRatio="none" aria-hidden="true">
-              {edges.map(([from, to]) => {
-                const a = byId.get(from)!.map
-                const b = byId.get(to)!.map
-                const open = phaseStatus(progress, registry, from) === 'completed'
-                const mx = (a.x + b.x) / 2
-                return <path key={`${from}-${to}`} d={`M${a.x},${a.y} C${mx},${a.y} ${mx},${b.y} ${b.x},${b.y}`} className={open ? s.edgeOpen : s.edge} vectorEffect="non-scaling-stroke" />
+          <div className={s.map} style={{ aspectRatio: `${MAP_W} / ${viewH}` }}>
+            <svg className={s.edges} viewBox={`0 0 ${MAP_W} ${viewH}`} preserveAspectRatio="none" aria-hidden="true">
+              {/* As liberadas por último, para ficarem por cima dos trechos divididos. */}
+              {[...routes].sort((a, b) => Number(isOpen(a.from)) - Number(isOpen(b.from))).map(({ from, to, d }) => {
+                const open = isOpen(from)
+                return <path key={`${from}-${to}`} data-from={from} data-to={to} d={d} className={open ? s.edgeOpen : s.edge} vectorEffect="non-scaling-stroke" />
               })}
             </svg>
             {phases.map((p) => {
               const st = phaseStatus(progress, registry, p.id)
               const pp = phaseProgress(progress, p)
+              const hex = p.id === track.final?.id ? NODE.finalHex : NODE.hex
               return (
                 <button
                   key={p.id}
@@ -140,20 +138,23 @@ export function TrackMapPage() {
                   data-status={st}
                   data-selected={p.id === selectedId}
                   data-final={p.id === track.final?.id}
-                  style={{ left: `${(p.map.x / VIEW_W) * 100}%`, top: `${(p.map.y / VIEW_H) * 100}%`, ['--node-color' as string]: p.color }}
+                  data-phase={p.id}
+                  style={{ left: `${(p.map.x / MAP_W) * 100}%`, top: `${((p.map.y - hex / 2) / viewH) * 100}%`, ['--node-color' as string]: p.color }}
                   onClick={() => pick(p.id)}
                   aria-pressed={p.id === selectedId}
                   aria-label={`${phaseLabel(p)}: ${p.title}. ${PHASE_STATUS[st].label}.`}
                 >
-                  <span className={s.hex}>
+                  <span className={s.hex} data-part="hex">
                     <Glyph name={p.glyph} size={26} />
                     {pp.total > 0 && st !== 'completed' && <span className={s.nodeProgress} style={{ ['--p' as string]: pp.ratio }} />}
                   </span>
-                  <span className={s.nodeBadge}>
+                  <span className={s.nodeBadge} data-part="badge">
                     <StatusIcon status={st} />
                     {p.id === track.final?.id ? 'Final' : `F${p.order}`}
                   </span>
-                  <span className={s.nodeLabel}>{p.title}</span>
+                  <span className={s.nodeLabel} data-part="label" data-lines={labelLines(p.title)}>
+                    {p.title}
+                  </span>
                 </button>
               )
             })}
