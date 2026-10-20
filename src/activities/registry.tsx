@@ -41,6 +41,20 @@ import { IdentityLab } from '../simulators/identity/IdentityLab'
 import type { IdentityLabResponse } from '../simulators/identity/lab'
 import { OrgLab } from '../simulators/org/OrgLab'
 import type { OrgLabResponse } from '../simulators/org/lab'
+import { InstancePickerLab } from '../simulators/instances/InstancePickerLab'
+import type { InstancePickerLabResponse } from '../simulators/instances/lab'
+import { VolumesLab } from '../simulators/ebs/VolumesLab'
+import type { VolumesLabResponse } from '../simulators/ebs/lab'
+import { PurchaseLab } from '../simulators/purchase/PurchaseLab'
+import type { PurchaseLabResponse } from '../simulators/purchase/lab'
+import { LoadBalancerLab } from '../simulators/loadbalancer/LoadBalancerLab'
+import type { LbLabResponse } from '../simulators/loadbalancer/lab'
+import { ScalingLab } from '../simulators/scaling/ScalingLab'
+import type { ScalingLabResponse } from '../simulators/scaling/lab'
+import { LambdaLab } from '../simulators/lambda/LambdaLab'
+import type { LambdaLabResponse } from '../simulators/lambda/lab'
+import { ChooserLab } from '../simulators/chooser/ChooserLab'
+import type { ChooserLabResponse } from '../simulators/chooser/lab'
 import type { TransferLabResponse } from '../simulators/transfer/lab'
 import type { GatewayLabResponse } from '../simulators/gateway/lab'
 import type { RPLabResponse } from '../simulators/requester-pays/lab'
@@ -136,6 +150,20 @@ export function ActivityView({ activity, value, onChange, disabled, evaluation, 
           return <IdentityLab config={activity.config} value={value as unknown as IdentityLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
         case 'org':
           return <OrgLab config={activity.config} value={value as unknown as OrgLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'instance-picker':
+          return <InstancePickerLab config={activity.config} value={value as unknown as InstancePickerLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'volumes':
+          return <VolumesLab config={activity.config} value={value as unknown as VolumesLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'purchase':
+          return <PurchaseLab config={activity.config} value={value as unknown as PurchaseLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'load-balancer':
+          return <LoadBalancerLab config={activity.config} value={value as unknown as LbLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'scaling':
+          return <ScalingLab config={activity.config} value={value as unknown as ScalingLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'lambda-concurrency':
+          return <LambdaLab config={activity.config} value={value as unknown as LambdaLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'compute-chooser':
+          return <ChooserLab config={activity.config} value={value as unknown as ChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
       }
   }
 }
