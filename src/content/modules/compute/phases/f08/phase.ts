@@ -1,0 +1,307 @@
+/**
+ * Fase 8 — Contêineres. ECS, Fargate, as duas roles de uma task, EKS e ECR.
+ */
+import type { PhaseDef } from '../../../../../engine/types'
+import { META } from '../meta'
+
+export const F08_CMP: PhaseDef = {
+  ...META.f08,
+  concepts: ['ecs.basics', 'ecs.capacity', 'fargate.isolation', 'ecs.roles', 'eks.basics', 'ecs.vs-eks', 'ecr.registry'],
+  availability: 'available',
+  simplifications: ['A fase trata do ECS e do EKS do ponto de vista da arquitetura: redes de tasks (modos de rede), service mesh e detalhes do Kubernetes ficam de fora.'],
+  missions: [
+    // -----------------------------------------------------------------------
+    {
+      id: 'cmp.f08.m1',
+      title: 'As peças do ECS',
+      type: 'mission',
+      summary: 'Task definition, task, service, cluster e onde as tasks rodam.',
+      briefing: {
+        company: 'Agência Viaje Leve',
+        role: 'Você é a pessoa de plataforma de uma agência de viagens online.',
+        situation: 'O sistema de reservas virou contêineres. O time precisa decidir onde eles vão rodar: alguns querem "esquecer servidores", outros precisam de GPU para um recomendador, e uma parte ainda fica no data center por contrato.',
+        objective: 'Entender as peças do ECS e escolher onde cada carga roda.',
+        successCriteria: ['Associar cada peça à sua função', 'Escolher a capacidade certa para cada carga'],
+      },
+      intel: [
+        { conceptId: 'ecs.basics', body: ['**Task definition**: a receita (imagem, CPU, memória, portas, roles). **Task**: uma execução que termina. **Service**: mantém um número de tasks rodando, com balanceador e escala. **Cluster**: onde tudo roda.'] },
+        { conceptId: 'ecs.capacity', body: ['**Fargate**: sem servidores. **EC2**: você gerencia as instâncias. **ECS Managed Instances**: instâncias EC2 que a AWS provisiona, corrige e escala, com acesso a GPUs e tipos especiais. **ECS Anywhere**: servidores no seu data center.'] },
+        { conceptId: 'ecr.registry', body: ['O **ECR** guarda as imagens: privado com IAM, scan de vulnerabilidades ao enviar, lifecycle policies e replicação entre Regiões e contas.'] },
+      ],
+      activities: [
+        {
+          id: 'cmp.f08.m1.a1',
+          kind: 'match',
+          title: 'Cada peça no seu papel',
+          prompt: 'Associe cada peça ao que ela faz.',
+          concepts: [{ id: 'ecs.basics' }],
+          xp: 50,
+          difficulty: 1,
+          explanation: ['A task definition descreve; a task executa; o service mantém tasks rodando; o cluster agrupa a capacidade; o ECR guarda as imagens.'],
+          leftLabel: 'Peça',
+          rightLabel: 'Função',
+          pairs: [
+            { id: 'td', left: 'Task definition', right: 'Receita da aplicação: imagem, CPU, memória, portas e roles', explanation: 'É o modelo de onde as tasks nascem.', concepts: ['ecs.basics'] },
+            { id: 'task', left: 'Task', right: 'Uma execução que faz um trabalho e termina', explanation: 'Um job de lote, por exemplo.', concepts: ['ecs.basics'] },
+            { id: 'service', left: 'Service', right: 'Mantém um número de tasks sempre rodando, atrás de um balanceador', explanation: 'Para aplicações de longa duração.', concepts: ['ecs.basics'] },
+            { id: 'cluster', left: 'Cluster', right: 'O conjunto de capacidade onde as tasks rodam', explanation: 'Pode combinar Fargate, EC2 e outras capacidades.', concepts: ['ecs.basics'] },
+            { id: 'ecr', left: 'Amazon ECR', right: 'Registro privado das imagens de contêiner', explanation: 'De onde as tasks puxam as imagens.', concepts: ['ecr.registry'] },
+          ],
+        },
+        {
+          id: 'cmp.f08.m1.a2',
+          kind: 'classify',
+          title: 'Onde cada carga roda',
+          prompt: 'Classifique cada carga na capacidade do ECS mais indicada.',
+          concepts: [{ id: 'ecs.capacity' }],
+          xp: 50,
+          difficulty: 2,
+          explanation: ['Sem servidores para gerenciar: Fargate. Controle total das instâncias: EC2. Instâncias especiais (GPU) sem gerenciar a infraestrutura: ECS Managed Instances. Servidores no data center: ECS Anywhere.'],
+          bins: [
+            { id: 'fargate', label: 'Fargate' },
+            { id: 'ec2', label: 'EC2' },
+            { id: 'managed', label: 'ECS Managed Instances' },
+            { id: 'anywhere', label: 'ECS Anywhere' },
+          ],
+          items: [
+            { id: 'api', text: 'API de reservas: o time não quer cuidar de servidores', bin: 'fargate', explanation: 'Fargate: nada de instâncias para escolher, corrigir ou escalar.', concepts: ['ecs.capacity', 'fargate.isolation'] },
+            { id: 'gpu', text: 'Recomendador com GPU, sem o time querer cuidar de patches e escala das instâncias', bin: 'managed', explanation: 'ECS Managed Instances dá acesso a tipos com GPU e deixa a gestão com a AWS.', concepts: ['ecs.capacity'] },
+            { id: 'ami', text: 'Serviço que exige uma AMI própria com um agente de segurança e ajustes no kernel', bin: 'ec2', explanation: 'Com EC2, você controla as instâncias do cluster.', concepts: ['ecs.capacity'] },
+            { id: 'dc', text: 'Módulo de faturamento que precisa ficar nos servidores do data center', bin: 'anywhere', explanation: 'O ECS Anywhere registra servidores externos no cluster.', concepts: ['ecs.capacity'] },
+          ],
+        },
+        {
+          id: 'cmp.f08.m1.a3',
+          kind: 'decision',
+          title: 'Imagens com vulnerabilidade',
+          prompt: 'A auditoria quer saber se alguma imagem enviada ao registro tem vulnerabilidades conhecidas, assim que ela é enviada. O que usar?',
+          concepts: [{ id: 'ecr.registry' }],
+          xp: 30,
+          difficulty: 1,
+          explanation: ['O ECR pode fazer o scan de cada imagem quando ela é enviada ao repositório (scan on push).'],
+          options: [
+            { id: 'a', text: 'Ligar o scan on push nos repositórios do ECR', correct: true, consequence: 'Cada imagem nova é analisada e os resultados ficam disponíveis no ECR.' },
+            { id: 'b', text: 'Uma lifecycle policy no ECR', correct: false, consequence: 'Lifecycle policies apagam imagens antigas; não procuram vulnerabilidades.' },
+            { id: 'c', text: 'Replicar as imagens para outra Região', correct: false, consequence: 'Replicação leva as imagens para onde são usadas; não as analisa.' },
+          ],
+        },
+      ],
+      debrief: { takeaways: ['Task definition, task, service e cluster são as peças do ECS.', 'Fargate quando não se quer gerenciar servidores.', 'O ECR guarda, analisa e replica as imagens.'] },
+    },
+    // -----------------------------------------------------------------------
+    {
+      id: 'cmp.f08.m2',
+      title: 'As duas roles da task',
+      type: 'mission',
+      summary: 'Execution role para o agente, task role para o código, e o isolamento do Fargate.',
+      briefing: {
+        company: 'Agência Viaje Leve',
+        role: 'Você continua na plataforma da agência.',
+        situation: 'A primeira task do sistema de reservas não sobe: "CannotPullContainerError". E, quando sobe, o código não consegue ler o bucket de vouchers. Alguém sugeriu dar AdministratorAccess "para tudo funcionar".',
+        objective: 'Dar a cada role só o que ela precisa.',
+        successCriteria: ['Separar as permissões da execution role e da task role', 'Escolher onde rodar tasks de clientes diferentes'],
+      },
+      intel: [
+        { conceptId: 'ecs.roles', visual: 'ecs-roles', body: ['A **execution role** é do agente: puxar a imagem do ECR, mandar logs, ler segredos para a task. A **task role** é do **código**: as chamadas que a aplicação faz à AWS. As duas confiam em `ecs-tasks.amazonaws.com`.'] },
+        { conceptId: 'fargate.isolation', body: ['No **Fargate**, cada task tem o próprio limite de isolamento: não divide kernel, CPU, memória nem rede com outras tasks. No EC2, tasks da mesma instância não têm esse isolamento.'] },
+      ],
+      activities: [
+        {
+          id: 'cmp.f08.m2.a1',
+          kind: 'classify',
+          title: 'Qual role precisa disso?',
+          prompt: 'Classifique cada permissão na role que deve recebê-la.',
+          concepts: [{ id: 'ecs.roles' }],
+          xp: 50,
+          difficulty: 2,
+          explanation: ['Tudo o que o agente faz para colocar a task de pé (imagem, logs, segredos da task definition) fica na execution role. Tudo o que o código chama fica na task role.'],
+          bins: [
+            { id: 'exec', label: 'Execution role' },
+            { id: 'task', label: 'Task role' },
+          ],
+          items: [
+            { id: 'pull', text: 'Puxar a imagem do repositório privado no ECR', bin: 'exec', explanation: 'É o agente que puxa a imagem antes de o código rodar.', concepts: ['ecs.roles'] },
+            { id: 'logs', text: 'Enviar os logs dos contêineres ao CloudWatch Logs com o driver awslogs', bin: 'exec', explanation: 'O envio dos logs é feito pelo agente.', concepts: ['ecs.roles'] },
+            { id: 'secret', text: 'Ler o segredo do Secrets Manager referenciado na task definition', bin: 'exec', explanation: 'O agente lê o segredo e o injeta na task.', concepts: ['ecs.roles'] },
+            { id: 's3', text: 'O código ler os vouchers num bucket do S3', bin: 'task', explanation: 'Chamada feita pela aplicação: task role.', concepts: ['ecs.roles'] },
+            { id: 'ddb', text: 'O código gravar as reservas numa tabela do DynamoDB', bin: 'task', explanation: 'Chamada feita pela aplicação: task role.', concepts: ['ecs.roles'] },
+          ],
+        },
+        {
+          id: 'cmp.f08.m2.a2',
+          kind: 'decision',
+          title: 'Clientes que não podem se ver',
+          prompt: 'A agência vai rodar, para cada parceiro, uma task que processa dados sigilosos dele. O contrato exige o **maior isolamento possível** entre as tasks de parceiros diferentes. Onde rodar?',
+          concepts: [{ id: 'fargate.isolation' }],
+          xp: 40,
+          difficulty: 3,
+          explanation: ['No Fargate, cada task tem o próprio limite de isolamento. No EC2, tasks na mesma instância podem acessar credenciais e dados umas das outras; a documentação recomenda o Fargate para isolamento rigoroso.'],
+          options: [
+            { id: 'a', text: 'No Fargate, com uma task role por parceiro', correct: true, consequence: 'Cada task fica isolada, com só as permissões do próprio parceiro.' },
+            { id: 'b', text: 'No EC2, com todas as tasks na mesma instância grande', correct: false, consequence: 'Tasks na mesma instância não têm isolamento entre si.' },
+            { id: 'c', text: 'No EC2, com a mesma task role para todos os parceiros', correct: false, consequence: 'Sem isolamento e com permissões além do necessário para cada parceiro.' },
+          ],
+        },
+        {
+          id: 'cmp.f08.m2.a3',
+          kind: 'decision',
+          title: 'AdministratorAccess para tudo?',
+          prompt: 'A task sobe com erro ao puxar a imagem, e depois o código não lê o bucket. Qual é a correção certa?',
+          concepts: [{ id: 'ecs.roles' }],
+          xp: 40,
+          difficulty: 2,
+          explanation: ['O erro ao puxar a imagem é da execution role; o acesso ao bucket é da task role. Cada uma recebe só o que precisa.'],
+          options: [
+            { id: 'a', text: 'Execution role com permissão de puxar a imagem do ECR; task role com leitura só no bucket de vouchers', correct: true, consequence: 'A task sobe, o código lê o bucket e nada mais fica liberado.' },
+            { id: 'b', text: 'AdministratorAccess na task role', correct: false, consequence: 'O código ganharia acesso total à conta, e a imagem continuaria sem ser puxada.' },
+            { id: 'c', text: 'Colocar a leitura do bucket na execution role', correct: false, consequence: 'As credenciais da execution role não chegam ao código do contêiner.' },
+          ],
+        },
+      ],
+      debrief: { takeaways: ['Execution role: imagem, logs e segredos da task.', 'Task role: o que o código chama.', 'Isolamento rigoroso entre tasks: Fargate.'] },
+    },
+    // -----------------------------------------------------------------------
+    {
+      id: 'cmp.f08.m3',
+      title: 'ECS ou Kubernetes?',
+      type: 'mission',
+      summary: 'Quando o EKS faz sentido e como os nós do Kubernetes rodam na AWS.',
+      briefing: {
+        company: 'Agência Viaje Leve',
+        role: 'Você continua na plataforma da agência.',
+        situation: 'A agência comprou uma empresa que roda tudo em Kubernetes, com manifestos, Helm charts e ferramentas próprias. Os dois times precisam de uma plataforma comum.',
+        objective: 'Escolher entre ECS e EKS e entender as opções de nós do EKS.',
+        successCriteria: ['Decidir entre ECS e EKS pelos requisitos', 'Associar cada opção de nós do EKS ao seu uso'],
+      },
+      intel: [
+        { conceptId: 'eks.basics', body: ['**EKS**: Kubernetes gerenciado; a AWS opera o plano de controle. No **standard**, você cuida dos nós (grupos gerenciados, nós próprios ou Fargate). No **Auto Mode**, a AWS também cuida dos nós. **EKS Anywhere** e **Hybrid Nodes** levam o EKS ao data center.'] },
+        { conceptId: 'ecs.vs-eks', body: ['**ECS**: o orquestrador da AWS, com menos peças. **EKS**: Kubernetes certificado, para quem já usa Kubernetes, quer as mesmas ferramentas em outros ambientes ou depende do ecossistema.'] },
+      ],
+      activities: [
+        {
+          id: 'cmp.f08.m3.a1',
+          kind: 'decision',
+          title: 'A plataforma comum',
+          prompt: 'O time novo tem centenas de manifestos Kubernetes e Helm charts e quer usar as mesmas ferramentas também no data center. Qual plataforma escolher?',
+          concepts: [{ id: 'ecs.vs-eks' }, { id: 'eks.basics', weight: 0.5 }],
+          xp: 40,
+          difficulty: 2,
+          explanation: ['O EKS é Kubernetes certificado: os manifestos e as ferramentas funcionam sem reescrita, e o EKS Anywhere ou os Hybrid Nodes levam o mesmo modelo ao data center.'],
+          options: [
+            { id: 'a', text: 'Amazon EKS, com EKS Anywhere ou Hybrid Nodes no data center', correct: true, consequence: 'Os manifestos continuam valendo, na nuvem e no data center.' },
+            { id: 'b', text: 'Amazon ECS, reescrevendo os manifestos como task definitions', correct: false, consequence: 'Funciona, mas joga fora o investimento em Kubernetes e as ferramentas do time.' },
+            { id: 'c', text: 'Instâncias EC2 com Kubernetes instalado à mão', correct: false, consequence: 'O time passaria a operar o plano de controle, que o EKS já entrega gerenciado.' },
+          ],
+        },
+        {
+          id: 'cmp.f08.m3.a2',
+          kind: 'classify',
+          title: 'Os nós do EKS',
+          prompt: 'Classifique cada necessidade na opção de nós do EKS que a atende.',
+          concepts: [{ id: 'eks.basics' }],
+          xp: 50,
+          difficulty: 2,
+          explanation: ['Auto Mode: a AWS cuida dos nós. Grupos de nós gerenciados: você escolhe as instâncias e a AWS ajuda no ciclo de vida. Fargate: pods sem nós para gerenciar. EKS Anywhere: clusters no próprio data center.'],
+          bins: [
+            { id: 'auto', label: 'EKS Auto Mode' },
+            { id: 'managed', label: 'Grupos de nós gerenciados' },
+            { id: 'fargate', label: 'Fargate' },
+            { id: 'anywhere', label: 'EKS Anywhere' },
+          ],
+          items: [
+            { id: 'all', text: 'A AWS deve provisionar, escalar e corrigir os nós sozinha', bin: 'auto', explanation: 'É o que o EKS Auto Mode faz.', concepts: ['eks.basics'] },
+            { id: 'types', text: 'O time quer escolher os tipos de instância dos nós e os grupos em que eles ficam', bin: 'managed', explanation: 'Nos grupos de nós gerenciados, você define as instâncias.', concepts: ['eks.basics'] },
+            { id: 'pods', text: 'Um job de poucos pods que não deve exigir nenhum nó para gerenciar', bin: 'fargate', explanation: 'No Fargate, cada pod roda sem nós visíveis.', concepts: ['eks.basics', 'fargate.isolation'] },
+            { id: 'dc', text: 'Clusters Kubernetes que rodam inteiros nos servidores do data center', bin: 'anywhere', explanation: 'O EKS Anywhere leva o EKS ao data center.', concepts: ['eks.basics'] },
+          ],
+        },
+      ],
+      debrief: { takeaways: ['Kubernetes no time: EKS. Sem motivo para Kubernetes: ECS costuma ser mais simples.', 'Auto Mode: a AWS cuida também dos nós.', 'EKS Anywhere e Hybrid Nodes: Kubernetes no data center.'] },
+    },
+    // -----------------------------------------------------------------------
+    {
+      id: 'cmp.f08.boss',
+      title: 'A migração dos microsserviços',
+      type: 'boss',
+      summary: 'A primeira task no Fargate não sobe, e a segunda sobe sem conseguir trabalhar.',
+      briefing: {
+        company: 'Mercado Bairro Vivo',
+        role: 'Você foi chamado por uma rede de mercados que está migrando microsserviços para o ECS no Fargate.',
+        situation: 'O serviço de ofertas não sobe; o de estoque sobe, mas devolve erro ao ler a tabela. O time copiou as roles de um tutorial antigo.',
+        objective: 'Fazer os dois serviços funcionarem com o mínimo de permissões.',
+        successCriteria: ['Apontar as evidências', 'Identificar a causa', 'Escolher as correções'],
+      },
+      intel: [
+        { conceptId: 'ecs.roles', body: ['Execution role: imagem, logs e segredos. Task role: as chamadas do código.'] },
+        { conceptId: 'fargate.isolation', body: ['No Fargate, não há instance profile para os contêineres: as credenciais do código vêm da task role.'] },
+      ],
+      activities: [
+        {
+          id: 'cmp.f08.boss.a1',
+          kind: 'investigate',
+          title: 'Os eventos do serviço',
+          prompt: 'Examine as task definitions e os eventos.',
+          concepts: [{ id: 'ecs.roles' }, { id: 'fargate.isolation', weight: 0.5 }],
+          xp: 90,
+          difficulty: 3,
+          explanation: ['O serviço de ofertas não tem execution role com permissão no ECR: a imagem não é puxada. O de estoque não tem task role: no Fargate, o código não recebe credenciais da instância, e as chamadas ao DynamoDB falham.'],
+          artifacts: [
+            {
+              id: 'td',
+              title: 'Task definitions',
+              format: 'table',
+              lines: [
+                { id: 'c1', text: 'ofertas · executionRoleArn: (vazio) · imagem no ECR privado', isIssue: true, explanation: 'Sem execution role, o Fargate não consegue puxar a imagem privada.' },
+                { id: 'c2', text: 'estoque · executionRoleArn: ecsTaskExecutionRole (AmazonECSTaskExecutionRolePolicy)', isIssue: false, explanation: 'Correta: a imagem é puxada e os logs são enviados.' },
+                { id: 'c3', text: 'estoque · taskRoleArn: (vazio)', isIssue: true, explanation: 'Sem task role, o código não tem credenciais para chamar a AWS.' },
+              ],
+            },
+            {
+              id: 'ev',
+              title: 'Eventos e logs',
+              format: 'log',
+              lines: [
+                { id: 'l1', text: 'ofertas · CannotPullContainerError: pull access denied', isIssue: true, explanation: 'Falta permissão para puxar a imagem: execution role.' },
+                { id: 'l2', text: 'estoque · RUNNING · health check ok', isIssue: false, explanation: 'A task sobe: o problema não é a execution role.' },
+                { id: 'l3', text: 'estoque · Unable to locate credentials ao chamar dynamodb:Query', isIssue: true, explanation: 'O SDK não encontra credenciais: falta a task role.' },
+              ],
+            },
+          ],
+          rootCause: {
+            prompt: 'Qual é a causa?',
+            options: [
+              { id: 'r1', text: 'Ofertas sem execution role para puxar a imagem; estoque sem task role para o código chamar o DynamoDB', correct: true, feedback: 'Isso: cada serviço está sem uma das duas roles.' },
+              { id: 'r2', text: 'Faltam permissões no instance profile das instâncias do cluster', correct: false, feedback: 'No Fargate, não há instance profile para os contêineres.' },
+              { id: 'r3', text: 'As imagens deveriam estar no Docker Hub', correct: false, feedback: 'O ECR privado funciona; falta a permissão para puxar.' },
+            ],
+          },
+          remediations: {
+            prompt: 'Quais correções resolvem com o mínimo de permissões? (selecione todas as adequadas)',
+            options: [
+              { id: 'f1', text: 'Dar ao serviço de ofertas a execution role com a política AmazonECSTaskExecutionRolePolicy', correct: true, feedback: 'O Fargate passa a puxar a imagem e enviar os logs.' },
+              { id: 'f2', text: 'Criar para o estoque uma task role com dynamodb:Query só na tabela de estoque', correct: true, feedback: 'O código recebe credenciais com só a permissão que usa.' },
+              { id: 'f3', text: 'Colocar dynamodb:Query na execution role do estoque', correct: false, feedback: 'As credenciais da execution role não chegam ao código.' },
+              { id: 'f4', text: 'Dar AdministratorAccess às duas roles', correct: false, feedback: 'Resolve, mas libera a conta inteira para o código e para o agente.' },
+            ],
+          },
+        },
+        {
+          id: 'cmp.f08.boss.a2',
+          kind: 'decision',
+          title: 'Fargate ou EC2 para o resto?',
+          prompt: 'Os outros 20 microsserviços têm carga que varia ao longo do dia, e o time é pequeno, sem tempo para cuidar de instâncias. Onde rodar?',
+          concepts: [{ id: 'ecs.capacity' }, { id: 'fargate.isolation', weight: 0.5 }],
+          xp: 40,
+          difficulty: 2,
+          explanation: ['O Fargate dispensa escolher, corrigir e escalar instâncias; paga-se por vCPU e memória das tasks, e o Compute Savings Plan também se aplica a ele.'],
+          options: [
+            { id: 'a', text: 'ECS no Fargate, com Service Auto Scaling', correct: true, consequence: 'Nada de instâncias para cuidar, e as tasks acompanham a carga.' },
+            { id: 'b', text: 'ECS no EC2, com um grupo do Auto Scaling para o cluster', correct: false, consequence: 'Funciona, mas o time passa a cuidar de AMIs, patches e da escala das instâncias.' },
+            { id: 'c', text: 'Uma instância EC2 grande por microsserviço', correct: false, consequence: 'Paga capacidade ociosa e ainda exige cuidar de 20 servidores.' },
+          ],
+        },
+      ],
+      debrief: { takeaways: ['CannotPullContainerError aponta para a execution role.', 'Sem credenciais no código: falta a task role.', 'Time pequeno e carga variável: Fargate.'] },
+    },
+  ],
+}
