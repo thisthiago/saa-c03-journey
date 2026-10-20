@@ -14,6 +14,12 @@ import type { Behavior, EdgeEvent, EdgeSetup } from '../../simulators/edge/model
 import type { PlanId, Severity } from '../../simulators/support/model'
 import type { PolicyScenario, RequestSpec } from '../../simulators/policy/model'
 import type { AssumeAttempt, RoleSettings } from '../../simulators/sts/model'
+import type { Aspect, InstanceAction } from '../../simulators/instances/model'
+import type { VolumeConfig, VolumeNeed } from '../../simulators/ebs/model'
+import type { PurchaseOption, Segment } from '../../simulators/purchase/model'
+import type { HttpRequest, Listener } from '../../simulators/loadbalancer/model'
+import type { AsgInstance, GroupState, PolicySpec } from '../../simulators/scaling/model'
+import type { ConcurrencySettings, FunctionSpec } from '../../simulators/lambda/model'
 
 export type PredictSpec =
   | {
@@ -60,6 +66,24 @@ export type PredictSpec =
   | { sim: 'policy'; scenario: PolicyScenario; request: RequestSpec }
   /** AssumeRole: ok, trust-denied, caller-denied, duration-invalid ou mfa-missing. */
   | { sim: 'sts'; scenario: PolicyScenario; role: RoleSettings; attempt: AssumeAttempt }
+  /** EC2: `aspect` é preservado (kept) ou perdido (lost) depois de `action`. */
+  | { sim: 'ec2-state'; action: InstanceAction; aspect: Aspect }
+  /** Burstable × fixa com a CPU média dada (por vCPU): qual sai mais barata (burstable/fixed). */
+  | { sim: 'burst'; burstable: string; fixed: string; avgCpu: number; region?: string }
+  /** EBS: a configuração é recusada (invalid), atende (meets) ou não atende (short) à carga. */
+  | { sim: 'ebs'; volume: VolumeConfig; need: VolumeNeed }
+  /** Opções de compra: a opção válida mais barata para o segmento (id da opção). */
+  | { sim: 'purchase'; segment: Segment; options: PurchaseOption[]; region?: string }
+  /** ALB: destino da requisição (id do target group, "redirect" ou "fixed:<status>"). */
+  | { sim: 'alb-route'; listener: Listener; request: HttpRequest; groups: Record<string, string> }
+  /** Cross-zone: porcentagem do tráfego total que um alvo da AZ recebe (ex.: "6.25"). */
+  | { sim: 'cross-zone'; targetsByAz: Record<string, number>; crossZone: boolean; az: string }
+  /** Auto Scaling: capacidade desejada depois de avaliar as políticas (número). */
+  | { sim: 'scaling'; group: GroupState; utilization: number; policies: PolicySpec[] }
+  /** Auto Scaling: id da instância encerrada primeiro pela política de término padrão. */
+  | { sim: 'asg-termination'; instances: AsgInstance[]; template: string; version: number }
+  /** Lambda: `throttled` (yes/no) ou `concurrency` (número de execuções simultâneas necessárias) da função `fn`. */
+  | { sim: 'lambda'; functions: FunctionSpec[]; settings: Record<string, ConcurrencySettings>; fn: string; query: 'throttled' | 'concurrency' | 'cold-start' }
 
 
 /** Uma requisição é permitida ou negada? (resultado calculado pelo avaliador de acesso) */
