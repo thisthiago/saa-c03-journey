@@ -1,0 +1,82 @@
+.chart {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+.chart svg {
+  width: 100%;
+  height: 140px;
+  background: var(--surface-2);
+  border-radius: var(--radius-s);
+}
+.grid {
+  stroke: var(--border);
+  stroke-width: 0.5;
+}
+.demand {
+  fill: none;
+  stroke: var(--warning, #e0b341);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.cap {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+.keyDemand::before,
+.keyCap::before {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  margin-right: 5px;
+  vertical-align: middle;
+  background: var(--warning, #e0b341);
+}
+.keyCap::before {
+  background: var(--accent);
+}
+.check {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.86rem;
+}
+.sched {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-s);
+  padding: 6px 10px;
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  min-width: 0;
+}
+.sched legend {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.btn {
+  font: inherit;
+  font-size: 0.84rem;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  padding: 6px 10px;
+  cursor: pointer;
+  justify-self: start;
+}
+.error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.84rem;
+}
