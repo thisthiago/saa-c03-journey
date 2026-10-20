@@ -69,6 +69,13 @@ export type GlyphName =
   | 'policy'
   | 'org'
   | 'ticket'
+  | 'cpu'
+  | 'container'
+  | 'drive'
+  | 'split'
+  | 'percent'
+  | 'scale'
+  | 'layers'
 
 export interface TerritoryDef {
   id: string
@@ -218,7 +225,7 @@ export interface PhaseDef {
   availability: 'available' | 'in-construction'
   simplifications?: string[]
   estimatedMinutes: number
-  /** Posição no mapa da trilha (canvas 900 × 720). */
+  /** Centro do hexágono no mapa da trilha (canvas 900 × altura da trilha). */
   map: { x: number; y: number }
 }
 
@@ -237,6 +244,8 @@ export interface TrackDef {
   phases: PhaseDef[]
   /** Desafio final da trilha, tratado como uma fase especial do mapa. */
   final?: PhaseDef
+  /** Altura do canvas do mapa (padrão 720), para trilhas com muitas fases por coluna. */
+  mapHeight?: number
 }
 
 // ---------------------------------------------------------------------------
