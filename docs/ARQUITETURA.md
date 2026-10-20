@@ -112,6 +112,18 @@ Os simuladores `sts/` (AssumeRole) e `org/` (árvore com SCPs por nível) montam
 **Fase ainda incompleta**
 Marque `availability: 'in-construction'`. A fase aparece no mapa sem ação de iniciar.
 
+## Mapa da trilha
+
+O campo `map` de cada fase é o centro do hexágono num canvas de 900 de largura. A altura padrão é 720 e pode ser alterada por trilha em `TrackDef.mapHeight`. As medidas ficam em `src/features/map/layout.ts`, que é usado tanto pelo desenho quanto pelos testes.
+- **Tamanho dos nós:** o hexágono, o selo e o rótulo escalam junto com o mapa (CSS em `cqw`). Por isso, uma posição válida vale em qualquer largura.
+- **Rota vertical:** abaixo de 640 px de mapa, a tela mostra a rota vertical no lugar do grafo.
+- **Linhas:** seguem o estilo de mapa de metrô. Cada linha sai na horizontal, muda de altura num corredor logo antes da coluna do destino e entra pela esquerda.
+- **Como posicionar:** organize as fases em colunas por dependência. Nenhuma fase deve ficar na altura de uma linha que atravessa a coluna dela.
+
+**Testes do layout:**
+- **`content.test.ts`** roda no CI e falha se houver nós sobrepostos, nós fora do mapa, linhas por cima de um nó (ou do selo e do rótulo das fases que a linha liga), linhas sem fase em comum correndo juntas ou uma dependência à direita da fase que depende dela.
+- **`tests/e2e/map-layout.spec.ts`** mede a tela real em 680, 1000, 1100 e 1440 px. Ele também confere se o número de linhas estimado para cada rótulo cobre o número de linhas que o navegador de fato desenha.
+
 ## Build
 
-O pacote é dividido em bibliotecas (`vendor`), conteúdo comum (`content`), um pacote por módulo de conteúdo (`content-foundations`, `content-storage`, `content-identity`) e aplicação. As telas além da Base são carregadas sob demanda.
+O pacote é dividido em bibliotecas (`vendor`), conteúdo comum (`content`), um pacote por módulo de conteúdo (`content-foundations`, `content-storage`, `content-identity`, `content-compute`) e aplicação. As telas além da Base são carregadas sob demanda.
