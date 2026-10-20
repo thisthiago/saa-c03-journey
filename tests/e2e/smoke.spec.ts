@@ -7,6 +7,7 @@ test('quem começa agora recebe a primeira missão da AWS Foundations', async ({
   await expect(page.getByRole('heading', { name: 'AWS Foundations' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'S3 Expedition' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'IAM e Access Management' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Computação na AWS' })).toBeVisible()
   await page.getByRole('link', { name: 'Iniciar expedição' }).click()
   await expect(page.getByRole('heading', { name: 'Viajaí' })).toBeVisible()
 })
@@ -20,6 +21,13 @@ test('a S3 Expedition recomenda a AWS Foundations sem bloquear', async ({ page }
 
 test('a trilha IAM recomenda a AWS Foundations sem bloquear', async ({ page }) => {
   await page.goto('/#/trilha/identity.iam-access')
+  await expect(page.getByText('Recomendado antes')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'AWS Foundations' })).toBeVisible()
+  await expect(page.getByRole('link', { name: /Jogar|Iniciar/ }).first()).toBeVisible()
+})
+
+test('a trilha Computação recomenda a AWS Foundations sem bloquear', async ({ page }) => {
+  await page.goto('/#/trilha/compute.aws-compute')
   await expect(page.getByText('Recomendado antes')).toBeVisible()
   await expect(page.getByRole('link', { name: 'AWS Foundations' })).toBeVisible()
   await expect(page.getByRole('link', { name: /Jogar|Iniciar/ }).first()).toBeVisible()
