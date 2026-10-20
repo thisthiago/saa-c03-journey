@@ -1,0 +1,95 @@
+.compare {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  padding: var(--space-2) var(--space-3);
+}
+.compare summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.legend {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 6px 0;
+}
+.plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+  gap: 8px;
+}
+.plan {
+  background: var(--surface-2);
+  border-radius: var(--radius-s);
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+.plan h5 {
+  margin: 0;
+  font-size: 0.92rem;
+}
+.plan p {
+  margin: 0;
+  color: var(--text-muted);
+}
+.plan dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  margin: 0;
+}
+.plan dt {
+  color: var(--text-muted);
+}
+.plan dd {
+  margin: 0;
+  text-align: right;
+}
+.pair {
+  display: contents;
+}
+.extras {
+  font-size: 0.76rem;
+}
+.spend {
+  margin: 0;
+  font-size: 0.88rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.needs {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.86rem;
+}
+.choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
+  gap: 6px;
+}
+.choice {
+  font: inherit;
+  text-align: left;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s);
+  padding: 8px 10px;
+  display: grid;
+  gap: 2px;
+  cursor: pointer;
+  font-size: 0.86rem;
+}
+.choice span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+.choice[aria-checked='true'] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}

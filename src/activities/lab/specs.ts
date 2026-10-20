@@ -1,0 +1,48 @@
+/** Laboratórios disponíveis e suas configurações. */
+import type { AccessLabConfig } from '../../simulators/access/lab'
+import type { BucketLabConfig } from '../../simulators/bucket/lab'
+import type { CostLabConfig } from '../../simulators/cost/lab'
+import type { VersioningLabConfig } from '../../simulators/versioning/lab'
+import type { LifecycleLabConfig } from '../../simulators/lifecycle/lab'
+import type { ReplicationLabConfig } from '../../simulators/replication/lab'
+import type { EventsLabConfig } from '../../simulators/events/lab'
+import type { RPLabConfig } from '../../simulators/requester-pays/lab'
+import type { GatewayLabConfig } from '../../simulators/gateway/lab'
+import type { TransferLabConfig } from '../../simulators/transfer/lab'
+import type { ArchitectureLabConfig } from '../../simulators/architecture/lab'
+import type { RegionLabConfig } from '../../simulators/regions/lab'
+import type { ZonesLabConfig } from '../../simulators/zones/lab'
+import type { EdgeLabConfig } from '../../simulators/edge/lab'
+import type { PlacementLabConfig } from '../../simulators/placement/lab'
+import type { SupportLabConfig } from '../../simulators/support/lab'
+import type { ResponsibilityLabConfig } from '../../simulators/responsibility/lab'
+import type { CredentialsLabConfig } from '../../simulators/credentials/lab'
+import type { BuilderLabConfig } from '../../simulators/policy/builder'
+import type { LayersLabConfig } from '../../simulators/policy/layers'
+import type { TrustLabConfig } from '../../simulators/sts/lab'
+import type { IdentityLabConfig } from '../../simulators/identity/lab'
+import type { OrgLabConfig } from '../../simulators/org/lab'
+
+export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'; config: CostLabConfig } | { lab: 'access'; config: AccessLabConfig }
+  | { lab: 'versioning'; config: VersioningLabConfig }
+  | { lab: 'lifecycle'; config: LifecycleLabConfig }
+  | { lab: 'replication'; config: ReplicationLabConfig }
+  | { lab: 'events'; config: EventsLabConfig }
+  | { lab: 'requester-pays'; config: RPLabConfig }
+  | { lab: 'gateway'; config: GatewayLabConfig }
+  | { lab: 'transfer'; config: TransferLabConfig }
+  | { lab: 'architecture'; config: ArchitectureLabConfig }
+  | { lab: 'region'; config: RegionLabConfig }
+  | { lab: 'zones'; config: ZonesLabConfig }
+  | { lab: 'edge'; config: EdgeLabConfig }
+  | { lab: 'placement'; config: PlacementLabConfig }
+  | { lab: 'support'; config: SupportLabConfig }
+  | { lab: 'responsibility'; config: ResponsibilityLabConfig }
+  | { lab: 'credentials'; config: CredentialsLabConfig }
+  | { lab: 'policy-builder'; config: BuilderLabConfig }
+  | { lab: 'policy-layers'; config: LayersLabConfig }
+  | { lab: 'trust'; config: TrustLabConfig }
+  | { lab: 'identity'; config: IdentityLabConfig }
+  | { lab: 'org'; config: OrgLabConfig }
+
+export type LabId = LabSpec['lab']

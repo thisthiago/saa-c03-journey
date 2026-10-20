@@ -1,0 +1,87 @@
+.introGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+.introGrid > section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.introGrid p {
+  margin: 0;
+}
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.15rem;
+}
+.preview {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+  width: 100%;
+}
+.preview li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: 0.92rem;
+}
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.concept {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mastery);
+  margin-bottom: var(--space-2);
+}
+.progress {
+  width: min(100%, 260px);
+}
+.summary h1 {
+  margin-bottom: var(--space-2);
+}
+.results {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-4) 0 0;
+  display: grid;
+  gap: 6px;
+}
+.results li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 8px 12px;
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+}
+.results li[data-ok='true'] svg {
+  color: var(--success);
+}
+.results li[data-ok='false'] svg {
+  color: var(--danger);
+}
+.resultName {
+  flex: 1;
+  min-width: 160px;
+}
+.delta {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}

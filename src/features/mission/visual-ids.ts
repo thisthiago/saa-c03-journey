@@ -1,0 +1,2 @@
+/** Ids dos visuais registrados em visuals.tsx (conferidos pelos testes de integridade). */
+export const VISUAL_IDS = ['storage-types', 'bucket-anatomy', 'flat-namespace', 'durability-availability', 'class-spectrum', 'global-hierarchy', 'region-map', 'az-isolation', 'edge-flow', 'srm-stack', 'support-ladder', 'iam-entities', 'policy-anatomy', 'policy-flow', 'cross-account-eval', 'assume-role-flow', 'confused-deputy', 'federation-flow', 'cognito-pools', 'org-tree', 'permission-layers']

@@ -1,0 +1,264 @@
+{
+  "source": "AWS Price List Bulk API",
+  "sourceDocs": "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-price-list-query-api.html",
+  "retrievedAt": "2026-10-18",
+  "currency": "USD",
+  "notes": [
+    "Valores de referência para fins didáticos, extraídos da AWS Price List na data indicada.",
+    "Apenas a primeira faixa de preço de cada item; sem nível gratuito, impostos ou descontos.",
+    "Preços mudam: consulte https://aws.amazon.com/s3/pricing/ antes de qualquer decisão real."
+  ],
+  "regions": {
+    "us-east-1": {
+      "label": "US East (N. Virginia)",
+      "offers": {
+        "AmazonS3": "2026-10-15T17:35:40Z",
+        "AmazonS3GlacierDeepArchive": "2026-09-11T12:45:07Z",
+        "AWSDataTransfer": "2026-09-16T13:22:08Z"
+      },
+      "storageGBMonth": {
+        "STANDARD": 0.023,
+        "INTELLIGENT_TIERING": 0.023,
+        "STANDARD_IA": 0.0125,
+        "ONEZONE_IA": 0.01,
+        "EXPRESS_ONEZONE": 0.11,
+        "GLACIER_IR": 0.004,
+        "GLACIER": 0.0036,
+        "DEEP_ARCHIVE": 0.00099
+      },
+      "intelligentTiering": {
+        "monitoringPer1000Objects": 0.0025,
+        "tierGBMonth": {
+          "frequent": 0.023,
+          "infrequent": 0.0125,
+          "archiveInstant": 0.004
+        }
+      },
+      "putPer1000": {
+        "STANDARD": 0.005,
+        "INTELLIGENT_TIERING": 0.005,
+        "STANDARD_IA": 0.01,
+        "ONEZONE_IA": 0.01,
+        "EXPRESS_ONEZONE": 0.00113,
+        "GLACIER_IR": 0.02,
+        "GLACIER": 0.03,
+        "DEEP_ARCHIVE": 0.05
+      },
+      "getPer1000": {
+        "STANDARD": 0.0004,
+        "INTELLIGENT_TIERING": 0.0004,
+        "STANDARD_IA": 0.001,
+        "ONEZONE_IA": 0.001,
+        "EXPRESS_ONEZONE": 0.00003,
+        "GLACIER_IR": 0.01,
+        "GLACIER": 0.0004,
+        "DEEP_ARCHIVE": 0.0004
+      },
+      "retrievalPerGB": {
+        "STANDARD_IA": 0.01,
+        "ONEZONE_IA": 0.01,
+        "GLACIER_IR": 0.03,
+        "EXPRESS_ONEZONE": 0.0006,
+        "GLACIER_EXPEDITED": 0.03,
+        "GLACIER_STANDARD": 0.01,
+        "GLACIER_BULK": 0,
+        "DEEP_ARCHIVE_STANDARD": 0.02,
+        "DEEP_ARCHIVE_BULK": 0.0025
+      },
+      "restoreRequestPer1000": {
+        "GLACIER_EXPEDITED": 10,
+        "GLACIER_STANDARD": 0.05,
+        "GLACIER_BULK": 0,
+        "DEEP_ARCHIVE_STANDARD": 0.1,
+        "DEEP_ARCHIVE_BULK": 0.025
+      },
+      "transitionPer1000": {
+        "STANDARD_IA": 0.01,
+        "ONEZONE_IA": 0.01,
+        "INTELLIGENT_TIERING": 0.01,
+        "GLACIER_IR": 0.02,
+        "GLACIER": 0.03,
+        "DEEP_ARCHIVE": 0.05
+      },
+      "expressUploadPerGB": 0.0032,
+      "dataTransferOutPerGB": 0.09,
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/20261015173540/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3GlacierDeepArchive/20260911124507/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20260916132208/us-east-1/index.json"
+      ]
+    },
+    "sa-east-1": {
+      "label": "América do Sul (São Paulo)",
+      "offers": {
+        "AmazonS3": "2026-10-15T17:35:40Z",
+        "AmazonS3GlacierDeepArchive": "2026-09-11T12:45:07Z",
+        "AWSDataTransfer": "2026-09-16T13:22:08Z"
+      },
+      "storageGBMonth": {
+        "STANDARD": 0.0405,
+        "INTELLIGENT_TIERING": 0.0405,
+        "STANDARD_IA": 0.0221,
+        "ONEZONE_IA": 0.0177,
+        "EXPRESS_ONEZONE": 0.194,
+        "GLACIER_IR": 0.0083,
+        "GLACIER": 0.00765,
+        "DEEP_ARCHIVE": 0.0032
+      },
+      "intelligentTiering": {
+        "monitoringPer1000Objects": 0.0025,
+        "tierGBMonth": {
+          "frequent": 0.0405,
+          "infrequent": 0.0221,
+          "archiveInstant": 0.0083
+        }
+      },
+      "putPer1000": {
+        "STANDARD": 0.007,
+        "INTELLIGENT_TIERING": 0.007,
+        "STANDARD_IA": 0.01,
+        "ONEZONE_IA": 0.01,
+        "EXPRESS_ONEZONE": 0.00158,
+        "GLACIER_IR": 0.02,
+        "GLACIER": 0.042,
+        "DEEP_ARCHIVE": 0.1
+      },
+      "getPer1000": {
+        "STANDARD": 0.00056,
+        "INTELLIGENT_TIERING": 0.00056,
+        "STANDARD_IA": 0.001,
+        "ONEZONE_IA": 0.001,
+        "EXPRESS_ONEZONE": 0.000042,
+        "GLACIER_IR": 0.01,
+        "GLACIER": 0.00056,
+        "DEEP_ARCHIVE": 0.00056
+      },
+      "retrievalPerGB": {
+        "STANDARD_IA": 0.01,
+        "ONEZONE_IA": 0.01,
+        "GLACIER_IR": 0.03,
+        "EXPRESS_ONEZONE": 0.00084,
+        "GLACIER_EXPEDITED": 0.042,
+        "GLACIER_STANDARD": 0.014,
+        "GLACIER_BULK": 0,
+        "DEEP_ARCHIVE_STANDARD": 0.028,
+        "DEEP_ARCHIVE_BULK": 0.008
+      },
+      "restoreRequestPer1000": {
+        "GLACIER_EXPEDITED": 14,
+        "GLACIER_STANDARD": 0.07,
+        "GLACIER_BULK": 0,
+        "DEEP_ARCHIVE_STANDARD": 0.14,
+        "DEEP_ARCHIVE_BULK": 0.035
+      },
+      "transitionPer1000": {
+        "STANDARD_IA": 0.01,
+        "ONEZONE_IA": 0.01,
+        "INTELLIGENT_TIERING": 0.01,
+        "GLACIER_IR": 0.02,
+        "GLACIER": 0.042,
+        "DEEP_ARCHIVE": 0.1
+      },
+      "expressUploadPerGB": 0.00448,
+      "dataTransferOutPerGB": 0.15,
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/20261015173540/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3GlacierDeepArchive/20260911124507/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20260916132208/sa-east-1/index.json"
+      ]
+    }
+  },
+  "standardByRegion": {
+    "us-east-1": {
+      "label": "US East (N. Virginia)",
+      "offers": {
+        "AmazonS3": "2026-10-15T17:35:40Z",
+        "AWSDataTransfer": "2026-09-16T13:22:08Z"
+      },
+      "standardGBMonth": 0.023,
+      "dataTransferOutPerGB": 0.09,
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/20261015173540/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20260916132208/us-east-1/index.json"
+      ]
+    },
+    "sa-east-1": {
+      "label": "South America (São Paulo)",
+      "offers": {
+        "AmazonS3": "2026-10-15T17:35:40Z",
+        "AWSDataTransfer": "2026-09-16T13:22:08Z"
+      },
+      "standardGBMonth": 0.0405,
+      "dataTransferOutPerGB": 0.15,
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/20261015173540/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20260916132208/sa-east-1/index.json"
+      ]
+    },
+    "mx-central-1": {
+      "label": "Mexico (Central)",
+      "offers": {
+        "AmazonS3": "2026-10-15T17:35:40Z",
+        "AWSDataTransfer": "2026-09-16T13:22:08Z"
+      },
+      "standardGBMonth": 0.02415,
+      "dataTransferOutPerGB": 0.09,
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/20261015173540/mx-central-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20260916132208/mx-central-1/index.json"
+      ]
+    },
+    "eu-west-1": {
+      "label": "Europe (Ireland)",
+      "offers": {
+        "AmazonS3": "2026-10-15T17:35:40Z",
+        "AWSDataTransfer": "2026-09-16T13:22:08Z"
+      },
+      "standardGBMonth": 0.023,
+      "dataTransferOutPerGB": 0.09,
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/20261015173540/eu-west-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20260916132208/eu-west-1/index.json"
+      ]
+    },
+    "eu-west-3": {
+      "label": "Europe (Paris)",
+      "offers": {
+        "AmazonS3": "2026-10-15T17:35:40Z",
+        "AWSDataTransfer": "2026-09-16T13:22:08Z"
+      },
+      "standardGBMonth": 0.024,
+      "dataTransferOutPerGB": 0.09,
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/20261015173540/eu-west-3/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20260916132208/eu-west-3/index.json"
+      ]
+    },
+    "eu-central-1": {
+      "label": "Europe (Frankfurt)",
+      "offers": {
+        "AmazonS3": "2026-10-15T17:35:40Z",
+        "AWSDataTransfer": "2026-09-16T13:22:08Z"
+      },
+      "standardGBMonth": 0.0245,
+      "dataTransferOutPerGB": 0.09,
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/20261015173540/eu-central-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20260916132208/eu-central-1/index.json"
+      ]
+    },
+    "eu-south-2": {
+      "label": "Europe (Spain)",
+      "offers": {
+        "AmazonS3": "2026-10-15T17:35:40Z",
+        "AWSDataTransfer": "2026-09-16T13:22:08Z"
+      },
+      "standardGBMonth": 0.023,
+      "dataTransferOutPerGB": 0.09,
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/20261015173540/eu-south-2/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/20260916132208/eu-south-2/index.json"
+      ]
+    }
+  }
+}

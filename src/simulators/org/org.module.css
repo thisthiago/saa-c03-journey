@@ -1,0 +1,65 @@
+.summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.library {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.scp {
+  border-radius: var(--radius-s);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  padding: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+.tree {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.node {
+  margin-left: calc(var(--depth, 0) * 18px);
+  border-left: 3px solid var(--info);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  padding: var(--space-2) var(--space-3);
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+@media (max-width: 560px) {
+  .node {
+    margin-left: calc(var(--depth, 0) * 8px);
+  }
+}
+.node[data-kind='root'] {
+  border-left-color: var(--accent);
+}
+.node[data-kind='account'] {
+  border-left-color: var(--mastery);
+}
+.nodeHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.acct {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+.attach {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.warn {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--warning, #e0b341);
+}

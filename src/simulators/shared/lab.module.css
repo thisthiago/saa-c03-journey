@@ -1,0 +1,100 @@
+/* Estilos comuns aos simuladores da trilha AWS Foundations. */
+.lab {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.card {
+  border-radius: var(--radius-m);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.title {
+  margin: 0;
+  font-size: 1rem;
+}
+.desc {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.verdict {
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  padding: 8px 10px;
+  font-size: 0.86rem;
+  display: grid;
+  gap: 4px;
+}
+.verdict[data-status='correct'] {
+  border-left: 3px solid var(--success);
+}
+.verdict[data-status='partial'] {
+  border-left: 3px solid var(--warning, #e0b341);
+}
+.verdict[data-status='wrong'],
+.verdict[data-status='missed'] {
+  border-left: 3px solid var(--danger);
+}
+.verdict ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+.simp {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.simp summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.simp ul {
+  margin: 6px 0 0;
+  padding-left: 1.1rem;
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  padding: 1px 8px;
+  border: 1px solid var(--border-strong);
+  white-space: nowrap;
+}
+.tag[data-kind='fact'] {
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 45%, transparent);
+}
+.tag[data-kind='premise'] {
+  color: var(--info, var(--accent));
+  border-color: color-mix(in srgb, var(--info, var(--accent)) 45%, transparent);
+  border-style: dashed;
+}
+.tag[data-kind='judgement'] {
+  color: var(--mastery, var(--accent));
+  border-color: color-mix(in srgb, var(--mastery, var(--accent)) 45%, transparent);
+  border-style: dotted;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

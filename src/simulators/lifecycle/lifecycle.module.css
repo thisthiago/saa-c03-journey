@@ -1,0 +1,368 @@
+.lab {
+  display: grid;
+  gap: var(--space-3);
+}
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+@media (max-width: 1000px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}
+.col {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.rule {
+  border-radius: var(--radius-m);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  padding: var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.rule[data-enabled='false'] {
+  opacity: 0.7;
+  border-style: dashed;
+}
+.ruleHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+.idField {
+  display: grid;
+  gap: 2px;
+  flex: 1 1 160px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.rule input,
+.rule select {
+  font: inherit;
+  font-size: 0.86rem;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s);
+  padding: 6px 8px;
+  min-width: 0;
+}
+.rule input[type='checkbox'] {
+  padding: 0;
+  accent-color: var(--accent);
+}
+.idField input {
+  font-family: var(--font-mono);
+}
+.group {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  padding: 8px 10px;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.group legend {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0 4px;
+}
+.inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-size: 0.82rem;
+  align-items: center;
+}
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+.tRow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.84rem;
+}
+.rule .days {
+  width: 5.5em;
+  flex: none;
+  font-family: var(--font-mono);
+}
+.opt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  font-size: 0.84rem;
+}
+.opt > label {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  cursor: pointer;
+}
+.empty {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-faint);
+}
+.icon {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--danger);
+  cursor: pointer;
+}
+.add {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px dashed var(--accent);
+  background: none;
+  color: var(--accent);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.icon:disabled,
+.add:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.json summary,
+.simp summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.84rem;
+  color: var(--accent);
+}
+.json pre {
+  margin: 6px 0 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  font-size: 0.74rem;
+  overflow-x: auto;
+  max-height: 320px;
+}
+.errors {
+  border-radius: var(--radius-m);
+  border: 1px solid var(--danger);
+  background: var(--danger-soft);
+  padding: var(--space-3);
+  font-size: 0.86rem;
+}
+.errors strong {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.errors ul {
+  margin: 6px 0 0;
+  padding-left: 1.2em;
+  display: grid;
+  gap: 4px;
+}
+.ok {
+  border-radius: var(--radius-m);
+  border: 1px solid var(--success);
+  background: var(--success-soft);
+  padding: 8px var(--space-3);
+  font-size: 0.86rem;
+}
+.warnings {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  font-size: 0.82rem;
+  color: var(--warning);
+}
+.panel {
+  border-radius: var(--radius-m);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: var(--space-3);
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.panelTitle {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.track {
+  display: grid;
+  gap: 4px;
+}
+.trackHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.86rem;
+}
+.key {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+.bar {
+  position: relative;
+  height: 18px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.seg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.seg[data-noncurrent='true'] {
+  background-image: repeating-linear-gradient(45deg, rgb(0 0 0 / 0.25) 0 4px, transparent 4px 8px) !important;
+}
+.seg[data-gone='true'] {
+  background: repeating-linear-gradient(135deg, var(--border) 0 3px, transparent 3px 7px) !important;
+}
+.trackText {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+.note {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--warning);
+}
+.axis {
+  position: relative;
+  height: 14px;
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+.axis span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+.axis span:first-child {
+  transform: none;
+}
+.axis span:last-child {
+  transform: translateX(-100%);
+}
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.legend span {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+.totals {
+  margin: 0;
+  font-size: 0.86rem;
+}
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 120px;
+  padding-top: 4px;
+  border-bottom: 1px solid var(--border-strong);
+}
+.col2 {
+  flex: 1;
+  position: relative;
+  height: 100%;
+}
+.base,
+.with {
+  position: absolute;
+  bottom: 0;
+  border-radius: 3px 3px 0 0;
+}
+.base {
+  left: 0;
+  right: 0;
+  background: var(--border-strong);
+}
+.with {
+  left: 20%;
+  right: 20%;
+  background: var(--accent);
+}
+.legendLine {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+.swWith,
+.swBase {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+.swWith {
+  background: var(--accent);
+}
+.swBase {
+  background: var(--border-strong);
+  margin-left: 8px;
+}
+.simp {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}

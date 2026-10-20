@@ -1,0 +1,214 @@
+/* ---------- Botões ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.98rem;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.15s var(--ease-out),
+    background-color 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
+  white-space: nowrap;
+}
+.btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+}
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 6px 18px -6px var(--accent);
+}
+.primary:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+.secondary {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.secondary:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.ghost {
+  background: transparent;
+  color: var(--text-muted);
+}
+.ghost:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--surface-2);
+}
+.danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+.small {
+  min-height: 36px;
+  padding: 6px 14px;
+  font-size: 0.88rem;
+}
+.block {
+  width: 100%;
+}
+
+/* ---------- Cartões ---------- */
+.card {
+  background: var(--surface-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-l);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-1);
+  backdrop-filter: blur(10px);
+}
+@media (max-width: 640px) {
+  .card {
+    padding: var(--space-4);
+    border-radius: var(--radius-m);
+  }
+}
+
+/* ---------- Selos ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.4;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.tone-neutral {
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+.tone-accent {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.tone-xp {
+  color: var(--xp);
+  background: var(--xp-soft);
+}
+.tone-mastery {
+  color: var(--mastery);
+  background: var(--mastery-soft);
+}
+.tone-success {
+  color: var(--success);
+  background: var(--success-soft);
+}
+.tone-danger {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+.tone-warning {
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+.tone-info {
+  color: var(--info);
+  background: var(--info-soft);
+}
+
+/* ---------- Progresso ---------- */
+.bar {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.barFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--fill, var(--accent)), color-mix(in srgb, var(--fill, var(--accent)) 70%, white));
+  transition: width 0.6s var(--ease-out);
+}
+.ring {
+  display: block;
+}
+.ringTrack {
+  stroke: var(--surface-3);
+}
+.ringFill {
+  transition: stroke-dashoffset 0.6s var(--ease-out);
+}
+
+/* ---------- Modal ---------- */
+.dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-l);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-2);
+}
+.dialog::backdrop {
+  background: rgba(3, 8, 20, 0.6);
+  backdrop-filter: blur(3px);
+}
+.dialogBody {
+  padding: var(--space-5);
+}
+.dialogActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+/* ---------- Diversos ---------- */
+.iconTile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  color: var(--tile, var(--accent));
+  background: color-mix(in srgb, var(--tile, var(--accent)) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tile, var(--accent)) 40%, transparent);
+}
+.callout {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-m);
+  border: 1px solid currentColor;
+  font-size: 0.95rem;
+}
+.callout > svg {
+  flex: none;
+  margin-top: 3px;
+}
+.callout p:last-child {
+  margin-bottom: 0;
+}
+.calloutBody {
+  color: var(--text);
+  min-width: 0;
+}

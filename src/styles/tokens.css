@@ -1,0 +1,134 @@
+/*
+ * Design tokens do AWS Quest.
+ * Identidade "centro de missão + mapa de expedição": azul-noite, grade de blueprint,
+ * acentos vibrantes. Tema escuro por padrão; tema claro por preferência ou ajuste.
+ */
+:root {
+  --font-display: 'Space Grotesk Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Inter Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', monospace;
+
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 22px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --content-max: 1180px;
+  --topbar-h: 64px;
+  --bottomnav-h: 64px;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  color-scheme: dark;
+  --bg: #070d1c;
+  --bg-grid: rgba(110, 160, 255, 0.06);
+  --bg-glow-a: rgba(52, 224, 200, 0.12);
+  --bg-glow-b: rgba(165, 148, 255, 0.1);
+  --surface: #0f1830;
+  --surface-2: #15213f;
+  --surface-3: #1c2b50;
+  --surface-glass: rgba(18, 29, 56, 0.78);
+  --border: #26365e;
+  --border-strong: #3a4f82;
+  --text: #e9effc;
+  --text-muted: #a6b5d6;
+  --text-faint: #7f8fb3;
+  --accent: #34e0c8;
+  --accent-strong: #1cc4ac;
+  --accent-ink: #032a26;
+  --accent-soft: rgba(52, 224, 200, 0.14);
+  --xp: #ffb547;
+  --xp-soft: rgba(255, 181, 71, 0.16);
+  --mastery: #a594ff;
+  --mastery-soft: rgba(165, 148, 255, 0.16);
+  --success: #3ddc97;
+  --success-soft: rgba(61, 220, 151, 0.14);
+  --danger: #ff6b81;
+  --danger-soft: rgba(255, 107, 129, 0.14);
+  --warning: #ffcf5c;
+  --warning-soft: rgba(255, 207, 92, 0.14);
+  --info: #6cb6ff;
+  --info-soft: rgba(108, 182, 255, 0.14);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.25);
+  --shadow-2: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --focus: 0 0 0 3px rgba(52, 224, 200, 0.55);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    color-scheme: light;
+    --bg: #eef3fb;
+    --bg-grid: rgba(30, 70, 140, 0.06);
+    --bg-glow-a: rgba(11, 143, 127, 0.1);
+    --bg-glow-b: rgba(91, 71, 214, 0.08);
+    --surface: #ffffff;
+    --surface-2: #f3f6fc;
+    --surface-3: #e6ecf7;
+    --surface-glass: rgba(255, 255, 255, 0.86);
+    --border: #d3dcec;
+    --border-strong: #a9b7d3;
+    --text: #0e1a33;
+    --text-muted: #45557a;
+    --text-faint: #66769a;
+    --accent: #0b8f7f;
+    --accent-strong: #08796b;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(11, 143, 127, 0.12);
+    --xp: #a65f00;
+    --xp-soft: rgba(196, 120, 0, 0.12);
+    --mastery: #5b47d6;
+    --mastery-soft: rgba(91, 71, 214, 0.1);
+    --success: #12784c;
+    --success-soft: rgba(18, 120, 76, 0.1);
+    --danger: #c42d47;
+    --danger-soft: rgba(196, 45, 71, 0.1);
+    --warning: #8a6100;
+    --warning-soft: rgba(184, 130, 0, 0.12);
+    --info: #1d64b8;
+    --info-soft: rgba(29, 100, 184, 0.1);
+    --shadow-1: 0 1px 2px rgba(15, 30, 70, 0.08), 0 8px 24px rgba(15, 30, 70, 0.08);
+    --shadow-2: 0 12px 40px rgba(15, 30, 70, 0.16);
+    --focus: 0 0 0 3px rgba(11, 143, 127, 0.45);
+  }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #eef3fb;
+  --bg-grid: rgba(30, 70, 140, 0.06);
+  --bg-glow-a: rgba(11, 143, 127, 0.1);
+  --bg-glow-b: rgba(91, 71, 214, 0.08);
+  --surface: #ffffff;
+  --surface-2: #f3f6fc;
+  --surface-3: #e6ecf7;
+  --surface-glass: rgba(255, 255, 255, 0.86);
+  --border: #d3dcec;
+  --border-strong: #a9b7d3;
+  --text: #0e1a33;
+  --text-muted: #45557a;
+  --text-faint: #66769a;
+  --accent: #0b8f7f;
+  --accent-strong: #08796b;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(11, 143, 127, 0.12);
+  --xp: #a65f00;
+  --xp-soft: rgba(196, 120, 0, 0.12);
+  --mastery: #5b47d6;
+  --mastery-soft: rgba(91, 71, 214, 0.1);
+  --success: #12784c;
+  --success-soft: rgba(18, 120, 76, 0.1);
+  --danger: #c42d47;
+  --danger-soft: rgba(196, 45, 71, 0.1);
+  --warning: #8a6100;
+  --warning-soft: rgba(184, 130, 0, 0.12);
+  --info: #1d64b8;
+  --info-soft: rgba(29, 100, 184, 0.1);
+  --shadow-1: 0 1px 2px rgba(15, 30, 70, 0.08), 0 8px 24px rgba(15, 30, 70, 0.08);
+  --shadow-2: 0 12px 40px rgba(15, 30, 70, 0.16);
+  --focus: 0 0 0 3px rgba(11, 143, 127, 0.45);
+}

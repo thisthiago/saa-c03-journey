@@ -1,0 +1,103 @@
+.services {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+  gap: var(--space-3);
+}
+.model {
+  display: block;
+  font-weight: 400;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+.count {
+  margin: -4px 0 var(--space-2);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.count[data-done='true'] {
+  color: var(--accent);
+  font-weight: 600;
+}
+.layers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.layers li {
+  display: grid;
+  gap: 4px;
+  border-left: 3px solid transparent;
+  padding-left: 6px;
+}
+.layers li[data-status='correct'] {
+  border-left-color: var(--success);
+}
+.layers li[data-status='wrong'],
+.layers li[data-status='missed'] {
+  border-left-color: var(--danger);
+}
+.layer {
+  font-size: 0.82rem;
+}
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  width: fit-content;
+  max-width: 100%;
+}
+.seg button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 10px 4px 7px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 0;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.seg button:last-child {
+  border-right: 0;
+}
+.seg button:hover:not(:disabled):not([aria-checked='true']) {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+.seg button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+/* Escolha feita: preenchimento sólido + ícone, para não depender só da cor. */
+.seg button[aria-checked='true'] {
+  background: var(--accent-strong);
+  color: var(--accent-ink);
+}
+/* O espaço do ícone fica sempre reservado: marcar uma opção não muda a largura dos botões. */
+.tick {
+  flex: none;
+  visibility: hidden;
+}
+.seg button[aria-checked='true'] .tick {
+  visibility: visible;
+}
+.seg button:disabled {
+  cursor: default;
+}
+.seg button:disabled:not([aria-checked='true']) {
+  opacity: 0.6;
+}
+.why {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}

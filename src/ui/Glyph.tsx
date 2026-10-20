@@ -1,0 +1,93 @@
+/** Glifos dos serviços e fases. Desenhos próprios ou genéricos — não são ícones oficiais da AWS. */
+import {
+  Boxes,
+  Coins,
+  Database,
+  Eye,
+  FileText,
+  Flag,
+  Globe,
+  HardDrive,
+  History,
+  KeyRound,
+  Megaphone,
+  MessagesSquare,
+  Network,
+  Receipt,
+  RefreshCw,
+  Server,
+  Shield,
+  SquareFunction,
+  Trophy,
+  Truck,
+  Zap,
+  Layers,
+  RadioTower,
+  Factory,
+  LifeBuoy,
+  Handshake,
+  MapPin,
+  User,
+  Users,
+  IdCard,
+  FingerprintPattern,
+  ScrollText,
+  Building2,
+  Ticket,
+  type LucideIcon,
+} from 'lucide-react'
+import type { GlyphName } from '../engine/types'
+
+function BucketIcon({ size = 24, strokeWidth = 2, ...rest }: { size?: number; strokeWidth?: number } & React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...rest}>
+      <ellipse cx="12" cy="5.5" rx="8" ry="2.5" />
+      <path d="M4 5.5 6 19a2 2 0 0 0 2 1.7h8a2 2 0 0 0 2-1.7l2-13.5" />
+      <path d="M6.6 11.5c1.6.7 3.4 1 5.4 1s3.8-.3 5.4-1" />
+    </svg>
+  )
+}
+
+const ICONS: Record<Exclude<GlyphName, 'bucket'>, LucideIcon> = {
+  object: Boxes,
+  block: HardDrive,
+  file: FileText,
+  coins: Coins,
+  shield: Shield,
+  key: KeyRound,
+  history: History,
+  cycle: RefreshCw,
+  globe: Globe,
+  bolt: Zap,
+  receipt: Receipt,
+  bridge: Network,
+  truck: Truck,
+  trophy: Trophy,
+  server: Server,
+  network: Network,
+  database: Database,
+  queue: MessagesSquare,
+  topic: Megaphone,
+  function: SquareFunction,
+  eye: Eye,
+  flag: Flag,
+  zone: Layers,
+  tower: RadioTower,
+  factory: Factory,
+  lifebuoy: LifeBuoy,
+  handshake: Handshake,
+  pin: MapPin,
+  user: User,
+  users: Users,
+  idcard: IdCard,
+  fingerprint: FingerprintPattern,
+  policy: ScrollText,
+  org: Building2,
+  ticket: Ticket,
+}
+
+export function Glyph({ name, size = 22, className }: { name: GlyphName; size?: number; className?: string }) {
+  if (name === 'bucket') return <BucketIcon size={size} className={className} />
+  const Icon = ICONS[name]
+  return <Icon size={size} className={className} aria-hidden="true" />
+}

@@ -1,0 +1,143 @@
+import { expect, test } from '@playwright/test'
+import { place, progressWithFirstMission, seedProgress } from './helpers'
+
+test('quem começa agora recebe a primeira missão da AWS Foundations', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'Sua expedição começa aqui' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'AWS Foundations' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'S3 Expedition' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'IAM e Access Management' })).toBeVisible()
+  await page.getByRole('link', { name: 'Iniciar expedição' }).click()
+  await expect(page.getByRole('heading', { name: 'Viajaí' })).toBeVisible()
+})
+
+test('a S3 Expedition recomenda a AWS Foundations sem bloquear', async ({ page }) => {
+  await page.goto('/#/trilha/storage.s3-expedition')
+  await expect(page.getByText('Recomendado antes')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'AWS Foundations' })).toBeVisible()
+  await expect(page.getByRole('link', { name: /Jogar|Iniciar/ }).first()).toBeVisible()
+})
+
+test('a trilha IAM recomenda a AWS Foundations sem bloquear', async ({ page }) => {
+  await page.goto('/#/trilha/identity.iam-access')
+  await expect(page.getByText('Recomendado antes')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'AWS Foundations' })).toBeVisible()
+  await expect(page.getByRole('link', { name: /Jogar|Iniciar/ }).first()).toBeVisible()
+})
+
+test('jogar a primeira missão, errar, acertar e manter o progresso após recarregar', async ({ page }) => {
+  await page.goto('/#/missao/s3x.f01.m1')
+
+  await expect(page.getByRole('heading', { name: 'Estúdio Lumen' })).toBeVisible()
+  await page.getByRole('button', { name: 'Ver conceitos-chave' }).click()
+  await page.getByRole('button', { name: 'Entendi, ir para o desafio' }).click()
+
+  // Desafio 1 — classificação: primeiro uma resposta com erro.
+  await expect(page.getByRole('heading', { name: 'Triagem do servidor lotado' })).toBeVisible()
+  const correct: [string, string][] = [
+    ['Fotos de produtos exibidas', 'Objeto (Amazon S3)'],
+    ['Disco de dados do PostgreSQL', 'Bloco (Amazon EBS)'],
+    ['Pasta de rede em que a equipe', 'Arquivo (Amazon EFS/FSx)'],
+    ['Backups diários compactados', 'Objeto (Amazon S3)'],
+    ['Volume de boot', 'Bloco (Amazon EBS)'],
+    ['Arquivos CSV e Parquet', 'Objeto (Amazon S3)'],
+    ['Diretório /home montado', 'Arquivo (Amazon EFS/FSx)'],
+    ['Vídeos dos ensaios', 'Objeto (Amazon S3)'],
+  ]
+  const wrong = correct.map(([item, bin], i) => [item, i === 1 ? 'Objeto (Amazon S3)' : bin] as [string, string])
+  for (const [item, bin] of wrong) await place(page, item, bin)
+  await page.getByRole('button', { name: 'Verificar' }).click()
+  await expect(page.getByText('Resultado: 88%', { exact: true })).toBeVisible()
+  await expect(page.getByText('+35 XP').first()).toBeVisible()
+
+  // Nova tentativa com tudo certo: só a melhoria de XP é concedida.
+  await page.getByRole('button', { name: 'Tentar 100%' }).click()
+  for (const [item, bin] of correct) await place(page, item, bin)
+  await page.getByRole('button', { name: 'Verificar' }).click()
+  await expect(page.getByText('Perfeito!')).toBeVisible()
+  await expect(page.getByText('Sem XP adicional nesta tentativa')).toBeVisible()
+  await page.getByRole('button', { name: /Próximo desafio/ }).click()
+
+  // Desafio 2 — decisão com justificativa.
+  await page.getByRole('radio', { name: /Manter os dados do banco num volume Amazon EBS/ }).click()
+  await page.getByRole('radio', { name: /Bancos transacionais fazem muitas leituras/ }).click()
+  await page.getByRole('button', { name: 'Verificar' }).click()
+  await expect(page.getByText('Perfeito!')).toBeVisible()
+  await expect(page.getByText('O que aconteceria')).toBeVisible()
+  // XP da atividade + bônus da missão + conquista levam ao nível 2: a celebração aparece.
+  const levelUp = page.getByRole('dialog', { name: 'Cadete da Nuvem' })
+  await expect(levelUp).toBeVisible()
+  await levelUp.getByRole('button', { name: 'Continuar' }).click()
+  await page.getByRole('button', { name: 'Ver resultado' }).click()
+
+  await expect(page.getByRole('heading', { name: 'Missão aprovada' })).toBeVisible()
+  await expect(page.getByText('Conquista desbloqueada')).toBeVisible()
+
+  // Recarregar: o progresso continua lá, e a sugestão segue na trilha em andamento.
+  await page.goto('/')
+  await page.reload()
+  await expect(page.getByText('Anatomia de um bucket')).toBeVisible()
+  await expect(page.getByRole('link', { name: /Nível 2/ })).toContainText('XP')
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('aws-quest/progress') ?? '{}'))
+  expect(stored.missions['s3x.f01.m1'].passedAt).toBeTruthy()
+  expect(stored.xp).toBeGreaterThan(0)
+})
+
+test('fases bloqueadas não podem ser iniciadas', async ({ page }) => {
+  await page.goto('/#/trilha/storage.s3-expedition?fase=s3x.f02')
+  await expect(page.getByRole('heading', { name: 'Classes de armazenamento e custos' })).toBeVisible()
+  await expect(page.getByText('Bloqueada').first()).toBeVisible()
+  await expect(page.getByRole('link', { name: /Jogar/ })).toHaveCount(0)
+  await page.goto('/#/missao/s3x.f01.m2')
+  await expect(page.getByRole('heading', { name: 'Missão bloqueada' })).toBeVisible()
+})
+
+test('laboratório do bucket: encontrar objeto, responder e verificar', async ({ page }) => {
+  await seedProgress(page, progressWithFirstMission())
+  await page.goto('/#/missao/s3x.f01.m2')
+  await page.getByRole('button', { name: 'Ver conceitos-chave' }).click()
+  await page.getByRole('button', { name: 'Entendi, ir para o desafio' }).click()
+  await page.getByRole('button', { name: /^contratos\// }).click()
+  await page.getByRole('button', { name: /^2026\// }).click()
+  await page.getByRole('button', { name: 'contrato-ana-leo.pdf' }).click()
+  await expect(page.getByText('x-amz-meta-cliente: ana-e-leo')).toBeVisible()
+  await page.getByRole('button', { name: 'Marcar como resposta da tarefa 1' }).click()
+  await page.getByLabel('Resposta da tarefa 7').fill('sa-east-1')
+  await page.getByLabel('Resposta da tarefa 3').fill('4')
+  await page.getByRole('button', { name: 'Verificar' }).click()
+  await expect(page.getByRole('alert')).toContainText('Responda a todas as tarefas')
+})
+
+test('revisão aparece para conceitos fracos e concede domínio', async ({ page }) => {
+  await seedProgress(page, progressWithFirstMission())
+  await page.goto('/#/revisao')
+  await expect(page.getByRole('heading', { name: 'Treino de memória' })).toBeVisible()
+  await page.getByRole('button', { name: 'Começar revisão' }).click()
+  await expect(page.getByText(/item 1 de/)).toBeVisible()
+})
+
+test('arrastar com o mouse: o bloco fica colado no cursor e cai no destino', async ({ page }) => {
+  await page.goto('/#/missao/s3x.f01.m1')
+  await page.getByRole('button', { name: 'Ver conceitos-chave' }).click()
+  await page.getByRole('button', { name: 'Entendi, ir para o desafio' }).click()
+
+  const chip = page.getByRole('button', { name: /Volume de boot/ })
+  const box = (await chip.boundingBox())!
+  // Segura o item perto do canto esquerdo, não no centro, para conferir que esse ponto é mantido.
+  const grab = { x: box.x + 20, y: box.y + box.height / 2 }
+  await page.mouse.move(grab.x, grab.y)
+  await page.mouse.down()
+  const to = { x: grab.x + 150, y: grab.y + 120 }
+  await page.mouse.move(to.x, to.y, { steps: 8 })
+
+  const ghost = page.locator('body > div[aria-hidden="true"]', { hasText: 'Volume de boot' })
+  const g = (await ghost.boundingBox())!
+  expect(Math.abs(g.x - (to.x - 20))).toBeLessThanOrEqual(2)
+  expect(Math.abs(g.y + g.height / 2 - to.y)).toBeLessThanOrEqual(4)
+
+  const target = (await page.getByRole('button', { name: 'Posicionar em Bloco (Amazon EBS)' }).boundingBox())!
+  await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2, { steps: 8 })
+  await page.mouse.up()
+  await expect(ghost).toHaveCount(0)
+  await expect(page.locator('[data-drop]').filter({ hasText: 'Bloco (Amazon EBS)' }).getByRole('button', { name: /Volume de boot/ })).toBeVisible()
+})

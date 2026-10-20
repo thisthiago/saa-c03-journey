@@ -1,0 +1,177 @@
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+@media (max-width: 860px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+}
+.missionCard {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(500px 220px at 100% 0%, color-mix(in srgb, var(--phase) 22%, transparent), transparent 70%),
+    var(--surface-glass);
+  border-color: color-mix(in srgb, var(--phase) 40%, var(--border));
+}
+.heroTitle {
+  margin-bottom: var(--space-4);
+}
+.missionRow {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  margin-bottom: var(--space-5);
+}
+.missionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.missionPhase {
+  font-size: 0.85rem;
+  color: var(--phase);
+  font-weight: 600;
+}
+.missionTitle {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+.playerCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.playerTop {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.playerTitle {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.xp {
+  color: var(--xp);
+  font-weight: 600;
+}
+.small {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+.stats {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-2) 0 0;
+  display: grid;
+  gap: 6px;
+  font-size: 0.92rem;
+}
+.stats li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.stats svg {
+  color: var(--text-faint);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: var(--space-4);
+}
+.grid > section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+.grid > section > :global(.muted),
+.grid > section > p {
+  margin: 0;
+}
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.cardTitle {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.achList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.achList li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--xp);
+}
+.achList span {
+  color: var(--text);
+}
+.territories {
+  margin-top: var(--space-6);
+}
+.terrGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+  gap: var(--space-3);
+}
+.terr {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--border);
+  background: var(--surface-glass);
+  color: var(--text);
+  text-decoration: none;
+}
+.terr[data-status='active'] {
+  border-color: var(--accent);
+}
+.terr[data-status='active']:hover {
+  background: var(--accent-soft);
+}
+.terr[data-status='planned'] {
+  opacity: 0.6;
+}
+.terrName {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.tracks {
+  margin-top: var(--space-5);
+}
+.trackGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: var(--space-4);
+}
+.trackGrid > section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+.trackGrid > section > p {
+  margin: 0;
+}
+.trackGrid > section > [role='progressbar'] {
+  align-self: stretch;
+}

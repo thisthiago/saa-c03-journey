@@ -1,0 +1,138 @@
+.lab {
+  display: grid;
+  gap: var(--space-3);
+}
+.card {
+  border-radius: var(--radius-m);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.title {
+  margin: 0;
+  font-size: 1rem;
+}
+.desc {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+.params {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 4px 12px;
+  font-size: 0.84rem;
+}
+.params span {
+  color: var(--text-muted);
+}
+.choice {
+  display: grid;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  max-width: 480px;
+}
+.choice select {
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s);
+  padding: 8px 10px;
+  min-width: 0;
+}
+.est {
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  padding: 8px 10px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+.est svg {
+  vertical-align: -3px;
+}
+.est ul {
+  margin: 4px 0 0;
+  padding-left: 1.2em;
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+.compare {
+  display: grid;
+  gap: 6px;
+  font-size: 0.82rem;
+}
+.compare ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.compare li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(80px, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 640px) {
+  .compare li {
+    grid-template-columns: 1fr auto;
+  }
+  .barWrap {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+}
+.mName {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.barWrap {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+.bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: var(--danger);
+}
+.bar[data-ok='true'] {
+  background: var(--success);
+}
+.deadline {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: var(--text);
+}
+.days {
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.compare small {
+  color: var(--text-faint);
+}
+.simp {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.simp summary {
+  cursor: pointer;
+  font-weight: 600;
+}

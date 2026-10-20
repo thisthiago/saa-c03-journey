@@ -1,0 +1,126 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+}
+.search {
+  position: relative;
+  flex: 1;
+  min-width: min(100%, 280px);
+}
+.search svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-faint);
+}
+.search input {
+  padding-left: 40px;
+}
+.group {
+  margin-top: var(--space-5);
+}
+.groupTitle {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+}
+.grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-3);
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  height: 100%;
+  padding: var(--space-4);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--border);
+  background: var(--surface-glass);
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    transform 0.15s;
+}
+a.card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+.card[data-tier='dominado'] {
+  border-color: var(--mastery);
+}
+.card[data-tier='hidden'] {
+  border-style: dashed;
+  color: var(--text-faint);
+}
+.official {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+.title {
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-bottom: var(--space-3);
+}
+.head {
+  margin-bottom: var(--space-4);
+}
+.head .official {
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+}
+.summaryCard {
+  margin: var(--space-4) 0;
+}
+.summary {
+  font-size: 1.1rem;
+}
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  gap: var(--space-5);
+}
+.section {
+  margin-top: var(--space-4);
+}
+.sectionTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 1.02rem;
+}
+.list,
+.warnList,
+.refs {
+  margin: 0;
+  padding-left: 1.2em;
+  display: grid;
+  gap: 6px;
+}
+.warnList li::marker {
+  color: var(--warning);
+}
+.refs a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

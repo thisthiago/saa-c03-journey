@@ -1,0 +1,501 @@
+/** Fase 4 — Criptografia e proteção dos dados (empresa fictícia: Pagaí Pagamentos). */
+import type { PhaseDef } from '../../../../../engine/types'
+import {
+  APP,
+  AUDITOR,
+  BP_ALLOW_TLS,
+  BP_AUDITOR,
+  BP_DENY_HTTPS,
+  BP_TLS,
+  BRUNO,
+  BRUNO_DECRYPT,
+  BRUNO_RW,
+  BUCKET,
+  CUSTOMER_KEY,
+  KEY_ID,
+  KP_BRUNO,
+  KP_EVERYONE,
+  KP_PARTNER,
+  KP_ROOT,
+  REQUESTS,
+  pagai,
+} from './world'
+
+const COMPANY = 'Pagaí Pagamentos'
+const ROLE = 'Você é responsável pela conformidade de segurança da plataforma de pagamentos.'
+
+const ask = (identityId: string, r: (typeof REQUESTS)[keyof typeof REQUESTS]) => ({ identityId, action: r.action, key: r.key, secureTransport: r.secureTransport, sourceIp: r.sourceIp })
+const ALLOW_DENY = [
+  { id: 'o1', text: 'Permitido', outcome: 'allow' },
+  { id: 'o2', text: 'Negado (AccessDenied)', outcome: 'deny' },
+]
+const FULL_BPA = { blockPublicAcls: true, ignorePublicAcls: true, blockPublicPolicy: true, restrictPublicBuckets: true }
+
+export const F04: PhaseDef = {
+  id: 's3x.f04',
+  order: 4,
+  title: 'Criptografia e proteção dos dados',
+  subtitle: 'SSE-S3, SSE-KMS, DSSE-KMS, SSE-C e TLS',
+  summary: 'Escolha a proteção certa e resolva um Access Denied causado por permissões de chave KMS.',
+  glyph: 'key',
+  color: '#a594ff',
+  requires: ['s3x.f03'],
+  concepts: [
+    'crypto.at-rest-in-transit',
+    's3.tls-enforcement',
+    's3.sse-s3',
+    's3.sse-kms',
+    'kms.key-policy',
+    's3.dsse-kms',
+    's3.sse-c',
+    's3.client-side-encryption',
+    's3.default-encryption',
+    's3.bucket-keys',
+    // Revisitados da Fase 3:
+    'iam.policy-evaluation',
+    'iam.cross-account',
+    's3.block-public-access',
+  ],
+  availability: 'available',
+  estimatedMinutes: 40,
+  map: { x: 430, y: 280 },
+  simplifications: [
+    'O avaliador modela kms:Decrypt e kms:GenerateDataKey com key policy e IAM. Não modela grants, contexto de criptografia, cotas de requisição do KMS nem chaves multirregionais.',
+    'A chave gerenciada pela AWS (aws/s3) é tratada como utilizável apenas por identidades da própria conta, via S3.',
+    'As requisições HTTP e HTTPS são simuladas pelo valor de aws:SecureTransport; não há negociação de TLS.',
+  ],
+  missions: [
+    // -----------------------------------------------------------------------
+    {
+      id: 's3x.f04.m1',
+      title: 'Em repouso e em trânsito',
+      type: 'mission',
+      summary: 'Separar as proteções em repouso das em trânsito e exigir HTTPS com uma bucket policy.',
+      briefing: {
+        company: COMPANY,
+        role: ROLE,
+        situation: `O bucket \`${BUCKET}\` guarda as transações de cartão. Um teste de intrusão mostrou que um script antigo ainda envia arquivos por **HTTP**. A auditoria exige: dados protegidos em repouso **e** em trânsito.`,
+        objective: 'Garantir que nenhuma requisição sem TLS seja aceita, sem bloquear o uso normal.',
+        successCriteria: ['Classificar as proteções', 'Prever o efeito de duas políticas', 'Exigir HTTPS para todos'],
+      },
+      intel: [
+        {
+          conceptId: 'crypto.at-rest-in-transit',
+          body: ['**Em repouso**: o dado gravado em disco está cifrado. **Em trânsito**: o dado viaja cifrado pela rede (TLS/HTTPS). SSE no S3 protege o disco — não a conexão.'],
+        },
+        {
+          conceptId: 's3.sse-s3',
+          body: ['Desde **5 de janeiro de 2023**, todo objeto novo no S3 é criptografado automaticamente com **SSE-S3**, sem custo adicional. A criptografia em repouso já existe; falta garantir o trânsito.'],
+        },
+        {
+          conceptId: 's3.tls-enforcement',
+          body: ['Para exigir HTTPS: uma declaração **Deny** na bucket policy, para `Principal: "*"`, com a condição `aws:SecureTransport = false`. Deny explícito vence qualquer Allow.'],
+        },
+      ],
+      activities: [
+        {
+          id: 's3x.f04.m1.a1',
+          kind: 'classify',
+          title: 'Repouso ou trânsito?',
+          prompt: 'Classifique cada mecanismo pelo que ele protege.',
+          concepts: [{ id: 'crypto.at-rest-in-transit' }],
+          xp: 40,
+          difficulty: 1,
+          explanation: ['SSE-S3, SSE-KMS, DSSE-KMS e a criptografia padrão do bucket protegem os dados gravados. TLS e a condição aws:SecureTransport tratam da conexão.'],
+          bins: [
+            { id: 'rest', label: 'Em repouso' },
+            { id: 'transit', label: 'Em trânsito' },
+          ],
+          items: [
+            { id: 'c1', text: 'SSE-S3', bin: 'rest', explanation: 'Cifra o objeto ao gravá-lo em disco.', concepts: ['s3.sse-s3'] },
+            { id: 'c2', text: 'SSE-KMS com chave gerenciada pelo cliente', bin: 'rest', explanation: 'Cifra o objeto em disco com chave do KMS.', concepts: ['s3.sse-kms'] },
+            { id: 'c3', text: 'DSSE-KMS', bin: 'rest', explanation: 'Duas camadas de criptografia no objeto gravado.', concepts: ['s3.dsse-kms'] },
+            { id: 'c4', text: 'Criptografia padrão do bucket', bin: 'rest', explanation: 'Define a criptografia aplicada a objetos novos em disco.', concepts: ['s3.default-encryption'] },
+            { id: 'c5', text: 'Endpoint HTTPS (TLS)', bin: 'transit', explanation: 'Cifra a conexão entre o cliente e o S3.', concepts: ['crypto.at-rest-in-transit'] },
+            { id: 'c6', text: 'Deny com aws:SecureTransport = false', bin: 'transit', explanation: 'Recusa requisições que não usam TLS.', concepts: ['s3.tls-enforcement'] },
+          ],
+        },
+        {
+          id: 's3x.f04.m1.a2',
+          kind: 'predict',
+          title: 'Um Allow "só com HTTPS"',
+          prompt: 'Um colega adicionou à bucket policy um **Allow** para a própria conta com a condição `aws:SecureTransport = true`. O analista `bruno.lima` já tem uma política IAM de leitura. Ele pede uma transação por **HTTP**. O que acontece?',
+          concepts: [{ id: 's3.tls-enforcement' }, { id: 'iam.policy-evaluation' }],
+          xp: 40,
+          difficulty: 3,
+          explanation: [
+            'Um Allow condicionado só deixa de conceder — ele não nega. A política IAM do analista continua permitindo, então a requisição HTTP passa.',
+            'Para bloquear HTTP, é preciso um **Deny** explícito com `aws:SecureTransport = false`.',
+          ],
+          spec: { sim: 'access', world: pagai({ policy: [BP_ALLOW_TLS], identities: [BRUNO] }), request: ask('bruno', REQUESTS.getTxHttp) },
+          options: ALLOW_DENY,
+        },
+        {
+          id: 's3x.f04.m1.a3',
+          kind: 'lab',
+          lab: 'access',
+          title: 'Somente HTTPS',
+          prompt: 'Monte a bucket policy para que **ninguém** consiga ler ou gravar sem TLS — e para que tudo continue funcionando por HTTPS.',
+          concepts: [{ id: 's3.tls-enforcement' }, { id: 'crypto.at-rest-in-transit' }],
+          xp: 70,
+          difficulty: 2,
+          hints: ['Allow condicionado não bloqueia quem já tem permissão por IAM.', 'Leia com atenção o valor da condição em cada Deny.'],
+          explanation: ['Solução: `SomenteHTTPS` — Deny para todos quando `aws:SecureTransport = false`. `NegaComHTTPS` faz o oposto e bloquearia todo o uso legítimo.'],
+          config: {
+            world: pagai({ identities: [BRUNO, APP] }),
+            bucketLibrary: [BP_ALLOW_TLS, BP_TLS, BP_DENY_HTTPS],
+            editable: {},
+            identities: ['bruno', 'app'],
+            requests: [REQUESTS.getTxHttps, REQUESTS.getTxHttp, REQUESTS.putTxHttps, REQUESTS.putTxHttp],
+            goals: [
+              { identityId: 'bruno', requestId: 'get-tx-https', expect: 'allow', why: 'O analista continua lendo por HTTPS.', concepts: ['s3.tls-enforcement'] },
+              { identityId: 'bruno', requestId: 'get-tx-http', expect: 'deny', why: 'Leitura sem TLS expõe os dados na rede.', concepts: ['s3.tls-enforcement'] },
+              { identityId: 'app', requestId: 'put-tx-https', expect: 'allow', why: 'A aplicação continua gravando por HTTPS.', concepts: ['s3.tls-enforcement'] },
+              { identityId: 'app', requestId: 'put-tx-http', expect: 'deny', why: 'O script antigo por HTTP precisa ser recusado.', concepts: ['crypto.at-rest-in-transit'] },
+            ],
+            solution: { bucketPolicy: [BP_TLS.sid], identityPolicies: {}, keyPolicies: {}, bpa: FULL_BPA, objectOwnership: 'BucketOwnerEnforced' },
+          },
+        },
+      ],
+      debrief: {
+        takeaways: [
+          'SSE protege o dado em disco; TLS protege a conexão. São camadas diferentes.',
+          'Exigir HTTPS: **Deny** com `aws:SecureTransport = false`, para todos os principais.',
+          'Um Allow condicionado não bloqueia nada — só deixa de conceder.',
+        ],
+      },
+    },
+    // -----------------------------------------------------------------------
+    {
+      id: 's3x.f04.m2',
+      title: 'Escolha da proteção',
+      type: 'mission',
+      summary: 'Escolher entre SSE-S3, SSE-KMS, DSSE-KMS, SSE-C e criptografia do lado do cliente.',
+      briefing: {
+        company: COMPANY,
+        role: ROLE,
+        situation: 'Cada área da Pagaí tem uma exigência diferente: auditoria de uso de chaves, duas camadas de criptografia, chaves que nunca saem da empresa. Você precisa escolher a proteção de cada conjunto de dados.',
+        objective: 'Casar cada exigência com a opção de criptografia adequada.',
+        successCriteria: ['Associar opções e cenários', 'Decidir três casos concretos'],
+      },
+      intel: [
+        {
+          conceptId: 's3.sse-kms',
+          body: ['**SSE-KMS**: chaves no AWS KMS. Você controla quem usa a chave e o uso aparece no **CloudTrail**. Ler exige `kms:Decrypt`; gravar, `kms:GenerateDataKey`.'],
+        },
+        {
+          conceptId: 's3.dsse-kms',
+          body: ['**DSSE-KMS**: duas camadas independentes de AES-256 no servidor, para normas que exigem criptografia multicamada.'],
+        },
+        {
+          conceptId: 's3.sse-c',
+          body: ['**SSE-C**: a chave vai em cada requisição e o S3 não a guarda. Desde **abril de 2026**, buckets novos vêm com SSE-C **desabilitado** para novas gravações; é preciso habilitá-lo deliberadamente.'],
+        },
+        {
+          conceptId: 's3.client-side-encryption',
+          body: ['**Lado do cliente**: a aplicação cifra antes de enviar. O S3 só vê texto cifrado.'],
+        },
+      ],
+      activities: [
+        {
+          id: 's3x.f04.m2.a1',
+          kind: 'match',
+          title: 'Cada exigência, sua criptografia',
+          prompt: 'Associe cada opção ao cenário em que ela é a escolha típica.',
+          concepts: [{ id: 's3.sse-s3' }, { id: 's3.sse-kms' }, { id: 's3.dsse-kms' }, { id: 's3.sse-c' }, { id: 's3.client-side-encryption' }],
+          xp: 60,
+          difficulty: 2,
+          explanation: ['A escolha depende de quem controla a chave, se o uso precisa ser auditado, quantas camadas a norma exige e se a AWS pode ver o texto claro.'],
+          leftLabel: 'Opções',
+          rightLabel: 'Cenários',
+          pairs: [
+            { id: 'sse-s3', left: 'SSE-S3', right: 'Criptografia em repouso sem gestão de chaves e sem custo adicional', explanation: 'O padrão de todo bucket.', concepts: ['s3.sse-s3'] },
+            { id: 'sse-kms', left: 'SSE-KMS (chave do cliente)', right: 'Controlar quem descriptografa e auditar cada uso da chave', explanation: 'Key policy + IAM, com registro no CloudTrail.', concepts: ['s3.sse-kms'] },
+            { id: 'dsse', left: 'DSSE-KMS', right: 'Norma que exige duas camadas de criptografia em repouso', explanation: 'Duas camadas independentes de AES-256.', concepts: ['s3.dsse-kms'] },
+            { id: 'sse-c', left: 'SSE-C', right: 'A empresa gera as chaves e quer enviá-las a cada requisição, sem guardá-las na AWS', explanation: 'O S3 usa a chave enviada e não a armazena.', concepts: ['s3.sse-c'] },
+            { id: 'cse', left: 'Criptografia do lado do cliente', right: 'O provedor de nuvem nunca pode ver o conteúdo em texto claro', explanation: 'O dado já chega cifrado ao S3.', concepts: ['s3.client-side-encryption'] },
+          ],
+        },
+        {
+          id: 's3x.f04.m2.a2',
+          kind: 'decision',
+          title: 'Relatórios para o regulador',
+          prompt: 'Os relatórios regulatórios precisam de: registro de **cada uso da chave**, possibilidade de **revogar o acesso** de uma área retirando permissão na chave e **compartilhamento com a conta da auditoria**. Qual opção?',
+          concepts: [{ id: 's3.sse-kms' }, { id: 'kms.key-policy' }],
+          xp: 40,
+          difficulty: 2,
+          explanation: ['Uma chave KMS **gerenciada pelo cliente** permite editar a key policy, compartilhar com outra conta e auditar o uso no CloudTrail. A chave `aws/s3` não pode ser compartilhada entre contas.'],
+          options: [
+            { id: 'a', text: 'SSE-KMS com chave gerenciada pelo cliente', correct: true, consequence: 'Cada Decrypt aparece no CloudTrail, a key policy controla quem usa a chave e a auditoria pode receber acesso.', impacts: { seguranca: 2 } },
+            { id: 'b', text: 'SSE-KMS com a chave gerenciada pela AWS (aws/s3)', correct: false, consequence: 'A key policy da aws/s3 não pode ser alterada: a conta da auditoria nunca conseguiria descriptografar.', impacts: { seguranca: -1 } },
+            { id: 'c', text: 'SSE-S3', correct: false, consequence: 'Os dados ficam cifrados, mas não há chave própria para revogar nem registro de uso por chave.', impacts: { seguranca: -1 } },
+          ],
+        },
+        {
+          id: 's3x.f04.m2.a3',
+          kind: 'decision',
+          title: 'Duas camadas',
+          prompt: 'Um contrato com uma bandeira de cartão exige **duas camadas de criptografia em repouso** para os arquivos de liquidação. A equipe também quer usar S3 Bucket Keys para reduzir custos. O que você responde?',
+          concepts: [{ id: 's3.dsse-kms' }, { id: 's3.bucket-keys' }],
+          xp: 40,
+          difficulty: 3,
+          explanation: ['DSSE-KMS atende à exigência de duas camadas, mas não é compatível com S3 Bucket Keys. É preciso aceitar o custo das requisições ao KMS nesses arquivos.'],
+          options: [
+            { id: 'a', text: 'Usar DSSE-KMS nos arquivos de liquidação, sabendo que S3 Bucket Keys não se aplicam a eles.', correct: true, consequence: 'O contrato é cumprido; o custo de requisições ao KMS desses arquivos entra no orçamento.', impacts: { seguranca: 2, custo: -1 } },
+            { id: 'b', text: 'Usar SSE-KMS com S3 Bucket Keys: já são duas chaves, então são duas camadas.', correct: false, consequence: 'A Bucket Key só gera chaves de dados; o objeto continua com uma camada de criptografia. O contrato não seria cumprido.', impacts: { seguranca: -2 } },
+            { id: 'c', text: 'Usar DSSE-KMS com S3 Bucket Keys.', correct: false, consequence: 'A combinação não existe: S3 Bucket Keys não são compatíveis com DSSE-KMS.' },
+          ],
+        },
+        {
+          id: 's3x.f04.m2.a4',
+          kind: 'decision',
+          title: 'O PUT com SSE-C que falhou',
+          prompt: 'Uma integração antiga grava com **SSE-C**. Num bucket criado este mês, o PUT passou a falhar. O que está acontecendo?',
+          concepts: [{ id: 's3.sse-c' }],
+          xp: 30,
+          difficulty: 2,
+          explanation: ['Desde abril de 2026, buckets de uso geral novos têm SSE-C desabilitado para novas gravações. Se a empresa realmente precisa de SSE-C, deve habilitá-lo deliberadamente com PutBucketEncryption — ou migrar para SSE-KMS.'],
+          options: [
+            { id: 'a', text: 'Buckets novos têm SSE-C desabilitado por padrão desde abril de 2026; é preciso habilitá-lo explicitamente ou adotar outra opção.', correct: true, consequence: 'Você avalia se SSE-C ainda é necessário. Em geral, SSE-KMS atende com menos risco de perder a chave.', impacts: { seguranca: 1 } },
+            { id: 'b', text: 'SSE-C foi descontinuado e não pode mais ser usado em nenhum bucket.', correct: false, consequence: 'Não é verdade: SSE-C continua disponível, mas precisa ser habilitado nos buckets novos.' },
+            { id: 'c', text: 'O bucket precisa de versionamento para aceitar SSE-C.', correct: false, consequence: 'Versionamento não tem relação com a criptografia aceita pelo bucket.' },
+          ],
+        },
+      ],
+      debrief: {
+        takeaways: [
+          'SSE-S3 é o padrão; SSE-KMS traz controle e auditoria da chave; DSSE-KMS, duas camadas; SSE-C, chave enviada a cada requisição.',
+          'A chave aws/s3 não pode ser compartilhada entre contas — use uma chave gerenciada pelo cliente.',
+          'Buckets novos têm SSE-C desabilitado desde abril de 2026.',
+        ],
+      },
+    },
+    // -----------------------------------------------------------------------
+    {
+      id: 's3x.f04.m3',
+      title: 'Access Denied sem motivo aparente',
+      type: 'mission',
+      summary: 'Descobrir por que quem tem permissão no S3 não consegue ler um objeto SSE-KMS — e corrigir.',
+      briefing: {
+        company: COMPANY,
+        role: ROLE,
+        situation: `Os relatórios trimestrais passaram a usar SSE-KMS com a chave \`${CUSTOMER_KEY.alias}\`. Desde então, o analista e a auditoria recebem **AccessDenied** — mesmo com as permissões do S3 intactas.`,
+        objective: 'Restaurar o acesso legítimo sem abrir a chave para todos.',
+        successCriteria: ['Prever duas decisões com KMS', 'Ajustar IAM e key policy com o mínimo necessário'],
+      },
+      intel: [
+        {
+          conceptId: 'kms.key-policy',
+          body: [
+            'Para ler um objeto SSE-KMS, a identidade precisa de permissão no S3 **e** de `kms:Decrypt` na chave.',
+            'A key policy pode conceder direto ou **delegar à conta** (aí uma política IAM precisa conceder). Entre contas, key policy **e** IAM de origem.',
+          ],
+        },
+      ],
+      activities: [
+        {
+          id: 's3x.f04.m3.a1',
+          kind: 'predict',
+          title: 'Permissão no S3 basta?',
+          prompt: '`bruno.lima` tem `s3:GetObject` em todo o bucket. O relatório usa SSE-KMS com uma chave cuja key policy só **delega à conta** (`HabilitaIAM`). Nenhuma política IAM do analista menciona KMS. Ele pede o relatório. O que acontece?',
+          concepts: [{ id: 'kms.key-policy' }, { id: 's3.sse-kms' }],
+          xp: 40,
+          difficulty: 2,
+          explanation: ['A key policy delega ao IAM, mas nenhuma política IAM concede `kms:Decrypt`. O S3 permitiria; o KMS nega.'],
+          spec: { sim: 'access', world: pagai({ identities: [BRUNO] }), request: ask('bruno', REQUESTS.getReport) },
+          options: ALLOW_DENY,
+        },
+        {
+          id: 's3x.f04.m3.a2',
+          kind: 'predict',
+          title: 'Compartilhar com aws/s3',
+          prompt: 'Imagine que os relatórios estivessem com a chave gerenciada pela AWS, **aws/s3**. A auditoria (outra conta) tem `s3:GetObject` e `kms:Decrypt` na política IAM dela, e a bucket policy concede leitura a ela. Ela pede o relatório. O que acontece?',
+          concepts: [{ id: 's3.sse-kms' }],
+          xp: 40,
+          difficulty: 3,
+          explanation: ['A key policy da aws/s3 não pode ser editada e não permite uso por outras contas. Para compartilhar objetos SSE-KMS entre contas, use uma chave gerenciada pelo cliente.'],
+          spec: { sim: 'access', world: pagai({ policy: [BP_AUDITOR], identities: [AUDITOR], reportsKey: 'aws' }), request: ask('auditor', REQUESTS.getReport) },
+          options: ALLOW_DENY,
+        },
+        {
+          id: 's3x.f04.m3.a3',
+          kind: 'lab',
+          lab: 'access',
+          title: 'Devolver o acesso aos relatórios',
+          prompt: 'Ajuste a política IAM do analista e a key policy. A aplicação **não** deve conseguir ler os relatórios, embora tenha permissão no S3 em todo o bucket.',
+          concepts: [{ id: 'kms.key-policy' }, { id: 's3.sse-kms' }, { id: 'iam.cross-account' }],
+          xp: 90,
+          difficulty: 3,
+          hints: [
+            'O analista está na mesma conta da chave: com `HabilitaIAM`, basta uma política IAM com `kms:Decrypt`.',
+            'A auditoria já tem `kms:Decrypt` do lado dela. Falta a key policy aceitar a conta dela.',
+            '`TodosUsam` resolve tudo — inclusive para quem não deveria.',
+          ],
+          explanation: [
+            'Uma solução: adicionar `BrunoDecrypt` à política do analista e `AuditoriaDecrypt` à key policy, mantendo `HabilitaIAM`.',
+            '`BrunoDecryptDireto` também funciona para o analista. `TodosUsam` deixaria a aplicação ler os relatórios — a chave deixaria de ser uma segunda trava.',
+          ],
+          config: {
+            world: pagai({ policy: [BP_AUDITOR], identities: [BRUNO, APP, AUDITOR] }),
+            identityLibrary: { bruno: [BRUNO_DECRYPT] },
+            keyLibrary: { [KEY_ID]: [KP_PARTNER, KP_BRUNO, KP_EVERYONE] },
+            editable: {},
+            identities: ['bruno', 'auditor', 'app'],
+            requests: [REQUESTS.getReport, REQUESTS.getTxHttps],
+            goals: [
+              { identityId: 'bruno', requestId: 'get-rel', expect: 'allow', why: 'O analista precisa ler os relatórios.', concepts: ['kms.key-policy'] },
+              { identityId: 'auditor', requestId: 'get-rel', expect: 'allow', why: 'A auditoria precisa ler os relatórios.', concepts: ['iam.cross-account'] },
+              { identityId: 'app', requestId: 'get-rel', expect: 'deny', why: 'A aplicação não deve ler relatórios: a chave é a segunda trava.', concepts: ['s3.sse-kms'] },
+              { identityId: 'app', requestId: 'get-tx-https', expect: 'allow', why: 'A aplicação continua lendo transações (SSE-S3).', concepts: ['s3.sse-s3'] },
+            ],
+            solution: {
+              bucketPolicy: [BP_AUDITOR.sid],
+              identityPolicies: { bruno: [BRUNO_RW.sid, BRUNO_DECRYPT.sid] },
+              keyPolicies: { [KEY_ID]: [KP_ROOT.sid, KP_PARTNER.sid] },
+              bpa: FULL_BPA,
+              objectOwnership: 'BucketOwnerEnforced',
+            },
+          },
+        },
+      ],
+      debrief: {
+        takeaways: [
+          'Para ler um objeto SSE-KMS é preciso permissão no S3 **e** na chave do KMS. Se a permissão no S3 está certa e mesmo assim dá AccessDenied, a causa costuma ser a chave.',
+          'Key policy que delega à conta exige uma política IAM com `kms:Decrypt`.',
+          'Entre contas, use chave gerenciada pelo cliente: a key policy e a IAM de origem precisam permitir.',
+        ],
+      },
+    },
+    // -----------------------------------------------------------------------
+    {
+      id: 's3x.f04.boss',
+      title: 'Chefe: auditoria de conformidade',
+      type: 'boss',
+      summary: 'Explicar uma conta do KMS que explodiu, decidir sobre os objetos antigos e fechar o checklist de conformidade.',
+      briefing: {
+        company: COMPANY,
+        role: ROLE,
+        situation: 'Para atender à auditoria, a Pagaí mudou a criptografia padrão do bucket de transações para SSE-KMS com chave própria. No mês seguinte, a conta do **AWS KMS** cresceu dezenas de vezes — e o auditor perguntou se os arquivos antigos também estão com a chave nova.',
+        objective: 'Encontrar a causa do custo, corrigir sem perder a conformidade e responder ao auditor.',
+        successCriteria: ['Apontar evidências, causa e correções', 'Responder sobre os objetos antigos', 'Fechar o checklist'],
+      },
+      intel: [
+        {
+          conceptId: 's3.bucket-keys',
+          body: ['Sem **S3 Bucket Keys**, cada objeto SSE-KMS usa uma chave de dados própria e o S3 chama o KMS a cada requisição. Com Bucket Keys, uma chave de curta duração no nível do bucket gera as chaves de dados — até **99%** menos requisições ao KMS.'],
+        },
+        {
+          conceptId: 's3.default-encryption',
+          body: ['Mudar a criptografia padrão afeta só **objetos novos**. Os antigos continuam como estavam até serem copiados (por exemplo, com S3 Batch Operations).'],
+        },
+      ],
+      activities: [
+        {
+          id: 's3x.f04.boss.a1',
+          kind: 'investigate',
+          title: 'A conta do KMS',
+          prompt: 'Examine a configuração de criptografia, o resumo do CloudTrail e a fatura. Marque as evidências, a causa raiz e as correções.',
+          concepts: [{ id: 's3.bucket-keys' }, { id: 's3.sse-kms' }],
+          xp: 90,
+          difficulty: 3,
+          explanation: [
+            'Milhões de leituras por dia, cada uma chamando kms:Decrypt, porque a S3 Bucket Key está desabilitada. Habilitar a Bucket Key reduz drasticamente essas chamadas para objetos novos; copiar os objetos existentes estende o benefício a eles.',
+            'Atenção: com Bucket Keys, o contexto de criptografia passa a ser o ARN do bucket — políticas baseadas no ARN do objeto precisam ser ajustadas.',
+          ],
+          artifacts: [
+            {
+              id: 'config',
+              title: `Criptografia padrão — ${BUCKET}`,
+              format: 'table',
+              lines: [
+                { id: 'c1', text: 'SSEAlgorithm: aws:kms', isIssue: false, explanation: 'SSE-KMS é a exigência da auditoria — não é o problema em si.' },
+                { id: 'c2', text: `KMSMasterKeyID: ${CUSTOMER_KEY.alias}`, isIssue: false, explanation: 'Chave gerenciada pelo cliente, como pedido.' },
+                { id: 'c3', text: 'BucketKeyEnabled: false', isIssue: true, explanation: 'Sem Bucket Key, cada requisição a um objeto SSE-KMS gera uma chamada ao KMS.' },
+              ],
+            },
+            {
+              id: 'trail',
+              title: 'CloudTrail — eventos do KMS (resumo do dia)',
+              format: 'log',
+              lines: [
+                { id: 't1', text: 'kms:Decrypt · invokedBy s3.amazonaws.com · 41.800.000 eventos · contexto: arn:aws:s3:::pagai-transacoes/transacoes/…', isIssue: true, explanation: 'Uma chamada por leitura, com o ARN de cada objeto no contexto: o padrão sem Bucket Key.' },
+                { id: 't2', text: 'kms:GenerateDataKey · invokedBy s3.amazonaws.com · 2.100.000 eventos', isIssue: true, explanation: 'Uma chamada por gravação de objeto novo.' },
+                { id: 't3', text: 'kms:DescribeKey · console · 12 eventos', isIssue: false, explanation: 'Consultas manuais, irrelevantes para o custo.' },
+              ],
+            },
+            {
+              id: 'bill',
+              title: 'Fatura — variação mês a mês',
+              format: 'table',
+              lines: [
+                { id: 'b1', text: 'AWS KMS — requisições: forte alta', isIssue: true, explanation: 'O KMS cobra por requisição: milhões de chamadas por dia viram uma conta alta.' },
+                { id: 'b2', text: 'AWS KMS — chaves gerenciadas pelo cliente: 1 chave', isIssue: false, explanation: 'O custo mensal de uma chave é pequeno e fixo.' },
+                { id: 'b3', text: 'Amazon S3 — armazenamento: estável', isIssue: false, explanation: 'O volume de dados não mudou.' },
+              ],
+            },
+          ],
+          rootCause: {
+            prompt: 'Qual é a causa raiz?',
+            options: [
+              { id: 'r1', text: 'SSE-KMS sem S3 Bucket Key: cada leitura e gravação gera uma requisição ao KMS.', correct: true, feedback: 'Isso: o volume de requisições é o que pesa.' },
+              { id: 'r2', text: 'A chave gerenciada pelo cliente é cobrada por GB criptografado.', correct: false, feedback: 'O KMS não cobra por GB; cobra pela chave e pelas requisições.' },
+              { id: 'r3', text: 'A chave está sendo rotacionada a cada requisição.', correct: false, feedback: 'Não há evento de rotação no CloudTrail; os eventos são Decrypt e GenerateDataKey.' },
+              { id: 'r4', text: 'O tráfego aumentou porque a criptografia deixa os objetos maiores.', correct: false, feedback: 'O armazenamento está estável; o aumento é só em requisições ao KMS.' },
+            ],
+          },
+          remediations: {
+            prompt: 'Quais correções aplicar? (selecione todas as adequadas)',
+            options: [
+              { id: 'f1', text: 'Habilitar a S3 Bucket Key na criptografia padrão do bucket.', correct: true, feedback: 'Objetos novos passam a usar a chave no nível do bucket.' },
+              { id: 'f2', text: 'Copiar os objetos existentes (por exemplo, com S3 Batch Operations) para que também usem a Bucket Key.', correct: true, feedback: 'Objetos antigos só passam a usar a Bucket Key se forem copiados.' },
+              { id: 'f3', text: 'Revisar políticas que usam o ARN do objeto no contexto de criptografia.', correct: true, feedback: 'Com Bucket Key, o contexto passa a ser o ARN do bucket.' },
+              { id: 'f4', text: 'Voltar para SSE-S3.', correct: false, feedback: 'Reduz o custo, mas descumpre a exigência de auditoria da chave.' },
+              { id: 'f5', text: 'Trocar para DSSE-KMS.', correct: false, feedback: 'DSSE-KMS não aceita Bucket Keys e não reduz as requisições.' },
+            ],
+          },
+        },
+        {
+          id: 's3x.f04.boss.a2',
+          kind: 'decision',
+          title: 'E os arquivos antigos?',
+          prompt: 'O auditor pergunta: "Os arquivos de transações de antes da mudança também estão com a chave da Pagaí?" O que é verdade?',
+          concepts: [{ id: 's3.default-encryption' }],
+          xp: 40,
+          difficulty: 2,
+          explanation: ['A criptografia padrão vale para objetos novos. Os antigos continuam com SSE-S3 até serem copiados com a nova configuração.'],
+          options: [
+            { id: 'a', text: 'Não: continuam com SSE-S3. Para recriptografá-los com a chave da Pagaí, é preciso copiá-los, por exemplo com S3 Batch Operations.', correct: true, consequence: 'O plano de conformidade inclui um job de cópia — e o auditor recebe uma resposta exata.', impacts: { seguranca: 1 } },
+            { id: 'b', text: 'Sim: mudar a criptografia padrão recriptografa todo o bucket automaticamente.', correct: false, consequence: 'A resposta estaria errada: objetos antigos continuam como foram gravados.', impacts: { seguranca: -1 } },
+            { id: 'c', text: 'Não estão criptografados de forma alguma.', correct: false, consequence: 'Estão: desde 2023, todo objeto novo recebe SSE-S3 automaticamente.' },
+          ],
+        },
+        {
+          id: 's3x.f04.boss.a3',
+          kind: 'decision',
+          title: 'Checklist de conformidade',
+          prompt: 'Quais itens, juntos, atendem a: dados cifrados em repouso com chave auditável da empresa, dados cifrados em trânsito, compartilhamento com a auditoria e nada público? (selecione todos os adequados)',
+          concepts: [{ id: 's3.tls-enforcement' }, { id: 's3.sse-kms' }, { id: 'kms.key-policy' }, { id: 's3.block-public-access' }],
+          xp: 60,
+          difficulty: 3,
+          multiple: true,
+          explanation: ['TLS exigido por Deny, SSE-KMS com chave do cliente (com Bucket Key), key policy liberando a conta da auditoria e Block Public Access ligado. Chave aberta a todos ou dependência de SSE-C não cumprem os requisitos.'],
+          options: [
+            { id: 'a', text: 'Bucket policy com Deny quando aws:SecureTransport = false', correct: true, consequence: 'Nada entra nem sai sem TLS.', impacts: { seguranca: 2 } },
+            { id: 'b', text: 'Criptografia padrão SSE-KMS com chave gerenciada pelo cliente e Bucket Key habilitada', correct: true, consequence: 'Uso da chave auditável, com custo de KMS controlado.', impacts: { seguranca: 1, custo: 1 } },
+            { id: 'c', text: 'Key policy concedendo kms:Decrypt à conta da auditoria (e IAM do lado dela)', correct: true, consequence: 'A auditoria lê os relatórios; ninguém mais de fora.', impacts: { seguranca: 1 } },
+            { id: 'd', text: 'Block Public Access ligado no bucket e na conta', correct: true, consequence: 'Nenhuma configuração pública passa.', impacts: { seguranca: 2 } },
+            { id: 'e', text: 'Key policy com Principal "*" para evitar erros de AccessDenied', correct: false, consequence: 'Qualquer principal com acesso ao S3 passaria pela segunda trava. A chave deixa de proteger.', impacts: { seguranca: -2 } },
+            { id: 'f', text: 'Usar a chave aws/s3 para compartilhar com a auditoria', correct: false, consequence: 'A aws/s3 não pode ser usada por outras contas.', impacts: { seguranca: -1 } },
+          ],
+        },
+      ],
+      debrief: {
+        takeaways: [
+          'SSE-KMS sem Bucket Key gera uma chamada ao KMS por requisição — e a conta acompanha.',
+          'A criptografia padrão afeta só objetos novos; para os antigos, copie.',
+          'Conformidade combina camadas: TLS, chave do cliente, key policy mínima e Block Public Access.',
+        ],
+      },
+    },
+  ],
+}

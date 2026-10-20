@@ -1,0 +1,50 @@
+.ref {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface);
+  padding: var(--space-2) var(--space-3);
+}
+.ref summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.legend {
+  margin: 6px 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 8px;
+}
+.options li {
+  display: grid;
+  gap: 2px;
+  font-size: 0.82rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-s);
+  padding: 8px 10px;
+}
+.cost {
+  font-family: var(--font-mono);
+  color: var(--mastery);
+  font-size: 0.78rem;
+}
+.limit {
+  color: var(--text-muted);
+}
+.verdicts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
