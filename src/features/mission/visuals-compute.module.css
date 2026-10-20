@@ -1,0 +1,153 @@
+/* Visuais da trilha Computação na AWS. */
+.tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+.scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+.grid th,
+.grid td {
+  padding: 3px 4px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+.grid thead th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.7rem;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.grid tbody th {
+  text-align: left;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.kept {
+  color: var(--success);
+}
+.lost {
+  color: var(--danger);
+}
+.name {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: stretch;
+  justify-content: center;
+}
+.part {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  padding: 8px 10px;
+  min-width: 88px;
+  font-size: 0.78rem;
+  text-align: center;
+}
+.part code {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+.part small {
+  color: var(--text-muted);
+  max-width: 14ch;
+}
+.part[data-tone='info'] {
+  border-top-color: var(--info);
+}
+.part[data-tone='success'] {
+  border-top-color: var(--success);
+}
+.part[data-tone='mastery'] {
+  border-top-color: var(--mastery);
+}
+.boxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: 8px;
+}
+.box {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  padding: 8px;
+  display: grid;
+  gap: 3px;
+  font-size: 0.8rem;
+  min-width: 0;
+}
+.box[data-tone='info'] {
+  border-left-color: var(--info);
+}
+.box[data-tone='success'] {
+  border-left-color: var(--success);
+}
+.box[data-tone='mastery'] {
+  border-left-color: var(--mastery);
+}
+.box[data-tone='danger'] {
+  border-left-color: var(--danger);
+}
+.box small {
+  color: var(--text-muted);
+}
+.rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.rules li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  padding: 6px 8px;
+  font-size: 0.8rem;
+}
+.rules code {
+  font-weight: 700;
+  min-width: 3.5em;
+}
+@media (max-width: 420px) {
+  .rules li {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .rules li > :last-child {
+    grid-column: 2;
+  }
+}
+.formula {
+  margin: 0 0 8px;
+  font-size: 0.84rem;
+  text-align: center;
+}
+.you {
+  color: var(--accent);
+  font-weight: 700;
+}
