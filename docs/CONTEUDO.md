@@ -63,6 +63,29 @@ Módulo `src/content/modules/identity/`. Reaproveita, sem redeclarar, os conceit
 
 **Construtor de políticas.** O jogador monta statements com peças de uma paleta e vê o JSON real ao lado. Os testes mostram, ao vivo, o que a AWS decidiria; as sondas de menor privilégio multiplicam a nota por 0,7 quando a política libera algo além do necessário. Statement sem ação, recurso ou principal limita a nota a 50%.
 
+## Trilha Computação na AWS
+
+Módulo `src/content/modules/compute/`. Reaproveita, sem redeclarar, `iam.instance-profile`, `srm.*` e os conceitos `infra.*` da AWS Foundations (AZs, Outposts, Wavelength). Acrescenta conceitos `ec2.*`, `ebs.*`, `elb.*`, `asg.*`, `lambda.*`, `ecs.*`, `eks.*`, `fargate.*`, `ecr.*` e `cmp.*`. O ELB e o EBS continuam nos territórios Redes e Armazenamento do catálogo, mas são ensinados aqui.
+
+| Fase | Tema | Empresas fictícias | Laboratórios |
+|---|---|---|---|
+| 1 | EC2 essencial | Editora Pé de Página | (predições do ciclo de vida e investigação) |
+| 2 | Tipos de instância | Livraria Ponto Final, Laboratório Genoma Aberto | Escolha de instâncias |
+| 3 | EBS e instance store | Clínica Sorriso Pleno, Hospital Vida Plena | Volumes |
+| 4 | Opções de compra | Loja Casa & Jardim, Gráfica Papel & Tinta | Plano de compra |
+| 5 | Elastic Load Balancing | Pão de Queijo Online, Jogos Pixel Brasil | Regras do listener |
+| 6 | Auto Scaling | Loja Mundo Gamer, Farmácia Saúde Já | Escalonamento (2), AZs |
+| 7 | Lambda | Cafeteria Grão Nobre, Rede Doce Lar Confeitarias | Concorrência |
+| 8 | Contêineres | Agência Viaje Leve, Mercado Bairro Vivo | (predições de roles e investigação) |
+| 9 | Escolhendo a computação | Rede Horizonte de Ensino, Mercado Ponte Alta | Escolha da computação (2) |
+| Final | Arquitetura de Computação | Maré Varejo | Arquitetura em 8 etapas, com dimensões Resiliente, Alto desempenho, Custo, Seguro e Requisitos |
+
+**Dependências.** A Fase 4 exige a 2; a Fase 6 exige a 5; a Fase 9 exige a 7 e a 8; as demais só recomendam as anteriores; o desafio final exige as nove. A trilha recomenda a AWS Foundations. O mapa tem `mapHeight: 800` por causa das cinco fases da segunda coluna.
+
+**Preços reais nos labs.** Instâncias, volumes, compra, escalonamento e Lambda calculam custos com `simulators/compute-prices.ts`, que lê a tabela gerada por `npm run prices:compute`. O desconto do Spot é premissa do cenário.
+
+**Escolha da computação.** O lab `compute-chooser` segue o padrão da escolha de identidade: cada carga tem um requisito que decide e requisitos rígidos; a melhor opção vale 1, uma que atende com mais trabalho vale 0,5 e uma que deixa um requisito de fora vale 0. Os testes falham se duas opções empatarem como melhor.
+
 ## Princípios de escrita
 
 - **Aprender fazendo.** Cada missão segue a ordem: contexto (briefing) → conceitos-chave (intel, até ~80 palavras por carta) → desafios → resultado (debrief). Na interface aparecem só os nomes em português.
@@ -100,5 +123,7 @@ Cada módulo tem um `questions.ts` com questões no formato do exame. Para escre
 Os testes recusam questão com conceito inexistente, formato errado, alternativa sem explicação, alternativas repetidas ou setas no texto.
 
 ## Preços
+
+`src/content/pricing/compute-prices.json` é gerado por `npm run prices:compute` (EC2, Savings Plans, Lambda, Fargate e ELB; us-east-1 e sa-east-1). O script lê o CSV regional do EC2 em streaming; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
 
 `src/content/pricing/s3-prices.json` é gerado por `npm run prices:update`, a partir da AWS Price List API (ofertas AmazonS3, AmazonS3GlacierDeepArchive e AWSDataTransfer; Regiões us-east-1 e sa-east-1, mais o S3 Standard de sete Regiões em `standardByRegion`, usado na comparação entre Regiões). Os preços dos planos de suporte ficam em `simulators/support/model.ts`, com data e fonte, porque não vêm da Price List API. O script falha se faltar algum preço e nunca inventa valores. A interface sempre indica a data da tabela e que se trata de estimativa (primeira faixa, sem nível gratuito nem impostos).
