@@ -7,6 +7,9 @@ import type { CostLabResponse } from '../simulators/cost/lab'
 import { rpLabComplete, type RPLabResponse } from '../simulators/requester-pays/lab'
 import { architectureComplete, type ArchitectureLabResponse } from '../simulators/architecture/lab'
 import { credentialsComplete, type CredentialsLabResponse } from '../simulators/credentials/lab'
+import { instancePickerComplete, type InstancePickerLabResponse } from '../simulators/instances/lab'
+import { volumesComplete, type VolumesLabResponse } from '../simulators/ebs/lab'
+import { purchaseComplete, type PurchaseLabResponse } from '../simulators/purchase/lab'
 import type {
   ActivityResponse,
   DecisionResponse,
@@ -95,6 +98,7 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
           return activity.config.scenarios.every((sc) => Boolean((response as unknown as { choices?: Record<string, string> }).choices?.[sc.id]))
         case 'placement':
         case 'identity':
+        case 'compute-chooser':
           return activity.config.items.every((i) => Boolean((response as unknown as { placements?: Record<string, string> }).placements?.[i.id]))
         case 'support':
           return activity.config.scenarios.every((sc) => Boolean((response as unknown as { choices?: Record<string, string> }).choices?.[sc.id]))
@@ -111,6 +115,16 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
           return true
         case 'credentials':
           return credentialsComplete(activity.config, response as unknown as CredentialsLabResponse)
+        case 'instance-picker':
+          return instancePickerComplete(activity.config, response as unknown as InstancePickerLabResponse)
+        case 'volumes':
+          return volumesComplete(activity.config, response as unknown as VolumesLabResponse)
+        case 'purchase':
+          return purchaseComplete(activity.config, response as unknown as PurchaseLabResponse)
+        case 'load-balancer':
+        case 'scaling':
+        case 'lambda-concurrency':
+          return true
       }
   }
 }
@@ -161,6 +175,7 @@ function labHint(activity: Extract<ActivityDef, { kind: 'lab' }>): string {
       return 'Escolha uma Região para cada cenário.'
     case 'placement':
     case 'identity':
+    case 'compute-chooser':
       return 'Posicione todos os cartões.'
     case 'support':
       return 'Escolha um plano para cada organização.'
@@ -170,6 +185,12 @@ function labHint(activity: Extract<ActivityDef, { kind: 'lab' }>): string {
       return `Responda às perguntas das ${activity.config.steps.length} etapas.`
     case 'credentials':
       return 'Escolha ao menos uma ação para cada linha.'
+    case 'instance-picker':
+      return 'Escolha um tipo de instância para cada carga.'
+    case 'volumes':
+      return 'Configure um volume para cada carga.'
+    case 'purchase':
+      return 'Escolha uma opção de compra para cada parte da frota.'
     default:
       return 'Responda a todas as tarefas.'
   }
