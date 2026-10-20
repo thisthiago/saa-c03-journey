@@ -14,7 +14,7 @@ export const META: Record<'f01' | 'f02' | 'f03' | 'f04' | 'f05' | 'f06' | 'f07' 
     color: '#7aa2ff',
     requires: [],
     estimatedMinutes: 60,
-    map: { x: 110, y: 360 },
+    map: { x: 90, y: 400 },
   },
   f02: {
     id: 'iax.f02',
@@ -27,7 +27,7 @@ export const META: Record<'f01' | 'f02' | 'f03' | 'f04' | 'f05' | 'f06' | 'f07' 
     requires: [],
     recommends: ['iax.f01'],
     estimatedMinutes: 50,
-    map: { x: 260, y: 170 },
+    map: { x: 300, y: 310 },
   },
   f03: {
     id: 'iax.f03',
@@ -40,7 +40,7 @@ export const META: Record<'f01' | 'f02' | 'f03' | 'f04' | 'f05' | 'f06' | 'f07' 
     requires: [],
     recommends: ['iax.f01'],
     estimatedMinutes: 75,
-    map: { x: 260, y: 550 },
+    map: { x: 300, y: 480 },
   },
   f04: {
     id: 'iax.f04',
@@ -52,7 +52,7 @@ export const META: Record<'f01' | 'f02' | 'f03' | 'f04' | 'f05' | 'f06' | 'f07' 
     color: '#ef6f8f',
     requires: ['iax.f03'],
     estimatedMinutes: 70,
-    map: { x: 430, y: 550 },
+    map: { x: 560, y: 480 },
   },
   f05: {
     id: 'iax.f05',
@@ -65,7 +65,7 @@ export const META: Record<'f01' | 'f02' | 'f03' | 'f04' | 'f05' | 'f06' | 'f07' 
     requires: [],
     recommends: ['iax.f01', 'iax.f03'],
     estimatedMinutes: 70,
-    map: { x: 430, y: 170 },
+    map: { x: 300, y: 50 },
   },
   f06: {
     id: 'iax.f06',
@@ -78,7 +78,7 @@ export const META: Record<'f01' | 'f02' | 'f03' | 'f04' | 'f05' | 'f06' | 'f07' 
     requires: ['iax.f05'],
     recommends: ['iax.f04'],
     estimatedMinutes: 75,
-    map: { x: 580, y: 360 },
+    map: { x: 560, y: 50 },
   },
   f07: {
     id: 'iax.f07',
@@ -91,7 +91,7 @@ export const META: Record<'f01' | 'f02' | 'f03' | 'f04' | 'f05' | 'f06' | 'f07' 
     requires: [],
     recommends: ['iax.f05'],
     estimatedMinutes: 75,
-    map: { x: 680, y: 170 },
+    map: { x: 560, y: 180 },
   },
   f08: {
     id: 'iax.f08',
@@ -104,7 +104,7 @@ export const META: Record<'f01' | 'f02' | 'f03' | 'f04' | 'f05' | 'f06' | 'f07' 
     requires: [],
     recommends: ['iax.f04'],
     estimatedMinutes: 85,
-    map: { x: 680, y: 550 },
+    map: { x: 560, y: 610 },
   },
   final: {
     id: 'iax.final',
@@ -116,6 +116,6 @@ export const META: Record<'f01' | 'f02' | 'f03' | 'f04' | 'f05' | 'f06' | 'f07' 
     color: '#ffcf5c',
     requires: ['iax.f01', 'iax.f02', 'iax.f03', 'iax.f04', 'iax.f05', 'iax.f06', 'iax.f07', 'iax.f08'],
     estimatedMinutes: 40,
-    map: { x: 820, y: 360 },
+    map: { x: 820, y: 400 },
   },
 }
