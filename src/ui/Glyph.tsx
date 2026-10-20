@@ -34,6 +34,11 @@ import {
   ScrollText,
   Building2,
   Ticket,
+  Cpu,
+  Container,
+  Split,
+  BadgePercent,
+  TrendingUp,
   type LucideIcon,
 } from 'lucide-react'
 import type { GlyphName } from '../engine/types'
@@ -84,6 +89,13 @@ const ICONS: Record<Exclude<GlyphName, 'bucket'>, LucideIcon> = {
   policy: ScrollText,
   org: Building2,
   ticket: Ticket,
+  cpu: Cpu,
+  container: Container,
+  drive: HardDrive,
+  split: Split,
+  percent: BadgePercent,
+  scale: TrendingUp,
+  layers: Layers,
 }
 
 export function Glyph({ name, size = 22, className }: { name: GlyphName; size?: number; className?: string }) {
