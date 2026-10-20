@@ -1,13 +1,14 @@
-A plataforma tem três trilhas jogáveis: **AWS Foundations** (3 fases e o desafio final **Architecture Foundations**), **S3 Expedition** (11 fases e o desafio final **Projeto Atlas**) e **IAM e Access Management** (8 fases e o desafio final **Arquitetura de Acesso**). Typecheck, lint e build passam sem erros; os 237 testes unitários, de conteúdo e de componente e os 102 testes E2E também.
+A plataforma tem quatro trilhas jogáveis: **AWS Foundations** (3 fases e o desafio final **Architecture Foundations**), **S3 Expedition** (11 fases e o desafio final **Projeto Atlas**), **IAM e Access Management** (8 fases e o desafio final **Arquitetura de Acesso**) e **Computação na AWS** (9 fases e o desafio final **Arquitetura de Computação**). Typecheck, lint e build passam sem erros; os 296 testes unitários, de conteúdo e de componente e os 155 testes E2E também.
 
 ## O que foi implementado
 - **Plataforma extensível**:
   - motor de jogo em TypeScript puro: XP, níveis, domínio por conceito, revisão espaçada, desbloqueio por dependências, conquistas e progresso salvo no navegador, com exportar e importar;
   - para criar uma trilha nova, basta registrar um módulo de conteúdo, sem mexer no motor nem nas telas.
-- **Conteúdo**: 98 missões, 283 atividades avaliadas, 218 conceitos (cada um com links para a documentação oficial), 624 itens de revisão, 67 conquistas e um banco de 106 questões de simulado.
+- **Conteúdo**: 134 missões, 395 atividades avaliadas, 299 conceitos (cada um com links para a documentação oficial), 842 itens de revisão, 89 conquistas e um banco de 171 questões de simulado.
 - **IAM e Access Management**: usuário raiz, credenciais, MFA, anatomia e avaliação de políticas, roles e STS, PassRole, Roles Anywhere, External ID, Identity Center, Directory Service, Cognito, ABAC, Organizations, SCPs, RCPs, boundaries, Control Tower e Access Analyzer. Simuladores novos: motor de políticas (construtor com JSON ao vivo e laboratório de camadas), AssumeRole (cadeia de confiança), organização com SCPs, auditoria de credenciais e escolha da solução de identidade.
+- **Computação na AWS**: EC2, tipos de instância, EBS, opções de compra, Elastic Load Balancing, Auto Scaling, Lambda, contêineres (ECS, EKS, Fargate, ECR), Batch, Elastic Beanstalk e ambientes híbridos. Simuladores novos, com preços reais da AWS Price List API (`npm run prices:compute`): escolha de instâncias, volumes EBS, plano de compra, balanceadores, Auto Scaling ao longo de um dia, concorrência da Lambda e escolha da computação.
 - **AWS Foundations**: Regiões, AZs, Local Zones, Wavelength, Outposts e borda; planos de suporte vigentes (com os antigos marcados como em descontinuação); responsabilidade compartilhada por serviço. Seis simuladores novos: Regiões, AZs, CloudFront, escolha da infraestrutura, suporte e matriz de responsabilidade.
-- **Banco de questões** (Revisão, "Abrir o banco de questões"): 106 questões no formato do exame, com dificuldade, conceito e domínio no enunciado e explicação de cada alternativa. Filtros por trilha, conceito, dificuldade, domínio e situação; treino com explicação na hora; simulado com cronômetro, marcação para revisar e correção comentada. Os erros trazem o conceito de volta para a revisão. No Codex, cada conceito com questões tem um link para elas.
+- **Banco de questões** (Revisão, "Abrir o banco de questões"): 171 questões no formato do exame, com dificuldade, conceito e domínio no enunciado e explicação de cada alternativa. Filtros por trilha, conceito, dificuldade, domínio e situação; treino com explicação na hora; simulado com cronômetro, marcação para revisar e correção comentada. Os erros trazem o conceito de volta para a revisão. No Codex, cada conceito com questões tem um link para elas.
 - **Desafio final**: 8 etapas em que as decisões cruzam entre si. Por exemplo, replicar sem ter ligado o versionamento gera um risco apontado no relatório.
   - O relatório traz uma rubrica com 6 dimensões, as decisões corretas, os erros com consequências, os riscos e os conceitos a revisar.
   - Esses conceitos entram na fila de revisão na hora.
@@ -18,7 +19,7 @@ A plataforma tem três trilhas jogáveis: **AWS Foundations** (3 fases e o desaf
 - **Respostas calculadas, não escritas à mão**: as respostas das predições, as faturas e as comparações saem dos simuladores. Os testes de conteúdo exigem que toda predição tenha exatamente uma resposta certa, que todo laboratório comece abaixo de 70% e que a solução de referência chegue a 100%.
 - **Configuração inválida é recusada inteira**, como na AWS. Uma regra de lifecycle, replicação ou notificação com erro faz o simulador mostrar que nenhuma regra está valendo. O chefe da Fase 6 é construído em cima disso.
 - **Preços reais**: vêm da AWS Price List API, numa tabela com data, e aparecem sempre como estimativa (primeira faixa de preço, sem nível gratuito nem impostos).
-- **Pacote dividido**: conteúdo e bibliotecas ficam em arquivos separados (cerca de 120 kB e 107 kB compactados), e as telas carregam sob demanda.
+- **Pacote dividido**: conteúdo e bibliotecas ficam em arquivos separados (cerca de 120 kB e 110 kB compactados; a trilha de computação, 117 kB), e as telas carregam sob demanda.
 
 ## Como executar
 ```bash
@@ -30,7 +31,7 @@ npm run e2e     # Playwright (rode antes: npx playwright install chromium)
 
 ## Interações que funcionam
 - **Atividades**: decisão com justificativa, classificação, associação, ordenação, predição, estimativa e investigação.
-- **Laboratórios**: Regiões, AZs, CloudFront, infraestrutura, suporte, responsabilidade, bucket, custos, acesso/IAM/KMS, versionamento, lifecycle, replicação, eventos, Requester Pays, Storage Gateway, transferência, arquitetura, construtor de políticas, camadas de política, cadeia de confiança, organização, auditoria de credenciais e solução de identidade.
+- **Laboratórios**: Regiões, AZs, CloudFront, infraestrutura, suporte, responsabilidade, bucket, custos, acesso/IAM/KMS, versionamento, lifecycle, replicação, eventos, Requester Pays, Storage Gateway, transferência, arquitetura, construtor de políticas, camadas de política, cadeia de confiança, organização, auditoria de credenciais, solução de identidade, instâncias, volumes, compra, balanceador, Auto Scaling, Lambda e escolha da computação.
 - **Teclado**: tudo o que se arrasta também funciona só com o teclado, e há testes de componente para isso.
 - **Progresso**: revisão espaçada, treino livre, banco de questões e simulados, Codex, Dossiê com exportar/importar/resetar, tema claro e escuro, e celular.
 
