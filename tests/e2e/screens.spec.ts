@@ -512,6 +512,48 @@ test.describe('trilha IAM e Access Management', () => {
   }
 })
 
+/** Missões da trilha Computação na ordem do mapa (as anteriores ficam aprovadas no progresso semeado). */
+const CMP_MISSIONS = [
+  ...['f01', 'f02', 'f03', 'f04', 'f05', 'f06', 'f07', 'f08'].flatMap((f) => ['m1', 'm2', 'm3', 'boss'].map((m) => `cmp.${f}.${m}`)),
+  ...['m1', 'm2', 'boss'].map((m) => `cmp.f09.${m}`),
+  'cmp.final.varejo',
+]
+
+test.describe('trilha Computação na AWS', () => {
+  const CASES = [
+    { name: 'cmp-mapa', path: '/#/trilha/compute.aws-compute' },
+    { name: 'cmp-f1-ciclo', mission: 'cmp.f01.m2', step: 1 },
+    { name: 'cmp-f2-tipos', mission: 'cmp.f02.boss', step: 2 },
+    { name: 'cmp-f3-volumes', mission: 'cmp.f03.m2', step: 2 },
+    { name: 'cmp-f4-compra', mission: 'cmp.f04.boss', step: 2 },
+    { name: 'cmp-f5-regras', mission: 'cmp.f05.m2', step: 2 },
+    { name: 'cmp-f6-escala', mission: 'cmp.f06.m2', step: 2 },
+    { name: 'cmp-f6-zonas', mission: 'cmp.f06.m3', step: 4 },
+    { name: 'cmp-f7-concorrencia', mission: 'cmp.f07.m2', step: 2 },
+    { name: 'cmp-f9-espectro', mission: 'cmp.f09.m1', step: 1 },
+    { name: 'cmp-f9-escolha', mission: 'cmp.f09.boss', step: 2 },
+    { name: 'cmp-final', mission: 'cmp.final.varejo', step: 2 },
+  ]
+  for (const vp of VIEWPORTS) {
+    for (const c of CASES) {
+      test(`${c.name} — ${vp.name}`, async ({ page }) => {
+        await page.setViewportSize({ width: vp.width, height: vp.height })
+        await page.emulateMedia({ colorScheme: 'dark' })
+        const before = c.mission ? CMP_MISSIONS.slice(0, CMP_MISSIONS.indexOf(c.mission)) : []
+        const base = progressWithPhase1(new Date(), { missions: before })
+        const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+        await seedProgress(page, seeded)
+        await page.goto(c.path ?? `/#/missao/${c.mission}`)
+        await page.waitForLoadState('networkidle')
+        await page.waitForTimeout(250)
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+        expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+        await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+      })
+    }
+  }
+})
+
 test.describe('banco de questões', () => {
   for (const vp of VIEWPORTS) {
     test(`treino e simulado — ${vp.name}`, async ({ page }) => {
