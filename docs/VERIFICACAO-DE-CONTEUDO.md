@@ -234,3 +234,117 @@ Cada simulador lista as suas simplificações na própria tela e em cada fase. A
 - **Escolha da solução de identidade:** a "complexidade relativa" que desempata opções é julgamento de arquitetura.
 - **Arquitetura de Acesso:** rubrica e pesos pedagógicos.
 - **Texto da S3 Expedition (Fase 3)** que chamava o root de impossível de limitar foi alinhado: ele não recebe políticas de identidade, mas Deny em política de recurso, SCPs e RCPs o afetam.
+
+# Trilha Computação na AWS — conferido em 20/10/2026
+
+## Escopo do exame
+
+| Fato | Fonte |
+|---|---|
+| Serviços no escopo do SAA-C03: Batch, EC2, EC2 Auto Scaling, Elastic Beanstalk, Outposts, Serverless Application Repository, VMware Cloud on AWS e Wavelength (Compute); ECR, ECS, ECS Anywhere, EKS, EKS Anywhere e EKS Distro (Containers); Fargate e Lambda (Serverless); EBS, ELB, Savings Plans, AWS Auto Scaling e Compute Optimizer em outras categorias. | [In-scope services](https://docs.aws.amazon.com/aws-certification/latest/solutions-architect-associate-03/saa-03-in-scope-services.html) |
+| A página da AWS sobre VMware apresenta hoje o **Amazon EVS** (VMware Cloud Foundation em bare metal do EC2 na VPC, migração sem trocar IPs, operado pelo cliente ou por parceiro). A trilha cita o VMware Cloud on AWS só por esse caminho. | [What is Amazon EVS?](https://docs.aws.amazon.com/evs/latest/userguide/what-is-evs.html) |
+
+## EC2 essencial (Fase 1)
+
+| Fato | Fonte |
+|---|---|
+| Estados e cobrança: `running` cobrado por segundo, com mínimo de 1 min a cada início; `stopped` não é cobrado, mas os volumes EBS sim; na hibernação, o `stopping` é cobrado. | [Instance state changes](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-lifecycle.html) |
+| Stop/start: muda de host, apaga o instance store e troca o IPv4 público; IP privado e Elastic IP ficam. Hibernação: única ação que preserva a RAM (gravada no volume raiz). Terminate: o volume raiz é apagado por padrão (`DeleteOnTermination`); os demais volumes ficam. | [Lifecycle](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-lifecycle.html), [Hibernate](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Hibernate.html) |
+| Instance store: temporário, aguenta reboot e se apaga no stop, hibernate, terminate ou falha do disco. | [Instance store](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html), [Data persistence](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-store-lifetime.html) |
+| Elastic IP: estático, remapeável para outra instância, cobrado mesmo sem associação; o IPv4 público automático não pode ser convertido em Elastic IP. | [Elastic IP addresses](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html), [IP addressing](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html) |
+| AMI, key pair (o EC2 não guarda a chave privada), security group, user data (alterável só com a instância parada), IMDS e instance profile. | [AMIs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html), [Key pairs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html), [Security groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html), [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html), [IMDS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html), [Roles for EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html) |
+| Session Manager: acesso sem par de chaves, com chamadas registradas no CloudTrail. | [Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html) |
+
+## Tipos de instância (Fase 2)
+
+| Fato | Fonte |
+|---|---|
+| Nome: série, geração, opções e tamanho (ex.: `c7gn.xlarge`); letras de série e de opções (a, g, i, d, n, e, b, z, flex). | [Naming](https://docs.aws.amazon.com/ec2/latest/instancetypes/instance-type-names.html) |
+| Famílias de uso geral, computação, memória, armazenamento e acelerada (G e P com GPU, Inf para inferência, Trn para treino, F com FPGA). | [Instance types](https://docs.aws.amazon.com/ec2/latest/instancetypes/instance-types.html), [Accelerated](https://docs.aws.amazon.com/ec2/latest/instancetypes/ac.html) |
+| Graviton: AMI Arm de 64 bits e só Linux. | [Graviton](https://aws.amazon.com/ec2/graviton/) |
+| Burstable: T8i, T4g, T3a e T3 atuais (T2 da geração anterior), em unlimited por padrão; excedente cobrado só se a média de 24 h passar da baseline. Exemplo da documentação: baseline de 30% do t3.large e equilíbrio com o m5.large em 42,5% de CPU. | [Burstable](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances.html), [Credits](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-credits-baseline-concepts.html), [Unlimited](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-unlimited-mode-concepts.html) |
+| Nitro, ENA e EFA (tráfego EFA não atravessa AZs nem VPCs; sem custo adicional). | [Nitro](https://docs.aws.amazon.com/ec2/latest/instancetypes/ec2-nitro-instances.html), [ENA](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking-ena.html), [EFA](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/efa.html) |
+| Placement groups: cluster (uma AZ, baixa latência, não aceita T), partition (até 7 partições por AZ) e spread (até 7 instâncias em execução por AZ; não aceita Dedicated Instances). | [Placement strategies](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-strategies.html) |
+| Compute Optimizer: recomendações a partir do uso medido; até 93 dias com as métricas avançadas pagas. | [Compute Optimizer](https://docs.aws.amazon.com/compute-optimizer/latest/ug/what-is-compute-optimizer.html) |
+
+## EBS e instance store (Fase 3)
+
+| Fato | Fonte |
+|---|---|
+| gp3: 1 GiB a 64 TiB, baseline de 3.000 IOPS e 125 MiB/s, até 80.000 IOPS e 2.000 MiB/s. gp2: até 16 TiB, 16.000 IOPS e 250 MiB/s. io2 Block Express: 4 GiB a 64 TiB, até 256.000 IOPS e 4.000 MiB/s, durabilidade de 99,999%. io1: até 64.000 IOPS. st1 e sc1: 125 GiB a 16 TiB, 500 e 250 MiB/s, não servem de boot. | [Volume types](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html), [General Purpose](https://docs.aws.amazon.com/ebs/latest/userguide/general-purpose.html), [Provisioned IOPS](https://docs.aws.amazon.com/ebs/latest/userguide/provisioned-iops.html), [HDD](https://docs.aws.amazon.com/ebs/latest/userguide/hdd-vols.html) |
+| Multi-Attach: só io1 e io2, não serve de boot, sem cobrança extra; Windows só com io2. | [Multi-Attach](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volumes-multi.html) |
+| Snapshots incrementais, guardados no S3 sem acesso pelo console do S3, restauráveis em qualquer AZ da Região e copiáveis para outra Região (podendo cifrar com chave de lá). Criptografia por padrão por Região. | [Snapshots](https://docs.aws.amazon.com/ebs/latest/userguide/ebs-snapshots.html), [Encryption by default](https://docs.aws.amazon.com/ebs/latest/userguide/encryption-by-default.html) |
+
+## Opções de compra (Fase 4)
+
+| Fato | Fonte |
+|---|---|
+| On-Demand, Savings Plans, Reserved Instances, Spot, Dedicated Hosts, Dedicated Instances, Capacity Reservations e Capacity Blocks para ML. | [Purchasing options](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-purchasing-options.html) |
+| Compute SP até 66% (qualquer família, tamanho, Região, SO e tenancy, e Fargate e Lambda); EC2 Instance SP até 72% (uma família numa Região); 1 ou 3 anos, All/Partial/No Upfront. Taxa de Dedicated Instances de US$ 2/h por Região, sem desconto. | [Plan types](https://docs.aws.amazon.com/savingsplans/latest/userguide/plan-types.html), [SP e RIs](https://docs.aws.amazon.com/savingsplans/latest/userguide/sp-ris.html) |
+| RIs: a AWS recomenda Savings Plans; Standard só modificável, Convertible trocável; sem cancelamento; regional × zonal (só a zonal reserva capacidade). | [RI](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-reserved-instances.html), [Scope](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/reserved-instances-scope.html) |
+| Spot: aviso de 2 min por EventBridge e pelo metadata `spot/instance-action`; motivos (capacidade, preço, restrições); terminate, stop ou hibernate; preço máximo aumenta interrupções. | [Spot](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html), [Interruptions](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-interruptions.html), [Notices](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-instance-termination-notices.html) |
+| ODCR por AZ, cobrada mesmo sem uso; Dedicated Host com afinidade e BYOL por socket ou core. | [ODCR](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-capacity-reservations.html), [Dedicated Hosts](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dedicated-hosts-overview.html) |
+
+## Elastic Load Balancing (Fase 5)
+
+| Fato | Fonte |
+|---|---|
+| ALB exige 2 AZs; alvos em AZ não habilitada não recebem tráfego. Cross-zone sempre ligado no ALB (desligável no target group), desligado por padrão no NLB e no GWLB; exemplo 2+8 (10% com cross-zone; 25% e 6,25% sem). | [How ELB works](https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html) |
+| NLB: flow hash, IP estático por AZ (Elastic IP opcional), TCP 443 para passthrough de TLS. GWLB: GENEVE na porta 6081, endpoints nas tabelas de rotas. | [NLB](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html), [GWLB](https://docs.aws.amazon.com/elasticloadbalancing/latest/gateway/introduction.html) |
+| Regras do ALB: prioridade crescente, regra padrão por último, uma ação terminal, condições host, método, path, IP de origem, header e query string; até 3 valores por condição e 5 por regra; forward ponderado. | [Listeners](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-listeners.html), [Listener rules](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/listener-rules.html) |
+| Target groups (tipo fixo, uma função Lambda por grupo), health checks, sticky sessions (cookie até 7 dias; não funcionam com cross-zone desligado). | [Target groups](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-target-groups.html), [Health checks](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html), [Attributes](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html) |
+
+## Auto Scaling (Fase 6)
+
+| Fato | Fonte |
+|---|---|
+| Target tracking (recomendado), step e simple (com cooldown); nunca sai de min e max; com várias políticas, vence a que deixa mais capacidade (exemplo: 8 instâncias, remover 3 ou 25%, remove 2). | [Dynamic scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scale-based-on-demand.html), [Cooldowns](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-scaling-cooldowns.html) |
+| Scheduled e predictive (tráfego cíclico, inicialização lenta). | [Predictive](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-predictive-scaling.html) |
+| Health checks (EC2 e, depois do grace period, ELB, EBS, VPC Lattice ou custom); término com equilíbrio entre AZs antes da política padrão. | [Health checks](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html), [Termination](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-termination-policies.html) |
+| Lifecycle hooks (CONTINUE ou ABANDON), warm pools e grupos mistos (lowest-price desaconselhada para Spot). | [Hooks](https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html), [Warm pools](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html), [Mixed](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-mixed-instances-groups.html) |
+
+## Lambda (Fase 7)
+
+| Fato | Fonte |
+|---|---|
+| Memória de 128 a 10.240 MB (1.769 MB = 1 vCPU), timeout de 900 s, `/tmp` de 512 a 10.240 MB, 4 KB de variáveis, 5 camadas, payload de 6 MB síncrono e 1 MB assíncrono. | [Quotas](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html) |
+| Concorrência = RPS × duração; 1.000 por Região, 100 sempre sem reserva; limite de RPS de 10 vezes a concorrência; reservada é mínimo e máximo, gratuita; provisionada é cobrada e não passa da reservada. | [Concurrency](https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html) |
+| Assíncrono: 2 novas tentativas em erros da função; destinos e DLQ (FIFO não serve); event source mapping processa pelo menos uma vez; Lambda na VPC precisa de NAT para a internet. | [Async errors](https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html), [Destinations](https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-retain-records.html), [ESM](https://docs.aws.amazon.com/lambda/latest/dg/invocation-eventsourcemapping.html), [VPC](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html) |
+
+## Contêineres (Fase 8)
+
+| Fato | Fonte |
+|---|---|
+| ECS: task definition, task, service e cluster; capacidade Fargate, EC2, ECS Managed Instances e ECS Anywhere. | [What is ECS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html), [Fargate](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html) |
+| Execution role (imagem do ECR, logs, segredos) × task role (código), ambas confiando em `ecs-tasks.amazonaws.com`. | [Task role](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html), [Execution role](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html) |
+| EKS: plano de controle gerenciado, Kubernetes certificado, Auto Mode; ECR com scan on push, lifecycle policies e replicação. | [EKS](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html), [ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html) |
+
+## Escolhendo a computação (Fase 9)
+
+| Fato | Fonte |
+|---|---|
+| AWS Batch: job definition, job, job queue com prioridade, compute environment gerenciado (Fargate, EC2 On-Demand ou Spot, ECS Managed Instances) ou não gerenciado; jobs em contêiner sobre ECS ou EKS; dependências entre jobs. | [What is Batch](https://docs.aws.amazon.com/batch/latest/userguide/what-is-batch.html), [Components](https://docs.aws.amazon.com/batch/latest/userguide/batch_components.html) |
+| Elastic Beanstalk: provisiona instâncias (ou EKS no modo Cluster), balanceamento, monitoramento de saúde e escala; Go, Java, .NET, Node.js, PHP, Python, Ruby e Docker; sem cobrança adicional. | [What is Beanstalk](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/Welcome.html) |
+| Políticas de implantação: All at once (fora do ar por pouco tempo), Rolling (capacidade reduzida), Rolling with additional batch (mantém a capacidade), Immutable (grupo novo, as antigas ficam intactas se as novas falharem), Traffic splitting (canary, exige ALB). Blue/green por troca de CNAME, exigido para versão de plataforma incompatível; banco fora do ambiente. | [Deployment policies](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.rolling-version-deploy.html), [Blue/Green](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.CNAMESwap.html) |
+| Serverless Application Repository: aplicações SAM publicadas de forma privada, compartilhada ou pública. | [What is SAR](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/what-is-serverlessrepo.html) |
+| ECS Anywhere: instâncias externas com launch type EXTERNAL, agente do SSM, sem balanceamento de carga nem service discovery, sem `awsvpc`. | [ECS Anywhere](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-anywhere.html) |
+| EKS Anywhere: operado pelo cliente, em vSphere, bare metal, Nutanix, CloudStack e Snow, também em ambientes isolados. Hybrid Nodes e EKS no Outposts exigem conexão confiável com a Região. | [EKS deployment options](https://docs.aws.amazon.com/eks/latest/userguide/eks-deployment-options.html) |
+
+## Preços
+
+- `src/content/pricing/compute-prices.json` é gerado por `npm run prices:compute` a partir da AWS Price List API (ofertas AmazonEC2, AWSComputeSavingsPlan, AWSLambda, AmazonECS e AWSELB) para us-east-1 e sa-east-1. O script falha se faltar algum preço ou se houver ambiguidade.
+- O desconto do Spot não está na Price List API: entra como **premissa do cenário** (70%), e o fato de existir desconto vem da página do Spot.
+- Mês de 730 horas; primeira faixa de preço, sem nível gratuito nem impostos.
+
+## Premissas e simplificações da trilha
+
+- **Premissas dos cenários:** cargas, perfis de CPU e de tráfego ao longo do dia, capacidade por instância, atraso de launch e warmup, desconto do Spot e orçamentos dos labs.
+- **Instâncias:** a carga cabe se vCPU e memória bastam (sem rede, disco ou benchmark); preços On-Demand de Linux.
+- **Volumes:** a configuração de referência é a mais barata que atende, achada por busca.
+- **Compra:** cada compromisso (RI ou Savings Plan) cobre exatamente as instâncias do segmento e é cobrado as 730 horas do mês; preços No Upfront, Linux e tenancy compartilhada.
+- **Balanceadores:** o forward ponderado é determinístico.
+- **Auto Scaling:** passos de 5 min; o predictive repete o dia anterior.
+- **Lambda:** a carga é o pico constante; sem reserva, as funções dividem a concorrência livre em proporção à necessidade.
+- **Escolha da computação:** a "complexidade relativa" que desempata as opções é julgamento de arquitetura.
+- **Arquitetura de Computação:** rubrica e pesos pedagógicos.
+- **Variantes novas** (Lambda Managed Instances, durable functions, ECS Managed Instances e EC2 managed instances) aparecem só como aviso, sem detalhes.
