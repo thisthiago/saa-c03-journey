@@ -1,0 +1,1205 @@
+{
+  "source": "AWS Price List Bulk API",
+  "sourceDocs": "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-price-list-query-api.html",
+  "retrievedAt": "2026-10-20",
+  "currency": "USD",
+  "notes": [
+    "Valores de referência para fins didáticos, extraídos da AWS Price List na data indicada.",
+    "Linux, tenancy compartilhada, sem software pré-instalado; Reserved Instances e Savings Plans sem pagamento antecipado (No Upfront).",
+    "Apenas a primeira faixa de preço de cada item; sem nível gratuito, impostos ou descontos.",
+    "O preço do Spot varia e não faz parte da Price List: os laboratórios usam um desconto marcado como premissa do cenário.",
+    "Preços mudam: consulte https://aws.amazon.com/ec2/pricing/ antes de qualquer decisão real."
+  ],
+  "regions": {
+    "us-east-1": {
+      "label": "US East (N. Virginia)",
+      "offers": {
+        "AmazonEC2": "2026-10-15T19:13:16Z",
+        "AWSComputeSavingsPlan": "2026-10-13T03:50:15Z",
+        "AWSLambda": "2026-10-16T18:23:59Z",
+        "AmazonECS": "2026-10-19T22:43:17Z",
+        "AWSELB": "2026-09-11T12:45:44Z"
+      },
+      "instances": {
+        "t3.micro": {
+          "vcpu": 2,
+          "memoryGiB": 1,
+          "processor": "Intel Skylake E5 2686 v5",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 5 Gigabit",
+          "onDemandHour": 0.0104,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0065,
+            "standard-3yr": 0.0045,
+            "convertible-1yr": 0.0075,
+            "convertible-3yr": 0.0052
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.0075,
+            "compute-3yr": 0.0052,
+            "ec2instance-1yr": 0.0065,
+            "ec2instance-3yr": 0.0045
+          }
+        },
+        "t3.medium": {
+          "vcpu": 2,
+          "memoryGiB": 4,
+          "processor": "Intel Skylake E5 2686 v5",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 5 Gigabit",
+          "onDemandHour": 0.0416,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0261,
+            "standard-3yr": 0.018,
+            "convertible-1yr": 0.03,
+            "convertible-3yr": 0.0206
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.03,
+            "compute-3yr": 0.0206,
+            "ec2instance-1yr": 0.0261,
+            "ec2instance-3yr": 0.018
+          }
+        },
+        "t3.large": {
+          "vcpu": 2,
+          "memoryGiB": 8,
+          "processor": "Intel Skylake E5 2686 v5",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 5 Gigabit",
+          "onDemandHour": 0.0832,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0522,
+            "standard-3yr": 0.0359,
+            "convertible-1yr": 0.06,
+            "convertible-3yr": 0.0413
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.06,
+            "compute-3yr": 0.0413,
+            "ec2instance-1yr": 0.0522,
+            "ec2instance-3yr": 0.0359
+          }
+        },
+        "t4g.medium": {
+          "vcpu": 2,
+          "memoryGiB": 4,
+          "processor": "AWS Graviton2 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 5 Gigabit",
+          "onDemandHour": 0.0336,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0211,
+            "standard-3yr": 0.0145,
+            "convertible-1yr": 0.0242,
+            "convertible-3yr": 0.0167
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.0242,
+            "compute-3yr": 0.0167,
+            "ec2instance-1yr": 0.0211,
+            "ec2instance-3yr": 0.0145
+          }
+        },
+        "t4g.large": {
+          "vcpu": 2,
+          "memoryGiB": 8,
+          "processor": "AWS Graviton2 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 5 Gigabit",
+          "onDemandHour": 0.0672,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0421,
+            "standard-3yr": 0.029,
+            "convertible-1yr": 0.0485,
+            "convertible-3yr": 0.0334
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.0485,
+            "compute-3yr": 0.0334,
+            "ec2instance-1yr": 0.0421,
+            "ec2instance-3yr": 0.029
+          }
+        },
+        "m5.large": {
+          "vcpu": 2,
+          "memoryGiB": 8,
+          "processor": "Intel Xeon Platinum 8175",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 10 Gigabit",
+          "onDemandHour": 0.096,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.06,
+            "standard-3yr": 0.041,
+            "convertible-1yr": 0.071,
+            "convertible-3yr": 0.049
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.071,
+            "compute-3yr": 0.049,
+            "ec2instance-1yr": 0.06,
+            "ec2instance-3yr": 0.041
+          }
+        },
+        "m7i.large": {
+          "vcpu": 2,
+          "memoryGiB": 8,
+          "processor": "Intel Xeon Scalable (Sapphire Rapids)",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.1008,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.06668,
+            "standard-3yr": 0.04572,
+            "convertible-1yr": 0.07406,
+            "convertible-3yr": 0.05112
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.07406,
+            "compute-3yr": 0.05112,
+            "ec2instance-1yr": 0.06668,
+            "ec2instance-3yr": 0.04572
+          }
+        },
+        "m7i.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 16,
+          "processor": "Intel Xeon Scalable (Sapphire Rapids)",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.2016,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.13336,
+            "standard-3yr": 0.09145,
+            "convertible-1yr": 0.14811,
+            "convertible-3yr": 0.10224
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.14811,
+            "compute-3yr": 0.10224,
+            "ec2instance-1yr": 0.13336,
+            "ec2instance-3yr": 0.09145
+          }
+        },
+        "m7g.large": {
+          "vcpu": 2,
+          "memoryGiB": 8,
+          "processor": "AWS Graviton3 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.0816,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.054,
+            "standard-3yr": 0.037,
+            "convertible-1yr": 0.0599,
+            "convertible-3yr": 0.0414
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.0599,
+            "compute-3yr": 0.0414,
+            "ec2instance-1yr": 0.054,
+            "ec2instance-3yr": 0.037
+          }
+        },
+        "m7g.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 16,
+          "processor": "AWS Graviton3 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.1632,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.108,
+            "standard-3yr": 0.074,
+            "convertible-1yr": 0.1199,
+            "convertible-3yr": 0.0828
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.1199,
+            "compute-3yr": 0.0828,
+            "ec2instance-1yr": 0.108,
+            "ec2instance-3yr": 0.074
+          }
+        },
+        "c7i.large": {
+          "vcpu": 2,
+          "memoryGiB": 4,
+          "processor": "Intel Xeon Scalable (Sapphire Rapids)",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.08925,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.05904,
+            "standard-3yr": 0.03929,
+            "convertible-1yr": 0.0645,
+            "convertible-3yr": 0.04309
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.0645,
+            "compute-3yr": 0.04309,
+            "ec2instance-1yr": 0.05904,
+            "ec2instance-3yr": 0.03929
+          }
+        },
+        "c7i.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 8,
+          "processor": "Intel Xeon Scalable (Sapphire Rapids)",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.1785,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.11808,
+            "standard-3yr": 0.07859,
+            "convertible-1yr": 0.12899,
+            "convertible-3yr": 0.08618
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.12899,
+            "compute-3yr": 0.08618,
+            "ec2instance-1yr": 0.11808,
+            "ec2instance-3yr": 0.07859
+          }
+        },
+        "c7g.large": {
+          "vcpu": 2,
+          "memoryGiB": 4,
+          "processor": "AWS Graviton3 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.0725,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0478,
+            "standard-3yr": 0.0319,
+            "convertible-1yr": 0.052,
+            "convertible-3yr": 0.0351
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.052,
+            "compute-3yr": 0.0351,
+            "ec2instance-1yr": 0.0478,
+            "ec2instance-3yr": 0.0319
+          }
+        },
+        "c7g.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 8,
+          "processor": "AWS Graviton3 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.145,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0955,
+            "standard-3yr": 0.0637,
+            "convertible-1yr": 0.104,
+            "convertible-3yr": 0.0702
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.104,
+            "compute-3yr": 0.0702,
+            "ec2instance-1yr": 0.0955,
+            "ec2instance-3yr": 0.0637
+          }
+        },
+        "c7g.2xlarge": {
+          "vcpu": 8,
+          "memoryGiB": 16,
+          "processor": "AWS Graviton3 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 15 Gigabit",
+          "onDemandHour": 0.29,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.1911,
+            "standard-3yr": 0.1274,
+            "convertible-1yr": 0.2079,
+            "convertible-3yr": 0.1404
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.2079,
+            "compute-3yr": 0.1404,
+            "ec2instance-1yr": 0.1911,
+            "ec2instance-3yr": 0.1274
+          }
+        },
+        "r7i.large": {
+          "vcpu": 2,
+          "memoryGiB": 16,
+          "processor": "Intel Xeon Scalable (Sapphire Rapids)",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.1323,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.08752,
+            "standard-3yr": 0.06001,
+            "convertible-1yr": 0.09585,
+            "convertible-3yr": 0.06901
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.09585,
+            "compute-3yr": 0.06901,
+            "ec2instance-1yr": 0.08752,
+            "ec2instance-3yr": 0.06001
+          }
+        },
+        "r7g.large": {
+          "vcpu": 2,
+          "memoryGiB": 16,
+          "processor": "AWS Graviton3 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.1071,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0708,
+            "standard-3yr": 0.0486,
+            "convertible-1yr": 0.0776,
+            "convertible-3yr": 0.0559
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.0776,
+            "compute-3yr": 0.0559,
+            "ec2instance-1yr": 0.0708,
+            "ec2instance-3yr": 0.0486
+          }
+        },
+        "r7g.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 32,
+          "processor": "AWS Graviton3 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.2142,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.1417,
+            "standard-3yr": 0.0972,
+            "convertible-1yr": 0.1552,
+            "convertible-3yr": 0.1117
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.1552,
+            "compute-3yr": 0.1117,
+            "ec2instance-1yr": 0.1417,
+            "ec2instance-3yr": 0.0972
+          }
+        },
+        "i4i.large": {
+          "vcpu": 2,
+          "memoryGiB": 16,
+          "processor": "Intel Xeon 8375C (Ice Lake)",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "1 x 468 NVMe SSD",
+          "network": "Up to 10 Gigabit",
+          "onDemandHour": 0.172,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.111,
+            "standard-3yr": 0.079,
+            "convertible-1yr": 0.134,
+            "convertible-3yr": 0.095
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.134,
+            "compute-3yr": 0.095,
+            "ec2instance-1yr": 0.111,
+            "ec2instance-3yr": 0.079
+          }
+        },
+        "i4i.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 32,
+          "processor": "Intel Xeon 8375C (Ice Lake)",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "1 x 937 NVMe SSD",
+          "network": "Up to 10 Gigabit",
+          "onDemandHour": 0.343,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.223,
+            "standard-3yr": 0.159,
+            "convertible-1yr": 0.267,
+            "convertible-3yr": 0.191
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.267,
+            "compute-3yr": 0.191,
+            "ec2instance-1yr": 0.223,
+            "ec2instance-3yr": 0.159
+          }
+        },
+        "g5.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 16,
+          "processor": "AMD EPYC 7R32",
+          "arch": "x86_64",
+          "gpus": 1,
+          "storage": "1 x 250 GB NVMe SSD",
+          "network": "Up to 10 Gigabit",
+          "onDemandHour": 1.006,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.63378,
+            "standard-3yr": 0.43459,
+            "convertible-1yr": 0.79223,
+            "convertible-3yr": 0.54324
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.79223,
+            "compute-3yr": 0.54324,
+            "ec2instance-1yr": 0.63378,
+            "ec2instance-3yr": 0.43459
+          }
+        },
+        "inf2.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 16,
+          "processor": "AMD EPYC 7R13 Processor",
+          "arch": "x86_64",
+          "gpus": 1,
+          "storage": "EBS only",
+          "network": "Up to 15 Gigabit",
+          "onDemandHour": 0.7582,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.47767,
+            "standard-3yr": 0.32754,
+            "convertible-1yr": 0.59708,
+            "convertible-3yr": 0.40943
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.59708,
+            "compute-3yr": 0.40943,
+            "ec2instance-1yr": 0.47767,
+            "ec2instance-3yr": 0.32754
+          }
+        }
+      },
+      "cpuCreditsPerVcpuHour": {
+        "t3": 0.05,
+        "t4g": 0.04
+      },
+      "ebs": {
+        "gp3": {
+          "gbMonth": 0.08,
+          "iopsMonth": 0.005,
+          "throughputMiBpsMonth": 0.04
+        },
+        "gp2": {
+          "gbMonth": 0.1
+        },
+        "io2": {
+          "gbMonth": 0.125,
+          "iopsMonthTiers": [
+            {
+              "upTo": 32000,
+              "price": 0.065
+            },
+            {
+              "upTo": 64000,
+              "price": 0.0455
+            },
+            {
+              "upTo": null,
+              "price": 0.03185
+            }
+          ]
+        },
+        "io1": {
+          "gbMonth": 0.125,
+          "iopsMonth": 0.065
+        },
+        "st1": {
+          "gbMonth": 0.045
+        },
+        "sc1": {
+          "gbMonth": 0.015
+        },
+        "snapshotGBMonth": 0.05,
+        "snapshotArchiveGBMonth": 0.0125
+      },
+      "lambda": {
+        "requestPerMillion": 0.2,
+        "gbSecond": {
+          "x86_64": 0.0000166667,
+          "arm64": 0.0000133334
+        },
+        "provisioned": {
+          "concurrencyGBSecond": 0.0000041667,
+          "durationGBSecond": 0.0000097222
+        },
+        "computeSavingsPlanGBSecond": {
+          "1yr": 0.0000147,
+          "3yr": 0.0000147
+        }
+      },
+      "fargate": {
+        "vcpuHour": {
+          "x86_64": 0.04048,
+          "arm64": 0.03238
+        },
+        "gbHour": {
+          "x86_64": 0.004445,
+          "arm64": 0.00356
+        },
+        "computeSavingsPlan": {
+          "1yr": {
+            "vcpuHour": 0.032384,
+            "gbHour": 0.003556
+          },
+          "3yr": {
+            "vcpuHour": 0.022264,
+            "gbHour": 0.00244475
+          }
+        }
+      },
+      "elb": {
+        "alb": {
+          "hour": 0.0225,
+          "lcuHour": 0.008
+        },
+        "nlb": {
+          "hour": 0.0225,
+          "lcuHour": 0.006
+        },
+        "gwlb": {
+          "hour": 0.0125,
+          "lcuHour": 0.004
+        }
+      },
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/us-east-1/index.csv",
+        "https://pricing.us-east-1.amazonaws.com/savingsPlan/v1.0/aws/AWSComputeSavingsPlan/20261013035015/us-east-1/index.csv",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSLambda/20261016182359/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECS/20261019224317/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSELB/20260911124544/us-east-1/index.json"
+      ]
+    },
+    "sa-east-1": {
+      "label": "América do Sul (São Paulo)",
+      "offers": {
+        "AmazonEC2": "2026-10-15T19:13:16Z",
+        "AWSComputeSavingsPlan": "2026-10-13T03:50:15Z",
+        "AWSLambda": "2026-10-16T18:23:59Z",
+        "AmazonECS": "2026-10-19T22:43:17Z",
+        "AWSELB": "2026-09-11T12:45:44Z"
+      },
+      "instances": {
+        "t3.micro": {
+          "vcpu": 2,
+          "memoryGiB": 1,
+          "processor": "Intel Skylake E5 2686 v5",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 5 Gigabit",
+          "onDemandHour": 0.0168,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0096,
+            "standard-3yr": 0.0073,
+            "convertible-1yr": 0.0111,
+            "convertible-3yr": 0.0084
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.0111,
+            "compute-3yr": 0.0084,
+            "ec2instance-1yr": 0.0096,
+            "ec2instance-3yr": 0.0073
+          }
+        },
+        "t3.medium": {
+          "vcpu": 2,
+          "memoryGiB": 4,
+          "processor": "Intel Skylake E5 2686 v5",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 5 Gigabit",
+          "onDemandHour": 0.0672,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0386,
+            "standard-3yr": 0.029,
+            "convertible-1yr": 0.0444,
+            "convertible-3yr": 0.0336
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.0444,
+            "compute-3yr": 0.0336,
+            "ec2instance-1yr": 0.0386,
+            "ec2instance-3yr": 0.029
+          }
+        },
+        "t3.large": {
+          "vcpu": 2,
+          "memoryGiB": 8,
+          "processor": "Intel Skylake E5 2686 v5",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 5 Gigabit",
+          "onDemandHour": 0.1344,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0772,
+            "standard-3yr": 0.0581,
+            "convertible-1yr": 0.0888,
+            "convertible-3yr": 0.0671
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.0888,
+            "compute-3yr": 0.0671,
+            "ec2instance-1yr": 0.0772,
+            "ec2instance-3yr": 0.0581
+          }
+        },
+        "t4g.medium": {
+          "vcpu": 2,
+          "memoryGiB": 4,
+          "processor": "AWS Graviton2 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 5 Gigabit",
+          "onDemandHour": 0.0536,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0308,
+            "standard-3yr": 0.0231,
+            "convertible-1yr": 0.0354,
+            "convertible-3yr": 0.0267
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.0354,
+            "compute-3yr": 0.0267,
+            "ec2instance-1yr": 0.0308,
+            "ec2instance-3yr": 0.0231
+          }
+        },
+        "t4g.large": {
+          "vcpu": 2,
+          "memoryGiB": 8,
+          "processor": "AWS Graviton2 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 5 Gigabit",
+          "onDemandHour": 0.1072,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0616,
+            "standard-3yr": 0.0462,
+            "convertible-1yr": 0.0707,
+            "convertible-3yr": 0.0535
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.0707,
+            "compute-3yr": 0.0535,
+            "ec2instance-1yr": 0.0616,
+            "ec2instance-3yr": 0.0462
+          }
+        },
+        "m5.large": {
+          "vcpu": 2,
+          "memoryGiB": 8,
+          "processor": "Intel Xeon Platinum 8175",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 10 Gigabit",
+          "onDemandHour": 0.153,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.09,
+            "standard-3yr": 0.066,
+            "convertible-1yr": 0.104,
+            "convertible-3yr": 0.079
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.104,
+            "compute-3yr": 0.079,
+            "ec2instance-1yr": 0.09,
+            "ec2instance-3yr": 0.066
+          }
+        },
+        "m7i.large": {
+          "vcpu": 2,
+          "memoryGiB": 8,
+          "processor": "Intel Xeon Scalable (Sapphire Rapids)",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.16065,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.09956,
+            "standard-3yr": 0.07263,
+            "convertible-1yr": 0.10915,
+            "convertible-3yr": 0.08335
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.10915,
+            "compute-3yr": 0.08335,
+            "ec2instance-1yr": 0.09956,
+            "ec2instance-3yr": 0.07263
+          }
+        },
+        "m7i.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 16,
+          "processor": "Intel Xeon Scalable (Sapphire Rapids)",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.3213,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.19911,
+            "standard-3yr": 0.14527,
+            "convertible-1yr": 0.2183,
+            "convertible-3yr": 0.1667
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.2183,
+            "compute-3yr": 0.1667,
+            "ec2instance-1yr": 0.19911,
+            "ec2instance-3yr": 0.14527
+          }
+        },
+        "m7g.large": {
+          "vcpu": 2,
+          "memoryGiB": 8,
+          "processor": "AWS Graviton3 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.1301,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0806,
+            "standard-3yr": 0.0588,
+            "convertible-1yr": 0.0884,
+            "convertible-3yr": 0.0675
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.0884,
+            "compute-3yr": 0.0675,
+            "ec2instance-1yr": 0.0806,
+            "ec2instance-3yr": 0.0588
+          }
+        },
+        "m7g.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 16,
+          "processor": "AWS Graviton3 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.2601,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.1612,
+            "standard-3yr": 0.1176,
+            "convertible-1yr": 0.1767,
+            "convertible-3yr": 0.1349
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.1767,
+            "compute-3yr": 0.1349,
+            "ec2instance-1yr": 0.1612,
+            "ec2instance-3yr": 0.1176
+          }
+        },
+        "c7i.large": {
+          "vcpu": 2,
+          "memoryGiB": 4,
+          "processor": "Intel Xeon Scalable (Sapphire Rapids)",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.13755,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.09085,
+            "standard-3yr": 0.06248,
+            "convertible-1yr": 0.10474,
+            "convertible-3yr": 0.07133
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.10474,
+            "compute-3yr": 0.07133,
+            "ec2instance-1yr": 0.09085,
+            "ec2instance-3yr": 0.06248
+          }
+        },
+        "c7i.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 8,
+          "processor": "Intel Xeon Scalable (Sapphire Rapids)",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.2751,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.18169,
+            "standard-3yr": 0.12497,
+            "convertible-1yr": 0.20947,
+            "convertible-3yr": 0.14266
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.20947,
+            "compute-3yr": 0.14266,
+            "ec2instance-1yr": 0.18169,
+            "ec2instance-3yr": 0.12497
+          }
+        },
+        "c7g.large": {
+          "vcpu": 2,
+          "memoryGiB": 4,
+          "processor": "AWS Graviton3 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.1111,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.0735,
+            "standard-3yr": 0.0505,
+            "convertible-1yr": 0.0909,
+            "convertible-3yr": 0.06
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.0909,
+            "compute-3yr": 0.06,
+            "ec2instance-1yr": 0.0735,
+            "ec2instance-3yr": 0.0505
+          }
+        },
+        "c7g.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 8,
+          "processor": "AWS Graviton3 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.2222,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.147,
+            "standard-3yr": 0.1009,
+            "convertible-1yr": 0.1819,
+            "convertible-3yr": 0.12
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.1819,
+            "compute-3yr": 0.12,
+            "ec2instance-1yr": 0.147,
+            "ec2instance-3yr": 0.1009
+          }
+        },
+        "c7g.2xlarge": {
+          "vcpu": 8,
+          "memoryGiB": 16,
+          "processor": "AWS Graviton3 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 15 Gigabit",
+          "onDemandHour": 0.4443,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.2941,
+            "standard-3yr": 0.2018,
+            "convertible-1yr": 0.3637,
+            "convertible-3yr": 0.2399
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.3637,
+            "compute-3yr": 0.2399,
+            "ec2instance-1yr": 0.2941,
+            "ec2instance-3yr": 0.2018
+          }
+        },
+        "r7i.large": {
+          "vcpu": 2,
+          "memoryGiB": 16,
+          "processor": "Intel Xeon Scalable (Sapphire Rapids)",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.21105,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.13949,
+            "standard-3yr": 0.09585,
+            "convertible-1yr": 0.1527,
+            "convertible-3yr": 0.10943
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.1527,
+            "compute-3yr": 0.10943,
+            "ec2instance-1yr": 0.13949,
+            "ec2instance-3yr": 0.09585
+          }
+        },
+        "r7g.large": {
+          "vcpu": 2,
+          "memoryGiB": 16,
+          "processor": "AWS Graviton3 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.1704,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.1129,
+            "standard-3yr": 0.0775,
+            "convertible-1yr": 0.1236,
+            "convertible-3yr": 0.0884
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.1236,
+            "compute-3yr": 0.0884,
+            "ec2instance-1yr": 0.1129,
+            "ec2instance-3yr": 0.0775
+          }
+        },
+        "r7g.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 32,
+          "processor": "AWS Graviton3 Processor",
+          "arch": "arm64",
+          "gpus": 0,
+          "storage": "EBS only",
+          "network": "Up to 12500 Megabit",
+          "onDemandHour": 0.3409,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.2259,
+            "standard-3yr": 0.1549,
+            "convertible-1yr": 0.2473,
+            "convertible-3yr": 0.1768
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.2473,
+            "compute-3yr": 0.1768,
+            "ec2instance-1yr": 0.2259,
+            "ec2instance-3yr": 0.1549
+          }
+        },
+        "i4i.large": {
+          "vcpu": 2,
+          "memoryGiB": 16,
+          "processor": "Intel Xeon 8375C (Ice Lake)",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "1 x 468 NVMe SSD",
+          "network": "Up to 10 Gigabit",
+          "onDemandHour": 0.274,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.179,
+            "standard-3yr": 0.126,
+            "convertible-1yr": 0.212,
+            "convertible-3yr": 0.151
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.212,
+            "compute-3yr": 0.151,
+            "ec2instance-1yr": 0.179,
+            "ec2instance-3yr": 0.126
+          }
+        },
+        "i4i.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 32,
+          "processor": "Intel Xeon 8375C (Ice Lake)",
+          "arch": "x86_64",
+          "gpus": 0,
+          "storage": "1 x 937 NVMe SSD",
+          "network": "Up to 10 Gigabit",
+          "onDemandHour": 0.548,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.357,
+            "standard-3yr": 0.252,
+            "convertible-1yr": 0.425,
+            "convertible-3yr": 0.302
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 0.425,
+            "compute-3yr": 0.302,
+            "ec2instance-1yr": 0.357,
+            "ec2instance-3yr": 0.252
+          }
+        },
+        "g5.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 16,
+          "processor": "AMD EPYC 7R32",
+          "arch": "x86_64",
+          "gpus": 1,
+          "storage": "1 x 250 GB NVMe SSD",
+          "network": "Up to 10 Gigabit",
+          "onDemandHour": 1.71,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 1.0773,
+            "standard-3yr": 0.73872,
+            "convertible-1yr": 1.34663,
+            "convertible-3yr": 0.9234
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 1.34663,
+            "compute-3yr": 0.9234,
+            "ec2instance-1yr": 1.0773,
+            "ec2instance-3yr": 0.73872
+          }
+        },
+        "inf2.xlarge": {
+          "vcpu": 4,
+          "memoryGiB": 16,
+          "processor": "AMD EPYC 7R13 Processor",
+          "arch": "x86_64",
+          "gpus": 1,
+          "storage": "EBS only",
+          "network": "Up to 15 Gigabit",
+          "onDemandHour": 1.28894,
+          "reservedNoUpfrontHour": {
+            "standard-1yr": 0.81203,
+            "standard-3yr": 0.55682,
+            "convertible-1yr": 1.01504,
+            "convertible-3yr": 0.69603
+          },
+          "savingsPlanHour": {
+            "compute-1yr": 1.01504,
+            "compute-3yr": 0.69603,
+            "ec2instance-1yr": 0.81203,
+            "ec2instance-3yr": 0.55682
+          }
+        }
+      },
+      "cpuCreditsPerVcpuHour": {
+        "t3": 0.05,
+        "t4g": 0.04
+      },
+      "ebs": {
+        "gp3": {
+          "gbMonth": 0.152,
+          "iopsMonth": 0.0095,
+          "throughputMiBpsMonth": 0.076
+        },
+        "gp2": {
+          "gbMonth": 0.19
+        },
+        "io2": {
+          "gbMonth": 0.238,
+          "iopsMonthTiers": [
+            {
+              "upTo": 32000,
+              "price": 0.091
+            },
+            {
+              "upTo": 64000,
+              "price": 0.0637
+            },
+            {
+              "upTo": null,
+              "price": 0.0445
+            }
+          ]
+        },
+        "io1": {
+          "gbMonth": 0.238,
+          "iopsMonth": 0.091
+        },
+        "st1": {
+          "gbMonth": 0.086
+        },
+        "sc1": {
+          "gbMonth": 0.0288
+        },
+        "snapshotGBMonth": 0.068,
+        "snapshotArchiveGBMonth": 0.017
+      },
+      "lambda": {
+        "requestPerMillion": 0.2,
+        "gbSecond": {
+          "x86_64": 0.0000166667,
+          "arm64": 0.0000133334
+        },
+        "provisioned": {
+          "concurrencyGBSecond": 0.0000066372,
+          "durationGBSecond": 0.0000154867
+        },
+        "computeSavingsPlanGBSecond": {
+          "1yr": 0.000015,
+          "3yr": 0.000015
+        }
+      },
+      "fargate": {
+        "vcpuHour": {
+          "x86_64": 0.0696,
+          "arm64": 0.0557
+        },
+        "gbHour": {
+          "x86_64": 0.0076,
+          "arm64": 0.00612
+        },
+        "computeSavingsPlan": {
+          "1yr": {
+            "vcpuHour": 0.05916,
+            "gbHour": 0.00646
+          },
+          "3yr": {
+            "vcpuHour": 0.047328,
+            "gbHour": 0.005168
+          }
+        }
+      },
+      "elb": {
+        "alb": {
+          "hour": 0.034,
+          "lcuHour": 0.011
+        },
+        "nlb": {
+          "hour": 0.034,
+          "lcuHour": 0.00825
+        },
+        "gwlb": {
+          "hour": 0.0189,
+          "lcuHour": 0.0055
+        }
+      },
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/sa-east-1/index.csv",
+        "https://pricing.us-east-1.amazonaws.com/savingsPlan/v1.0/aws/AWSComputeSavingsPlan/20261013035015/sa-east-1/index.csv",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSLambda/20261016182359/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonECS/20261019224317/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSELB/20260911124544/sa-east-1/index.json"
+      ]
+    }
+  }
+}
