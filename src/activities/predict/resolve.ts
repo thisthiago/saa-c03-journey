@@ -16,6 +16,13 @@ import { HOP_LABEL, simulateEdge } from '../../simulators/edge/model'
 import { formatMinutes, PLANS, responseMinutes, SEVERITY_LABEL } from '../../simulators/support/model'
 import { evaluate as evaluatePolicy } from '../../simulators/policy/model'
 import { assumeRole } from '../../simulators/sts/model'
+import { ACTION_LABEL, ASPECT_LABEL, breakeven, BURST_BASELINE, burstableHourly, monthly, stateEffects } from '../../simulators/instances/model'
+import { instancePrice, usd } from '../../simulators/compute-prices'
+import { needGaps, performance, validateVolume, volumeMonthly } from '../../simulators/ebs/model'
+import { bestOptions, compareOptions, OPTIONS as PURCHASE_OPTIONS } from '../../simulators/purchase/model'
+import { distribute, routeAlb } from '../../simulators/loadbalancer/model'
+import { defaultTerminationOrder, evaluatePolicies } from '../../simulators/scaling/model'
+import { simulateAccount } from '../../simulators/lambda/model'
 import type { PredictSpec } from './specs'
 
 export interface PredictResult {
@@ -147,6 +154,74 @@ export function resolvePredict(spec: PredictSpec): PredictResult {
     case 'access': {
       const d = evaluateAccess(spec.world, spec.request)
       return { outcome: d.allowed ? 'allow' : 'deny', detail: d.trace }
+    }
+    case 'ec2-state': {
+      const e = stateEffects(spec.action)[spec.aspect]
+      return { outcome: e.kept ? 'kept' : 'lost', detail: [`${ACTION_LABEL[spec.action]}: ${ASPECT_LABEL[spec.aspect]} ${e.kept ? 'é preservado' : 'não é preservado'}.`, e.note] }
+    }
+    case 'burst': {
+      const b = monthly(burstableHourly(spec.burstable, spec.avgCpu, spec.region).total)
+      const f = monthly(instancePrice(spec.fixed, spec.region).onDemandHour)
+      const be = breakeven(spec.burstable, spec.fixed, spec.region)
+      return {
+        outcome: b < f ? 'burstable' : 'fixed',
+        detail: [
+          `Com CPU média de ${Math.round(spec.avgCpu * 100)}%, ${spec.burstable} custa ${usd(b)}/mês (baseline de ${Math.round(BURST_BASELINE[spec.burstable] * 100)}%, excedente cobrado por vCPU-hora) e ${spec.fixed} custa ${usd(f)}/mês.`,
+          `O ponto de equilíbrio é ${Math.round(be * 1000) / 10}% de CPU média: abaixo dele, a burstable sai mais barata; acima, a fixa.`,
+        ],
+      }
+    }
+    case 'ebs': {
+      const errors = validateVolume(spec.volume)
+      if (errors.length) return { outcome: 'invalid', detail: [`A AWS recusaria o volume: ${errors.join('; ')}.`] }
+      const gaps = needGaps(spec.volume, spec.need)
+      const perf = performance(spec.volume)
+      const head = `O volume entrega ${Math.round(perf.iops).toLocaleString('pt-BR')} IOPS e ${Math.round(perf.throughput)} MiB/s e custa ${usd(volumeMonthly(spec.volume))}/mês.`
+      return gaps.length ? { outcome: 'short', detail: [head, `Não atende: ${gaps.join('; ')}.`] } : { outcome: 'meets', detail: [head, 'Atende a todos os requisitos da carga.'] }
+    }
+    case 'purchase': {
+      const best = bestOptions(spec.segment, spec.options, spec.region)
+      const rows = compareOptions(spec.segment, spec.options, spec.region).map((r) => `${PURCHASE_OPTIONS[r.option].short}: ${usd(r.monthly)}/mês${r.violations.length ? ` (não serve: ${r.violations.join('; ')})` : ''}`)
+      return { outcome: best[0], detail: ['Custo mensal de cada opção, calculado pelo simulador:', ...rows] }
+    }
+    case 'alb-route': {
+      const r = routeAlb(spec.listener, spec.request, (id) => spec.groups[id] ?? id)
+      return { outcome: r.outcome, detail: r.trace }
+    }
+    case 'cross-zone': {
+      const share = distribute(spec.targetsByAz, spec.crossZone)
+      const pct = (v: number) => Math.round(v * 10000) / 100
+      const azs = Object.keys(spec.targetsByAz)
+      return {
+        outcome: String(pct(share[spec.az])),
+        detail: [
+          `Cada nó do balanceador recebe 1/${azs.length} do tráfego.`,
+          spec.crossZone ? 'Com cross-zone, cada nó distribui entre os alvos de todas as AZs.' : 'Sem cross-zone, cada nó distribui só entre os alvos da sua AZ.',
+          azs.map((az) => `AZ ${az}: ${spec.targetsByAz[az]} alvo(s), ${pct(share[az]).toLocaleString('pt-BR')}% cada`).join(' · ') + '.',
+        ],
+      }
+    }
+    case 'scaling': {
+      const r = evaluatePolicies(spec.group, spec.utilization, spec.policies)
+      return {
+        outcome: String(r.desired),
+        detail: [
+          `As políticas pedem ${r.asked.join(' e ')} instância(s); vence a que deixa mais capacidade.`,
+          `O resultado fica entre o min (${spec.group.min}) e o max (${spec.group.max}): ${r.desired}.`,
+        ],
+      }
+    }
+    case 'asg-termination': {
+      const r = defaultTerminationOrder(spec.instances, spec.template, spec.version)
+      return { outcome: r.victim.id, detail: r.reasons }
+    }
+    case 'lambda': {
+      const all = simulateAccount(spec.functions, spec.settings)
+      const r = all.find((x) => x.id === spec.fn)!
+      const detail = [`Precisa de ${r.needed} execuções simultâneas (requisições por segundo × duração) e tem ${r.available} disponíveis.`, ...r.notes]
+      if (spec.query === 'concurrency') return { outcome: String(r.needed), detail }
+      if (spec.query === 'cold-start') return { outcome: r.coldStart ? 'yes' : 'no', detail: [...detail, r.coldStart ? 'O pico passa da concorrência provisionada: ambientes novos precisam inicializar.' : 'A provisionada cobre o pico: todos os ambientes já estão inicializados.'] }
+      return { outcome: r.throttled ? 'yes' : 'no', detail }
     }
     case 'cost-cheapest': {
       const prices = regionPrices(spec.region)
