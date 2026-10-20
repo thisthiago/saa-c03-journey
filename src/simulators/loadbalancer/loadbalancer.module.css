@@ -1,0 +1,84 @@
+.rule {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  padding: 8px 10px;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.conds {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  min-width: 0;
+}
+.conds legend {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.cond {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.82rem;
+  min-width: 0;
+}
+.cond code {
+  overflow-wrap: anywhere;
+}
+.add,
+.remove {
+  font: inherit;
+  font-size: 0.84rem;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.add:disabled,
+.remove:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.84rem;
+}
+.ok {
+  color: var(--success);
+}
+.bad {
+  color: var(--danger);
+}
+.tests {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.tests li {
+  display: grid;
+  gap: 2px;
+  border-left: 3px solid var(--danger);
+  background: var(--surface-2);
+  border-radius: var(--radius-s);
+  padding: 6px 10px;
+  font-size: 0.84rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.tests li[data-ok='true'] {
+  border-left-color: var(--success);
+}
