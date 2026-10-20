@@ -7,6 +7,7 @@ import { STORAGE_CLASSES, STORAGE_CLASS_ORDER } from '../../simulators/shared/st
 import { Glyph } from '../../ui/Glyph'
 import s from './visuals.module.css'
 import { AzIsolation, EdgeFlow, GlobalHierarchy, RegionMap, SrmStack, SupportLadder } from './visuals-foundations'
+import { AlbRules, AsgLoop, ComputeSpectrum, EbsTypes, EcsRoles, ElbCrossZone, InstanceLifecycle, InstanceName, LambdaConcurrency, PurchaseOptions } from './visuals-compute'
 import { AssumeRoleFlow, CognitoPools, ConfusedDeputy, CrossAccountEval, FederationFlow, IamEntities, OrgTree, PermissionLayers, PolicyAnatomy, PolicyFlow } from './visuals-identity'
 
 function Frame({ label, children }: { label: string; children: ReactNode }) {
@@ -228,6 +229,16 @@ const VISUALS: Record<string, () => ReactNode> = {
   'cognito-pools': CognitoPools,
   'org-tree': OrgTree,
   'permission-layers': PermissionLayers,
+  'instance-lifecycle': InstanceLifecycle,
+  'instance-name': InstanceName,
+  'ebs-types': EbsTypes,
+  'purchase-options': PurchaseOptions,
+  'elb-cross-zone': ElbCrossZone,
+  'alb-rules': AlbRules,
+  'asg-loop': AsgLoop,
+  'lambda-concurrency': LambdaConcurrency,
+  'ecs-roles': EcsRoles,
+  'compute-spectrum': ComputeSpectrum,
 }
 
 export function Visual({ id }: { id: string }) {
