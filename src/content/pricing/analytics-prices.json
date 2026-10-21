@@ -1,0 +1,61 @@
+{
+  "source": "AWS Price List Bulk API",
+  "sourceDocs": "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-price-list-query-api.html",
+  "retrievedAt": "2026-10-21",
+  "currency": "USD",
+  "notes": [
+    "Valores de referência para fins didáticos, extraídos da AWS Price List na data indicada.",
+    "Apenas a primeira faixa paga de cada item; sem nível gratuito, impostos ou descontos por volume.",
+    "O Athena cobra o dado lido pelas consultas; o mínimo por consulta e o arredondamento estão na página de preços do serviço.",
+    "EMR, OpenSearch e MSK não entram na tabela: o custo deles depende do tamanho do cluster.",
+    "Preços mudam: consulte as páginas de preço de cada serviço antes de qualquer decisão real."
+  ],
+  "regions": {
+    "us-east-1": {
+      "label": "US East (N. Virginia)",
+      "offers": {
+        "AmazonAthena": "2026-09-11T12:44:08Z",
+        "AWSGlue": "2026-10-12T18:55:42Z"
+      },
+      "athena": {
+        "perTBScanned": 5,
+        "provisionedDpuHour": 0.3
+      },
+      "glue": {
+        "etlDpuHour": 0.44,
+        "etlFlexDpuHour": 0.29,
+        "etlDpuHourGen2": 0.308,
+        "crawlerDpuHour": 0.44,
+        "catalogObjectMonth": 0.00001,
+        "catalogRequest": 0.000001
+      },
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonAthena/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSGlue/current/us-east-1/index.json"
+      ]
+    },
+    "sa-east-1": {
+      "label": "América do Sul (São Paulo)",
+      "offers": {
+        "AmazonAthena": "2026-09-11T12:44:08Z",
+        "AWSGlue": "2026-10-12T18:55:42Z"
+      },
+      "athena": {
+        "perTBScanned": 9,
+        "provisionedDpuHour": 0.3
+      },
+      "glue": {
+        "etlDpuHour": 0.69,
+        "etlFlexDpuHour": 0.45,
+        "etlDpuHourGen2": 0.483,
+        "crawlerDpuHour": 0.69,
+        "catalogObjectMonth": 0.00001,
+        "catalogRequest": 0.000001
+      },
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonAthena/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSGlue/current/sa-east-1/index.json"
+      ]
+    }
+  }
+}
