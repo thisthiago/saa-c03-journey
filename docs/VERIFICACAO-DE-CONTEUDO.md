@@ -348,3 +348,108 @@ Cada simulador lista as suas simplificações na própria tela e em cada fase. A
 - **Escolha da computação:** a "complexidade relativa" que desempata as opções é julgamento de arquitetura.
 - **Arquitetura de Computação:** rubrica e pesos pedagógicos.
 - **Variantes novas** (Lambda Managed Instances, durable functions, ECS Managed Instances e EC2 managed instances) aparecem só como aviso, sem detalhes.
+
+# Trilha Bancos de dados na AWS — conferido em 21/10/2026
+
+## Escopo do exame
+
+| Fato | Fonte |
+|---|---|
+| Serviços no escopo do SAA-C03 em Database: Aurora, Aurora Serverless, DocumentDB, DynamoDB, ElastiCache, Keyspaces, Neptune, RDS e Redshift; AWS DMS em Migration and Transfer; AWS Backup em Storage. | [In-scope services](https://docs.aws.amazon.com/aws-certification/latest/solutions-architect-associate-03/saa-03-in-scope-services.html) |
+| A documentação atual chama de "Aurora serverless" o antigo Aurora Serverless v2 (nota de abril de 2026 no blog da AWS); o v1 é descrito como produto descontinuado, de outra arquitetura. A trilha ensina só o atual. | [Using Aurora serverless](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.html), [How Aurora serverless works](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.how-it-works.html), [Blog: upgrade v1 to v2](https://aws.amazon.com/blogs/database/upgrade-from-amazon-aurora-serverless-v1-to-v2-with-minimal-downtime) |
+
+## RDS essencial (Fase 1)
+
+| Fato | Fonte |
+|---|---|
+| Motores: Db2, MariaDB, SQL Server, MySQL, Oracle e PostgreSQL; o Aurora tem guia próprio. A AWS cuida de escala, alta disponibilidade, backups, patches e instalação do motor e do sistema operacional; otimização da aplicação e ajuste de consultas ficam com o cliente. A AWS recomenda o RDS como escolha padrão. | [What is Amazon RDS?](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html) |
+| Classes: db.m (uso geral), db.r, db.x e db.z (memória), db.c (computação), db.t (burstable); a classe pode ser trocada. | [DB instance classes](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.DBInstanceClass.html) |
+| Armazenamento: gp3 com 3.000 IOPS e 125 MiB/s abaixo de 400 GiB e 12.000 IOPS e 500 MiB/s a partir de 400 GiB (volume dividido em quatro; MySQL, MariaDB, PostgreSQL e Db2), aceitando de 12.000 a 64.000 IOPS e de 500 a 4.000 MiB/s; até 0,25 MiB/s por IOPS e 500 IOPS por GiB. io2 Block Express até 256.000 IOPS, de 0,5 a 1.000 IOPS por GiB, 100 GiB a 64 TiB. Magnético descontinuado; desde 01/07/2026 não se restaura snapshot para ele. 64 TiB (256 TiB com volumes adicionais no Oracle e no SQL Server). | [Amazon RDS DB instance storage](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html) |
+| Autoscaling de armazenamento: espaço livre ≤ 10% por 5 minutos; aumento pelo maior entre 10 GiB, 10% e o crescimento previsto para 7 horas; até quatro alterações em 24 horas; nunca diminui; sem reboot. | [Storage autoscaling](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.Autoscaling.html) |
+| Parameter group padrão não pode ser alterado; estáticos valem após reboot; `pending-reboot` não reinicia sozinho na janela de manutenção. | [Overview of parameter groups](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/parameter-groups-overview.html) |
+| DB subnet group com subnets em pelo menos duas AZs; Public access, subnets públicas e security group decidem o acesso pela internet; conectar pelo nome DNS. | [Working with a DB instance in a VPC](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html) |
+| Janela de manutenção semanal de 30 minutos; no Multi-AZ, o patch de sistema operacional vai primeiro ao standby; atualização da versão do motor para as duas instâncias juntas. Blue/Green (MySQL, MariaDB e PostgreSQL) com troca em geral abaixo de 1 minuto. | [Maintaining a DB instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html), [Blue/Green Deployments](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/blue-green-deployments.html) |
+
+## Alta disponibilidade no RDS (Fase 2)
+
+| Fato | Fonte |
+|---|---|
+| Multi-AZ com um standby: síncrono, não atende leituras, failover em geral de 60 a 120 s com troca do DNS; AWS recomenda cache de DNS de até 60 s em Java. | [Multi-AZ DB instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html), [Failover](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html) |
+| Cluster Multi-AZ: escritor e dois leitores em três AZs, semissíncrono (commit espera um leitor), leitores atendem leituras, failover em geral abaixo de 35 s. | [Multi-AZ DB cluster](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/multi-az-db-clusters-concepts.html), [Cluster failover](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/multi-az-db-clusters-concepts-failover.html) |
+| Réplicas de leitura: assíncronas, até 15 por primária, cobradas como instâncias, sem cobrança de transferência na mesma Região, criação manual, exigem backup automático na origem; em outra Região para DR (transferência cobrada, chave KMS do destino). Promoção: reinicia, sem volta, não afeta outras réplicas. | [Read replicas](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html), [Creating](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.Create.html), [Cross-Region](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.XRgn.html), [Promoting](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.Promote.html), [Quotas](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Limits.html) |
+| Backup automático de 0 a 35 dias (padrão 7 no console e 1 na API; 0 desliga); incrementais no S3; PITR com logs enviados a cada 5 minutos, restauração numa instância nova. | [Backups](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html), [Retention](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.BackupRetention.html), [PITR](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIT.html) |
+| Snapshots manuais ficam até serem apagados (100 por Região); compartilháveis com até 20 contas; com a chave padrão do RDS não podem ser compartilhados; criptografados nunca públicos; automáticos precisam ser copiados antes. | [Sharing snapshots](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ShareSnapshot.html), [Copying snapshots](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_CopySnapshot.html) |
+| RDS Proxy: pool de conexões, segura clientes no failover, IAM e Secrets Manager; mesma VPC, não público, só a instância de escrita; cobrado por vCPU. | [RDS Proxy](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html) |
+
+## Amazon Aurora (Fase 3)
+
+| Fato | Fonte |
+|---|---|
+| Volume do cluster com seis cópias em três AZs, independente do número de instâncias; até 256 TiB em algumas versões; espaço diminui ao apagar dados. | [Aurora storage](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.StorageReliability.html), [High availability](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.AuroraHighAvailability.html) |
+| Até 15 réplicas; failover em geral abaixo de 60 s (muitas vezes 30 s); sem réplicas, recriação em geral abaixo de 10 minutos; prioridades de 0 a 15. Aurora Auto Scaling só para leitoras. | [High availability](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.AuroraHighAvailability.html), [Aurora Auto Scaling](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Integrating.AutoScaling.html) |
+| Endpoints de cluster, de leitura, personalizado e de instância. | [Endpoints](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.Endpoints.html) |
+| Global Database: primário e até 10 secundários de leitura, replicação em geral abaixo de 1 s, até 16 instâncias por secundário, switchover e failover, write forwarding. | [Global Database](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html) |
+| Aurora serverless: ACU com cerca de 2 GiB, de 0 a 256 ACUs conforme a versão, passos de 0,5 ACU, cobrança por ACU-hora, mistura com instâncias provisionadas. | [How Aurora serverless works](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.how-it-works.html) |
+| Standard × I/O-Optimized: I/O-Optimized indicado quando a E/S passa de 25% do gasto; de Standard para I/O-Optimized uma vez a cada 30 dias. | [Aurora storage](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.StorageReliability.html) |
+| Backtrack só no Aurora MySQL, janela de até 72 h, ligado na criação; clone copy-on-write, até 15 clones assim. | [Backtrack](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/AuroraMySQL.Managing.Backtrack.html), [Cloning](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Managing.Clone.html) |
+
+## DynamoDB (Fases 4 e 5)
+
+| Fato | Fonte |
+|---|---|
+| Sem servidor, três AZs, sem esquema fora da chave, item de até 400 KB; chave de partição por hash, chave composta com ordenação. | [What is DynamoDB?](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html), [Core components](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html), [Partitions](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.Partitions.html), [Constraints](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Constraints.html) |
+| Unidades: leitura de 4 KB (forte 1, eventual ½, transacional 2), escrita de 1 KB (transacional 2), arredondamento para cima; exemplos 80 RCU e 100 WCU. | [Read and write operations](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/read-write-operations.html), [Provisioned mode](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/provisioned-capacity-mode.html) |
+| Partição: até 3.000 unidades de leitura e 1.000 de escrita por segundo; write sharding; capacidade adaptativa e burst de 300 s. | [Partition key design](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-partition-key-design.html), [Write sharding](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-partition-key-sharding.html), [Burst and adaptive](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/burst-adaptive-capacity.html) |
+| Sob demanda (padrão recomendado; nova tabela até 4.000 escritas e 12.000 leituras por segundo, dobro do pico anterior) × provisionado; troca para sob demanda até quatro vezes em 24 h; 40.000 unidades por tabela; meta de 70% no auto scaling. | [On-demand](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/on-demand-capacity-mode.html), [Quotas](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ServiceQuotas.html) |
+| GSI × LSI (20 e 5 por tabela, LSI só na criação e 10 GB por chave, GSI só leitura eventual). | [Secondary indexes](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/SecondaryIndexes.html), [Read consistency](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html) |
+| Streams (24 h, ordem por item, uma vez); TTL (época Unix, em geral alguns dias, sem WCU); DAX (microssegundos, leituras eventuais, não indicado para leitura forte nem escrita intensa); tabelas globais (todas gravam, last writer wins, MREC em geral até 1 s, MRSC com três Regiões); PITR de 1 a 35 dias por segundo, tabela nova; transações (100 ações, 4 MB, duas operações, não entre Regiões); exportação para o S3 sem RCU. | [Streams](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html), [TTL](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html), [DAX](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.html), [Global tables](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html), [How global tables work](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/V2globaltables_HowItWorks.html), [PITR](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Point-in-time-recovery.html), [Transactions](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html), [Export](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/S3DataExport.HowItWorks.html) |
+
+## Cache e bancos especializados (Fase 6)
+
+| Fato | Fonte |
+|---|---|
+| ElastiCache com Valkey, Redis OSS e Memcached, serverless ou em nós; Memcached multithread, sem replicação nem backup em nós; Valkey e Redis OSS com sorted sets, pub/sub, failover e backup. Sessões como caso de uso. | [What is ElastiCache?](https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/WhatIs.html), [Comparing engines](https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/SelectEngine.html), [What is Valkey?](https://aws.amazon.com/elasticache/what-is-valkey/) |
+| Lazy loading (três idas na falta, dado pode ficar velho), write-through (sempre atual, guarda dados não lidos) e TTL. | [Caching strategies](https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html) |
+| DocumentDB (compatível com MongoDB, seis cópias em três AZs, 15 réplicas); Neptune (Gremlin, openCypher e SPARQL, 15 réplicas); Keyspaces (compatível com Cassandra, sem servidor, sob demanda ou provisionado). | [DocumentDB](https://docs.aws.amazon.com/documentdb/latest/developerguide/what-is.html), [Neptune](https://docs.aws.amazon.com/neptune/latest/userguide/intro.html), [Keyspaces](https://docs.aws.amazon.com/keyspaces/latest/devguide/what-is-keyspaces.html) |
+
+## Redshift (Fase 7)
+
+| Fato | Fonte |
+|---|---|
+| Data warehouse em petabytes; armazenamento em colunas (5 de 100 colunas ≈ 5% dos dados, blocos de 1 MB); nó líder com dois ou mais nós de computação; RMS no RA3; concurrency scaling. | [What is Redshift?](https://docs.aws.amazon.com/redshift/latest/mgmt/welcome.html), [Columnar storage](https://docs.aws.amazon.com/redshift/latest/dg/c_columnar_storage_disk_mem_mgmnt.html), [Architecture](https://docs.aws.amazon.com/redshift/latest/dg/c_high_level_system_architecture.html), [Concurrency scaling](https://docs.aws.amazon.com/redshift/latest/dg/concurrency-scaling.html) |
+| Serverless: RPUs, por segundo com mínimo de 60 s, sem cobrança parado. Spectrum consulta o S3 sem carregar. | [Serverless capacity](https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-capacity.html), [Serverless billing](https://docs.aws.amazon.com/redshift/latest/mgmt/serverless-billing.html), [Spectrum](https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html) |
+| Snapshots automáticos a cada cerca de 8 h ou 5 GB por nó, retenção padrão de 1 dia (até 35 no RA3), cópia automática para outra Região; Multi-AZ em duas AZs com um endpoint. | [Snapshots](https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-snapshots.html), [Cross-Region copy](https://docs.aws.amazon.com/redshift/latest/mgmt/cross-region-snapshot-copy.html), [Multi-AZ](https://docs.aws.amazon.com/redshift/latest/mgmt/managing-cluster-multi-az.html) |
+| Data sharing de dados vivos entre clusters, contas e Regiões; zero-ETL a partir de Aurora, RDS e DynamoDB. Athena: SQL sem servidor sobre o S3, pago por consulta. | [Data sharing](https://docs.aws.amazon.com/redshift/latest/dg/datashare-overview.html), [Zero-ETL](https://docs.aws.amazon.com/redshift/latest/mgmt/zero-etl-using.html), [Athena](https://docs.aws.amazon.com/athena/latest/ug/what-is.html) |
+
+## Segurança e backup (Fase 8)
+
+| Fato | Fonte |
+|---|---|
+| Criptografia em repouso (AES-256, KMS) cobre armazenamento, logs, backups, réplicas e snapshots; só na criação; para um banco existente, copiar snapshot com criptografia e restaurar; não desliga; réplica com o mesmo estado da origem. | [Encrypting RDS resources](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.html) |
+| TLS: `rds.force_ssl` no PostgreSQL. Autenticação IAM (MariaDB, MySQL, PostgreSQL) com token de 15 minutos. Senha mestre gerenciada no Secrets Manager, rotação a cada 7 dias por padrão. | [SSL PostgreSQL](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.Concepts.General.SSL.html), [IAM DB auth](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html), [Secrets Manager](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-secrets-manager.html) |
+| DynamoDB criptografado por padrão (chave da AWS sem custo); endpoint de gateway para S3 e DynamoDB sem custo adicional; `dynamodb:LeadingKeys`. | [DynamoDB encryption](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/EncryptionAtRest.html), [Gateway endpoints](https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html), [Fine-grained access](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/specifying-conditions.html) |
+| Proteção contra exclusão (ligada por padrão no console), snapshot final e retenção dos backups automáticos (replicados para outra Região permanecem). | [Deleting a DB instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html) |
+| AWS Backup: planos, cofres, backups imutáveis, Vault Lock (WORM; compliance × governance; sem custo adicional), gestão entre contas. | [What is AWS Backup?](https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html), [Vault Lock](https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html) |
+
+## Migração e escolha (Fase 9)
+
+| Fato | Fonte |
+|---|---|
+| DMS: servidor de replicação, endpoints, tarefas; DMS Serverless; Schema Conversion e AWS SCT para trocar de motor; criptografia KMS e SSL; failover da replicação; cria tabelas e chaves primárias. | [What is DMS?](https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html), [Serverless](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Serverless.html), [Schema Conversion](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_SchemaConversion.html), [SCT](https://docs.aws.amazon.com/SchemaConversionTool/latest/userguide/CHAP_Welcome.html) |
+| Tipos de tarefa: carga completa, carga completa com CDC e só CDC. Validação compara origem e destino, inclusive as mudanças da CDC. Migrações homogêneas usam ferramentas nativas, sem validação embutida. | [Creating a task](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Tasks.Creating.html), [Validation](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Validating.html), [Homogeneous migrations](https://docs.aws.amazon.com/dms/latest/userguide/data-migrations.html) |
+| Guia de escolha de banco da AWS. | [Choosing an AWS database service](https://aws.amazon.com/getting-started/decision-guides/databases-on-aws-how-to-choose/) |
+
+## Preços
+
+- `src/content/pricing/database-prices.json` é gerado por `npm run prices:database` a partir da AWS Price List API (ofertas AmazonRDS, AmazonElastiCache, AmazonDynamoDB e AmazonRedshift) para us-east-1 e sa-east-1: RDS for PostgreSQL (Single-AZ e Multi-AZ, gp3 e io2, backup, RDS Proxy), Aurora PostgreSQL (Standard e I/O-Optimized, Serverless), DynamoDB (sob demanda, provisionado, armazenamento, PITR, backup), nós do ElastiCache (Valkey, Redis OSS, Memcached) e Redshift (RA3, armazenamento gerenciado, Serverless, Spectrum). Primeira faixa paga, sem nível gratuito; o script falha se faltar algum preço ou se houver ambiguidade.
+- Mês de 730 horas.
+
+## Premissas e simplificações da trilha
+
+- **Premissas dos cenários:** cargas, tamanhos e tráfego das tabelas; tempos de promoção de réplica (10 min), restauração (30 min) e recuperação Single-AZ (15 min); latência de 0,5 ms no cache e 8 ms no banco; 75% da memória do nó de cache para dados; carga completa do DMS a 200 GB por hora e virada de 10 minutos.
+- **Dimensionamento:** só PostgreSQL; a carga cabe se vCPU, memória, espaço, IOPS e throughput bastam; a referência é a mais barata, achada por busca.
+- **Alta disponibilidade:** o cluster Multi-AZ é cobrado como três instâncias da mesma classe (a AWS usa classes próprias); o custo considera só instâncias e RDS Proxy.
+- **DynamoDB:** cada valor de chave de partição numa única partição; provisionado sem auto scaling, cobrindo o pico.
+- **Cache:** com TTL, cada item quente falta uma vez por período; sem TTL, cache já aquecido.
+- **Escolha do banco:** a "complexidade relativa" que desempata as opções é julgamento de arquitetura.
+- **Arquitetura de Dados:** rubrica e pesos pedagógicos.
