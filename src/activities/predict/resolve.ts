@@ -38,6 +38,9 @@ import { blockProblems, lookupRoute, overlaps, parseCidr, usableIps, type Cidr }
 import { OUTCOME_LABEL as REACH_LABEL, traceFlow } from '../../simulators/reach/model'
 import { reaches } from '../../simulators/connect/model'
 import { resolveDns } from '../../simulators/dns/model'
+import { describeLayout, formatSize, layoutMonthly, scannedGB } from '../../simulators/datalake/model'
+import { describeGrant, visibleColumns, visibleRows } from '../../simulators/lakeperm/model'
+import { describeCluster, runJob } from '../../simulators/emr/model'
 import type { PredictSpec } from './specs'
 
 export interface PredictResult {
@@ -373,6 +376,29 @@ export function resolvePredict(spec: PredictSpec): PredictResult {
       const r = resolveDns(spec.records, spec.client)
       if (spec.query === 'share') return { outcome: String(Math.round((r.shares?.[spec.record!] ?? 0) * 10000) / 100), detail: r.trace }
       return { outcome: r.answers.length ? r.answers.join('+') : 'none', detail: r.trace }
+    }
+    case 'datalake': {
+      const q = spec.query ? spec.table.queries.find((x) => x.id === spec.query) : undefined
+      const rows = Object.entries(spec.layouts).map(([id, l]) => ({ id, l, value: q ? scannedGB(spec.table, l, q) : layoutMonthly(spec.table, l, spec.region).total }))
+      const min = Math.min(...rows.map((r) => r.value))
+      const winners = rows.filter((r) => r.value <= min * 1.01)
+      return {
+        outcome: winners.length > 1 ? 'same' : winners[0].id,
+        detail: rows.map((r) => `${describeLayout(r.l, spec.table)}: ${q ? `lê ${formatSize(r.value)} em "${q.label}"` : `${usd(r.value)} por mês`}.`),
+      }
+    }
+    case 'emr': {
+      const r = runJob(spec.job, spec.cluster)
+      return { outcome: r.outcome, detail: [`Cluster: ${describeCluster(spec.cluster)}.`, ...r.trace] }
+    }
+    case 'lakeperm': {
+      const detail = spec.grants.length ? spec.grants.map((g) => `Concessão: ${describeGrant(spec.table, g)}.`) : ['Nenhuma concessão.']
+      if (spec.measure === 'rows') {
+        const rows = visibleRows(spec.table, spec.grants)
+        return { outcome: String(rows), detail: [...detail, `O analista vê ${rows} de ${spec.table.rows.length} linhas.`] }
+      }
+      const sees = visibleColumns(spec.table, spec.grants).has(spec.column!)
+      return { outcome: sees ? 'yes' : 'no', detail: [...detail, sees ? 'A coluna aparece para o analista.' : 'A coluna fica oculta para o analista.'] }
     }
     case 'cost-cheapest': {
       const prices = regionPrices(spec.region)
