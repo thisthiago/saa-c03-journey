@@ -59,10 +59,9 @@ export const TERRITORIES: TerritoryDef[] = [
   {
     id: 'bancos-de-dados',
     title: 'Bancos de dados',
-    summary: 'Relacionais, NoSQL e cache.',
+    summary: 'Relacionais, NoSQL, cache, data warehouse e migração de bancos.',
     glyph: 'database',
-    status: 'planned',
-    plannedServices: ['Amazon RDS', 'Amazon Aurora', 'Amazon DynamoDB', 'Amazon ElastiCache'],
+    status: 'active',
   },
   {
     id: 'integracao',
