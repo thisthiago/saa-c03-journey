@@ -80,6 +80,12 @@ export type GlyphName =
   | 'cache'
   | 'warehouse'
   | 'migrate'
+  | 'bell'
+  | 'gauge'
+  | 'clipboard'
+  | 'terminal'
+  | 'wallet'
+  | 'code'
 
 export interface TerritoryDef {
   id: string
