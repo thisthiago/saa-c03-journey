@@ -554,6 +554,50 @@ test.describe('trilha Computação na AWS', () => {
   }
 })
 
+/** Missões da trilha Bancos de dados na ordem do mapa (as anteriores ficam aprovadas no progresso semeado). */
+const DB_MISSIONS = [
+  ...['m1', 'm2', 'm3', 'boss'].map((m) => `db.f01.${m}`),
+  ...['m1', 'm2', 'm3', 'm4', 'boss'].map((m) => `db.f02.${m}`),
+  ...['m1', 'm2', 'm3', 'boss'].map((m) => `db.f03.${m}`),
+  ...['m1', 'm2', 'm3', 'm4', 'boss'].map((m) => `db.f04.${m}`),
+  ...['f05', 'f06', 'f07', 'f08'].flatMap((f) => ['m1', 'm2', 'm3', 'boss'].map((m) => `db.${f}.${m}`)),
+  ...['m1', 'm2', 'boss'].map((m) => `db.f09.${m}`),
+  'db.final.varejo',
+]
+
+test.describe('trilha Bancos de dados na AWS', () => {
+  const CASES = [
+    { name: 'db-mapa', path: '/#/trilha/database.aws-database' },
+    { name: 'db-f1-dimensionamento', mission: 'db.f01.boss', step: 2 },
+    { name: 'db-f2-falha', mission: 'db.f02.m1', step: 2 },
+    { name: 'db-f2-continuidade', mission: 'db.f02.boss', step: 2 },
+    { name: 'db-f3-escolha', mission: 'db.f03.boss', step: 2 },
+    { name: 'db-f4-chaves', mission: 'db.f04.boss', step: 2 },
+    { name: 'db-f6-cache', mission: 'db.f06.boss', step: 2 },
+    { name: 'db-f8-seguranca', mission: 'db.f08.boss', step: 2 },
+    { name: 'db-f9-migracao', mission: 'db.f09.m2', step: 4 },
+    { name: 'db-final', mission: 'db.final.varejo', step: 2 },
+  ]
+  for (const vp of VIEWPORTS) {
+    for (const c of CASES) {
+      test(`${c.name} — ${vp.name}`, async ({ page }) => {
+        await page.setViewportSize({ width: vp.width, height: vp.height })
+        await page.emulateMedia({ colorScheme: 'dark' })
+        const before = c.mission ? DB_MISSIONS.slice(0, DB_MISSIONS.indexOf(c.mission)) : []
+        const base = progressWithPhase1(new Date(), { missions: before })
+        const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+        await seedProgress(page, seeded)
+        await page.goto(c.path ?? `/#/missao/${c.mission}`)
+        await page.waitForLoadState('networkidle')
+        await page.waitForTimeout(250)
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+        expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+        await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+      })
+    }
+  }
+})
+
 test.describe('banco de questões', () => {
   for (const vp of VIEWPORTS) {
     test(`treino e simulado — ${vp.name}`, async ({ page }) => {
