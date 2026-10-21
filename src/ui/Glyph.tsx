@@ -39,6 +39,10 @@ import {
   Split,
   BadgePercent,
   TrendingUp,
+  Table,
+  DatabaseZap,
+  Warehouse,
+  ArrowRightLeft,
   type LucideIcon,
 } from 'lucide-react'
 import type { GlyphName } from '../engine/types'
@@ -96,6 +100,10 @@ const ICONS: Record<Exclude<GlyphName, 'bucket'>, LucideIcon> = {
   percent: BadgePercent,
   scale: TrendingUp,
   layers: Layers,
+  table: Table,
+  cache: DatabaseZap,
+  warehouse: Warehouse,
+  migrate: ArrowRightLeft,
 }
 
 export function Glyph({ name, size = 22, className }: { name: GlyphName; size?: number; className?: string }) {
