@@ -1,0 +1,38 @@
+/* Peças comuns aos laboratórios da trilha Redes na AWS. */
+.verdicts {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.group {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.86rem;
+}
+.group label {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.status[data-ok='true'] {
+  color: var(--success);
+  font-weight: 600;
+}
+.status[data-ok='false'] {
+  color: var(--danger);
+  font-weight: 600;
+}
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-3);
+  min-width: 0;
+}
+.columns > * {
+  align-content: start;
+}
