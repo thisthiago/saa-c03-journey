@@ -57,6 +57,13 @@ import { endpointsSolution, evaluateEndpointsLab, type EndpointsLabResponse } fr
 import { evaluateHybridLab, hybridSolution, type HybridLabResponse } from '../../simulators/hybrid/model'
 import { dnsPolicySolution, evaluateDnsPolicyLab, type DnsPolicyLabResponse } from '../../simulators/dns/policy'
 import { evaluateNetChooserLab, netChooserSolution, type NetChooserLabResponse } from '../../simulators/netchooser/model'
+import { evaluateLakeLab, lakeInitial, lakeSolution, type LakeLabResponse } from '../../simulators/datalake/lab'
+import { evaluateLakePermLab, lakePermInitial, lakePermSolution, type LakePermLabResponse } from '../../simulators/lakeperm/lab'
+import { emrInitial } from '../../simulators/emr/lab'
+import { evaluateEmrLab, emrSolution, type EmrLabResponse } from '../../simulators/emr/lab'
+import { evaluateIngestLab, ingestSolution, type IngestLabResponse } from '../../simulators/ingest/model'
+import { evaluateAiChooserLab, aiChooserSolution, type AiChooserLabResponse } from '../../simulators/aichooser/model'
+import { evaluateAnaChooserLab, anaChooserSolution, type AnaChooserLabResponse } from '../../simulators/anachooser/model'
 import type { LabActivity } from '../types'
 
 export interface LabItemScore {
@@ -195,6 +202,18 @@ export function evaluateLab(activity: LabActivity, response: unknown): LabResult
       return evaluateDnsPolicyLab(activity.config, (response as DnsPolicyLabResponse | undefined) ?? { placements: {} })
     case 'net-chooser':
       return evaluateNetChooserLab(activity.config, (response as NetChooserLabResponse | undefined) ?? { placements: {} })
+    case 'datalake':
+      return evaluateLakeLab(activity.config, (response as LakeLabResponse | undefined) ?? lakeInitial(activity.config))
+    case 'lakeperm':
+      return evaluateLakePermLab(activity.config, (response as LakePermLabResponse | undefined) ?? lakePermInitial(activity.config))
+    case 'emr':
+      return evaluateEmrLab(activity.config, (response as EmrLabResponse | undefined) ?? emrInitial(activity.config))
+    case 'ingest':
+      return evaluateIngestLab(activity.config, (response as IngestLabResponse | undefined) ?? { placements: {} })
+    case 'ai-chooser':
+      return evaluateAiChooserLab(activity.config, (response as AiChooserLabResponse | undefined) ?? { placements: {} })
+    case 'ana-chooser':
+      return evaluateAnaChooserLab(activity.config, (response as AnaChooserLabResponse | undefined) ?? { placements: {} })
   }
 }
 
@@ -300,6 +319,18 @@ export function labSolution(activity: LabActivity): unknown {
       return dnsPolicySolution(activity.config)
     case 'net-chooser':
       return netChooserSolution(activity.config)
+    case 'datalake':
+      return lakeSolution(activity.config)
+    case 'lakeperm':
+      return lakePermSolution(activity.config)
+    case 'emr':
+      return emrSolution(activity.config)
+    case 'ingest':
+      return ingestSolution(activity.config)
+    case 'ai-chooser':
+      return aiChooserSolution(activity.config)
+    case 'ana-chooser':
+      return anaChooserSolution(activity.config)
   }
 }
 
@@ -403,5 +434,15 @@ export function labInitialResponse(activity: LabActivity): unknown {
     case 'connect':
     case 'endpoints':
       return { choices: {} }
+    case 'datalake':
+      return lakeInitial(activity.config)
+    case 'lakeperm':
+      return lakePermInitial(activity.config)
+    case 'emr':
+      return emrInitial(activity.config)
+    case 'ingest':
+    case 'ai-chooser':
+    case 'ana-chooser':
+      return { placements: {} }
   }
 }
