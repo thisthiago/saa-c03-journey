@@ -287,7 +287,7 @@ function PhasePanel({ phase }: { phase: PhaseDef }) {
       {playable && (
         <div className="row" style={{ marginTop: 20 }}>
           {next && (
-            <ButtonLink to={`/missao/${next.id}`}>
+            <ButtonLink to={`/missao/${next.id}`} className={s.playLink}>
               <Play size={18} aria-hidden="true" /> {missionStatus(progress, registry, next.id) === 'in-progress' ? 'Continuar' : 'Jogar'}: {next.title}
             </ButtonLink>
           )}
