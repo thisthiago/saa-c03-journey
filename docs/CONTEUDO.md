@@ -109,6 +109,31 @@ Módulo `src/content/modules/database/`. Reaproveita, sem redeclarar, `infra.rds
 
 **Escolha do banco.** O lab `db-chooser` segue o padrão da escolha da computação, com um único catálogo de opções (bancos, recursos do DynamoDB e opções de análise). Cada laboratório passa só as opções que fazem sentido para a fase, e os testes falham se duas opções empatarem como melhor.
 
+## Trilha Monitoramento e governança na AWS
+
+Módulo `src/content/modules/governance/`, território `monitoramento`. Reaproveita, sem redeclarar, `org.organizations`, `org.scp`, `org.rcp`, `org.control-tower` (Fase 7), `ec2.savings-plans` e `ec2.compute-optimizer` (Fase 8), `support.trusted-advisor` (Fase 9) e `cw.agent` (Fase 2). Acrescenta conceitos `cw.*`, `logs.*`, `xray.*`, `trail.*`, `cfg.*`, `ssm.*`, `cfn.*`, `sc.*`, `gov.*`, `fin.*` e `ops.*`. O Well-Architected Tool fica na trilha de Arquitetura, e a Fase 7 aprofunda a governança multiconta sem repetir as SCPs da trilha de IAM.
+
+| Fase | Tema | Empresas fictícias | Laboratórios |
+|---|---|---|---|
+| 1 | CloudWatch: métricas e alarmes | Padaria Trigo Bom | Alarmes (períodos, M de N e dados ausentes) |
+| 2 | Logs e rastreamento | Rede de Clínicas Vida Plena | Logs (retenção, classe e filtros de métrica) |
+| 3 | CloudTrail | Cooperativa Agrícola Rio Claro | Trilhas (onde cada evento é encontrado) |
+| 4 | AWS Config | Banco Cooperativo Horizonte | Regras de conformidade e remediação |
+| 5 | Systems Manager | Rede de Supermercados Bom Preço | Escolha da ferramenta (classificação) |
+| 6 | Infraestrutura como código | Estúdio Pixel Verde | Atualização de stacks (o que muda, é substituído ou removido) |
+| 7 | Governança multiconta | Holding Vento Sul | Investigação (a conta fora do padrão) |
+| 8 | Custos e orçamentos | Rede Mercado Tropical | Orçamentos e tags de alocação de custo |
+| 9 | Recomendações e escolha | Editora Horizonte | Escolha do serviço de operação |
+| Final | Central de Operações | Atlas Transportes | Arquitetura em 8 etapas, com dimensões Seguro, Resiliente, Alto desempenho, Custo e Requisitos |
+
+**Dependências.** A Fase 2 exige a 1; a 4 exige a 3; a 7 exige a 4; a 9 exige a 2, a 7 e a 8; as demais só recomendam; o desafio final exige as nove. A trilha recomenda a AWS Foundations e a IAM. O mapa usa cinco colunas (x = 90, 270, 450, 630 e 815) e `mapHeight: 800`, porque a cadeia F3, F4, F7, F9 e final tem cinco níveis de dependência.
+
+**Preços reais nos labs.** Os custos de logs (ingestão e armazenamento), de trilhas (eventos de dados) e de regras do Config calculam valores com `simulators/governance-prices.ts`, que lê a tabela gerada por `npm run prices:governance`. A premissa de que um grupo sem retenção guarda 1.825 dias é do cenário.
+
+**Premissas do cenário.** Os alarmes avaliam o intervalo de N períodos mais dois, com a regra do alarme prematuro; os casos que a documentação não especifica mantêm o estado anterior. O gasto de cada recurso nos orçamentos é constante por dia, com uma mudança de patamar, e a previsão é uma projeção linear. O comportamento de atualização do CloudFormation vem de uma tabela de propriedades conferidas na referência de cada tipo; a propriedade Port do RDS ficou de fora porque o guia e a referência divergem.
+
+**Escolha do serviço.** O lab `ops-chooser` segue o padrão da escolha da computação: cada pergunta tem um requisito que decide, a melhor opção vale 1, uma que atende com mais trabalho vale 0,5 e uma que deixa um requisito de fora vale 0. Os testes falham se duas opções empatarem como melhor.
+
 ## Princípios de escrita
 
 - **Aprender fazendo.** Cada missão segue a ordem: contexto (briefing) → conceitos-chave (intel, até ~80 palavras por carta) → desafios → resultado (debrief). Na interface aparecem só os nomes em português.
@@ -146,6 +171,8 @@ Cada módulo tem um `questions.ts` com questões no formato do exame. Para escre
 Os testes recusam questão com conceito inexistente, formato errado, alternativa sem explicação, alternativas repetidas ou setas no texto.
 
 ## Preços
+
+`src/content/pricing/governance-prices.json` é gerado por `npm run prices:governance` (CloudWatch, CloudTrail e Config; us-east-1 e sa-east-1), a partir da AWS Price List Bulk API; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
 
 `src/content/pricing/database-prices.json` é gerado por `npm run prices:database` (RDS for PostgreSQL, Aurora PostgreSQL, DynamoDB, ElastiCache e Redshift; us-east-1 e sa-east-1). O script lê o CSV regional do RDS e do ElastiCache em streaming e usa a primeira faixa paga de cada item; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
 
