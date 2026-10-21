@@ -126,4 +126,4 @@ O campo `map` de cada fase é o centro do hexágono num canvas de 900 de largura
 
 ## Build
 
-O pacote é dividido em bibliotecas (`vendor`), conteúdo comum (`content`), um pacote por módulo de conteúdo (`content-foundations`, `content-storage`, `content-identity`, `content-compute`, `content-database`, `content-governance`) e aplicação. As telas além da Base são carregadas sob demanda.
+O pacote é dividido em bibliotecas (`vendor`), conteúdo comum (`content`), um pacote por módulo de conteúdo (`content-foundations`, `content-storage`, `content-identity`, `content-compute`, `content-database`, `content-governance`, `content-network`) e aplicação. As telas além da Base são carregadas sob demanda.
