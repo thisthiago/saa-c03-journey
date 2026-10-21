@@ -24,6 +24,12 @@ import type { Failure as DbFailure, Topology as DbTopology } from '../../simulat
 import type { Consistency, KeyValue, TableLoad } from '../../simulators/dynamo/model'
 import type { AuroraCluster } from '../../simulators/aurora/model'
 import type { CacheConfig, CacheScenarioLoad } from '../../simulators/cachedb/model'
+import type { AlarmState, MissingData } from '../../simulators/alarm/model'
+import type { AccountEvent, TrailSetup } from '../../simulators/trail/model'
+import type { CfgResource, RuleParams } from '../../simulators/compliance/model'
+import type { StackResource } from '../../simulators/stack/model'
+import type { AccessMethod, NodeState } from '../../simulators/ssm/model'
+import type { BudgetAlert, BudgetFilter, SpendStream } from '../../simulators/budget/model'
 
 export type PredictSpec =
   | {
@@ -100,6 +106,22 @@ export type PredictSpec =
   | { sim: 'aurora-io'; cluster: AuroraCluster; region?: string }
   /** Cache: `stale` → um dado pode aparecer desatualizado (yes/no); `db-ok` → as leituras que chegam ao banco cabem em `maxDbReads` (yes/no). */
   | { sim: 'cache'; load: CacheScenarioLoad; config: CacheConfig; query: 'stale' | 'db-ok'; maxDbReads?: number }
+  /** Alarme do CloudWatch: estado depois dos pontos (`0` dentro do limite, `X` violando, `-` ausente; do mais antigo ao mais novo). */
+  | { sim: 'alarm-state'; points: string; n: number; m: number; missing: MissingData; prev?: AlarmState }
+  /** CloudTrail: onde o evento fica registrado (history/trail/both/none). */
+  | { sim: 'trail-found'; event: AccountEvent; trails: TrailSetup[]; account: string }
+  /** AWS Config: resultado da regra gerenciada sobre o recurso (COMPLIANT/NON_COMPLIANT/NOT_APPLICABLE). */
+  | { sim: 'config-rule'; rule: string; resource: CfgResource; params?: RuleParams }
+  /** Orçamento: primeiro dia do mês em que o alerta dispara (o número do dia, ou never). */
+  | { sim: 'budget-alert'; streams: SpendStream[]; filter: BudgetFilter; days: number; limit: number; alert: BudgetAlert }
+  /** Systems Manager: o acesso exige uma porta de entrada aberta (yes/no)? */
+  | { sim: 'ssm-port'; method: AccessMethod }
+  /** Systems Manager: a instância aparece como nó gerenciado (managed/not-managed)? */
+  | { sim: 'ssm-managed'; node: NodeState }
+  /** CloudFormation: efeito da atualização sobre o recurso `resource` (created, unchanged, none, some, replaced-delete, replaced-retain, replaced-snapshot, removed-delete, removed-retain ou removed-snapshot). */
+  | { sim: 'cfn-effect'; current: StackResource[]; next: StackResource[]; resource: string }
+  /** CloudWatch Logs: o padrão de filtro conta a linha (yes/no)? */
+  | { sim: 'log-filter'; pattern: string; line: string }
 
 
 /** Uma requisição é permitida ou negada? (resultado calculado pelo avaliador de acesso) */

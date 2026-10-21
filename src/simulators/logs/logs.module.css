@@ -1,0 +1,38 @@
+/* Linhas de exemplo do laboratório de logs. */
+.lines {
+  display: grid;
+  gap: 2px;
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  padding: 6px 8px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.line {
+  display: grid;
+  grid-template-columns: 1.2em 1fr;
+  gap: 6px;
+  font-size: 0.78rem;
+  align-items: baseline;
+  color: var(--text-muted);
+}
+.line code {
+  font-family: var(--font-mono);
+  white-space: pre;
+}
+.line[data-counted='true'] {
+  color: var(--text);
+}
+.line[data-counted='true'] .mark {
+  color: var(--accent);
+}
+.mark {
+  text-align: center;
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}

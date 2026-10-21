@@ -69,6 +69,20 @@ import { DbSecureLab } from '../simulators/dbsecure/DbSecureLab'
 import type { DbSecureLabResponse } from '../simulators/dbsecure/lab'
 import { MigrationLab } from '../simulators/migration/MigrationLab'
 import type { MigrationLabResponse } from '../simulators/migration/lab'
+import { AlarmLab } from '../simulators/alarm/AlarmLab'
+import type { AlarmLabResponse } from '../simulators/alarm/lab'
+import { LogsLab } from '../simulators/logs/LogsLab'
+import type { LogsLabResponse } from '../simulators/logs/lab'
+import { TrailLab } from '../simulators/trail/TrailLab'
+import type { TrailLabResponse } from '../simulators/trail/lab'
+import { ComplianceLab } from '../simulators/compliance/ComplianceLab'
+import type { ComplianceLabResponse } from '../simulators/compliance/lab'
+import { StackLab } from '../simulators/stack/StackLab'
+import type { StackLabResponse } from '../simulators/stack/lab'
+import { BudgetLab } from '../simulators/budget/BudgetLab'
+import type { BudgetLabResponse } from '../simulators/budget/lab'
+import { OpsChooserLab } from '../simulators/opschooser/OpsChooserLab'
+import type { OpsChooserLabResponse } from '../simulators/opschooser/lab'
 import type { TransferLabResponse } from '../simulators/transfer/lab'
 import type { GatewayLabResponse } from '../simulators/gateway/lab'
 import type { RPLabResponse } from '../simulators/requester-pays/lab'
@@ -192,6 +206,20 @@ export function ActivityView({ activity, value, onChange, disabled, evaluation, 
           return <DbSecureLab config={activity.config} value={value as unknown as DbSecureLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
         case 'migration':
           return <MigrationLab config={activity.config} value={value as unknown as MigrationLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'alarm':
+          return <AlarmLab config={activity.config} value={value as unknown as AlarmLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'logs':
+          return <LogsLab config={activity.config} value={value as unknown as LogsLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'trail':
+          return <TrailLab config={activity.config} value={value as unknown as TrailLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'compliance':
+          return <ComplianceLab config={activity.config} value={value as unknown as ComplianceLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'stack':
+          return <StackLab config={activity.config} value={value as unknown as StackLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'budget':
+          return <BudgetLab config={activity.config} value={value as unknown as BudgetLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'ops-chooser':
+          return <OpsChooserLab config={activity.config} value={value as unknown as OpsChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
       }
   }
 }

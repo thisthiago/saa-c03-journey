@@ -18,6 +18,7 @@ export default defineConfig({
             { name: 'content-identity', test: /src[\\/]content[\\/]modules[\\/]identity[\\/]/ },
             { name: 'content-compute', test: /src[\\/]content[\\/]modules[\\/]compute[\\/]/ },
             { name: 'content-database', test: /src[\\/]content[\\/]modules[\\/]database[\\/]/ },
+            { name: 'content-governance', test: /src[\\/]content[\\/]modules[\\/]governance[\\/]/ },
             { name: 'content', test: /src[\\/]content[\\/]/ },
           ],
         },

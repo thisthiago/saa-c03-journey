@@ -43,6 +43,12 @@ import {
   DatabaseZap,
   Warehouse,
   ArrowRightLeft,
+  Bell,
+  Gauge,
+  ClipboardCheck,
+  Terminal,
+  Wallet,
+  FileCode,
   type LucideIcon,
 } from 'lucide-react'
 import type { GlyphName } from '../engine/types'
@@ -104,6 +110,12 @@ const ICONS: Record<Exclude<GlyphName, 'bucket'>, LucideIcon> = {
   cache: DatabaseZap,
   warehouse: Warehouse,
   migrate: ArrowRightLeft,
+  bell: Bell,
+  gauge: Gauge,
+  clipboard: ClipboardCheck,
+  terminal: Terminal,
+  wallet: Wallet,
+  code: FileCode,
 }
 
 export function Glyph({ name, size = 22, className }: { name: GlyphName; size?: number; className?: string }) {

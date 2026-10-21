@@ -1,0 +1,82 @@
+{
+  "source": "AWS Price List Bulk API",
+  "sourceDocs": "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-price-list-query-api.html",
+  "retrievedAt": "2026-10-21",
+  "currency": "USD",
+  "notes": [
+    "Valores de referência para fins didáticos, extraídos da AWS Price List na data indicada.",
+    "Apenas a primeira faixa paga de cada item; sem nível gratuito, impostos, transferência de dados ou descontos por volume.",
+    "Os painéis personalizados do CloudWatch não constam da Price List em massa e ficam de fora.",
+    "Preços mudam: consulte as páginas de preço de cada serviço antes de qualquer decisão real."
+  ],
+  "regions": {
+    "us-east-1": {
+      "label": "US East (N. Virginia)",
+      "offers": {
+        "AmazonCloudWatch": "2026-10-07T11:55:40Z",
+        "AWSCloudTrail": "2026-09-11T12:45:31Z",
+        "AWSConfig": "2026-09-11T12:45:34Z"
+      },
+      "cloudwatch": {
+        "customMetricMonth": 0.3,
+        "standardAlarmMonth": 0.1,
+        "highResAlarmMonth": 0.3,
+        "compositeAlarmMonth": 0.5,
+        "logIngestGB": 0.5,
+        "logIngestInfrequentGB": 0.25,
+        "logStorageGBMonth": 0.03,
+        "logInsightsScannedGB": 0.005
+      },
+      "cloudtrail": {
+        "extraManagementEventPer100k": 2,
+        "dataEventPer100k": 0.1,
+        "insightsEventPer100k": 0.35
+      },
+      "config": {
+        "configurationItem": 0.003,
+        "configurationItemDaily": 0.012,
+        "ruleEvaluation": 0.001,
+        "conformancePackEvaluation": 0.001
+      },
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSCloudTrail/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSConfig/current/us-east-1/index.json"
+      ]
+    },
+    "sa-east-1": {
+      "label": "América do Sul (São Paulo)",
+      "offers": {
+        "AmazonCloudWatch": "2026-10-07T11:55:40Z",
+        "AWSCloudTrail": "2026-09-11T12:45:31Z",
+        "AWSConfig": "2026-09-11T12:45:34Z"
+      },
+      "cloudwatch": {
+        "customMetricMonth": 0.3,
+        "standardAlarmMonth": 0.135,
+        "highResAlarmMonth": 0.405,
+        "compositeAlarmMonth": 0.675,
+        "logIngestGB": 0.9,
+        "logIngestInfrequentGB": 0.45,
+        "logStorageGBMonth": 0.0408,
+        "logInsightsScannedGB": 0.009
+      },
+      "cloudtrail": {
+        "extraManagementEventPer100k": 2,
+        "dataEventPer100k": 0.1,
+        "insightsEventPer100k": 0.35
+      },
+      "config": {
+        "configurationItem": 0.003,
+        "configurationItemDaily": 0.012,
+        "ruleEvaluation": 0.001,
+        "conformancePackEvaluation": 0.001
+      },
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudWatch/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSCloudTrail/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSConfig/current/sa-east-1/index.json"
+      ]
+    }
+  }
+}

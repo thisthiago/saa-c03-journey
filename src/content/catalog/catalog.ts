@@ -82,10 +82,9 @@ export const TERRITORIES: TerritoryDef[] = [
   {
     id: 'monitoramento',
     title: 'Monitoramento e governança',
-    summary: 'Métricas, auditoria, conformidade e recomendações.',
+    summary: 'Métricas, auditoria, conformidade, automação, custos e recomendações.',
     glyph: 'eye',
-    status: 'planned',
-    plannedServices: ['Amazon CloudWatch', 'AWS CloudTrail', 'AWS Config', 'AWS Trusted Advisor'],
+    status: 'active',
   },
   {
     id: 'arquitetura',

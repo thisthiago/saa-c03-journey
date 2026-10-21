@@ -36,6 +36,13 @@ import type { DbChooserLabConfig } from '../../simulators/dbchooser/lab'
 import type { CacheLabConfig } from '../../simulators/cachedb/lab'
 import type { DbSecureLabConfig } from '../../simulators/dbsecure/lab'
 import type { MigrationLabConfig } from '../../simulators/migration/lab'
+import type { AlarmLabConfig } from '../../simulators/alarm/lab'
+import type { LogsLabConfig } from '../../simulators/logs/lab'
+import type { TrailLabConfig } from '../../simulators/trail/lab'
+import type { ComplianceLabConfig } from '../../simulators/compliance/lab'
+import type { StackLabConfig } from '../../simulators/stack/lab'
+import type { BudgetLabConfig } from '../../simulators/budget/lab'
+import type { OpsChooserLabConfig } from '../../simulators/opschooser/lab'
 
 export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'; config: CostLabConfig } | { lab: 'access'; config: AccessLabConfig }
   | { lab: 'versioning'; config: VersioningLabConfig }
@@ -72,5 +79,12 @@ export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'
   | { lab: 'cache-sim'; config: CacheLabConfig }
   | { lab: 'db-secure'; config: DbSecureLabConfig }
   | { lab: 'migration'; config: MigrationLabConfig }
+  | { lab: 'alarm'; config: AlarmLabConfig }
+  | { lab: 'logs'; config: LogsLabConfig }
+  | { lab: 'trail'; config: TrailLabConfig }
+  | { lab: 'compliance'; config: ComplianceLabConfig }
+  | { lab: 'stack'; config: StackLabConfig }
+  | { lab: 'budget'; config: BudgetLabConfig }
+  | { lab: 'ops-chooser'; config: OpsChooserLabConfig }
 
 export type LabId = LabSpec['lab']

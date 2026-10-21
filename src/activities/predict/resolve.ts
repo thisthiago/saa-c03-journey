@@ -27,6 +27,13 @@ import { describeTopology, FAILURE_LABEL as DB_FAILURE_LABEL, formatSeconds, LOS
 import { CONSISTENCY_LABEL, hotPartition, MODE_LABEL, neededCapacity, onDemandMonthly, provisionedMonthly, readUnits, writeUnits, cheaperMode } from '../../simulators/dynamo/model'
 import { auroraMonthly, cheaperStorageConfig, ioShare, STORAGE_CONFIG_LABEL } from '../../simulators/aurora/model'
 import { cacheMetrics, describeCache } from '../../simulators/cachedb/model'
+import { MISSING_LABEL, stateFromPoints, type PointCat } from '../../simulators/alarm/model'
+import { matchFilter } from '../../simulators/logs/model'
+import { FOUND_LABEL, foundIn } from '../../simulators/trail/model'
+import { evaluateRule, RULES } from '../../simulators/compliance/model'
+import { EFFECT_LABEL as CFN_EFFECT_LABEL, planUpdate } from '../../simulators/stack/model'
+import { METHOD_LABEL, NEEDS_INBOUND_PORT, notManagedReasons } from '../../simulators/ssm/model'
+import { dailyTotals, firstAlertDay } from '../../simulators/budget/model'
 import type { PredictSpec } from './specs'
 
 export interface PredictResult {
@@ -287,6 +294,50 @@ export function resolvePredict(spec: PredictSpec): PredictResult {
       ]
       if (spec.query === 'stale') return { outcome: m.maxStaleSec > 0 ? 'yes' : 'no', detail }
       return { outcome: m.dbReadsPerSec <= (spec.maxDbReads ?? 0) ? 'yes' : 'no', detail }
+    }
+    case 'alarm-state': {
+      const cats: PointCat[] = spec.points.split(' ').map((c) => (c === '0' ? 'ok' : c === 'X' ? 'breach' : 'missing'))
+      const state = stateFromPoints(cats, spec.n, spec.m, spec.missing, spec.prev ?? 'OK')
+      const real = cats.filter((c) => c !== 'missing').length
+      return {
+        outcome: state,
+        detail: [
+          `Alarme de ${spec.m} em ${spec.n} pontos. Os cinco pontos mais recentes, do mais antigo ao mais novo: ${spec.points}.`,
+          `Pontos reais no intervalo: ${real}. Dados ausentes: ${MISSING_LABEL[spec.missing]}.`,
+          `Estado resultante: ${state}.`,
+        ],
+      }
+    }
+    case 'trail-found': {
+      const found = foundIn(spec.event, spec.trails, spec.account)
+      return { outcome: found, detail: [`${spec.event.text}: ${FOUND_LABEL[found].toLowerCase()}.`, spec.event.kind === 'management' ? `Evento de gerenciamento de ${spec.event.ageDays} dia(s) atrás, na Região ${spec.event.region}.` : `Evento de dados, que o histórico de eventos nunca mostra.`] }
+    }
+    case 'config-rule': {
+      const result = evaluateRule(RULES[spec.rule], spec.resource, spec.params)
+      return { outcome: result, detail: [`A regra ${spec.rule} avaliou ${spec.resource.name}: ${result}.`] }
+    }
+    case 'budget-alert': {
+      const daily = dailyTotals(spec.streams, spec.filter, spec.days)
+      const day = firstAlertDay(daily, spec.limit, [spec.alert])
+      const total = Math.round(daily.reduce((a, b) => a + b, 0))
+      return { outcome: day === undefined ? 'never' : String(day), detail: [`Gasto do mês: cerca de US$ ${total.toLocaleString('pt-BR')}; limite de US$ ${spec.limit.toLocaleString('pt-BR')}.`, day === undefined ? 'O alerta não dispara neste mês.' : `O alerta de ${spec.alert.kind === 'actual' ? 'valor real' : 'valor previsto'} a ${spec.alert.pct}% dispara no dia ${day}.`] }
+    }
+    case 'ssm-port': {
+      const needs = NEEDS_INBOUND_PORT[spec.method]
+      return { outcome: needs ? 'yes' : 'no', detail: [`${METHOD_LABEL[spec.method]}: ${needs ? 'exige uma porta de entrada aberta, na instância ou num servidor intermediário.' : 'não exige nenhuma porta de entrada: a instância é que se conecta ao serviço, por saída.'}`] }
+    }
+    case 'ssm-managed': {
+      const reasons = notManagedReasons(spec.node)
+      return { outcome: reasons.length ? 'not-managed' : 'managed', detail: reasons.length ? ['A instância não aparece como nó gerenciado:', ...reasons.map((r) => `${r}.`)] : ['O agente está rodando, tem permissões e alcança o serviço: a instância é um nó gerenciado.'] }
+    }
+    case 'cfn-effect': {
+      const plan = planUpdate(spec.current, spec.next).find((p) => p.id === spec.resource)
+      if (!plan) throw new Error(`Recurso ${spec.resource} não existe nos modelos`)
+      return { outcome: plan.effect, detail: [`${spec.resource}: ${CFN_EFFECT_LABEL[plan.effect].toLowerCase()}.`, plan.why] }
+    }
+    case 'log-filter': {
+      const yes = matchFilter(spec.pattern, spec.line)
+      return { outcome: yes ? 'yes' : 'no', detail: [`O padrão ${spec.pattern} ${yes ? 'conta' : 'não conta'} a linha ${spec.line}.`] }
     }
     case 'cost-cheapest': {
       const prices = regionPrices(spec.region)

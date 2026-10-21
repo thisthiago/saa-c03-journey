@@ -598,6 +598,56 @@ test.describe('trilha Bancos de dados na AWS', () => {
   }
 })
 
+/** Missões da trilha Monitoramento e governança na ordem do mapa (as anteriores ficam aprovadas no progresso semeado). */
+const GOV_MISSIONS = [
+  ...['m1', 'm2', 'm3', 'm4', 'boss'].map((m) => `gov.f01.${m}`),
+  ...['m1', 'm2', 'm3', 'm4', 'boss'].map((m) => `gov.f02.${m}`),
+  ...['m1', 'm2', 'm3', 'boss'].map((m) => `gov.f03.${m}`),
+  ...['m1', 'm2', 'm3', 'boss'].map((m) => `gov.f04.${m}`),
+  ...['m1', 'm2', 'm3', 'boss'].map((m) => `gov.f05.${m}`),
+  ...['m1', 'm2', 'm3', 'm4', 'boss'].map((m) => `gov.f06.${m}`),
+  ...['m1', 'm2', 'm3', 'boss'].map((m) => `gov.f07.${m}`),
+  ...['m1', 'm2', 'm3', 'm4', 'boss'].map((m) => `gov.f08.${m}`),
+  ...['m1', 'm2', 'm3', 'm4', 'boss'].map((m) => `gov.f09.${m}`),
+  'gov.final.operacoes',
+]
+
+test.describe('trilha Monitoramento e governança na AWS', () => {
+  const CASES: { name: string; mission?: string; step?: number; path?: string }[] = [
+    { name: 'gov-f1-previsao', mission: 'gov.f01.m3', step: 2 },
+    { name: 'gov-f1-alarmes', mission: 'gov.f01.boss', step: 2 },
+    { name: 'gov-f2-logs', mission: 'gov.f02.boss', step: 2 },
+    { name: 'gov-f3-investigacao', mission: 'gov.f03.m3', step: 6 },
+    { name: 'gov-f3-trilha', mission: 'gov.f03.boss', step: 2 },
+    { name: 'gov-f4-regras', mission: 'gov.f04.boss', step: 2 },
+    { name: 'gov-f5-ferramentas', mission: 'gov.f05.boss', step: 2 },
+    { name: 'gov-f6-atualizacao', mission: 'gov.f06.boss', step: 2 },
+    { name: 'gov-f7-conta', mission: 'gov.f07.boss', step: 2 },
+    { name: 'gov-f8-orcamentos', mission: 'gov.f08.boss', step: 2 },
+    { name: 'gov-f9-escolha', mission: 'gov.f09.boss', step: 2 },
+    { name: 'gov-final', mission: 'gov.final.operacoes', step: 2 },
+    { name: 'gov-mapa', path: '/#/trilha/governance.aws-governance' },
+  ]
+  for (const vp of VIEWPORTS) {
+    for (const c of CASES) {
+      test(`${c.name} — ${vp.name}`, async ({ page }) => {
+        await page.setViewportSize({ width: vp.width, height: vp.height })
+        await page.emulateMedia({ colorScheme: 'dark' })
+        const before = c.mission ? GOV_MISSIONS.slice(0, GOV_MISSIONS.indexOf(c.mission)) : []
+        const base = progressWithPhase1(new Date(), { missions: before })
+        const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+        await seedProgress(page, seeded)
+        await page.goto(c.path ?? `/#/missao/${c.mission}`)
+        await page.waitForLoadState('networkidle')
+        await page.waitForTimeout(250)
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+        expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+        await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+      })
+    }
+  }
+})
+
 test.describe('banco de questões', () => {
   for (const vp of VIEWPORTS) {
     test(`treino e simulado — ${vp.name}`, async ({ page }) => {

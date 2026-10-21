@@ -13,6 +13,9 @@ import { purchaseComplete, type PurchaseLabResponse } from '../simulators/purcha
 import { dbSizingComplete, type DbSizingLabResponse } from '../simulators/dbsize/lab'
 import { ddbKeysComplete, type DdbKeysLabResponse } from '../simulators/dynamo/lab'
 import { migrationComplete, type MigrationLabResponse } from '../simulators/migration/lab'
+import { logsLabComplete, type LogsLabResponse } from '../simulators/logs/lab'
+import { stackLabComplete, type StackLabResponse } from '../simulators/stack/lab'
+import { budgetLabComplete, type BudgetLabResponse } from '../simulators/budget/lab'
 import type {
   ActivityResponse,
   DecisionResponse,
@@ -131,11 +134,21 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
         case 'rds-ha':
         case 'cache-sim':
         case 'db-secure':
+        case 'ops-chooser':
+        case 'compliance':
+        case 'trail':
+        case 'alarm':
           return true
         case 'db-sizing':
           return dbSizingComplete(activity.config, response as unknown as DbSizingLabResponse)
         case 'ddb-keys':
           return ddbKeysComplete(activity.config, response as unknown as DdbKeysLabResponse)
+        case 'logs':
+          return logsLabComplete(activity.config, response as unknown as LogsLabResponse)
+        case 'stack':
+          return stackLabComplete(activity.config, response as unknown as StackLabResponse)
+        case 'budget':
+          return budgetLabComplete(activity.config, response as unknown as BudgetLabResponse)
         case 'migration':
           return migrationComplete(activity.config, response as unknown as MigrationLabResponse)
       }
@@ -211,6 +224,12 @@ function labHint(activity: Extract<ActivityDef, { kind: 'lab' }>): string {
       return 'Escolha as chaves e o modo de capacidade de cada tabela.'
     case 'migration':
       return 'Escolha o tipo de tarefa do DMS de cada migração.'
+    case 'logs':
+      return "Escolha o padrão do filtro, a classe e a retenção de cada grupo de logs."
+    case 'stack':
+      return "Escolha o efeito da atualização em cada recurso."
+    case 'budget':
+      return "Ative as tags e configure o orçamento de cada alvo."
     default:
       return 'Responda a todas as tarefas.'
   }
