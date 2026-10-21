@@ -98,6 +98,18 @@ import type { HybridLabResponse } from '../simulators/hybrid/model'
 import { DnsPolicyLab } from '../simulators/dns/DnsPolicyLab'
 import type { DnsPolicyLabResponse } from '../simulators/dns/policy'
 import { NetChooserLab } from '../simulators/netchooser/NetChooserLab'
+import { DatalakeLab } from '../simulators/datalake/DatalakeLab'
+import type { LakeLabResponse } from '../simulators/datalake/lab'
+import { LakePermLab } from '../simulators/lakeperm/LakePermLab'
+import type { LakePermLabResponse } from '../simulators/lakeperm/lab'
+import { EmrLab } from '../simulators/emr/EmrLab'
+import type { EmrLabResponse } from '../simulators/emr/lab'
+import { IngestLab } from '../simulators/ingest/IngestLab'
+import type { IngestLabResponse } from '../simulators/ingest/model'
+import { AiChooserLab } from '../simulators/aichooser/AiChooserLab'
+import type { AiChooserLabResponse } from '../simulators/aichooser/model'
+import { AnaChooserLab } from '../simulators/anachooser/AnaChooserLab'
+import type { AnaChooserLabResponse } from '../simulators/anachooser/model'
 import type { NetChooserLabResponse } from '../simulators/netchooser/model'
 import type { TransferLabResponse } from '../simulators/transfer/lab'
 import type { GatewayLabResponse } from '../simulators/gateway/lab'
@@ -252,6 +264,18 @@ export function ActivityView({ activity, value, onChange, disabled, evaluation, 
           return <DnsPolicyLab config={activity.config} value={value as unknown as DnsPolicyLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
         case 'net-chooser':
           return <NetChooserLab config={activity.config} value={value as unknown as NetChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'datalake':
+          return <DatalakeLab config={activity.config} value={value as unknown as LakeLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'lakeperm':
+          return <LakePermLab config={activity.config} value={value as unknown as LakePermLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'emr':
+          return <EmrLab config={activity.config} value={value as unknown as EmrLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'ingest':
+          return <IngestLab config={activity.config} value={value as unknown as IngestLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'ai-chooser':
+          return <AiChooserLab config={activity.config} value={value as unknown as AiChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'ana-chooser':
+          return <AnaChooserLab config={activity.config} value={value as unknown as AnaChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
       }
   }
 }
