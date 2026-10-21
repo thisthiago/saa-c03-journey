@@ -76,6 +76,10 @@ export type GlyphName =
   | 'percent'
   | 'scale'
   | 'layers'
+  | 'table'
+  | 'cache'
+  | 'warehouse'
+  | 'migrate'
 
 export interface TerritoryDef {
   id: string
