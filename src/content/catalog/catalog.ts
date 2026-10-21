@@ -1,7 +1,7 @@
 /**
  * Catálogo global: territórios do mapa, domínios do exame SAA-C03 e títulos de nível.
  */
-import type { ExamDomain, TerritoryDef } from '../../engine/types'
+import type { ExamDomain, PlannedTrackDef, TerritoryDef } from '../../engine/types'
 
 /**
  * Domínios e pesos do exame SAA-C03.
@@ -26,6 +26,12 @@ export const EXAM_INFO = {
   checkedAt: '2026-10-16',
 }
 
+/**
+ * Territórios do mapa. `examDomains` liga cada um aos domínios do SAA-C03 que
+ * ele mais trabalha, pelas tarefas do guia do exame (consultado em
+ * 16/10/2026): 1.1 a 1.3 (seguro), 2.1 e 2.2 (resiliente), 3.1 a 3.5 (alto
+ * desempenho) e 4.1 a 4.4 (custo). É uma ligação pedagógica, não da AWS.
+ */
 export const TERRITORIES: TerritoryDef[] = [
   {
     id: 'fundamentos',
@@ -33,6 +39,7 @@ export const TERRITORIES: TerritoryDef[] = [
     summary: 'Infraestrutura global, planos de suporte e o modelo de responsabilidade compartilhada.',
     glyph: 'globe',
     status: 'active',
+    examDomains: ['d2', 'd1'],
   },
   {
     id: 'armazenamento',
@@ -40,6 +47,7 @@ export const TERRITORIES: TerritoryDef[] = [
     summary: 'Objetos, blocos, arquivos, transferência e armazenamento híbrido.',
     glyph: 'bucket',
     status: 'active',
+    examDomains: ['d3', 'd4', 'd1'],
   },
   {
     id: 'computacao',
@@ -47,6 +55,7 @@ export const TERRITORIES: TerritoryDef[] = [
     summary: 'Instâncias, volumes, balanceamento, escalonamento, contêineres e funções sem servidor.',
     glyph: 'server',
     status: 'active',
+    examDomains: ['d3', 'd4', 'd2'],
   },
   {
     id: 'redes',
@@ -54,6 +63,7 @@ export const TERRITORIES: TerritoryDef[] = [
     summary: 'VPC, sub-redes, roteamento, conexões híbridas, DNS, entrega de conteúdo e proteção de borda.',
     glyph: 'network',
     status: 'active',
+    examDomains: ['d1', 'd3', 'd4'],
   },
   {
     id: 'bancos-de-dados',
@@ -61,6 +71,15 @@ export const TERRITORIES: TerritoryDef[] = [
     summary: 'Relacionais, NoSQL, cache, data warehouse e migração de bancos.',
     glyph: 'database',
     status: 'active',
+    examDomains: ['d3', 'd2', 'd4'],
+  },
+  {
+    id: 'analise',
+    title: 'Análise de dados e IA',
+    summary: 'Data lake, consultas, processamento, streaming, visualização e serviços prontos de IA.',
+    glyph: 'chart',
+    status: 'active',
+    examDomains: ['d3'],
   },
   {
     id: 'integracao',
@@ -68,6 +87,7 @@ export const TERRITORIES: TerritoryDef[] = [
     summary: 'Filas, tópicos, eventos e orquestração.',
     glyph: 'queue',
     status: 'planned',
+    examDomains: ['d2'],
     plannedServices: ['Amazon SQS', 'Amazon SNS', 'Amazon EventBridge', 'AWS Step Functions'],
   },
   {
@@ -76,6 +96,7 @@ export const TERRITORIES: TerritoryDef[] = [
     summary: 'Identidades, permissões, federação, organizações, chaves e segredos.',
     glyph: 'shield',
     status: 'active',
+    examDomains: ['d1'],
     plannedServices: ['AWS KMS', 'AWS Secrets Manager'],
   },
   {
@@ -84,6 +105,7 @@ export const TERRITORIES: TerritoryDef[] = [
     summary: 'Métricas, auditoria, conformidade, automação, custos e recomendações.',
     glyph: 'eye',
     status: 'active',
+    examDomains: ['d1', 'd4'],
   },
   {
     id: 'arquitetura',
@@ -91,6 +113,7 @@ export const TERRITORIES: TerritoryDef[] = [
     summary: 'Alta disponibilidade, recuperação de desastres, custos e Well-Architected.',
     glyph: 'flag',
     status: 'planned',
+    examDomains: ['d2', 'd4'],
     plannedServices: ['AWS Well-Architected Framework'],
   },
 ]
@@ -109,4 +132,12 @@ export const LEVEL_TITLES = [
   'Estrategista de Arquitetura',
   'Referência em Arquitetura',
   'Lenda da Nuvem',
+]
+
+/** Trilhas com plano pronto em docs/, mostradas na Base como "em desenvolvimento". */
+export const PLANNED_TRACKS: PlannedTrackDef[] = [
+  { id: 'integration.aws-integration', title: 'Integração e mensageria na AWS', subtitle: 'Filas, tópicos, eventos, orquestração e APIs', territory: 'integracao', glyph: 'queue', examDomains: ['d2', 'd3'], plan: 'docs/PLANO-IMPLEMENTACAO-MODULO-INTEGRACAO-E-MENSAGERIA.md' },
+  { id: 'security.aws-security', title: 'Segurança e proteção de dados na AWS', subtitle: 'Chaves, segredos, certificados, detecção e conformidade', territory: 'seguranca', glyph: 'lock', examDomains: ['d1'], plan: 'docs/PLANO-IMPLEMENTACAO-MODULO-SEGURANCA.md' },
+  { id: 'files.aws-files', title: 'Arquivos e backup na AWS', subtitle: 'EFS, FSx, transferência de arquivos e AWS Backup', territory: 'armazenamento', glyph: 'file', examDomains: ['d2', 'd3', 'd4'], plan: 'docs/PLANO-IMPLEMENTACAO-MODULO-ARQUIVOS-E-BACKUP.md' },
+  { id: 'architecture.well-architected', title: 'Arquitetura e otimização na AWS', subtitle: 'Well-Architected, resiliência, desempenho, custo e migração', territory: 'arquitetura', glyph: 'flag', examDomains: ['d2', 'd3', 'd4'], plan: 'docs/PLANO-IMPLEMENTACAO-MODULO-ARQUITETURA-E-OTIMIZACAO.md' },
 ]

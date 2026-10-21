@@ -12,7 +12,32 @@ import { Badge, ButtonLink, Card, IconTile, ProgressBar, ProgressRing } from '..
 import { Glyph } from '../../ui/Glyph'
 import { renderInline } from '../../ui/inline'
 import { phaseRef, relativeDays } from '../../app/format'
+import { EXAM_DOMAINS, PLANNED_TRACKS } from '../../content/catalog/catalog'
+import type { ExamDomainId } from '../../engine/types'
 import s from './home.module.css'
+
+/** Nome curto de cada domínio do exame, o mesmo das dimensões dos desafios finais. */
+const DOMAIN_SHORT: Record<ExamDomainId, string> = { d1: 'Seguro', d2: 'Resiliente', d3: 'Alto desempenho', d4: 'Custo' }
+
+function DomainTag({ id }: { id: ExamDomainId }) {
+  const d = EXAM_DOMAINS.find((x) => x.id === id)
+  return (
+    <span className={s.domainTag} data-domain={id} title={d ? `${d.officialName} (${Math.round(d.weight * 100)}% do exame)` : undefined}>
+      {id.toUpperCase()} · {DOMAIN_SHORT[id]}
+    </span>
+  )
+}
+
+function DomainTags({ ids }: { ids?: ExamDomainId[] }) {
+  if (!ids?.length) return null
+  return (
+    <span className={s.domainTags} aria-label={`Domínios do exame: ${ids.map((id) => DOMAIN_SHORT[id]).join(', ')}`}>
+      {ids.map((id) => (
+        <DomainTag key={id} id={id} />
+      ))}
+    </span>
+  )
+}
 
 export function HomePage() {
   useDocumentTitle('Base de Operações')
@@ -185,22 +210,53 @@ export function HomePage() {
 
       <section className={s.territories} aria-labelledby="territories-title">
         <h2 id="territories-title">Territórios da plataforma</h2>
+        <p className="muted">Cada território e cada trilha mostram os domínios do exame que mais trabalham.</p>
+        <ul className={s.domainLegend} aria-label="Domínios do exame SAA-C03">
+          {EXAM_DOMAINS.map((d) => (
+            <li key={d.id}>
+              <DomainTag id={d.id} /> <span className="muted">{d.title}, {Math.round(d.weight * 100)}% do exame</span>
+            </li>
+          ))}
+        </ul>
         <div className={s.terrGrid}>
-          {registry.territories.map((t) =>
-            t.status === 'active' ? (
+          {registry.territories.map((t) => {
+            const inDevelopment = t.status === 'planned' && PLANNED_TRACKS.some((p) => p.territory === t.id)
+            const body = (
+              <>
+                <div className={s.terrHead}>
+                  <Glyph name={t.glyph} size={22} />
+                  <span className={s.terrName}>{t.title}</span>
+                  {t.status === 'active' ? <Badge tone="accent">Disponível</Badge> : <Badge>{inDevelopment ? 'Em desenvolvimento' : 'Em planejamento'}</Badge>}
+                </div>
+                <DomainTags ids={t.examDomains} />
+              </>
+            )
+            return t.status === 'active' ? (
               <Link key={t.id} to="/mapa" className={s.terr} data-status="active">
-                <Glyph name={t.glyph} size={22} />
-                <span className={s.terrName}>{t.title}</span>
-                <Badge tone="accent">Disponível</Badge>
+                {body}
               </Link>
             ) : (
               <div key={t.id} className={s.terr} data-status="planned" aria-disabled="true">
-                <Glyph name={t.glyph} size={22} />
-                <span className={s.terrName}>{t.title}</span>
-                <Badge>Em planejamento</Badge>
+                {body}
               </div>
-            ),
-          )}
+            )
+          })}
+        </div>
+        <h3 className={s.devTitle}>Trilhas em desenvolvimento</h3>
+        <div className={s.terrGrid}>
+          {PLANNED_TRACKS.map((p) => (
+            <div key={p.id} className={s.terr} data-status="development">
+              <div className={s.terrHead}>
+                <Glyph name={p.glyph} size={22} />
+                <span className={s.terrName}>{p.title}</span>
+                <Badge>Em desenvolvimento</Badge>
+              </div>
+              <span className={s.terrSub}>
+                {p.subtitle} · território {registry.territories.find((t) => t.id === p.territory)?.title}
+              </span>
+              <DomainTags ids={p.examDomains} />
+            </div>
+          ))}
         </div>
       </section>
     </div>

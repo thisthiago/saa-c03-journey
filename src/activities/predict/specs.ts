@@ -34,6 +34,9 @@ import type { Route } from '../../simulators/vpcnet/model'
 import type { Flow, ReachWorld } from '../../simulators/reach/model'
 import type { Net, Topology } from '../../simulators/connect/model'
 import type { DnsClient, DnsRecord } from '../../simulators/dns/model'
+import type { LakeTable, Layout } from '../../simulators/datalake/model'
+import type { Grant, PermTable } from '../../simulators/lakeperm/model'
+import type { EmrCluster, EmrJob } from '../../simulators/emr/model'
 
 export type PredictSpec =
   | {
@@ -136,6 +139,12 @@ export type PredictSpec =
   | { sim: 'connect'; nets: Net[]; topology: Topology; from: string; to: string }
   /** Route 53: `answer` → ids devolvidos em ordem, unidos por "+" (ou "none"); `share` → porcentagem do registro (ex.: "25"). */
   | { sim: 'dns'; records: DnsRecord[]; client: DnsClient; query: 'answer' | 'share'; record?: string }
+  /** Data lake: qual layout lê menos na consulta `query` (ou, sem ela, custa menos no mês); "same" se empatam. */
+  | { sim: 'datalake'; table: LakeTable; layouts: Record<string, Layout>; query?: string; region?: string }
+  /** Lake Formation: quantas linhas o analista vê (`rows`) ou se ele vê a coluna `column` (yes/no). */
+  | { sim: 'lakeperm'; table: PermTable; grants: Grant[]; measure: 'rows' | 'column'; column?: string }
+  /** EMR: o resultado do job no cluster (ok, late, cluster-ended, hdfs-lost, stalled, no-ha). */
+  | { sim: 'emr'; job: EmrJob; cluster: EmrCluster }
 
 
 /** Uma requisição é permitida ou negada? (resultado calculado pelo avaliador de acesso) */

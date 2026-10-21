@@ -112,6 +112,9 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
         case 'hybrid':
         case 'dns-policy':
         case 'net-chooser':
+        case 'ingest':
+        case 'ai-chooser':
+        case 'ana-chooser':
           return activity.config.items.every((i) => Boolean((response as unknown as { placements?: Record<string, string> }).placements?.[i.id]))
         case 'support':
           return activity.config.scenarios.every((sc) => Boolean((response as unknown as { choices?: Record<string, string> }).choices?.[sc.id]))
@@ -146,6 +149,9 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
         case 'alarm':
         case 'route-table':
         case 'reach':
+        case 'datalake':
+        case 'lakeperm':
+        case 'emr':
           return true
         case 'vpc-planner':
           return vpcPlannerComplete(activity.config, response as unknown as VpcPlannerLabResponse)
@@ -253,6 +259,12 @@ function labHint(activity: Extract<ActivityDef, { kind: 'lab' }>): string {
       return 'Escolha uma topologia para cada cenário.'
     case 'endpoints':
       return 'Escolha um caminho para cada carga.'
+    case 'datalake':
+      return 'Escolha o formato, a compressão e a partição de cada tabela.'
+    case 'lakeperm':
+      return 'Escolha as concessões de cada analista.'
+    case 'emr':
+      return 'Monte o cluster de cada job.'
     default:
       return 'Responda a todas as tarefas.'
   }

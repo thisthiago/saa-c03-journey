@@ -65,9 +65,9 @@ export function ConceptPage() {
   let availability: ReactNode = null
   if (av && av.kind !== 'current') {
     availability = (
-      <Callout kind="warning" title={av.kind === 'legacy' ? 'Recurso legado' : `Sem novos clientes${av.since ? ` desde ${av.since}` : ''}`}>
+      <Callout kind="warning" title={av.kind === 'legacy' ? 'Recurso legado' : av.kind === 'discontinued' ? `Serviço encerrado em ${av.since}` : `Sem novos clientes${av.since ? ` desde ${av.since}` : ''}`}>
         <p>{av.note}</p>
-        {av.kind === 'no-new-customers' && av.alternatives && <p>Alternativas: {av.alternatives.join(', ')}.</p>}
+        {av.kind !== 'legacy' && av.alternatives && <p>Alternativas: {av.alternatives.join(', ')}.</p>}
       </Callout>
     )
   }

@@ -49,6 +49,68 @@
   font-size: 0.84rem;
   color: var(--text-muted);
 }
+.order {
+  margin-top: var(--space-5);
+}
+.orderTitle {
+  font-size: 1.15rem;
+  margin: 0 0 var(--space-2);
+}
+.orderList {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-4) 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: var(--space-3);
+}
+.orderList > li {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3);
+  border-radius: var(--radius-m);
+  border: 1px solid var(--border);
+}
+.orderList > li[data-status='next'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.orderList > li[data-status='development'] {
+  border-style: dashed;
+}
+.orderNum {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.orderList > li[data-status='completed'] .orderNum {
+  background: var(--success);
+  color: var(--bg);
+}
+.orderList > li[data-status='next'] .orderNum {
+  background: var(--accent);
+  color: var(--bg);
+}
+.orderText {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.orderHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+}
 .breadcrumb {
   font-size: 0.88rem;
   color: var(--text-faint);

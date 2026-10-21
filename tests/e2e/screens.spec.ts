@@ -688,6 +688,47 @@ test.describe('trilha Redes na AWS', () => {
   }
 })
 
+/** Missões da trilha Análise de dados na ordem do mapa (as anteriores ficam aprovadas no progresso semeado). */
+const ANA_MISSIONS = [
+  ...['f01', 'f02', 'f03', 'f04', 'f05', 'f06', 'f07', 'f08'].flatMap((f) => ['m1', 'm2', 'm3', 'boss'].map((m) => `ana.${f}.${m}`)),
+  ...['m1', 'm2', 'boss'].map((m) => `ana.f09.${m}`),
+  'ana.final.plataforma',
+]
+
+// Módulo novo: por enquanto, só o desktop (tablet e celular ficam para uma etapa própria).
+test.describe('trilha Análise de dados', () => {
+  const CASES: { name: string; mission?: string; step?: number; path?: string }[] = [
+    { name: 'ana-f1-lago', mission: 'ana.f01.boss', step: 2 },
+    { name: 'ana-f2-madrugada', mission: 'ana.f02.boss', step: 2 },
+    { name: 'ana-f3-fatura', mission: 'ana.f03.boss', step: 3 },
+    { name: 'ana-f4-permissoes', mission: 'ana.f04.boss', step: 2 },
+    { name: 'ana-f5-clusters', mission: 'ana.f05.boss', step: 2 },
+    { name: 'ana-f6-ingestao', mission: 'ana.f06.boss', step: 2 },
+    { name: 'ana-f7-painel', mission: 'ana.f07.boss', step: 2 },
+    { name: 'ana-f8-servicos', mission: 'ana.f08.boss', step: 2 },
+    { name: 'ana-f9-escolha', mission: 'ana.f09.boss', step: 2 },
+    { name: 'ana-final', mission: 'ana.final.plataforma', step: 2 },
+    { name: 'ana-mapa', path: '/#/trilha/analytics.aws-analytics' },
+  ]
+  const vp = VIEWPORTS.find((v) => v.name === 'desktop')!
+  for (const c of CASES) {
+    test(`${c.name} — ${vp.name}`, async ({ page }) => {
+      await page.setViewportSize({ width: vp.width, height: vp.height })
+      await page.emulateMedia({ colorScheme: 'dark' })
+      const before = c.mission ? ANA_MISSIONS.slice(0, ANA_MISSIONS.indexOf(c.mission)) : []
+      const base = progressWithPhase1(new Date(), { missions: before })
+      const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+      await seedProgress(page, seeded)
+      await page.goto(c.path ?? `/#/missao/${c.mission}`)
+      await page.waitForLoadState('networkidle')
+      await page.waitForTimeout(250)
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+      expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+      await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+    })
+  }
+})
+
 test.describe('banco de questões', () => {
   for (const vp of VIEWPORTS) {
     test(`treino e simulado — ${vp.name}`, async ({ page }) => {

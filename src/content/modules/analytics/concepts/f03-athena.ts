@@ -1,0 +1,98 @@
+/**
+ * Conceitos da Fase 3 — Consultas com Athena.
+ * Fatos conferidos em 21/10/2026 (ver docs/VERIFICACAO-DE-CONTEUDO.md).
+ */
+import type { ConceptDef } from '../../../../engine/types'
+import { R } from './refs'
+
+export const F03_ANA_CONCEPTS: ConceptDef[] = [
+  {
+    id: 'athena.what',
+    title: 'Amazon Athena',
+    officialName: 'Amazon Athena',
+    serviceIds: ['aws.athena', 'aws.s3', 'aws.glue'],
+    summary: 'O **Athena** roda **SQL sem servidor** direto sobre os arquivos do S3, usando as tabelas do Data Catalog. Não há cluster para criar nem para desligar: a consulta começa na hora, e o resultado é gravado num local do S3.',
+    facts: ['O Athena também roda aplicações Apache Spark em notebooks, cobradas por DPU-hora.', 'Os resultados de cada consulta ficam gravados num local do S3 definido na consulta ou no workgroup.'],
+    useCases: ['Consultas esporádicas sobre logs e arquivos do data lake', 'Análises exploratórias sem montar infraestrutura'],
+    comparisons: [{ with: 'rs.vs-athena', text: 'O Redshift atende a painéis e relatórios frequentes sobre dados carregados no data warehouse; o Athena, a consultas sob demanda sobre o S3.' }],
+    exam: { domains: ['d3', 'd4'], relevance: 'alta' },
+    references: [R.athenaWhat],
+    tags: ['fundamentos'],
+  },
+  {
+    id: 'athena.cost',
+    title: 'Custo por dado lido',
+    officialName: 'Amazon Athena pricing (per query)',
+    serviceIds: ['aws.athena'],
+    summary: 'Na cobrança por consulta, o Athena cobra **por TB lido**, arredondado para cima ao **megabyte**, com **mínimo de 10 MB por consulta**. Comandos de definição (CREATE, ALTER, DROP) e consultas que **falham** não são cobrados; consultas **canceladas** pagam o que já leram.',
+    facts: [
+      'Na tabela da trilha: US$ 5 por TB em us-east-1 e US$ 9 em sa-east-1.',
+      'Compressão, partição e formato colunar podem reduzir o custo em até 90%, segundo a página de preços.',
+      'Consultas federadas, sobre fontes fora do S3, são cobradas pelo dado lido e pelas execuções do Lambda dos conectores.',
+    ],
+    commonMistakes: ['Achar que o Athena cobra por tempo de consulta ou por servidor ligado'],
+    exam: { domains: ['d4'], relevance: 'alta' },
+    references: [R.athenaPricing],
+    tags: ['custos'],
+  },
+  {
+    id: 'athena.workgroups',
+    title: 'Workgroups e limites de dados lidos',
+    officialName: 'Athena workgroups and data usage controls',
+    serviceIds: ['aws.athena', 'aws.cloudwatch', 'aws.sns'],
+    summary: 'O **workgroup** separa as consultas por equipe ou por uso, com histórico próprio, acesso controlado pelo IAM e configurações impostas, como o local e a criptografia dos resultados. Cada workgroup pode ter **um limite por consulta**, que **cancela** a consulta que passar dele, e **limites do workgroup** por hora ou por dia, que **avisam** por um tópico do SNS.',
+    facts: [
+      'O limite por consulta é único por workgroup; os limites do workgroup podem ser vários.',
+      'A consulta cancelada pelo limite paga o que já leu.',
+      'O workgroup pode publicar métricas no CloudWatch e receber tags de alocação de custo.',
+    ],
+    commonMistakes: ['Esperar que o limite do workgroup cancele consultas: ele só dispara o alarme', 'Deixar analistas e relatórios automáticos no mesmo workgroup, sem separar custo nem histórico'],
+    exam: { domains: ['d1', 'd4'], relevance: 'media' },
+    references: [R.workgroups, R.workgroupLimits],
+    tags: ['custos', 'seguranca'],
+  },
+  {
+    id: 'athena.capacity',
+    title: 'Reservas de capacidade',
+    officialName: 'Athena capacity reservations',
+    serviceIds: ['aws.athena'],
+    summary: 'A **reserva de capacidade** dá ao Athena **DPUs dedicados**, cobrados por DPU-hora, para um ou mais workgroups. As consultas desses workgroups têm prioridade e não disputam a cota de consultas da conta. Serve a cargas críticas e com volume previsível.',
+    facts: ['Cada DPU tem cerca de 4 vCPU e 16 GB de memória; mais DPUs permitem mais consultas ao mesmo tempo.', 'Na tabela da trilha, o DPU-hora reservado custa US$ 0,30 em us-east-1.', 'Com a reserva, o custo não depende do dado lido.'],
+    exam: { domains: ['d3', 'd4'], relevance: 'baixa' },
+    references: [R.capacity, R.athenaPricing],
+    tags: ['desempenho', 'custos'],
+  },
+  {
+    id: 'athena.federated',
+    title: 'Consultas federadas',
+    officialName: 'Amazon Athena Federated Query',
+    serviceIds: ['aws.athena', 'aws.lambda'],
+    summary: 'A **consulta federada** usa conectores para ler dados **fora do S3**, como bancos relacionais, DynamoDB e fontes de terceiros, **no lugar onde estão**, e até juntá-los com tabelas do data lake numa só consulta SQL.',
+    facts: ['Os conectores podem empurrar os filtros para a fonte e controlar o paralelismo.', 'Parte dos conectores roda como função Lambda na conta; a AWS passou a registrar conectores novos como catálogos do Glue.'],
+    exam: { domains: ['d3'], relevance: 'media' },
+    references: [R.federated],
+    tags: ['integracao'],
+  },
+  {
+    id: 'athena.result-reuse',
+    title: 'Reaproveitar resultados',
+    officialName: 'Reuse query results in Athena',
+    serviceIds: ['aws.athena'],
+    summary: 'Ao repetir uma consulta, o Athena pode **devolver o resultado guardado** da execução anterior, dentro de uma **idade máxima** escolhida, sem ler os dados de novo. Serve quando os dados não mudam nesse intervalo.',
+    facts: ['A busca pelo resultado anterior acontece dentro do mesmo workgroup.'],
+    exam: { domains: ['d3', 'd4'], relevance: 'baixa' },
+    references: [R.resultReuse],
+    tags: ['custos', 'desempenho'],
+  },
+  {
+    id: 'athena.partition-projection',
+    title: 'Projeção de partições',
+    officialName: 'Partition projection',
+    serviceIds: ['aws.athena', 'aws.glue'],
+    summary: 'Com a **projeção de partições**, o Athena **calcula** as partições a partir de regras na tabela (por exemplo, datas de 2020 até hoje), sem consultá-las no Data Catalog. Acelera tabelas com muitas partições e elimina o trabalho de registrar cada partição nova.',
+    facts: ['As consultas devem filtrar todas as chaves projetadas, para não listar caminhos demais no S3.', 'Em tabelas esparsas, com muitas combinações sem dados, a projeção pode piorar o desempenho.'],
+    exam: { domains: ['d3'], relevance: 'baixa' },
+    references: [R.projection, R.optimizeData],
+    tags: ['desempenho'],
+  },
+]

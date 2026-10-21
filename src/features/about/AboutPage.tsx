@@ -65,6 +65,13 @@ export function AboutPage() {
                   </p>
                   {sv.availability.alternatives && <p>Alternativas: {sv.availability.alternatives.join('; ')}.</p>}
                 </>
+              ) : sv.availability.kind === 'discontinued' ? (
+                <>
+                  <p>
+                    Encerrado em {sv.availability.since}. {sv.availability.note}
+                  </p>
+                  {sv.availability.alternatives && <p>Alternativas: {sv.availability.alternatives.join('; ')}.</p>}
+                </>
               ) : (
                 sv.availability.kind === 'legacy' && <p>{sv.availability.note}</p>
               )}

@@ -161,11 +161,38 @@ Módulo `src/content/modules/network/`, território `redes`. Reaproveita, sem re
 
 **Desktop primeiro.** As capturas de tela desta trilha (`tests/e2e/screens.spec.ts`) cobrem só o desktop; tablet e celular ficam para uma etapa própria.
 
+## Trilha Análise de dados e serviços de IA na AWS
+
+Módulo `src/content/modules/analytics/`, território novo `analise` ("Análise de dados e IA", glifo `chart`). Reaproveita, sem redeclarar, `lc.rules` (Fase 1), `rs.vs-athena` (Fases 3 e 9) e `rs.what` (comparações). Declara o básico de Kinesis Data Streams (`kds.streams`) e Data Firehose (`fh.delivery`, `fh.parquet`), com os prefixos do plano de Integração e mensageria, que deve reaproveitá-los.
+
+| Fase | Tema | Empresas fictícias | Laboratórios |
+|---|---|---|---|
+| 1 | Data lake no S3 | Transportadora Rota Sul | Formato, compressão e partição (`datalake`) |
+| 2 | Catálogo e transformação | Transportadora Rota Sul | Investigação do fluxo da madrugada |
+| 3 | Consultas com Athena | Portal Notícia Já | Custo do Athena por tabela (`datalake`) |
+| 4 | Governança do data lake | Cooperativa de Crédito Raiz | Permissões célula a célula (`lakeperm`) |
+| 5 | Processamento com EMR | Distribuidora de Energia Volt Norte | Clusters com retomada de Spot (`emr`) |
+| 6 | Ingestão e streaming | Aplicativo de Mobilidade Vai Lá | Caminho de cada fonte (`ingest`) |
+| 7 | Busca e visualização | Marketplace Feira Online | Investigação do painel lento |
+| 8 | Serviços prontos de IA | Escola Online Saber Mais | Serviço de cada pedido (`ai-chooser`) |
+| 9 | Escolhendo a solução de dados | Rede de Lojas Bem Bom | Serviço de cada pedido (`ana-chooser`) |
+| Final | Plataforma de Dados | Lojas Praça Nova | Arquitetura em 8 etapas, com dimensões Seguro, Resiliente, Alto desempenho, Custo e Requisitos |
+
+**Dependências.** A Fase 2 exige a 1; a 3, a 4 e a 5 exigem a 2; a 9 exige da 3 à 8; a 6, a 7 e a 8 só recomendam; o desafio final exige as nove. A trilha recomenda a AWS Foundations e a S3 Expedition. O mapa usa cinco colunas (x = 90, 270, 450, 630 e 815), com altura de 800.
+
+**Preços reais nos labs.** O custo do Athena (dado lido) e o armazenamento no S3 Standard vêm de `simulators/analytics-prices.ts` e `simulators/cost/prices.ts`; o lab do EMR usa o preço On-Demand da tabela de Computação e o desconto do Spot da trilha de Computação como premissa. As taxas de compressão, o tamanho do JSON e o limite de arquivo pequeno (64 MB) são premissas declaradas no lab.
+
+**Previsões calculadas.** As previsões `datalake`, `lakeperm` e `emr` usam os simuladores de mesmo nome.
+
+**Escolhas.** Os labs `ingest`, `ai-chooser` e `ana-chooser` usam o motor genérico `simulators/shared/chooser.ts`. No `ai-chooser`, o Elastic Transcoder aparece como opção que não atende a nada, porque foi encerrado.
+
+**Desktop primeiro.** As capturas de tela desta trilha cobrem só o desktop.
+
 ## Princípios de escrita
 
 - **Aprender fazendo.** Cada missão segue a ordem: contexto (briefing) → conceitos-chave (intel, até ~80 palavras por carta) → desafios → resultado (debrief). Na interface aparecem só os nomes em português.
 - **Fato separado de recomendação.** Nos conceitos, `facts` traz o comportamento documentado e `recommendations` traz o julgamento de arquitetura.
-- **Status explícito.** Serviços e recursos sem novos clientes levam `availability: { kind: 'no-new-customers', since, alternatives }`. Hoje são quatro: Snow Family, FSx File Gateway, o serviço Amazon Glacier (vaults) e os planos de suporte Developer, Business e Enterprise On-Ramp.
+- **Status explícito.** Serviços e recursos sem novos clientes levam `availability: { kind: 'no-new-customers', since, alternatives }`. Hoje são quatro: Snow Family, FSx File Gateway, o serviço Amazon Glacier (vaults) e os planos de suporte Developer, Business e Enterprise On-Ramp. Serviços encerrados levam `availability: { kind: 'discontinued', since, note, alternatives }`, com o selo "Serviço encerrado" no Codex e na página Sobre; hoje só o Amazon Elastic Transcoder (13/11/2025, alternativa: MediaConvert).
 - **Respostas calculadas.** Predições declaram um cenário (`spec`), e o simulador calcula a resposta. Faturas, custos e comparações também vêm dos modelos.
 - **Simplificações declaradas.** Toda fase lista as suas, e cada simulador tem um painel "Simplificações".
 - **Linguagem.** PT-BR, nomes oficiais em inglês, títulos neutros em gênero, sem copiar textos da AWS.
@@ -198,6 +225,8 @@ Cada módulo tem um `questions.ts` com questões no formato do exame. Para escre
 Os testes recusam questão com conceito inexistente, formato errado, alternativa sem explicação, alternativas repetidas ou setas no texto.
 
 ## Preços
+
+`src/content/pricing/analytics-prices.json` é gerado por `npm run prices:analytics` (Athena: dado lido e capacidade reservada; Glue: DPU-hora de jobs padrão, Flex e Glue 6.0 ou mais novo, crawlers e Data Catalog; us-east-1 e sa-east-1), a partir das ofertas AmazonAthena e AWSGlue da AWS Price List Bulk API; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
 
 `src/content/pricing/network-prices.json` é gerado por `npm run prices:network` (NAT Gateway, endpoints de interface, Transit Gateway, Site-to-Site VPN, Client VPN, IPv4 público e transferência entre zonas; us-east-1 e sa-east-1). O script lê as ofertas AmazonVPC e AWSDataTransfer em JSON e o CSV regional do EC2 em streaming, para o NAT Gateway; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
 

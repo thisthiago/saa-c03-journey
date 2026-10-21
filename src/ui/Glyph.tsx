@@ -55,6 +55,12 @@ import {
   BrickWall,
   Router,
   Waypoints,
+  ChartColumn,
+  Search,
+  Brain,
+  Video,
+  Waves,
+  ScanText,
   type LucideIcon,
 } from 'lucide-react'
 import type { GlyphName } from '../engine/types'
@@ -128,6 +134,12 @@ const ICONS: Record<Exclude<GlyphName, 'bucket'>, LucideIcon> = {
   firewall: BrickWall,
   router: Router,
   waypoints: Waypoints,
+  chart: ChartColumn,
+  search: Search,
+  brain: Brain,
+  video: Video,
+  waves: Waves,
+  scan: ScanText,
 }
 
 export function Glyph({ name, size = 22, className }: { name: GlyphName; size?: number; className?: string }) {
