@@ -2,15 +2,37 @@ import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router'
 import { registry } from '../../content'
 import { trackPhases } from '../../engine/registry'
-import { trackProgress, unmetTrackRecommendations, unmetTrackRequirements } from '../../engine/selectors'
+import { isTrackCompleted, trackProgress, unmetTrackRecommendations, unmetTrackRequirements } from '../../engine/selectors'
+import { recommendedTrackOrder, type TrackOrderStep } from '../../engine/track-order'
 import { useGame } from '../../store/gameStore'
 import { useDocumentTitle } from '../../app/hooks'
+import { PLANNED_TRACKS } from '../../content/catalog/catalog'
 import { Badge, Card, IconTile, ProgressBar } from '../../ui/kit'
 import s from './map.module.css'
+
+const ORDER = recommendedTrackOrder(registry)
+
+/** Explica, em uma frase, por que a trilha vem depois das anteriores. */
+function orderReason(step: TrackOrderStep): string {
+  if (step.after.length === 0) return 'Ponto de partida: apresenta a nuvem e os conceitos que as outras trilhas usam.'
+  const parts = step.after.map((a) => {
+    const n = a.concepts.length
+    if (n === 0) return a.track.title
+    return `${a.track.title} (${n} ${n === 1 ? 'conceito reaproveitado' : 'conceitos reaproveitados'})`
+  })
+  const list = parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} e ${parts[parts.length - 1]}`
+  return `Usa o que você aprende em ${list}.`
+}
+
+function conceptList(step: TrackOrderStep): string | undefined {
+  const titles = step.after.flatMap((a) => a.concepts.map((c) => registry.concepts.get(c)?.title ?? c))
+  return titles.length ? `Conceitos reaproveitados: ${titles.join(', ')}` : undefined
+}
 
 export function MapPage() {
   useDocumentTitle('Mapa')
   const progress = useGame((st) => st.progress)
+  const nextId = ORDER.find((step) => !isTrackCompleted(progress, step.track))?.track.id
   return (
     <div className="page">
       <p className="eyebrow">Mapa do mundo</p>
@@ -18,6 +40,49 @@ export function MapPage() {
       <p className="muted" style={{ maxWidth: 680 }}>
         Cada território reúne trilhas de um grupo de serviços. Conceitos aprendidos em um território (como permissões do IAM) contam para os outros.
       </p>
+      <Card as="section" className={s.order} aria-labelledby="order-title">
+        <h2 id="order-title" className={s.orderTitle}>
+          Ordem sugerida das trilhas
+        </h2>
+        <p className="muted">
+          Nenhuma trilha fica bloqueada, mas esta ordem evita encontrar um conceito antes de aprendê-lo. Ela vem das trilhas que cada uma recomenda e dos conceitos que cada uma reaproveita das outras.
+        </p>
+        <ol className={s.orderList}>
+          {ORDER.map((step, i) => {
+            const done = isTrackCompleted(progress, step.track)
+            return (
+              <li key={step.track.id} data-status={done ? 'completed' : step.track.id === nextId ? 'next' : 'pending'}>
+                <span className={s.orderNum} aria-hidden="true">
+                  {i + 1}
+                </span>
+                <div className={s.orderText}>
+                  <span className={s.orderHead}>
+                    <Link to={`/trilha/${step.track.id}`}>{step.track.title}</Link>
+                    {done ? <Badge tone="success">Concluída</Badge> : step.track.id === nextId ? <Badge tone="accent">Sugestão atual</Badge> : null}
+                  </span>
+                  <span className={s.small} title={conceptList(step)}>
+                    {orderReason(step)}
+                  </span>
+                </div>
+              </li>
+            )
+          })}
+          {PLANNED_TRACKS.length > 0 && (
+            <li data-status="development">
+              <span className={s.orderNum} aria-hidden="true">
+                {ORDER.length + 1}
+              </span>
+              <div className={s.orderText}>
+                <span className={s.orderHead}>
+                  <strong>Trilhas em desenvolvimento</strong>
+                  <Badge>Em breve</Badge>
+                </span>
+                <span className={s.small}>{PLANNED_TRACKS.map((p) => p.title).join(', ')}. Elas usam os conceitos das trilhas acima.</span>
+              </div>
+            </li>
+          )}
+        </ol>
+      </Card>
       <div className={s.territories}>
         {registry.territories.map((t) => {
           const tracks = [...registry.tracks.values()].filter((tr) => tr.territory === t.id)
