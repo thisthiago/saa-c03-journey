@@ -63,6 +63,13 @@ export const TERRITORIES: TerritoryDef[] = [
     status: 'active',
   },
   {
+    id: 'analise',
+    title: 'Análise de dados e IA',
+    summary: 'Data lake, consultas, processamento, streaming, visualização e serviços prontos de IA.',
+    glyph: 'chart',
+    status: 'active',
+  },
+  {
     id: 'integracao',
     title: 'Integração e mensageria',
     summary: 'Filas, tópicos, eventos e orquestração.',
