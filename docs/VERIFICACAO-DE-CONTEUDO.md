@@ -583,3 +583,110 @@ Cada simulador lista as suas simplificações na própria tela e em cada fase. A
 - **Orçamentos:** gasto constante por recurso, com uma mudança de patamar; só custo bruto, sem descontos, créditos, impostos e ações de orçamento.
 - **Escolha do serviço:** a "complexidade relativa" que desempata as opções é julgamento de arquitetura.
 - **Central de Operações:** rubrica e pesos pedagógicos.
+
+# Trilha Redes na AWS — conferido em 21/10/2026
+
+O site da documentação da AWS devolve 200 para páginas que não existem; as 76 URLs usadas nos conceitos e no catálogo foram conferidas pelo título da página em 21/10/2026.
+
+## Escopo do exame
+
+| Fato | Fonte |
+|---|---|
+| Serviços no escopo do SAA-C03 em Networking and Content Delivery: Client VPN, CloudFront, Direct Connect, Elastic Load Balancing, Global Accelerator, PrivateLink, Route 53, Site-to-Site VPN, Transit Gateway e Amazon VPC; em Security, Identity, and Compliance, ligados a rede: Certificate Manager, Firewall Manager, Network Firewall, Shield e WAF. | [Serviços no escopo](https://docs.aws.amazon.com/aws-certification/latest/solutions-architect-associate-03/saa-03-in-scope-services.html) |
+
+## VPC e endereçamento (Fase 1)
+
+| Fato | Fonte |
+|---|---|
+| Bloco IPv4 da VPC entre /16 (65.536 endereços) e /28 (16); recomendação das faixas da RFC 1918; proibidos 0.0.0.0/8, 127.0.0.0/8, 169.254.0.0/16 e 224.0.0.0/4; evitar 172.17.0.0/16; blocos secundários de /16 a /28 sem sobreposição; o tamanho de um bloco existente não muda; o bloco primário não pode ser removido; forma canônica pela API (100.68.0.18/18 vira 100.68.0.0/18). IPv6: até cinco blocos de /44 a /60 em passos de /4. | [VPC CIDR blocks](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-cidr-blocks.html) |
+| Sub-rede de /16 a /28, dentro do bloco da VPC, sem sobreposição; os quatro primeiros endereços e o último são reservados (exemplo 10.0.0.0/24: rede, roteador, DNS, uso futuro, broadcast); sub-redes IPv6 de /44 a /64. | [Subnet CIDR blocks](https://docs.aws.amazon.com/vpc/latest/userguide/subnet-sizing.html) |
+| Cada sub-rede fica inteira numa zona; tipos pública, privada, só VPN e isolada definidos pelas rotas; associação automática à tabela principal e à ACL padrão. | [Subnets](https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html) |
+| VPC padrão: 172.31.0.0/16, sub-rede /20 por zona, internet gateway, rota 0.0.0.0/0 na tabela principal, security group e ACL padrão, DHCP padrão; IPv4 público automático nas sub-redes padrão; nem a padrão nem a criada por você têm rota ::/0 ou IPv6 automático. | [Default VPC components](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc-components.html), [internet gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) |
+| A AWS cobra todos os IPv4 públicos, inclusive Elastic IPs; IPv6 fornecido pela AWS é anunciado na internet. | [IP addressing](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-ip-addressing.html) |
+
+## Roteamento e saída (Fase 2)
+
+| Fato | Fonte |
+|---|---|
+| Prefixo mais específico; no mesmo destino, estática antes de lista de prefixos antes de propagada; exemplo do peering 172.31.0.0/16 contra 0.0.0.0/0. | [Route priority](https://docs.aws.amazon.com/vpc/latest/userguide/route-tables-priority.html) |
+| Internet gateway: redundante, sem limite de banda, sem custo; IP público e rota necessários; sub-rede pública é a que tem rota para ele. | [Internet gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) |
+| NAT Gateway público em sub-rede pública com Elastic IP; privado sem Elastic IP; conexões só iniciadas de dentro; TCP, UDP e ICMP; 5 Gbps escalando a 100 Gbps; sem security group; não aceita tráfego vindo por peering nem por VPN ou Direct Connect num virtual private gateway; um por zona recomendado. | [NAT gateways](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html), [basics](https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateway-basics.html) |
+| NAT Gateway regional: expande-se sozinho, em até 60 minutos para uma zona nova; não precisa de sub-rede pública; não faz NAT privado. | [Regional NAT gateways](https://docs.aws.amazon.com/vpc/latest/userguide/nat-gateways-regional.html) |
+| NAT instance: verificação de origem e destino desligada, banda do tipo da instância, failover por script; aceita security group, encaminhamento de portas e uso como bastion; a AWS recomenda o NAT Gateway. | [Compare](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-comparison.html), [NAT instances](https://docs.aws.amazon.com/vpc/latest/userguide/work-with-nat-instances.html) |
+| Egress-only internet gateway: só IPv6, com estado, sem custo, sem security group. | [Egress-only](https://docs.aws.amazon.com/vpc/latest/userguide/egress-only-internet-gateway.html) |
+
+## Segurança na VPC (Fase 3)
+
+| Fato | Fonte |
+|---|---|
+| Security group: só permissões, avalia todas as regras, com estado, referência a outros grupos, sem custo; recomendação de não abrir 22 e 3389 para 0.0.0.0/0. Network ACL: nível de sub-rede, permite e nega, ordem crescente (1 a 32766), sem estado, sem custo; não filtra DNS da AWS, DHCP, metadados e Time Sync. | [Security groups](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html), [comparação](https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html), [ACLs](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html) |
+| ACL padrão: regras 100 e 101 permitem tudo; ACL personalizada nova nega tudo; exemplo da porta 443 casando a regra 110 e da 139 caindo na regra marcada com asterisco; portas efêmeras (Linux 32768-61000, Windows Server 2008+ 49152-65535, NAT Gateway, ELB e Lambda 1024-65535). | [Default ACL](https://docs.aws.amazon.com/vpc/latest/userguide/default-network-acl.html), [custom ACL](https://docs.aws.amazon.com/vpc/latest/userguide/custom-network-acl.html) |
+| Flow Logs: metadados do tráfego, destinos CloudWatch Logs, S3 e Data Firehose, fora do caminho do tráfego. Reachability Analyzer: análise da configuração, aponta o componente que bloqueia, cobrado por análise. | [Flow Logs](https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html), [Reachability Analyzer](https://docs.aws.amazon.com/vpc/latest/reachability/what-is-reachability-analyzer.html) |
+
+## Conectando VPCs (Fase 4)
+
+| Fato | Fonte |
+|---|---|
+| Peering: um para um, entre contas e Regiões, rotas nos dois lados, sem blocos sobrepostos (nem parcialmente), sem transitividade, sem borda a borda (internet gateway, NAT, VPN, Direct Connect e endpoint de gateway), pedido expira em 7 dias, MTU 9.001 na Região e 8.500 entre Regiões. | [Peering basics](https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-basics.html) |
+| Transit Gateway: roteador regional; anexos de VPC (uma sub-rede por zona), VPN, Direct Connect gateway, Connect e peering; tabelas com associação e propagação; tabelas separadas isolam grupos; estática vence propagada; ECMP para VPN; compartilhamento pelo RAM; anexo de Network Firewall. | [How Transit Gateway works](https://docs.aws.amazon.com/vpc/latest/tgw/how-transit-gateways-work.html) |
+
+## Acesso privado (Fase 5)
+
+| Fato | Fonte |
+|---|---|
+| Endpoint de gateway: só S3 e DynamoDB, sem custo, rota com lista de prefixos (vence 0.0.0.0/0), só na Região, não atende rede da empresa, peering entre Regiões nem Transit Gateway, não usa PrivateLink. | [Gateway endpoints](https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html), [S3](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html) |
+| Endpoint de interface: cobrança por hora em cada zona e por GB; interface por zona; DNS privado; recomendação de duas zonas; o serviço não inicia conexões. | [Access AWS services](https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-access-aws-services.html) |
+| Política de endpoint: padrão com acesso total, não substitui políticas de identidade e de recurso; Principal "*" no endpoint de gateway. Serviço de endpoint: Network Load Balancer do provedor, endpoint de interface do consumidor, duas zonas recomendadas. | [Endpoint policies](https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-access.html), [Share your services](https://docs.aws.amazon.com/vpc/latest/privatelink/privatelink-share-your-services.html) |
+
+## Conectividade híbrida (Fase 6)
+
+| Fato | Fonte |
+|---|---|
+| Site-to-Site VPN: IPsec, dois túneis, virtual private gateway (uma VPC) ou Transit Gateway; estática ou BGP; VPN acelerada pelo Global Accelerator. | [Site-to-Site VPN](https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html) |
+| Túnel padrão até 1,25 Gbps e 140 mil pacotes por segundo; túnel de grande largura de banda até 5 Gbps; ECMP no Transit Gateway só com roteamento dinâmico. | [VPN quotas](https://docs.aws.amazon.com/vpn/latest/s2svpn/vpn-limits.html) |
+| Direct Connect: dedicado de 1, 10, 100 ou 400 Gbps; hospedado de 50 Mbps a 25 Gbps por parceiro; revisão em até 72 horas úteis; cobrança após ativação ou 90 dias da LOA-CFA; VIFs privada, pública e de trânsito; Direct Connect gateway global (sem a China). | [Welcome](https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html), [dedicada](https://docs.aws.amazon.com/directconnect/latest/UserGuide/dedicated_connection.html), [hospedada](https://docs.aws.amazon.com/directconnect/latest/UserGuide/hosted_connection.html), [gateway](https://docs.aws.amazon.com/directconnect/latest/UserGuide/direct-connect-gateways-intro.html) |
+| MACsec em dedicadas de 10, 100 e 400 Gbps, não em hospedadas, sem custo extra; modelos de resiliência máxima (99,99%), alta (99,9%) e desenvolvimento e teste. Client VPN: OpenVPN, Active Directory, SAML ou certificado, cobrança por associação e por conexão. | [MACsec](https://docs.aws.amazon.com/directconnect/latest/UserGuide/MACsec.html), [Resiliency Toolkit](https://docs.aws.amazon.com/directconnect/latest/UserGuide/resilency_toolkit.html), [Client VPN](https://docs.aws.amazon.com/vpn/latest/clientvpn-admin/what-is.html) |
+
+## DNS com Route 53 (Fase 7)
+
+| Fato | Fonte |
+|---|---|
+| Zonas públicas e privadas; alias no ápice, sem cobrança de consultas a recursos da AWS, TTL do recurso; CNAME não pode ficar no ápice e, para outro registro do Route 53, conta como duas consultas. | [Hosted zones](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-working-with.html), [alias](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html) |
+| Oito políticas de roteamento; ponderada (peso ÷ soma, exemplo 1 e 255, tabela do peso zero); geolocalização (região menor vence, sem padrão não há resposta); múltiplas respostas (até oito saudáveis); failover ativo-passivo. | [Routing policies](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html), [weighted](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-weighted.html), [geo](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-geo.html), [multivalue](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy-multivalue.html), [failover](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-types.html) |
+| Verificações de endpoint, calculadas e por alarme do CloudWatch (sem "M de N" nem alta resolução); Resolver na VPC+2, endpoints de entrada e de saída, regras de encaminhamento. | [Health checks](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/health-checks-types.html), [Resolver](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resolver.html) |
+
+## Entrega de conteúdo (Fase 8)
+
+| Fato | Fonte |
+|---|---|
+| OAC recomendado no lugar da OAI (SSE-KMS, PUT e DELETE, todas as Regiões); bucket de site estático não aceita OAC; certificado do ACM em us-east-1 para o CloudFront; URLs e cookies assinados; restrição geográfica por país com 403; nomes versionados recomendados no lugar de invalidações frequentes. | [OAC](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html), [certificados](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cnames-and-https-requirements.html), [assinados](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-choosing-signed-urls-cookies.html), [geo](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/georestrictions.html), [invalidação](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html) |
+| CloudFront Functions (JavaScript, eventos do usuário, menos de 1 ms, 2 MB, 10 KB) × Lambda@Edge (Node.js e Python, até 30 s, rede, arquivos e corpo, 10.000 requisições por segundo por Região). Global Accelerator: dois IPv4 anycast fixos, TCP e UDP, endpoints ALB, NLB, EC2 e Elastic IP, failover por saúde, controle de tráfego e pesos. | [Functions × Lambda@Edge](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-choosing.html), [Global Accelerator](https://docs.aws.amazon.com/global-accelerator/latest/dg/introduction-how-it-works.html) |
+
+## Proteção de borda (Fase 9)
+
+| Fato | Fonte |
+|---|---|
+| WAF: recursos protegidos (CloudFront, API Gateway REST, ALB, AppSync, Cognito, App Runner, Verified Access, Amplify e outros); grupos gerenciados Core rule set (inclui XSS) e SQL database; regra por taxa. | [WAF](https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html), [baseline](https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-baseline.html), [use case](https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-use-case.html), [taxa](https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-rate-based.html) |
+| Shield Standard automático e sem custo extra, camadas 3 e 4; Shield Advanced: recursos protegidos, só os adicionados, WAF padrão incluído, mitigação automática na camada 7, SRT com Business ou Enterprise, créditos de custo, cobrança por família de faturamento. | [Overview](https://docs.aws.amazon.com/waf/latest/developerguide/ddos-overview.html), [Standard](https://docs.aws.amazon.com/waf/latest/developerguide/ddos-standard-summary.html), [Advanced](https://docs.aws.amazon.com/waf/latest/developerguide/ddos-advanced-summary.html), [capacidades](https://docs.aws.amazon.com/waf/latest/developerguide/ddos-advanced-summary-capabilities.html), [recursos](https://docs.aws.amazon.com/waf/latest/developerguide/ddos-advanced-summary-protected-resources.html) |
+| Network Firewall: com estado, IPS Suricata, filtro por domínio, sub-redes próprias por zona. Firewall Manager: WAF, Shield Advanced, security groups, ACLs, Network Firewall e DNS Firewall em toda a organização, contas novas incluídas, cobrança dos serviços gerenciados. | [Network Firewall](https://docs.aws.amazon.com/network-firewall/latest/developerguide/what-is-aws-network-firewall.html), [Firewall Manager](https://docs.aws.amazon.com/waf/latest/developerguide/fms-chapter.html) |
+
+**Cuidados.** A trilha não cita prazo para o circuito do Direct Connect: a demora do parceiro é premissa do cenário. O "não" do NLB e da instância EC2 como recursos do WAF vem da lista oficial de recursos protegidos, que não os inclui.
+
+## Projeto de Rede (desafio final)
+
+- Reaproveita os fatos das Fases 1 a 9. Rubrica e pesos são pedagógicos.
+
+## Preços
+
+- `src/content/pricing/network-prices.json` é gerado por `npm run prices:network` a partir da AWS Price List Bulk API (ofertas AmazonVPC de 16/10/2026, AmazonEC2 de 15/10/2026 e AWSDataTransfer de 16/9/2026), para us-east-1 e sa-east-1, consultada em 21/10/2026: hora e GB do NAT Gateway, hora por zona e GB do endpoint de interface, hora de anexo e GB do Transit Gateway, hora de conexão VPN, hora de associação e de conexão da Client VPN, hora de IPv4 público e GB entre zonas. Primeira faixa paga; o script falha se faltar algum preço. O Direct Connect cobra por local de conexão e fica de fora.
+- Mês de 730 horas.
+
+## Premissas e simplificações da trilha
+
+- **Endereços:** só IPv4 nos laboratórios; bloco desalinhado tratado como erro.
+- **Rotas:** uma rota para a internet por família de endereços em cada sub-rede.
+- **Fluxos:** conexões TCP em IPv4; a internet chega só a instâncias com IP público em sub-rede pública.
+- **Conexões entre VPCs:** o peering não tem custo por hora nem por GB processado; a transferência entre zonas fica fora da conta; todo anexo do Transit Gateway custa o preço do anexo de VPC; o limite de conexões que a equipe aceita é premissa.
+- **Endpoints:** custo de hora e de GB processado; quando o NAT já existe, só o GB entra.
+- **Escolhas (híbrida, DNS e rede):** a complexidade que desempata as opções é julgamento de arquitetura.
+- **CloudFront:** um POP e um cache regional, TTL fixo por comportamento, latências ilustrativas.
