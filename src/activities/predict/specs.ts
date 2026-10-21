@@ -30,6 +30,10 @@ import type { CfgResource, RuleParams } from '../../simulators/compliance/model'
 import type { StackResource } from '../../simulators/stack/model'
 import type { AccessMethod, NodeState } from '../../simulators/ssm/model'
 import type { BudgetAlert, BudgetFilter, SpendStream } from '../../simulators/budget/model'
+import type { Route } from '../../simulators/vpcnet/model'
+import type { Flow, ReachWorld } from '../../simulators/reach/model'
+import type { Net, Topology } from '../../simulators/connect/model'
+import type { DnsClient, DnsRecord } from '../../simulators/dns/model'
 
 export type PredictSpec =
   | {
@@ -122,6 +126,16 @@ export type PredictSpec =
   | { sim: 'cfn-effect'; current: StackResource[]; next: StackResource[]; resource: string }
   /** CloudWatch Logs: o padrão de filtro conta a linha (yes/no)? */
   | { sim: 'log-filter'; pattern: string; line: string }
+  /** CIDR: `usable` → endereços utilizáveis (número); `valid` → valid/invalid; `overlap` → yes/no. */
+  | { sim: 'cidr'; query: { type: 'usable'; cidr: string } | { type: 'valid'; kind: 'vpc' | 'subnet'; cidr: string; vpc?: string } | { type: 'overlap'; a: string; b: string } }
+  /** Tabela de rotas: alvo da rota escolhida para o destino (ou "drop" sem rota). */
+  | { sim: 'route'; routes: Route[]; destination: string; prefixLists?: Record<string, string[]> }
+  /** Conexão na VPC: delivered, route, sg-in, sg-out, nacl-in, nacl-out ou nacl-response. */
+  | { sim: 'reach'; world: ReachWorld; flow: Flow }
+  /** Peering ou Transit Gateway: a rede `from` alcança `to` (yes/no)? */
+  | { sim: 'connect'; nets: Net[]; topology: Topology; from: string; to: string }
+  /** Route 53: `answer` → ids devolvidos em ordem, unidos por "+" (ou "none"); `share` → porcentagem do registro (ex.: "25"). */
+  | { sim: 'dns'; records: DnsRecord[]; client: DnsClient; query: 'answer' | 'share'; record?: string }
 
 
 /** Uma requisição é permitida ou negada? (resultado calculado pelo avaliador de acesso) */
