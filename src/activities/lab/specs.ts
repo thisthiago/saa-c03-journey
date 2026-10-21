@@ -51,6 +51,12 @@ import type { EndpointsLabConfig } from '../../simulators/endpoints/lab'
 import type { HybridLabConfig } from '../../simulators/hybrid/model'
 import type { DnsPolicyLabConfig } from '../../simulators/dns/policy'
 import type { NetChooserLabConfig } from '../../simulators/netchooser/model'
+import type { LakeLabConfig } from '../../simulators/datalake/lab'
+import type { LakePermLabConfig } from '../../simulators/lakeperm/lab'
+import type { EmrLabConfig } from '../../simulators/emr/lab'
+import type { IngestLabConfig } from '../../simulators/ingest/model'
+import type { AiChooserLabConfig } from '../../simulators/aichooser/model'
+import type { AnaChooserLabConfig } from '../../simulators/anachooser/model'
 
 export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'; config: CostLabConfig } | { lab: 'access'; config: AccessLabConfig }
   | { lab: 'versioning'; config: VersioningLabConfig }
@@ -102,5 +108,11 @@ export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'
   | { lab: 'hybrid'; config: HybridLabConfig }
   | { lab: 'dns-policy'; config: DnsPolicyLabConfig }
   | { lab: 'net-chooser'; config: NetChooserLabConfig }
+  | { lab: 'datalake'; config: LakeLabConfig }
+  | { lab: 'lakeperm'; config: LakePermLabConfig }
+  | { lab: 'emr'; config: EmrLabConfig }
+  | { lab: 'ingest'; config: IngestLabConfig }
+  | { lab: 'ai-chooser'; config: AiChooserLabConfig }
+  | { lab: 'ana-chooser'; config: AnaChooserLabConfig }
 
 export type LabId = LabSpec['lab']
