@@ -86,6 +86,29 @@ Módulo `src/content/modules/compute/`. Reaproveita, sem redeclarar, `iam.instan
 
 **Escolha da computação.** O lab `compute-chooser` segue o padrão da escolha de identidade: cada carga tem um requisito que decide e requisitos rígidos; a melhor opção vale 1, uma que atende com mais trabalho vale 0,5 e uma que deixa um requisito de fora vale 0. Os testes falham se duas opções empatarem como melhor.
 
+## Trilha Bancos de dados na AWS
+
+Módulo `src/content/modules/database/`. Reaproveita, sem redeclarar, `infra.rds-multi-az`, `infra.ha-vs-dr` e `srm.rds` da AWS Foundations. Acrescenta conceitos `rds.*`, `aur.*`, `ddb.*`, `cache.*`, `nosql.*`, `rs.*`, `db.*`, `bkp.*` e `dms.*`. O AWS Backup entra no território Armazenamento e o Secrets Manager no de Segurança; aqui eles aparecem só no que o banco precisa (o AWS Backup é aprofundado no plano de Arquivos e backup, e KMS e Secrets Manager no de Segurança). Athena, Glue, OpenSearch e EMR ficam para o plano de Análise de dados; o Athena só aparece na comparação com o Redshift.
+
+| Fase | Tema | Empresas fictícias | Laboratórios |
+|---|---|---|---|
+| 1 | RDS essencial | Agenda Fácil | Dimensionamento do RDS |
+| 2 | Alta disponibilidade no RDS | Agenda Fácil | Alta disponibilidade (falhas simuladas) |
+| 3 | Amazon Aurora | Vitrine Digital | Escolha do banco |
+| 4 | DynamoDB: modelagem | Arena Pixel | Chaves e capacidade do DynamoDB |
+| 5 | DynamoDB: recursos avançados | Arena Pixel | Escolha do banco (recursos do DynamoDB) |
+| 6 | Cache e bancos especializados | Feira Livre | Cache |
+| 7 | Data warehouse com Redshift | Mercadão Sul | Escolha do banco (análise) |
+| 8 | Segurança e backup | Seguradora Abrigo | Banco exposto |
+| 9 | Migração e escolha | Distribuidora Rota Norte | Migração com o DMS, escolha do banco |
+| Final | Arquitetura de Dados | Empório Brasa | Arquitetura em 8 etapas, com dimensões Seguro, Resiliente, Alto desempenho, Custo e Requisitos |
+
+**Dependências.** A Fase 2 exige a 1; a 3 exige a 2; a 5 exige a 4; a 8 exige a 1; a 9 exige a 3, a 5 e a 6; as demais só recomendam; o desafio final exige as nove. A trilha recomenda a AWS Foundations e a Computação. O mapa usa cinco colunas (x = 90, 270, 450, 630 e 815) e `mapHeight: 800`, porque a cadeia F1, F2, F3, F9 e final tem cinco níveis de dependência.
+
+**Preços reais nos labs.** Dimensionamento, alta disponibilidade, custo do Aurora, capacidade do DynamoDB e cache calculam custos com `simulators/database-prices.ts`, que lê a tabela gerada por `npm run prices:database`. Latências do cache, tempos de promoção de réplica e de restauração e a velocidade da carga do DMS são premissas do cenário.
+
+**Escolha do banco.** O lab `db-chooser` segue o padrão da escolha da computação, com um único catálogo de opções (bancos, recursos do DynamoDB e opções de análise). Cada laboratório passa só as opções que fazem sentido para a fase, e os testes falham se duas opções empatarem como melhor.
+
 ## Princípios de escrita
 
 - **Aprender fazendo.** Cada missão segue a ordem: contexto (briefing) → conceitos-chave (intel, até ~80 palavras por carta) → desafios → resultado (debrief). Na interface aparecem só os nomes em português.
@@ -123,6 +146,8 @@ Cada módulo tem um `questions.ts` com questões no formato do exame. Para escre
 Os testes recusam questão com conceito inexistente, formato errado, alternativa sem explicação, alternativas repetidas ou setas no texto.
 
 ## Preços
+
+`src/content/pricing/database-prices.json` é gerado por `npm run prices:database` (RDS for PostgreSQL, Aurora PostgreSQL, DynamoDB, ElastiCache e Redshift; us-east-1 e sa-east-1). O script lê o CSV regional do RDS e do ElastiCache em streaming e usa a primeira faixa paga de cada item; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
 
 `src/content/pricing/compute-prices.json` é gerado por `npm run prices:compute` (EC2, Savings Plans, Lambda, Fargate e ELB; us-east-1 e sa-east-1). O script lê o CSV regional do EC2 em streaming; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
 
