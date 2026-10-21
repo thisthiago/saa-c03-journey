@@ -20,6 +20,10 @@ import type { PurchaseOption, Segment } from '../../simulators/purchase/model'
 import type { HttpRequest, Listener } from '../../simulators/loadbalancer/model'
 import type { AsgInstance, GroupState, PolicySpec } from '../../simulators/scaling/model'
 import type { ConcurrencySettings, FunctionSpec } from '../../simulators/lambda/model'
+import type { Failure as DbFailure, Topology as DbTopology } from '../../simulators/rdsha/model'
+import type { Consistency, KeyValue, TableLoad } from '../../simulators/dynamo/model'
+import type { AuroraCluster } from '../../simulators/aurora/model'
+import type { CacheConfig, CacheScenarioLoad } from '../../simulators/cachedb/model'
 
 export type PredictSpec =
   | {
@@ -84,6 +88,18 @@ export type PredictSpec =
   | { sim: 'asg-termination'; instances: AsgInstance[]; template: string; version: number }
   /** Lambda: `throttled` (yes/no) ou `concurrency` (número de execuções simultâneas necessárias) da função `fn`. */
   | { sim: 'lambda'; functions: FunctionSpec[]; settings: Record<string, ConcurrencySettings>; fn: string; query: 'throttled' | 'concurrency' | 'cold-start' }
+  /** RDS: depois da falha, `loss` → none/seconds/minutes/total; `recovery` → automatic/manual/none. */
+  | { sim: 'rds-failure'; topology: DbTopology; failure: DbFailure; query: 'loss' | 'recovery' }
+  /** DynamoDB: unidades consumidas por uma operação (número; meia unidade vira "0.5"). */
+  | { sim: 'ddb-units'; op: 'read' | 'write'; itemKB: number; consistency?: Consistency; transactional?: boolean }
+  /** DynamoDB: a partição do valor mais acessado sofre throttling (yes/no). */
+  | { sim: 'ddb-hot'; keys: KeyValue[]; perSecond: number; itemKB: number; op: 'read' | 'write'; consistency?: Consistency }
+  /** DynamoDB: modo de capacidade mais barato (on-demand/provisioned). */
+  | { sim: 'ddb-mode'; load: TableLoad; region?: string }
+  /** Aurora: configuração de armazenamento mais barata (standard/io-optimized). */
+  | { sim: 'aurora-io'; cluster: AuroraCluster; region?: string }
+  /** Cache: `stale` → um dado pode aparecer desatualizado (yes/no); `db-ok` → as leituras que chegam ao banco cabem em `maxDbReads` (yes/no). */
+  | { sim: 'cache'; load: CacheScenarioLoad; config: CacheConfig; query: 'stale' | 'db-ok'; maxDbReads?: number }
 
 
 /** Uma requisição é permitida ou negada? (resultado calculado pelo avaliador de acesso) */
