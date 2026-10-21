@@ -51,10 +51,9 @@ export const TERRITORIES: TerritoryDef[] = [
   {
     id: 'redes',
     title: 'Redes',
-    summary: 'VPC, sub-redes, roteamento, balanceamento e DNS.',
+    summary: 'VPC, sub-redes, roteamento, conexões híbridas, DNS, entrega de conteúdo e proteção de borda.',
     glyph: 'network',
-    status: 'planned',
-    plannedServices: ['Amazon VPC', 'Elastic Load Balancing', 'Amazon Route 53', 'Amazon CloudFront'],
+    status: 'active',
   },
   {
     id: 'bancos-de-dados',

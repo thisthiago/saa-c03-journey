@@ -16,6 +16,9 @@ import { migrationComplete, type MigrationLabResponse } from '../simulators/migr
 import { logsLabComplete, type LogsLabResponse } from '../simulators/logs/lab'
 import { stackLabComplete, type StackLabResponse } from '../simulators/stack/lab'
 import { budgetLabComplete, type BudgetLabResponse } from '../simulators/budget/lab'
+import { vpcPlannerComplete, type VpcPlannerLabResponse } from '../simulators/vpcnet/planner'
+import { connectComplete, type ConnectLabResponse } from '../simulators/connect/lab'
+import { endpointsComplete, type EndpointsLabResponse } from '../simulators/endpoints/lab'
 import type {
   ActivityResponse,
   DecisionResponse,
@@ -106,6 +109,9 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
         case 'identity':
         case 'compute-chooser':
         case 'db-chooser':
+        case 'hybrid':
+        case 'dns-policy':
+        case 'net-chooser':
           return activity.config.items.every((i) => Boolean((response as unknown as { placements?: Record<string, string> }).placements?.[i.id]))
         case 'support':
           return activity.config.scenarios.every((sc) => Boolean((response as unknown as { choices?: Record<string, string> }).choices?.[sc.id]))
@@ -138,7 +144,15 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
         case 'compliance':
         case 'trail':
         case 'alarm':
+        case 'route-table':
+        case 'reach':
           return true
+        case 'vpc-planner':
+          return vpcPlannerComplete(activity.config, response as unknown as VpcPlannerLabResponse)
+        case 'connect':
+          return connectComplete(activity.config, response as unknown as ConnectLabResponse)
+        case 'endpoints':
+          return endpointsComplete(activity.config, response as unknown as EndpointsLabResponse)
         case 'db-sizing':
           return dbSizingComplete(activity.config, response as unknown as DbSizingLabResponse)
         case 'ddb-keys':
@@ -203,6 +217,9 @@ function labHint(activity: Extract<ActivityDef, { kind: 'lab' }>): string {
     case 'identity':
     case 'compute-chooser':
     case 'db-chooser':
+    case 'hybrid':
+    case 'dns-policy':
+    case 'net-chooser':
       return 'Posicione todos os cartões.'
     case 'support':
       return 'Escolha um plano para cada organização.'
@@ -230,6 +247,12 @@ function labHint(activity: Extract<ActivityDef, { kind: 'lab' }>): string {
       return "Escolha o efeito da atualização em cada recurso."
     case 'budget':
       return "Ative as tags e configure o orçamento de cada alvo."
+    case 'vpc-planner':
+      return 'Escolha o bloco da VPC e preencha o bloco de cada sub-rede.'
+    case 'connect':
+      return 'Escolha uma topologia para cada cenário.'
+    case 'endpoints':
+      return 'Escolha um caminho para cada carga.'
     default:
       return 'Responda a todas as tarefas.'
   }

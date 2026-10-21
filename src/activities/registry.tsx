@@ -83,6 +83,22 @@ import { BudgetLab } from '../simulators/budget/BudgetLab'
 import type { BudgetLabResponse } from '../simulators/budget/lab'
 import { OpsChooserLab } from '../simulators/opschooser/OpsChooserLab'
 import type { OpsChooserLabResponse } from '../simulators/opschooser/lab'
+import { VpcPlannerLab } from '../simulators/vpcnet/VpcPlannerLab'
+import type { VpcPlannerLabResponse } from '../simulators/vpcnet/planner'
+import { RouteTableLab } from '../simulators/vpcnet/RouteTableLab'
+import type { RouteTableLabResponse } from '../simulators/vpcnet/routing'
+import { ReachLab } from '../simulators/reach/ReachLab'
+import type { ReachLabResponse } from '../simulators/reach/lab'
+import { ConnectLab } from '../simulators/connect/ConnectLab'
+import type { ConnectLabResponse } from '../simulators/connect/lab'
+import { EndpointsLab } from '../simulators/endpoints/EndpointsLab'
+import type { EndpointsLabResponse } from '../simulators/endpoints/lab'
+import { HybridLab } from '../simulators/hybrid/HybridLab'
+import type { HybridLabResponse } from '../simulators/hybrid/model'
+import { DnsPolicyLab } from '../simulators/dns/DnsPolicyLab'
+import type { DnsPolicyLabResponse } from '../simulators/dns/policy'
+import { NetChooserLab } from '../simulators/netchooser/NetChooserLab'
+import type { NetChooserLabResponse } from '../simulators/netchooser/model'
 import type { TransferLabResponse } from '../simulators/transfer/lab'
 import type { GatewayLabResponse } from '../simulators/gateway/lab'
 import type { RPLabResponse } from '../simulators/requester-pays/lab'
@@ -220,6 +236,22 @@ export function ActivityView({ activity, value, onChange, disabled, evaluation, 
           return <BudgetLab config={activity.config} value={value as unknown as BudgetLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
         case 'ops-chooser':
           return <OpsChooserLab config={activity.config} value={value as unknown as OpsChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'vpc-planner':
+          return <VpcPlannerLab config={activity.config} value={value as unknown as VpcPlannerLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'route-table':
+          return <RouteTableLab config={activity.config} value={value as unknown as RouteTableLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'reach':
+          return <ReachLab config={activity.config} value={value as unknown as ReachLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'connect':
+          return <ConnectLab config={activity.config} value={value as unknown as ConnectLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'endpoints':
+          return <EndpointsLab config={activity.config} value={value as unknown as EndpointsLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'hybrid':
+          return <HybridLab config={activity.config} value={value as unknown as HybridLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'dns-policy':
+          return <DnsPolicyLab config={activity.config} value={value as unknown as DnsPolicyLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'net-chooser':
+          return <NetChooserLab config={activity.config} value={value as unknown as NetChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
       }
   }
 }

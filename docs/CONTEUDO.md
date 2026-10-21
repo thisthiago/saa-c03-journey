@@ -134,6 +134,33 @@ Módulo `src/content/modules/governance/`, território `monitoramento`. Reaprove
 
 **Escolha do serviço.** O lab `ops-chooser` segue o padrão da escolha da computação: cada pergunta tem um requisito que decide, a melhor opção vale 1, uma que atende com mais trabalho vale 0,5 e uma que deixa um requisito de fora vale 0. Os testes falham se duas opções empatarem como melhor.
 
+## Trilha Redes na AWS
+
+Módulo `src/content/modules/network/`, território `redes`. Reaproveita, sem redeclarar, `ec2.security-group` (Fase 3), `infra.nat-zonal-regional` (Fase 2), `edge.route53` (Fase 7) e `edge.cloudfront`, `edge.pop`, `edge.regional-edge-cache` e `edge.global-accelerator` (Fase 8). O Elastic Load Balancing continua ensinado na trilha de Computação. Acrescenta conceitos `vpc.*`, `rt.*`, `sg.*`, `tgw.*`, `pl.*`, `hyb.*`, `dns.*`, `cdn.*`, `edgesec.*` e `net.choose`. O ACM só é citado (certificado do CloudFront em us-east-1) e o API Gateway fica de fora.
+
+| Fase | Tema | Empresas fictícias | Laboratórios |
+|---|---|---|---|
+| 1 | VPC e endereçamento | Varejo Ponto Certo | Plano de endereços (`vpc-planner`) |
+| 2 | Roteamento e saída para a internet | Varejo Ponto Certo | Tabelas de rotas (`route-table`) |
+| 3 | Segurança dentro da VPC | Escola Online Saber Mais | Caminho de cada fluxo (`reach`) |
+| 4 | Conectando VPCs | Grupo Horizonte Seguros | Topologias com peering e Transit Gateway (`connect`) |
+| 5 | Acesso privado a serviços | Corretora Valor Certo | Caminho até os serviços, com custo (`endpoints`) |
+| 6 | Conectividade híbrida | Metalúrgica Ferro Forte | Escolha da conexão (`hybrid`) |
+| 7 | DNS com Route 53 | Portal de Notícias Agora | Escolha da política de roteamento (`dns-policy`) |
+| 8 | Entrega de conteúdo | Streaming de Música Batuque | Cache do CloudFront (lab `edge`, reaproveitado) |
+| 9 | Proteção de borda e escolha | Mercado Online Pechincha | Escolha da solução de rede (`net-chooser`) |
+| Final | Projeto de Rede | Supermercados Cesta Cheia | Arquitetura em 8 etapas, com dimensões Seguro, Resiliente, Alto desempenho, Custo e Requisitos |
+
+**Dependências.** A Fase 2 exige a 1; a 3, a 4 e a 5 exigem a 2; a 6 exige a 4; a 9 exige a 7 e a 8; a 7 e a 8 só recomendam; o desafio final exige as nove. A trilha recomenda a AWS Foundations e a Computação. O mapa usa cinco colunas (x = 90, 270, 450, 630 e 815) e `mapHeight: 800`.
+
+**Preços reais nos labs.** O custo das topologias com Transit Gateway e dos caminhos até os serviços (NAT Gateway e endpoints) vem de `simulators/network-prices.ts`, que lê a tabela gerada por `npm run prices:network`.
+
+**Previsões calculadas.** As previsões `cidr`, `route`, `reach`, `connect` e `dns` usam os simuladores `vpcnet`, `reach`, `connect` e `dns`; a Fase 8 usa a previsão `edge` da Foundations.
+
+**Escolhas.** Os labs `hybrid`, `dns-policy` e `net-chooser` usam o motor genérico `simulators/shared/chooser.ts` e a interface `shared/ChoiceLab.tsx`: cada cartão tem um requisito que decide, a melhor opção vale 1, uma que atende com mais trabalho vale 0,5 e uma que deixa um requisito de fora vale 0. Os testes falham se duas opções empatarem como melhor.
+
+**Desktop primeiro.** As capturas de tela desta trilha (`tests/e2e/screens.spec.ts`) cobrem só o desktop; tablet e celular ficam para uma etapa própria.
+
 ## Princípios de escrita
 
 - **Aprender fazendo.** Cada missão segue a ordem: contexto (briefing) → conceitos-chave (intel, até ~80 palavras por carta) → desafios → resultado (debrief). Na interface aparecem só os nomes em português.
@@ -171,6 +198,8 @@ Cada módulo tem um `questions.ts` com questões no formato do exame. Para escre
 Os testes recusam questão com conceito inexistente, formato errado, alternativa sem explicação, alternativas repetidas ou setas no texto.
 
 ## Preços
+
+`src/content/pricing/network-prices.json` é gerado por `npm run prices:network` (NAT Gateway, endpoints de interface, Transit Gateway, Site-to-Site VPN, Client VPN, IPv4 público e transferência entre zonas; us-east-1 e sa-east-1). O script lê as ofertas AmazonVPC e AWSDataTransfer em JSON e o CSV regional do EC2 em streaming, para o NAT Gateway; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
 
 `src/content/pricing/governance-prices.json` é gerado por `npm run prices:governance` (CloudWatch, CloudTrail e Config; us-east-1 e sa-east-1), a partir da AWS Price List Bulk API; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
 

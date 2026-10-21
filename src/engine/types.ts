@@ -86,6 +86,12 @@ export type GlyphName =
   | 'terminal'
   | 'wallet'
   | 'code'
+  | 'route'
+  | 'plug'
+  | 'lock'
+  | 'firewall'
+  | 'router'
+  | 'waypoints'
 
 export interface TerritoryDef {
   id: string

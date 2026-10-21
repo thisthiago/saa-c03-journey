@@ -43,6 +43,14 @@ import type { ComplianceLabConfig } from '../../simulators/compliance/lab'
 import type { StackLabConfig } from '../../simulators/stack/lab'
 import type { BudgetLabConfig } from '../../simulators/budget/lab'
 import type { OpsChooserLabConfig } from '../../simulators/opschooser/lab'
+import type { VpcPlannerLabConfig } from '../../simulators/vpcnet/planner'
+import type { RouteTableLabConfig } from '../../simulators/vpcnet/routing'
+import type { ReachLabConfig } from '../../simulators/reach/lab'
+import type { ConnectLabConfig } from '../../simulators/connect/lab'
+import type { EndpointsLabConfig } from '../../simulators/endpoints/lab'
+import type { HybridLabConfig } from '../../simulators/hybrid/model'
+import type { DnsPolicyLabConfig } from '../../simulators/dns/policy'
+import type { NetChooserLabConfig } from '../../simulators/netchooser/model'
 
 export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'; config: CostLabConfig } | { lab: 'access'; config: AccessLabConfig }
   | { lab: 'versioning'; config: VersioningLabConfig }
@@ -86,5 +94,13 @@ export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'
   | { lab: 'stack'; config: StackLabConfig }
   | { lab: 'budget'; config: BudgetLabConfig }
   | { lab: 'ops-chooser'; config: OpsChooserLabConfig }
+  | { lab: 'vpc-planner'; config: VpcPlannerLabConfig }
+  | { lab: 'route-table'; config: RouteTableLabConfig }
+  | { lab: 'reach'; config: ReachLabConfig }
+  | { lab: 'connect'; config: ConnectLabConfig }
+  | { lab: 'endpoints'; config: EndpointsLabConfig }
+  | { lab: 'hybrid'; config: HybridLabConfig }
+  | { lab: 'dns-policy'; config: DnsPolicyLabConfig }
+  | { lab: 'net-chooser'; config: NetChooserLabConfig }
 
 export type LabId = LabSpec['lab']
