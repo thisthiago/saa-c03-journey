@@ -358,6 +358,11 @@
 .panel {
   border-top: 4px solid var(--phase);
 }
+/* O título da missão pode ser longo: o botão quebra a linha em vez de alargar o painel. */
+.playLink {
+  white-space: normal;
+  text-align: left;
+}
 .panelOrder {
   font-family: var(--font-display);
   font-size: 0.8rem;
