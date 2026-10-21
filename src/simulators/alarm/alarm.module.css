@@ -1,0 +1,70 @@
+/* Gráfico do laboratório de alarmes do CloudWatch. */
+.chart {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+}
+.axis {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+.grid {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+.line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+.threshold {
+  stroke: var(--warning, #e0b341);
+  stroke-width: 1.4;
+  stroke-dasharray: 6 4;
+}
+.incident {
+  fill: color-mix(in srgb, var(--danger) 14%, transparent);
+}
+.alarmDot {
+  fill: var(--danger);
+}
+.okDot {
+  fill: var(--success);
+}
+.noDataDot {
+  fill: var(--text-muted);
+}
+.label {
+  fill: var(--text-muted);
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+.transitions {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.84rem;
+  display: grid;
+  gap: 2px;
+}
