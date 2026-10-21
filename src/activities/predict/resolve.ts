@@ -23,6 +23,10 @@ import { bestOptions, compareOptions, OPTIONS as PURCHASE_OPTIONS } from '../../
 import { distribute, routeAlb } from '../../simulators/loadbalancer/model'
 import { defaultTerminationOrder, evaluatePolicies } from '../../simulators/scaling/model'
 import { simulateAccount } from '../../simulators/lambda/model'
+import { describeTopology, FAILURE_LABEL as DB_FAILURE_LABEL, formatSeconds, LOSS_LABEL, simulateFailure as simulateDbFailure } from '../../simulators/rdsha/model'
+import { CONSISTENCY_LABEL, hotPartition, MODE_LABEL, neededCapacity, onDemandMonthly, provisionedMonthly, readUnits, writeUnits, cheaperMode } from '../../simulators/dynamo/model'
+import { auroraMonthly, cheaperStorageConfig, ioShare, STORAGE_CONFIG_LABEL } from '../../simulators/aurora/model'
+import { cacheMetrics, describeCache } from '../../simulators/cachedb/model'
 import type { PredictSpec } from './specs'
 
 export interface PredictResult {
@@ -222,6 +226,67 @@ export function resolvePredict(spec: PredictSpec): PredictResult {
       if (spec.query === 'concurrency') return { outcome: String(r.needed), detail }
       if (spec.query === 'cold-start') return { outcome: r.coldStart ? 'yes' : 'no', detail: [...detail, r.coldStart ? 'O pico passa da concorrência provisionada: ambientes novos precisam inicializar.' : 'A provisionada cobre o pico: todos os ambientes já estão inicializados.'] }
       return { outcome: r.throttled ? 'yes' : 'no', detail }
+    }
+    case 'rds-failure': {
+      const r = simulateDbFailure(spec.topology, spec.failure)
+      const detail = [
+        `${describeTopology(spec.topology)}, diante de ${DB_FAILURE_LABEL[spec.failure]}: ${r.how}.`,
+        `${LOSS_LABEL[r.loss][0].toUpperCase()}${LOSS_LABEL[r.loss].slice(1)}${Number.isFinite(r.downtime) ? `; cerca de ${formatSeconds(r.downtime)} sem escritas` : ''}.`,
+      ]
+      return { outcome: spec.query === 'loss' ? r.loss : r.recovery, detail }
+    }
+    case 'ddb-units': {
+      const units = spec.op === 'read' ? readUnits(spec.itemKB, spec.consistency ?? 'eventual') : writeUnits(spec.itemKB, spec.transactional)
+      const kind = spec.op === 'read' ? `leitura ${CONSISTENCY_LABEL[spec.consistency ?? 'eventual']}` : `escrita${spec.transactional ? ' transacional' : ''}`
+      const block = spec.op === 'read' ? 4 : 1
+      return {
+        outcome: String(units),
+        detail: [`Uma ${kind} de um item de ${spec.itemKB.toLocaleString('pt-BR')} KB arredonda o tamanho para ${Math.ceil(spec.itemKB / block) * block} KB e consome ${units.toLocaleString('pt-BR')} unidade(s).`],
+      }
+    }
+    case 'ddb-hot': {
+      const per = spec.op === 'read' ? readUnits(spec.itemKB, spec.consistency ?? 'eventual') : writeUnits(spec.itemKB)
+      const r = hotPartition(spec.keys, spec.perSecond, per, spec.op)
+      return {
+        outcome: r.throttled ? 'yes' : 'no',
+        detail: [
+          `O valor "${r.hottest.value}" recebe ${Math.round(r.hottest.units).toLocaleString('pt-BR')} unidades de ${spec.op === 'read' ? 'leitura' : 'escrita'} por segundo.`,
+          `Uma partição entrega no máximo ${r.limit.toLocaleString('pt-BR')}: ${r.throttled ? 'o excedente sofre throttling, mesmo com a tabela folgada no total' : 'cabe na partição'}.`,
+        ],
+      }
+    }
+    case 'ddb-mode': {
+      const n = neededCapacity(spec.load)
+      const od = onDemandMonthly(spec.load, spec.region).total
+      const prov = provisionedMonthly(n.rcu, n.wcu, spec.region).total
+      const best = cheaperMode(spec.load, spec.region)
+      return {
+        outcome: best,
+        detail: [
+          `${MODE_LABEL['on-demand']}: US$ ${od.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}/mês, pagando cada requisição pela média do mês.`,
+          `${MODE_LABEL.provisioned}: US$ ${prov.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}/mês, reservando ${n.rcu.toLocaleString('pt-BR')} RCU e ${n.wcu.toLocaleString('pt-BR')} WCU para cobrir o pico.`,
+        ],
+      }
+    }
+    case 'aurora-io': {
+      const s = auroraMonthly(spec.cluster, 'standard', spec.region)
+      const o = auroraMonthly(spec.cluster, 'io-optimized', spec.region)
+      return {
+        outcome: cheaperStorageConfig(spec.cluster, spec.region),
+        detail: [
+          `${STORAGE_CONFIG_LABEL.standard}: US$ ${s.total.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}/mês, dos quais ${Math.round(ioShare(spec.cluster, spec.region) * 100)}% são E/S.`,
+          `${STORAGE_CONFIG_LABEL['io-optimized']}: US$ ${o.total.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}/mês, sem cobrança de E/S e com instância e armazenamento mais caros.`,
+        ],
+      }
+    }
+    case 'cache': {
+      const m = cacheMetrics(spec.load, spec.config)
+      const detail = [
+        `${describeCache(spec.config)}: ${Math.round(m.hitRate * 1000) / 10}% de acertos, ${Math.round(m.dbReadsPerSec).toLocaleString('pt-BR')} leituras por segundo no banco.`,
+        Number.isFinite(m.maxStaleSec) ? (m.maxStaleSec > 0 ? `Um dado alterado no banco pode aparecer desatualizado por até ${m.maxStaleSec} s.` : 'O cache não mostra dados desatualizados.') : 'Sem TTL e sem escrita direta, um dado alterado no banco fica desatualizado no cache até sair dele.',
+      ]
+      if (spec.query === 'stale') return { outcome: m.maxStaleSec > 0 ? 'yes' : 'no', detail }
+      return { outcome: m.dbReadsPerSec <= (spec.maxDbReads ?? 0) ? 'yes' : 'no', detail }
     }
     case 'cost-cheapest': {
       const prices = regionPrices(spec.region)

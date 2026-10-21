@@ -17,6 +17,7 @@ export default defineConfig({
             { name: 'content-storage', test: /src[\\/]content[\\/]modules[\\/]storage[\\/]/ },
             { name: 'content-identity', test: /src[\\/]content[\\/]modules[\\/]identity[\\/]/ },
             { name: 'content-compute', test: /src[\\/]content[\\/]modules[\\/]compute[\\/]/ },
+            { name: 'content-database', test: /src[\\/]content[\\/]modules[\\/]database[\\/]/ },
             { name: 'content', test: /src[\\/]content[\\/]/ },
           ],
         },

@@ -4,12 +4,13 @@ Plataforma web gamificada para aprender AWS **fazendo**: simulações, decisões
 
 Jogue em **https://thisthiago.github.io/saa-c03-journey/**. O site é publicado no GitHub Pages a cada push na branch `main`, pelo workflow `.github/workflows/pages.yml`, depois de passar no lint e nos testes.
 
-Quatro trilhas estão disponíveis:
+Cinco trilhas estão disponíveis:
 
 - **AWS Foundations — Infraestrutura Global, Segurança e Suporte**: Regiões, AZs, Local Zones, Wavelength, Outposts e borda; planos de suporte; modelo de responsabilidade compartilhada. Três fases e o desafio final **Architecture Foundations**. É a trilha sugerida para quem está começando.
 - **S3 Expedition — Domínio do Armazenamento AWS**: 11 fases e o desafio final **Projeto Atlas**. Recomenda (sem exigir) a AWS Foundations.
 - **IAM e Access Management — Autenticação, autorização e governança de acesso**: usuário raiz, MFA, políticas, avaliação de políticas, roles e STS, PassRole e External ID, federação (IAM Identity Center, Directory Service, Cognito), ABAC, Organizations, SCPs, RCPs, permissions boundaries, Control Tower e IAM Access Analyzer. Oito fases e o desafio final **Arquitetura de Acesso**. Recomenda (sem exigir) a AWS Foundations.
 - **Computação na AWS — EC2, escalabilidade, serverless e contêineres**: EC2, tipos de instância, EBS e instance store, opções de compra (Savings Plans, RIs, Spot), Elastic Load Balancing, Auto Scaling, Lambda, ECS, EKS, Fargate e ECR, Batch, Elastic Beanstalk e ambientes híbridos. Os labs de custo usam preços reais da AWS. Nove fases e o desafio final **Arquitetura de Computação**. Recomenda (sem exigir) a AWS Foundations.
+- **Bancos de dados na AWS — Relacionais, NoSQL, cache e análise**: RDS (classes, armazenamento, Multi-AZ, réplicas, backups e RDS Proxy), Aurora (réplicas, endpoints, Global Database, serverless, I/O-Optimized, Backtrack e clones), DynamoDB (chaves, capacidade, índices, Streams, TTL, DAX, tabelas globais e transações), ElastiCache, DocumentDB, Neptune, Keyspaces, Redshift, segurança e backup dos bancos e migração com o DMS. Os labs de custo usam preços reais da AWS. Nove fases e o desafio final **Arquitetura de Dados**. Recomenda (sem exigir) a AWS Foundations e a Computação.
 
 > Projeto educacional independente, sem afiliação com a Amazon Web Services. Não usa conta, credenciais nem recursos AWS reais: tudo é simulado no navegador.
 
@@ -32,17 +33,18 @@ npm run dev          # servidor de desenvolvimento (http://localhost:5173)
 | `npx playwright install chromium && npm run e2e` | Testes ponta a ponta e capturas de tela (em `screenshots/`) |
 | `npm run prices:update` | Atualiza a tabela de preços do S3 pela AWS Price List API |
 | `npm run prices:compute` | Atualiza a tabela de preços da computação (EC2, Savings Plans, Lambda, Fargate e ELB) |
+| `npm run prices:database` | Atualiza a tabela de preços dos bancos de dados (RDS, Aurora, DynamoDB, ElastiCache e Redshift) |
 
 O build usa caminhos relativos e rotas com `#`. Por isso, `dist/` pode ser servido de qualquer hospedagem estática, inclusive de um bucket S3.
 
 ## O que tem dentro
 
-- **35 fases** (31 fases e 4 desafios finais), **134 missões** e **395 atividades avaliadas**.
-- **299 conceitos**, cada um com referências à documentação oficial, e **842 itens de revisão espaçada**.
-- **Banco de 171 questões de simulado** (65 da Computação, 55 da IAM, 34 da S3 e 17 da Foundations), no formato do exame: cada uma mostra a dificuldade, o conceito avaliado e o domínio, e explica todas as alternativas. Dá para treinar com a explicação na hora ou fazer um simulado cronometrado, com resultado por domínio e por conceito.
-- **89 conquistas**.
+- **45 fases** (40 fases e 5 desafios finais), **172 missões** e **514 atividades avaliadas**.
+- **365 conceitos**, cada um com referências à documentação oficial, e **1.055 itens de revisão espaçada**.
+- **Banco de 220 questões de simulado** (65 da Computação, 55 da IAM, 49 dos Bancos de dados, 34 da S3 e 17 da Foundations), no formato do exame: cada uma mostra a dificuldade, o conceito avaliado e o domínio, e explica todas as alternativas. Dá para treinar com a explicação na hora ou fazer um simulado cronometrado, com resultado por domínio e por conceito.
+- **111 conquistas**.
 - **8 tipos de interação**: decisão com justificativa, classificação, associação, ordenação, predição, estimativa, investigação e laboratório.
-- **29 simuladores**:
+- **37 simuladores**:
   - escolha de Região (fatos verificados + premissas do cenário);
   - resiliência entre AZs (derrubar uma AZ ou a Região);
   - fluxo do CloudFront (POP, Regional Edge Cache e origem);
@@ -71,7 +73,15 @@ O build usa caminhos relativos e rotas com `#`. Por isso, `dist/` pode ser servi
   - balanceadores (regras do ALB, cross-zone e escolha entre ALB, NLB e GWLB);
   - Auto Scaling ao longo de um dia (políticas, ações agendadas, término);
   - concorrência da Lambda (reservada, provisionada, throttling e custo);
-  - escolha da computação.
+  - escolha da computação;
+  - dimensionamento do RDS (classe, Single-AZ ou Multi-AZ, gp3 ou io2, com preços reais);
+  - alta disponibilidade do RDS (Multi-AZ, cluster Multi-AZ, réplicas, outra Região, backup e RDS Proxy diante de falhas);
+  - custo do Aurora (Standard ou I/O-Optimized);
+  - capacidade do DynamoDB (unidades, partição quente, sob demanda ou provisionado);
+  - cache na frente do banco (estratégia, TTL, motor e nó do ElastiCache);
+  - escolha do banco (relacional, NoSQL, recursos do DynamoDB, bancos especializados e análise);
+  - segurança do banco (rede, criptografia, credenciais, backup e snapshots);
+  - plano de migração com o DMS.
 - **Progressão**:
   - XP só por ações avaliadas; níveis;
   - domínio por conceito e revisão espaçada (Leitner), alimentados também pelo banco de questões;

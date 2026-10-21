@@ -10,6 +10,9 @@ import { credentialsComplete, type CredentialsLabResponse } from '../simulators/
 import { instancePickerComplete, type InstancePickerLabResponse } from '../simulators/instances/lab'
 import { volumesComplete, type VolumesLabResponse } from '../simulators/ebs/lab'
 import { purchaseComplete, type PurchaseLabResponse } from '../simulators/purchase/lab'
+import { dbSizingComplete, type DbSizingLabResponse } from '../simulators/dbsize/lab'
+import { ddbKeysComplete, type DdbKeysLabResponse } from '../simulators/dynamo/lab'
+import { migrationComplete, type MigrationLabResponse } from '../simulators/migration/lab'
 import type {
   ActivityResponse,
   DecisionResponse,
@@ -99,6 +102,7 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
         case 'placement':
         case 'identity':
         case 'compute-chooser':
+        case 'db-chooser':
           return activity.config.items.every((i) => Boolean((response as unknown as { placements?: Record<string, string> }).placements?.[i.id]))
         case 'support':
           return activity.config.scenarios.every((sc) => Boolean((response as unknown as { choices?: Record<string, string> }).choices?.[sc.id]))
@@ -124,7 +128,16 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
         case 'load-balancer':
         case 'scaling':
         case 'lambda-concurrency':
+        case 'rds-ha':
+        case 'cache-sim':
+        case 'db-secure':
           return true
+        case 'db-sizing':
+          return dbSizingComplete(activity.config, response as unknown as DbSizingLabResponse)
+        case 'ddb-keys':
+          return ddbKeysComplete(activity.config, response as unknown as DdbKeysLabResponse)
+        case 'migration':
+          return migrationComplete(activity.config, response as unknown as MigrationLabResponse)
       }
   }
 }
@@ -176,6 +189,7 @@ function labHint(activity: Extract<ActivityDef, { kind: 'lab' }>): string {
     case 'placement':
     case 'identity':
     case 'compute-chooser':
+    case 'db-chooser':
       return 'Posicione todos os cartões.'
     case 'support':
       return 'Escolha um plano para cada organização.'
@@ -191,6 +205,12 @@ function labHint(activity: Extract<ActivityDef, { kind: 'lab' }>): string {
       return 'Configure um volume para cada carga.'
     case 'purchase':
       return 'Escolha uma opção de compra para cada parte da frota.'
+    case 'db-sizing':
+      return 'Configure um banco para cada carga.'
+    case 'ddb-keys':
+      return 'Escolha as chaves e o modo de capacidade de cada tabela.'
+    case 'migration':
+      return 'Escolha o tipo de tarefa do DMS de cada migração.'
     default:
       return 'Responda a todas as tarefas.'
   }

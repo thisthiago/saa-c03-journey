@@ -1,0 +1,426 @@
+{
+  "source": "AWS Price List Bulk API",
+  "sourceDocs": "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-price-list-query-api.html",
+  "retrievedAt": "2026-10-21",
+  "currency": "USD",
+  "notes": [
+    "Valores de referência para fins didáticos, extraídos da AWS Price List na data indicada.",
+    "RDS for PostgreSQL e Aurora PostgreSQL sob demanda; outros motores têm preços próprios.",
+    "Apenas a primeira faixa paga de cada item; sem nível gratuito, impostos, transferência de dados ou descontos de reserva.",
+    "Preços mudam: consulte as páginas de preço de cada serviço antes de qualquer decisão real."
+  ],
+  "regions": {
+    "us-east-1": {
+      "label": "US East (N. Virginia)",
+      "offers": {
+        "AmazonRDS": "2026-10-20T00:32:32Z",
+        "AmazonElastiCache": "2026-10-14T22:11:39Z",
+        "AmazonDynamoDB": "2026-09-11T12:44:22Z",
+        "AmazonRedshift": "2026-09-11T12:45:05Z"
+      },
+      "rds": {
+        "engine": "PostgreSQL",
+        "instances": {
+          "db.t4g.micro": {
+            "vcpu": 2,
+            "memoryGiB": 1,
+            "singleAzHour": 0.016,
+            "multiAzHour": 0.032
+          },
+          "db.t4g.medium": {
+            "vcpu": 2,
+            "memoryGiB": 4,
+            "singleAzHour": 0.065,
+            "multiAzHour": 0.129
+          },
+          "db.m7g.large": {
+            "vcpu": 2,
+            "memoryGiB": 8,
+            "singleAzHour": 0.168,
+            "multiAzHour": 0.337
+          },
+          "db.m7g.xlarge": {
+            "vcpu": 4,
+            "memoryGiB": 16,
+            "singleAzHour": 0.337,
+            "multiAzHour": 0.674
+          },
+          "db.m7g.2xlarge": {
+            "vcpu": 8,
+            "memoryGiB": 32,
+            "singleAzHour": 0.674,
+            "multiAzHour": 1.348
+          },
+          "db.r7g.large": {
+            "vcpu": 2,
+            "memoryGiB": 16,
+            "singleAzHour": 0.239,
+            "multiAzHour": 0.478
+          },
+          "db.r7g.xlarge": {
+            "vcpu": 4,
+            "memoryGiB": 32,
+            "singleAzHour": 0.478,
+            "multiAzHour": 0.956
+          },
+          "db.r7g.2xlarge": {
+            "vcpu": 8,
+            "memoryGiB": 64,
+            "singleAzHour": 0.956,
+            "multiAzHour": 1.913
+          }
+        },
+        "storage": {
+          "gp3": {
+            "singleAzGBMonth": 0.115,
+            "multiAzGBMonth": 0.23,
+            "singleAzIopsMonth": 0.02,
+            "multiAzIopsMonth": 0.04,
+            "singleAzThroughputMiBpsMonth": 0.08,
+            "multiAzThroughputMiBpsMonth": 0.16
+          },
+          "io2": {
+            "singleAzGBMonth": 0.125,
+            "multiAzGBMonth": 0.25,
+            "singleAzIopsMonth": 0.1,
+            "multiAzIopsMonth": 0.2
+          }
+        },
+        "backupGBMonth": 0.095,
+        "proxyVcpuHour": 0.015
+      },
+      "aurora": {
+        "engine": "Aurora PostgreSQL",
+        "instances": {
+          "db.t4g.medium": {
+            "vcpu": 2,
+            "memoryGiB": 4,
+            "standardHour": 0.073,
+            "ioOptimizedHour": 0.095
+          },
+          "db.r7g.large": {
+            "vcpu": 2,
+            "memoryGiB": 16,
+            "standardHour": 0.276,
+            "ioOptimizedHour": 0.359
+          },
+          "db.r7g.xlarge": {
+            "vcpu": 4,
+            "memoryGiB": 32,
+            "standardHour": 0.553,
+            "ioOptimizedHour": 0.719
+          },
+          "db.r7g.2xlarge": {
+            "vcpu": 8,
+            "memoryGiB": 64,
+            "standardHour": 1.106,
+            "ioOptimizedHour": 1.437
+          }
+        },
+        "standard": {
+          "storageGBMonth": 0.1,
+          "ioPerMillion": 0.2,
+          "serverlessV2AcuHour": 0.12
+        },
+        "ioOptimized": {
+          "storageGBMonth": 0.225,
+          "ioPerMillion": 0,
+          "serverlessV2AcuHour": 0.16
+        },
+        "backupGBMonth": 0.021
+      },
+      "dynamodb": {
+        "onDemand": {
+          "readPerMillion": 0.125,
+          "writePerMillion": 0.625,
+          "replicatedWritePerMillion": 0.625
+        },
+        "provisioned": {
+          "rcuHour": 0.00013,
+          "wcuHour": 0.00065,
+          "replicatedWcuHour": 0.00065
+        },
+        "storageGBMonth": 0.25,
+        "pitrGBMonth": 0.2,
+        "backupGBMonth": 0.1
+      },
+      "elasticache": {
+        "nodes": {
+          "cache.t4g.small": {
+            "vcpu": 2,
+            "memoryGiB": 1.37,
+            "hour": {
+              "valkey": 0.0256,
+              "redis": 0.032,
+              "memcached": 0.032
+            }
+          },
+          "cache.t4g.medium": {
+            "vcpu": 2,
+            "memoryGiB": 3.09,
+            "hour": {
+              "valkey": 0.052,
+              "redis": 0.065,
+              "memcached": 0.065
+            }
+          },
+          "cache.m7g.large": {
+            "vcpu": 2,
+            "memoryGiB": 6.38,
+            "hour": {
+              "valkey": 0.1264,
+              "redis": 0.158,
+              "memcached": 0.158
+            }
+          },
+          "cache.r7g.large": {
+            "vcpu": 2,
+            "memoryGiB": 13.07,
+            "hour": {
+              "valkey": 0.1752,
+              "redis": 0.219,
+              "memcached": 0.219
+            }
+          },
+          "cache.r7g.xlarge": {
+            "vcpu": 4,
+            "memoryGiB": 26.32,
+            "hour": {
+              "valkey": 0.3496,
+              "redis": 0.437,
+              "memcached": 0.437
+            }
+          }
+        }
+      },
+      "redshift": {
+        "nodes": {
+          "ra3.large": {
+            "hour": 0.543
+          },
+          "ra3.xlplus": {
+            "hour": 1.086
+          },
+          "ra3.4xlarge": {
+            "hour": 3.26
+          }
+        },
+        "managedStorageGBMonth": 0.024,
+        "serverlessRpuHour": 0.375,
+        "spectrumPerTB": 5
+      },
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/current/us-east-1/index.csv",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonElastiCache/current/us-east-1/index.csv",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonDynamoDB/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRedshift/current/us-east-1/index.json"
+      ]
+    },
+    "sa-east-1": {
+      "label": "América do Sul (São Paulo)",
+      "offers": {
+        "AmazonRDS": "2026-10-20T00:32:32Z",
+        "AmazonElastiCache": "2026-10-14T22:11:39Z",
+        "AmazonDynamoDB": "2026-09-11T12:44:22Z",
+        "AmazonRedshift": "2026-09-11T12:45:05Z"
+      },
+      "rds": {
+        "engine": "PostgreSQL",
+        "instances": {
+          "db.t4g.micro": {
+            "vcpu": 2,
+            "memoryGiB": 1,
+            "singleAzHour": 0.034,
+            "multiAzHour": 0.069
+          },
+          "db.t4g.medium": {
+            "vcpu": 2,
+            "memoryGiB": 4,
+            "singleAzHour": 0.137,
+            "multiAzHour": 0.275
+          },
+          "db.m7g.large": {
+            "vcpu": 2,
+            "memoryGiB": 8,
+            "singleAzHour": 0.221,
+            "multiAzHour": 0.442
+          },
+          "db.m7g.xlarge": {
+            "vcpu": 4,
+            "memoryGiB": 16,
+            "singleAzHour": 0.442,
+            "multiAzHour": 0.884
+          },
+          "db.m7g.2xlarge": {
+            "vcpu": 8,
+            "memoryGiB": 32,
+            "singleAzHour": 0.884,
+            "multiAzHour": 1.768
+          },
+          "db.r7g.large": {
+            "vcpu": 2,
+            "memoryGiB": 16,
+            "singleAzHour": 0.38001,
+            "multiAzHour": 0.76002
+          },
+          "db.r7g.xlarge": {
+            "vcpu": 4,
+            "memoryGiB": 32,
+            "singleAzHour": 0.76002,
+            "multiAzHour": 1.52004
+          },
+          "db.r7g.2xlarge": {
+            "vcpu": 8,
+            "memoryGiB": 64,
+            "singleAzHour": 1.52004,
+            "multiAzHour": 3.04167
+          }
+        },
+        "storage": {
+          "gp3": {
+            "singleAzGBMonth": 0.219,
+            "multiAzGBMonth": 0.438,
+            "singleAzIopsMonth": 0.038,
+            "multiAzIopsMonth": 0.076,
+            "singleAzThroughputMiBpsMonth": 0.152,
+            "multiAzThroughputMiBpsMonth": 0.305
+          },
+          "io2": {
+            "singleAzGBMonth": 0.238,
+            "multiAzGBMonth": 0.476,
+            "singleAzIopsMonth": 0.14,
+            "multiAzIopsMonth": 0.28
+          }
+        },
+        "backupGBMonth": 0.095,
+        "proxyVcpuHour": 0.03
+      },
+      "aurora": {
+        "engine": "Aurora PostgreSQL",
+        "instances": {
+          "db.t4g.medium": {
+            "vcpu": 2,
+            "memoryGiB": 4,
+            "standardHour": 0.153,
+            "ioOptimizedHour": 0.199
+          },
+          "db.r7g.large": {
+            "vcpu": 2,
+            "memoryGiB": 16,
+            "standardHour": 0.43884,
+            "ioOptimizedHour": 0.57081
+          },
+          "db.r7g.xlarge": {
+            "vcpu": 4,
+            "memoryGiB": 32,
+            "standardHour": 0.87927,
+            "ioOptimizedHour": 1.14321
+          },
+          "db.r7g.2xlarge": {
+            "vcpu": 8,
+            "memoryGiB": 64,
+            "standardHour": 1.75854,
+            "ioOptimizedHour": 2.28483
+          }
+        },
+        "standard": {
+          "storageGBMonth": 0.19,
+          "ioPerMillion": 0.28,
+          "serverlessV2AcuHour": 0.25
+        },
+        "ioOptimized": {
+          "storageGBMonth": 0.428,
+          "ioPerMillion": 0,
+          "serverlessV2AcuHour": 0.33
+        },
+        "backupGBMonth": 0.037
+      },
+      "dynamodb": {
+        "onDemand": {
+          "readPerMillion": 0.1875,
+          "writePerMillion": 0.9375,
+          "replicatedWritePerMillion": 0.9375
+        },
+        "provisioned": {
+          "rcuHour": 0.000195,
+          "wcuHour": 0.000975,
+          "replicatedWcuHour": 0.000975
+        },
+        "storageGBMonth": 0.375,
+        "pitrGBMonth": 0.3,
+        "backupGBMonth": 0.15
+      },
+      "elasticache": {
+        "nodes": {
+          "cache.t4g.small": {
+            "vcpu": 2,
+            "memoryGiB": 1.37,
+            "hour": {
+              "valkey": 0.0488,
+              "redis": 0.061,
+              "memcached": 0.061
+            }
+          },
+          "cache.t4g.medium": {
+            "vcpu": 2,
+            "memoryGiB": 3.09,
+            "hour": {
+              "valkey": 0.0976,
+              "redis": 0.122,
+              "memcached": 0.122
+            }
+          },
+          "cache.m7g.large": {
+            "vcpu": 2,
+            "memoryGiB": 6.38,
+            "hour": {
+              "valkey": 0.18,
+              "redis": 0.225,
+              "memcached": 0.225
+            }
+          },
+          "cache.r7g.large": {
+            "vcpu": 2,
+            "memoryGiB": 13.07,
+            "hour": {
+              "valkey": 0.3488,
+              "redis": 0.436,
+              "memcached": 0.436
+            }
+          },
+          "cache.r7g.xlarge": {
+            "vcpu": 4,
+            "memoryGiB": 26.32,
+            "hour": {
+              "valkey": 0.6984,
+              "redis": 0.873,
+              "memcached": 0.873
+            }
+          }
+        }
+      },
+      "redshift": {
+        "nodes": {
+          "ra3.large": {
+            "hour": 0.866
+          },
+          "ra3.xlplus": {
+            "hour": 1.731
+          },
+          "ra3.4xlarge": {
+            "hour": 5.195
+          }
+        },
+        "managedStorageGBMonth": 0.043,
+        "serverlessRpuHour": 0.5976,
+        "spectrumPerTB": 5
+      },
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/current/sa-east-1/index.csv",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonElastiCache/current/sa-east-1/index.csv",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonDynamoDB/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRedshift/current/sa-east-1/index.json"
+      ]
+    }
+  }
+}

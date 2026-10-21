@@ -29,6 +29,13 @@ import type { LbLabConfig } from '../../simulators/loadbalancer/lab'
 import type { ScalingLabConfig } from '../../simulators/scaling/lab'
 import type { LambdaLabConfig } from '../../simulators/lambda/lab'
 import type { ChooserLabConfig } from '../../simulators/chooser/lab'
+import type { DbSizingLabConfig } from '../../simulators/dbsize/lab'
+import type { RdsHaLabConfig } from '../../simulators/rdsha/lab'
+import type { DdbKeysLabConfig } from '../../simulators/dynamo/lab'
+import type { DbChooserLabConfig } from '../../simulators/dbchooser/lab'
+import type { CacheLabConfig } from '../../simulators/cachedb/lab'
+import type { DbSecureLabConfig } from '../../simulators/dbsecure/lab'
+import type { MigrationLabConfig } from '../../simulators/migration/lab'
 
 export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'; config: CostLabConfig } | { lab: 'access'; config: AccessLabConfig }
   | { lab: 'versioning'; config: VersioningLabConfig }
@@ -58,5 +65,12 @@ export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'
   | { lab: 'scaling'; config: ScalingLabConfig }
   | { lab: 'lambda-concurrency'; config: LambdaLabConfig }
   | { lab: 'compute-chooser'; config: ChooserLabConfig }
+  | { lab: 'db-sizing'; config: DbSizingLabConfig }
+  | { lab: 'rds-ha'; config: RdsHaLabConfig }
+  | { lab: 'ddb-keys'; config: DdbKeysLabConfig }
+  | { lab: 'db-chooser'; config: DbChooserLabConfig }
+  | { lab: 'cache-sim'; config: CacheLabConfig }
+  | { lab: 'db-secure'; config: DbSecureLabConfig }
+  | { lab: 'migration'; config: MigrationLabConfig }
 
 export type LabId = LabSpec['lab']
