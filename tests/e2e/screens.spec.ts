@@ -648,6 +648,46 @@ test.describe('trilha Monitoramento e governança na AWS', () => {
   }
 })
 
+/** Missões da trilha Redes na AWS na ordem do mapa (as anteriores ficam aprovadas no progresso semeado). */
+const NET_MISSIONS = [
+  ...['f01', 'f02', 'f03', 'f04', 'f05', 'f06', 'f07', 'f08', 'f09'].flatMap((f) => ['m1', 'm2', 'm3', 'boss'].map((m) => `net.${f}.${m}`)),
+  'net.final.projeto',
+]
+
+// Módulo novo: por enquanto, só o desktop (tablet e celular ficam para uma etapa própria).
+test.describe('trilha Redes na AWS', () => {
+  const CASES: { name: string; mission?: string; step?: number; path?: string }[] = [
+    { name: 'net-f1-plano', mission: 'net.f01.boss', step: 2 },
+    { name: 'net-f2-rotas', mission: 'net.f02.boss', step: 2 },
+    { name: 'net-f3-fluxos', mission: 'net.f03.boss', step: 2 },
+    { name: 'net-f4-topologias', mission: 'net.f04.boss', step: 2 },
+    { name: 'net-f5-endpoints', mission: 'net.f05.boss', step: 2 },
+    { name: 'net-f6-hibrida', mission: 'net.f06.boss', step: 2 },
+    { name: 'net-f7-politicas', mission: 'net.f07.boss', step: 2 },
+    { name: 'net-f8-cache', mission: 'net.f08.boss', step: 2 },
+    { name: 'net-f9-escolha', mission: 'net.f09.boss', step: 2 },
+    { name: 'net-final', mission: 'net.final.projeto', step: 2 },
+    { name: 'net-mapa', path: '/#/trilha/network.aws-network' },
+  ]
+  const vp = VIEWPORTS.find((v) => v.name === 'desktop')!
+  for (const c of CASES) {
+    test(`${c.name} — ${vp.name}`, async ({ page }) => {
+      await page.setViewportSize({ width: vp.width, height: vp.height })
+      await page.emulateMedia({ colorScheme: 'dark' })
+      const before = c.mission ? NET_MISSIONS.slice(0, NET_MISSIONS.indexOf(c.mission)) : []
+      const base = progressWithPhase1(new Date(), { missions: before })
+      const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+      await seedProgress(page, seeded)
+      await page.goto(c.path ?? `/#/missao/${c.mission}`)
+      await page.waitForLoadState('networkidle')
+      await page.waitForTimeout(250)
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+      expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+      await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+    })
+  }
+})
+
 test.describe('banco de questões', () => {
   for (const vp of VIEWPORTS) {
     test(`treino e simulado — ${vp.name}`, async ({ page }) => {
