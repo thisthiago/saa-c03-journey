@@ -108,6 +108,20 @@ export interface TerritoryDef {
   status: 'active' | 'planned'
   /** Serviços previstos para o território (informativo). */
   plannedServices?: string[]
+  /** Domínios do SAA-C03 que o território mais trabalha (ligação pedagógica, por tarefa do guia do exame). */
+  examDomains?: ExamDomainId[]
+}
+
+/** Trilha com plano de implementação pronto, ainda sem conteúdo jogável. */
+export interface PlannedTrackDef {
+  id: string
+  title: string
+  subtitle: string
+  territory: string
+  glyph: GlyphName
+  examDomains: ExamDomainId[]
+  /** Caminho do plano em docs/. */
+  plan: string
 }
 
 export interface ServiceDef {
