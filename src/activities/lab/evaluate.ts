@@ -42,6 +42,13 @@ import { dbChooserSolution, evaluateDbChooserLab, type DbChooserLabResponse } fr
 import { cacheInitial, cacheSolution, evaluateCacheLab, type CacheLabResponse } from '../../simulators/cachedb/lab'
 import { dbSecureSolution, evaluateDbSecureLab, type DbSecureLabResponse } from '../../simulators/dbsecure/lab'
 import { evaluateMigrationLab, migrationInitial, migrationSolution, type MigrationLabResponse } from '../../simulators/migration/lab'
+import { evaluateAlarmLab, alarmLabSolution, alarmLabInitial, type AlarmLabResponse } from '../../simulators/alarm/lab'
+import { evaluateLogsLab, logsLabSolution, logsLabInitial, type LogsLabResponse } from '../../simulators/logs/lab'
+import { evaluateTrailLab, trailLabSolution, trailLabInitial, type TrailLabResponse } from '../../simulators/trail/lab'
+import { evaluateComplianceLab, complianceLabSolution, complianceLabInitial, type ComplianceLabResponse } from '../../simulators/compliance/lab'
+import { evaluateStackLab, stackLabSolution, stackLabInitial, type StackLabResponse } from '../../simulators/stack/lab'
+import { evaluateBudgetLab, budgetLabSolution, budgetLabInitial, type BudgetLabResponse } from '../../simulators/budget/lab'
+import { evaluateOpsChooserLab, opsChooserSolution, type OpsChooserLabResponse } from '../../simulators/opschooser/lab'
 import type { LabActivity } from '../types'
 
 export interface LabItemScore {
@@ -150,6 +157,20 @@ export function evaluateLab(activity: LabActivity, response: unknown): LabResult
       return evaluateDbSecureLab(activity.config, (response as DbSecureLabResponse | undefined) ?? structuredClone(activity.config.initial))
     case 'migration':
       return evaluateMigrationLab(activity.config, (response as MigrationLabResponse | undefined) ?? migrationInitial(activity.config))
+    case 'alarm':
+      return evaluateAlarmLab(activity.config, (response as AlarmLabResponse | undefined) ?? alarmLabInitial(activity.config))
+    case 'logs':
+      return evaluateLogsLab(activity.config, (response as LogsLabResponse | undefined) ?? logsLabInitial(activity.config))
+    case 'trail':
+      return evaluateTrailLab(activity.config, (response as TrailLabResponse | undefined) ?? trailLabInitial(activity.config))
+    case 'compliance':
+      return evaluateComplianceLab(activity.config, (response as ComplianceLabResponse | undefined) ?? complianceLabInitial(activity.config))
+    case 'stack':
+      return evaluateStackLab(activity.config, (response as StackLabResponse | undefined) ?? stackLabInitial())
+    case 'budget':
+      return evaluateBudgetLab(activity.config, (response as BudgetLabResponse | undefined) ?? budgetLabInitial())
+    case 'ops-chooser':
+      return evaluateOpsChooserLab(activity.config, (response as OpsChooserLabResponse | undefined) ?? { placements: {} })
   }
 }
 
@@ -225,6 +246,20 @@ export function labSolution(activity: LabActivity): unknown {
       return dbSecureSolution(activity.config)
     case 'migration':
       return migrationSolution(activity.config)
+    case 'alarm':
+      return alarmLabSolution(activity.config)
+    case 'logs':
+      return logsLabSolution(activity.config)
+    case 'trail':
+      return trailLabSolution(activity.config)
+    case 'compliance':
+      return complianceLabSolution(activity.config)
+    case 'stack':
+      return stackLabSolution(activity.config)
+    case 'budget':
+      return budgetLabSolution(activity.config)
+    case 'ops-chooser':
+      return opsChooserSolution(activity.config)
   }
 }
 
@@ -302,5 +337,19 @@ export function labInitialResponse(activity: LabActivity): unknown {
       return structuredClone(activity.config.initial)
     case 'migration':
       return migrationInitial(activity.config)
+    case 'alarm':
+      return alarmLabInitial(activity.config)
+    case 'logs':
+      return logsLabInitial(activity.config)
+    case 'trail':
+      return trailLabInitial(activity.config)
+    case 'compliance':
+      return complianceLabInitial(activity.config)
+    case 'stack':
+      return stackLabInitial()
+    case 'budget':
+      return budgetLabInitial()
+    case 'ops-chooser':
+      return { placements: {} }
   }
 }
