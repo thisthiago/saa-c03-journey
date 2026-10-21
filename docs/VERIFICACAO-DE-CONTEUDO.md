@@ -690,3 +690,114 @@ O site da documentação da AWS devolve 200 para páginas que não existem; as 7
 - **Endpoints:** custo de hora e de GB processado; quando o NAT já existe, só o GB entra.
 - **Escolhas (híbrida, DNS e rede):** a complexidade que desempata as opções é julgamento de arquitetura.
 - **CloudFront:** um POP e um cache regional, TTL fixo por comportamento, latências ilustrativas.
+
+# Trilha Análise de dados e serviços de IA na AWS — conferido em 21/10/2026
+
+O site da documentação da AWS devolve 200 para páginas que não existem; as 83 URLs usadas nos conceitos e as dos 24 serviços novos do catálogo foram conferidas pelo título da página em 21/10/2026. A página da documentação do Elastic Transcoder já não existe; o catálogo aponta para o anúncio do encerramento.
+
+## Escopo do exame e situação dos serviços
+
+| Fato | Fonte |
+|---|---|
+| A lista do SAA-C03 inclui Athena, Data Exchange, Data Firehose, EMR, Glue, Kinesis, Kinesis Video Streams, Lake Formation, MSK, OpenSearch Service, Amazon Quick, Comprehend, Lex, Polly, Rekognition, SageMaker AI, Textract, Transcribe, Translate, Elastic Transcoder, Amplify e Device Farm. | [In-Scope AWS Services](https://docs.aws.amazon.com/aws-certification/latest/solutions-architect-associate-03/saa-03-in-scope-services.html) |
+| O Amazon Quick evoluiu do Amazon QuickSight, que continua como Amazon Quick Sight, um recurso do Quick; as APIs do QuickSight continuam valendo. O Quick também tem Quick Flows, Quick Automate, Quick Index e Quick Research. | [What is Amazon Quick?](https://docs.aws.amazon.com/quick/latest/userguide/what-is.html) |
+| A AWS encerrou o Amazon Elastic Transcoder em 13/11/2025; depois dessa data, o serviço não pode mais ser usado. A alternativa é o AWS Elemental MediaConvert. | [Support for Amazon Elastic Transcoder ending soon](https://aws.amazon.com/blogs/media/support-for-amazon-elastic-transcoder-ending-soon/) |
+
+## Data lake no S3 (Fase 1)
+
+| Fato | Fonte |
+|---|---|
+| Data lake: repositório central de dados estruturados ou não, guardados no formato original, com a estrutura definida na leitura; data warehouse: esquema definido antes, otimizado para SQL; muitas empresas precisam dos dois. | [What is a Data Lake?](https://aws.amazon.com/what-is/data-lake/) |
+| Camadas recomendadas: bruta (formato original, versionamento), tratada (por exemplo, CSV convertido em Parquet por um job do Glue) e de consumo; um bucket por camada; camada de chegada extra para dados pessoais; ciclo de vida sugerido para a bruta: Standard-IA depois de um ano e Glacier depois de mais dois. | [Recommended data layers](https://docs.aws.amazon.com/prescriptive-guidance/latest/defining-bucket-names-data-lakes/data-layer-definitions.html) |
+| Parquet e ORC são colunares: comprimem por coluna, pulam blocos por estatísticas e permitem dividir a leitura; o ORC costuma gerar arquivos menores; conversão por CTAS no Athena ou job do Glue. | [Use columnar storage formats](https://docs.aws.amazon.com/athena/latest/ug/columnar-storage.html) |
+| Formatos de compressão do Athena (GZIP, ZSTD, Snappy, LZ4, LZO, BZIP2, ZLIB); a compressão de CSV e JSON é reconhecida pela extensão; o Athena não lê .zip. | [Use compression in Athena](https://docs.aws.amazon.com/athena/latest/ug/compression-formats.html) |
+| O Athena cobra os bytes lidos antes da descompressão; texto comprimido, em geral, não se divide entre leitores; muitos arquivos pequenos pioram as consultas; grupos de linhas do Parquet com 128 MB e faixas do ORC com 64 MB por padrão; mais de 1.000 arquivos por partição piora a listagem; partição demais fragmenta, de menos lê além do necessário. | [Optimize data](https://docs.aws.amazon.com/athena/latest/ug/performance-tuning-data-optimization-techniques.html) |
+| Com a partição no WHERE, o Athena lê só as partições escolhidas; formato de pastas do Hive (chave=valor); sem partição, consultas sobre buckets com muitos objetos podem esbarrar no limite de requisições do S3. | [Partition your data](https://docs.aws.amazon.com/athena/latest/ug/partitions.html) |
+
+## Catálogo e transformação com o Glue (Fase 2)
+
+| Fato | Fonte |
+|---|---|
+| Um Data Catalog por conta e por Região; substitui o Hive Metastore; usado por Athena, Redshift Spectrum e EMR; acesso controlado por IAM e Lake Formation. | [AWS Glue components](https://docs.aws.amazon.com/glue/latest/dg/components-overview.html) |
+| Crawlers rodam classificadores próprios e depois os prontos, criam ou atualizam tabelas e partições. | [Using crawlers](https://docs.aws.amazon.com/glue/latest/dg/add-crawler.html) |
+| Job bookmarks evitam reprocessar e duplicar; fontes JDBC e S3 em JSON, CSV, Avro, XML, Parquet e ORC (Glue 1.0 ou mais novo). | [Job bookmarks](https://docs.aws.amazon.com/glue/latest/dg/monitor-continuations.html) |
+| Gatilhos por horário, por condição (SUCCEEDED, FAILED, TIMEOUT e outros) e sob demanda; um gatilho inicia no máximo dois crawlers; workflows são os recomendados para fluxos com vários passos. | [AWS Glue triggers](https://docs.aws.amazon.com/glue/latest/dg/about-triggers.html), [workflows](https://docs.aws.amazon.com/glue/latest/dg/workflows_overview.html) |
+| Tipos de job Spark, Spark Streaming, Ray e Python shell; 1 DPU = 4 vCPU e 16 GB; cobrança por segundo, mínimo de 1 minuto (Glue 2.0 ou mais novo); Spark com no mínimo 2 DPU e padrão 10; crawlers com mínimo de 10 minutos; Data Catalog gratuito até 1 milhão de objetos e 1 milhão de requisições por mês; exemplo: 6 DPU por 15 minutos a US$ 0,44 = US$ 0,66. | [AWS Glue Pricing](https://aws.amazon.com/glue/pricing/) |
+| Execução Flex: capacidade ociosa, mais barata, com início e duração variáveis, para jobs sem pressa. | [Introducing AWS Glue Flex jobs](https://aws.amazon.com/blogs/big-data/introducing-aws-glue-flex-jobs-cost-savings-on-etl-workloads/) |
+| DataBrew: preparação visual sem código, mais de 250 transformações, sem servidor. | [What is AWS Glue DataBrew?](https://docs.aws.amazon.com/databrew/latest/dg/what-is.html) |
+
+## Consultas com Athena (Fase 3)
+
+| Fato | Fonte |
+|---|---|
+| Cobrança por TB lido, arredondada ao megabyte, mínimo de 10 MB por consulta; DDL e consultas com falha não pagam; canceladas pagam o que leram; exemplo: 3 TB em texto = US$ 15, com GZIP 3:1 = US$ 5, colunar lendo 1 de 4 colunas = US$ 1,25; consultas federadas pagam também o Lambda. | [Amazon Athena Pricing](https://aws.amazon.com/athena/pricing/) |
+| Workgroups separam cargas, histórico e custo; um limite por consulta (cancela) e vários limites do workgroup por hora ou dia (alarme pelo SNS); a consulta cancelada é cobrada. | [Workgroups](https://docs.aws.amazon.com/athena/latest/ug/workgroups-manage-queries-control-costs.html), [data usage controls](https://docs.aws.amazon.com/athena/latest/ug/workgroups-setting-control-limits-cloudwatch.html) |
+| Reservas de capacidade: DPUs dedicados para workgroups, com prioridade e fora da cota de consultas da conta; 1 DPU ≈ 4 vCPU e 16 GB. | [Manage query processing capacity](https://docs.aws.amazon.com/athena/latest/ug/capacity-management.html) |
+| Consultas federadas com conectores; filtros empurrados para a fonte; parte dos conectores roda como Lambda. | [Federated Query](https://docs.aws.amazon.com/athena/latest/ug/federated-queries.html) |
+| Reaproveitamento de resultados com idade máxima, dentro do mesmo workgroup; projeção de partições calcula as partições pelas propriedades da tabela. | [Reuse query results](https://docs.aws.amazon.com/athena/latest/ug/reusing-query-results.html), [partition projection](https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html) |
+
+## Governança com Lake Formation (Fase 4)
+
+| Fato | Fonte |
+|---|---|
+| Permissões por GRANT e REVOKE que complementam o IAM; valem para Athena, Quick, Redshift Spectrum, EMR e Glue; modo híbrido; compartilhamento entre contas. | [What is AWS Lake Formation?](https://docs.aws.amazon.com/lake-formation/latest/dg/what-is-lake-formation.html) |
+| O pedido precisa passar no IAM e no Lake Formation; permissões valem só na Região concedida. | [Overview of Lake Formation permissions](https://docs.aws.amazon.com/lake-formation/latest/dg/lf-permissions-overview.html) |
+| Fluxo: metadados, checagem, credenciais temporárias (credential vending), leitura e filtragem no serviço integrado. | [How it works](https://docs.aws.amazon.com/lake-formation/latest/dg/how-it-works.html) |
+| Filtros por coluna, linha e célula, inclusive colunas aninhadas. | [Data filtering](https://docs.aws.amazon.com/lake-formation/latest/dg/data-filtering.html) |
+| LF-Tags são pares chave-valor; recomendadas com muitos objetos; não são tags do IAM. | [LF-TBAC](https://docs.aws.amazon.com/lake-formation/latest/dg/tag-based-access-control.html) |
+| Configuração padrão: Super para IAMAllowedPrincipals e "Use only IAM access control"; no modo híbrido, quem é incluído precisa de IAM e Lake Formation. | [Default settings](https://docs.aws.amazon.com/lake-formation/latest/dg/change-settings.html), [hybrid access mode](https://docs.aws.amazon.com/lake-formation/latest/dg/hybrid-access-mode.html) |
+| Compartilhamento entre contas pelo AWS RAM; na mesma organização vale na hora; fora dela, convite. Registrar um caminho registra as pastas abaixo dele. | [Cross-account](https://docs.aws.amazon.com/lake-formation/latest/dg/cross-account-permissions.html), [register](https://docs.aws.amazon.com/lake-formation/latest/dg/register-data-lake.html) |
+
+## Processamento com EMR (Fase 5)
+
+| Fato | Fonte |
+|---|---|
+| Primário coordena (três primários desde a 5.23.0); core guarda HDFS e perdê-lo arrisca dados; task só processa. | [Node types](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-master-core-task-nodes.html) |
+| Primário em Spot: a retomada termina o cluster; core em Spot só se a perda de HDFS for tolerável; task em Spot sem perda de dados; dados críticos: primário e core On-Demand, task Spot; trocar primário ou core de opção exige outro cluster. | [Spot best practices](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-instances-guidelines.html) |
+| HDFS é efêmero; S3 pelo conector S3A desde a 7.10.0 (antes, EMRFS). | [Storage and file systems](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-file-systems.html) |
+| Cluster de longa duração é o padrão do console e da CLI; transitório termina depois dos passos. | [Continue or terminate](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan-longrunning-transient.html) |
+| EMR Serverless sem cluster, com recursos pré-inicializáveis; EMR no EKS roda no Kubernetes existente. | [EMR Serverless](https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/emr-serverless.html), [EMR on EKS](https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/emr-eks.html) |
+
+## Ingestão e streaming (Fase 6)
+
+| Fato | Fonte |
+|---|---|
+| Shard: escrita de 1 MB/s ou 1.000 registros/s, leitura de 2 MB/s; registro de até 1 MB; retenção de 24 horas a 365 dias; modos sob demanda e provisionado. | [Terminology](https://docs.aws.amazon.com/streams/latest/dev/key-concepts.html), [modes](https://docs.aws.amazon.com/streams/latest/dev/how-do-i-size-a-stream.html), [retention](https://docs.aws.amazon.com/streams/latest/dev/kinesis-extended-retention.html) |
+| Firehose entrega no S3, Redshift, OpenSearch, Splunk, Iceberg e HTTP, sem código; transforma com Lambda; buffer de 1 a 128 MiB e de 60 a 900 segundos (o primeiro limite atingido dispara a entrega); converte JSON em Parquet ou ORC com o esquema do Data Catalog; partição dinâmica; aceita um fluxo do Kinesis Data Streams como origem. | [What is Firehose?](https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html), [format conversion](https://docs.aws.amazon.com/firehose/latest/dev/record-format-conversion.html), [backup settings](https://docs.aws.amazon.com/firehose/latest/dev/create-configure-backup.html), [source](https://docs.aws.amazon.com/firehose/latest/dev/create-name.html) |
+| MSK: Kafka gerenciado, provisionado ou sem servidor; MSK Serverless numa lista de Regiões que inclui us-east-1 e não inclui sa-east-1; MSK Connect com Kafka Connect. | [MSK](https://docs.aws.amazon.com/msk/latest/developerguide/what-is-msk.html), [MSK Serverless](https://docs.aws.amazon.com/msk/latest/developerguide/serverless.html), [MSK Connect](https://docs.aws.amazon.com/msk/latest/developerguide/msk-connect.html) |
+| Data Exchange: dados de outras organizações por concessão ou assinatura, e Open Data on AWS; AppFlow: SaaS (Salesforce, Zendesk) para S3 e Redshift, sem código. | [Data Exchange](https://docs.aws.amazon.com/data-exchange/latest/userguide/what-is.html), [AppFlow](https://docs.aws.amazon.com/appflow/latest/userguide/what-is-appflow.html) |
+
+## Busca e visualização (Fase 7)
+
+| Fato | Fonte |
+|---|---|
+| OpenSearch Service: domínios de OpenSearch ou Elasticsearch até 7.10; substitui nós com falha; logs, monitoramento e cliques. | [What is OpenSearch Service?](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html) |
+| OpenSearch Serverless com coleções; OpenSearch Ingestion sem servidor, baseado no Data Prepper. | [Serverless](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/serverless-overview.html), [Ingestion](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/ingestion.html) |
+| Multi-AZ with Standby recomendado para produção: três zonas, três mestres dedicados, réplicas, 99,99%. | [Multi-AZ](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains-multiaz.html) |
+| SPICE em memória, reusado sem custo extra; com fonte cobrada por consulta, paga-se a criação e as atualizações; capacidade por Região. Segurança por linha e incorporação na edição Enterprise. Fontes incluem Athena, Redshift, S3, RDS, Aurora, OpenSearch, Salesforce e Snowflake. | [SPICE](https://docs.aws.amazon.com/quick/latest/userguide/spice.html), [RLS](https://docs.aws.amazon.com/quick/latest/userguide/restrict-access-to-a-data-set-using-row-level-security.html), [embedding](https://docs.aws.amazon.com/quick/latest/userguide/embedding-overview.html), [sources](https://docs.aws.amazon.com/quick/latest/userguide/supported-data-sources.html) |
+
+## Serviços prontos de IA, mídia e front-end (Fase 8)
+
+| Fato | Fonte |
+|---|---|
+| Comprehend: entidades, frases-chave, idioma e sentimento; detecção de dados pessoais em inglês e espanhol. | [Comprehend](https://docs.aws.amazon.com/comprehend/latest/dg/what-is.html), [PII](https://docs.aws.amazon.com/comprehend/latest/dg/pii.html) |
+| Lex: chatbots de voz e texto, integração com Lambda; Polly: texto em fala; Transcribe: fala em texto, em tempo real ou lote, com legendas WebVTT e SubRip; Translate: tradução. | [Lex](https://docs.aws.amazon.com/lexv2/latest/dg/what-is.html), [Polly](https://docs.aws.amazon.com/polly/latest/dg/what-is.html), [Transcribe](https://docs.aws.amazon.com/transcribe/latest/dg/what-is.html), [subtitles](https://docs.aws.amazon.com/transcribe/latest/dg/subtitles.html), [Translate](https://docs.aws.amazon.com/translate/latest/dg/what-is.html) |
+| Rekognition: objetos, textos, conteúdo impróprio e rostos em imagens e vídeos; Textract: texto, formulários e tabelas, notas e recibos. | [Rekognition](https://docs.aws.amazon.com/rekognition/latest/dg/what-is.html), [Textract](https://docs.aws.amazon.com/textract/latest/dg/what-is.html) |
+| SageMaker AI: construir, treinar e hospedar modelos. Kinesis Video Streams: vídeo ao vivo de câmeras e aparelhos. MediaConvert: conversão de arquivos de vídeo. | [SageMaker AI](https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html), [Kinesis Video Streams](https://docs.aws.amazon.com/kinesisvideostreams/latest/dg/what-is-kinesis-video.html), [MediaConvert](https://docs.aws.amazon.com/mediaconvert/latest/ug/what-is.html) |
+| Amplify Hosting: deploy pelo Git, CDN e ambientes por branch; Device Farm: aparelhos reais, só em us-west-2. | [Amplify Hosting](https://docs.aws.amazon.com/amplify/latest/userguide/welcome.html), [Device Farm](https://docs.aws.amazon.com/devicefarm/latest/developerguide/welcome.html) |
+
+## Escolha da solução e desafio final (Fase 9 e Plataforma de Dados)
+
+- Reaproveitam os fatos das Fases 1 a 8. A preferência pela opção com menos operação e a rubrica do desafio final são julgamento pedagógico do AWS Quest.
+
+## Preços
+
+- `src/content/pricing/analytics-prices.json` é gerado por `npm run prices:analytics` a partir da AWS Price List Bulk API (ofertas AmazonAthena de 11/9/2026 e AWSGlue de 12/10/2026), para us-east-1 e sa-east-1, consultada em 21/10/2026: Athena US$ 5 (us-east-1) e US$ 9 (sa-east-1) por TB lido, capacidade reservada a US$ 0,30 por DPU-hora; Glue a US$ 0,44 (padrão), US$ 0,29 (Flex) e US$ 0,308 (Glue 6.0 ou mais novo) por DPU-hora em us-east-1.
+- O S3 Standard vem da tabela da S3 Expedition; o EMR usa o On-Demand da tabela de Computação.
+
+## Premissas e simplificações da trilha
+
+- **Data lake:** Snappy 2:1, GZIP e ZSTD 3:1, JSON 60% maior que o CSV, Parquet e ORC do mesmo tamanho, arquivo pequeno abaixo de 64 MB em média por partição, mês de 30 dias.
+- **Lake Formation:** concessões de leitura que se somam; as permissões do IAM já liberam o Athena.
+- **EMR:** um lote por nó core ou task por hora; uma retomada de Spot na hora indicada, sem reposição; grupo primário em Spot retomado inteiro; core perdido com HDFS faz o job falhar; desconto do Spot de 70% e taxa do EMR fora da conta.
+- **Escolhas (ingestão, IA e solução de dados):** a complexidade que desempata as opções é julgamento de arquitetura.
