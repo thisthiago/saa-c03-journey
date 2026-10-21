@@ -31,6 +31,7 @@ export type Availability =
   | { kind: 'current' }
   | { kind: 'legacy'; note: string }
   | { kind: 'no-new-customers'; since?: string; note: string; alternatives?: string[] }
+  | { kind: 'discontinued'; since: string; note: string; alternatives?: string[] }
 
 export type GlyphName =
   | 'bucket'
@@ -92,6 +93,12 @@ export type GlyphName =
   | 'firewall'
   | 'router'
   | 'waypoints'
+  | 'chart'
+  | 'search'
+  | 'brain'
+  | 'video'
+  | 'waves'
+  | 'scan'
 
 export interface TerritoryDef {
   id: string
