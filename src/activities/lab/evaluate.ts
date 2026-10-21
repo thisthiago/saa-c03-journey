@@ -49,6 +49,14 @@ import { evaluateComplianceLab, complianceLabSolution, complianceLabInitial, typ
 import { evaluateStackLab, stackLabSolution, stackLabInitial, type StackLabResponse } from '../../simulators/stack/lab'
 import { evaluateBudgetLab, budgetLabSolution, budgetLabInitial, type BudgetLabResponse } from '../../simulators/budget/lab'
 import { evaluateOpsChooserLab, opsChooserSolution, type OpsChooserLabResponse } from '../../simulators/opschooser/lab'
+import { evaluateVpcPlannerLab, vpcPlannerInitial, vpcPlannerSolution, type VpcPlannerLabResponse } from '../../simulators/vpcnet/planner'
+import { evaluateRouteTableLab, routeTableInitial, routeTableSolution, type RouteTableLabResponse } from '../../simulators/vpcnet/routing'
+import { evaluateReachLab, reachInitial, reachSolution, type ReachLabResponse } from '../../simulators/reach/lab'
+import { connectSolution, evaluateConnectLab, type ConnectLabResponse } from '../../simulators/connect/lab'
+import { endpointsSolution, evaluateEndpointsLab, type EndpointsLabResponse } from '../../simulators/endpoints/lab'
+import { evaluateHybridLab, hybridSolution, type HybridLabResponse } from '../../simulators/hybrid/model'
+import { dnsPolicySolution, evaluateDnsPolicyLab, type DnsPolicyLabResponse } from '../../simulators/dns/policy'
+import { evaluateNetChooserLab, netChooserSolution, type NetChooserLabResponse } from '../../simulators/netchooser/model'
 import type { LabActivity } from '../types'
 
 export interface LabItemScore {
@@ -171,6 +179,22 @@ export function evaluateLab(activity: LabActivity, response: unknown): LabResult
       return evaluateBudgetLab(activity.config, (response as BudgetLabResponse | undefined) ?? budgetLabInitial())
     case 'ops-chooser':
       return evaluateOpsChooserLab(activity.config, (response as OpsChooserLabResponse | undefined) ?? { placements: {} })
+    case 'vpc-planner':
+      return evaluateVpcPlannerLab(activity.config, (response as VpcPlannerLabResponse | undefined) ?? vpcPlannerInitial())
+    case 'route-table':
+      return evaluateRouteTableLab(activity.config, (response as RouteTableLabResponse | undefined) ?? routeTableInitial(activity.config))
+    case 'reach':
+      return evaluateReachLab(activity.config, (response as ReachLabResponse | undefined) ?? reachInitial(activity.config))
+    case 'connect':
+      return evaluateConnectLab(activity.config, (response as ConnectLabResponse | undefined) ?? { choices: {} })
+    case 'endpoints':
+      return evaluateEndpointsLab(activity.config, (response as EndpointsLabResponse | undefined) ?? { choices: {} })
+    case 'hybrid':
+      return evaluateHybridLab(activity.config, (response as HybridLabResponse | undefined) ?? { placements: {} })
+    case 'dns-policy':
+      return evaluateDnsPolicyLab(activity.config, (response as DnsPolicyLabResponse | undefined) ?? { placements: {} })
+    case 'net-chooser':
+      return evaluateNetChooserLab(activity.config, (response as NetChooserLabResponse | undefined) ?? { placements: {} })
   }
 }
 
@@ -260,6 +284,22 @@ export function labSolution(activity: LabActivity): unknown {
       return budgetLabSolution(activity.config)
     case 'ops-chooser':
       return opsChooserSolution(activity.config)
+    case 'vpc-planner':
+      return vpcPlannerSolution(activity.config)
+    case 'route-table':
+      return routeTableSolution(activity.config)
+    case 'reach':
+      return reachSolution(activity.config)
+    case 'connect':
+      return connectSolution(activity.config)
+    case 'endpoints':
+      return endpointsSolution(activity.config)
+    case 'hybrid':
+      return hybridSolution(activity.config)
+    case 'dns-policy':
+      return dnsPolicySolution(activity.config)
+    case 'net-chooser':
+      return netChooserSolution(activity.config)
   }
 }
 
@@ -350,6 +390,18 @@ export function labInitialResponse(activity: LabActivity): unknown {
     case 'budget':
       return budgetLabInitial()
     case 'ops-chooser':
+    case 'hybrid':
+    case 'dns-policy':
+    case 'net-chooser':
       return { placements: {} }
+    case 'vpc-planner':
+      return vpcPlannerInitial()
+    case 'route-table':
+      return routeTableInitial(activity.config)
+    case 'reach':
+      return reachInitial(activity.config)
+    case 'connect':
+    case 'endpoints':
+      return { choices: {} }
   }
 }
