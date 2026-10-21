@@ -6,7 +6,7 @@
  */
 import { expect, test } from '@playwright/test'
 
-const TRACKS = ['foundations.aws-foundations', 'storage.s3-expedition', 'identity.iam-access', 'compute.aws-compute']
+const TRACKS = ['foundations.aws-foundations', 'storage.s3-expedition', 'identity.iam-access', 'compute.aws-compute', 'database.aws-database']
 // Larguras em que o grafo aparece: coluna única estreita e larga, e duas colunas.
 const WIDTHS = [680, 1000, 1100, 1440]
 
