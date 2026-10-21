@@ -4,7 +4,7 @@ Plataforma web gamificada para aprender AWS **fazendo**: simulações, decisões
 
 Jogue em **https://thisthiago.github.io/saa-c03-journey/**. O site é publicado no GitHub Pages a cada push na branch `main`, pelo workflow `.github/workflows/pages.yml`, depois de passar no lint e nos testes.
 
-Sete trilhas estão disponíveis:
+Oito trilhas estão disponíveis:
 
 - **AWS Foundations — Infraestrutura Global, Segurança e Suporte**: Regiões, AZs, Local Zones, Wavelength, Outposts e borda; planos de suporte; modelo de responsabilidade compartilhada. Três fases e o desafio final **Architecture Foundations**. É a trilha sugerida para quem está começando.
 - **S3 Expedition — Domínio do Armazenamento AWS**: 11 fases e o desafio final **Projeto Atlas**. Recomenda (sem exigir) a AWS Foundations.
@@ -13,6 +13,7 @@ Sete trilhas estão disponíveis:
 - **Bancos de dados na AWS — Relacionais, NoSQL, cache e análise**: RDS (classes, armazenamento, Multi-AZ, réplicas, backups e RDS Proxy), Aurora (réplicas, endpoints, Global Database, serverless, I/O-Optimized, Backtrack e clones), DynamoDB (chaves, capacidade, índices, Streams, TTL, DAX, tabelas globais e transações), ElastiCache, DocumentDB, Neptune, Keyspaces, Redshift, segurança e backup dos bancos e migração com o DMS. Os labs de custo usam preços reais da AWS. Nove fases e o desafio final **Arquitetura de Dados**. Recomenda (sem exigir) a AWS Foundations e a Computação.
 - **Monitoramento e governança na AWS — Métricas, auditoria, conformidade, automação e custos**: CloudWatch (métricas, alarmes, agente e logs), Logs Insights e X-Ray, CloudTrail, AWS Config, Systems Manager (Session Manager, Patch Manager e Parameter Store), CloudFormation e Service Catalog, Control Tower e políticas da organização, Budgets, Cost Explorer e tags de custo, Trusted Advisor, Health e Service Quotas. Os labs de custo usam preços reais da AWS. Nove fases e o desafio final **Central de Operações**. Recomenda (sem exigir) a AWS Foundations e a IAM e Access Management.
 - **Redes na AWS — VPC, conectividade, DNS e entrega de conteúdo**: VPC e endereçamento, tabelas de rotas, internet gateway e NAT Gateway, security groups e network ACLs, VPC Flow Logs, peering e Transit Gateway, endpoints de gateway e de interface (PrivateLink), Site-to-Site VPN, Direct Connect e Client VPN, Route 53, CloudFront e Global Accelerator, WAF, Shield, Network Firewall e Firewall Manager. Os labs de custo usam preços reais da AWS. Nove fases e o desafio final **Projeto de Rede**. Recomenda (sem exigir) a AWS Foundations e a Computação.
+- **Análise de dados e serviços de IA na AWS — Data lake, consultas, processamento, streaming e serviços prontos**: data lake no S3 (camadas, formatos colunares, compressão e partições), AWS Glue (Data Catalog, crawlers, jobs e bookmarks), Athena (custo por dado lido, workgroups, consultas federadas), Lake Formation (permissões por coluna, linha e LF-Tags), EMR (tipos de nó e Spot), Kinesis Data Streams, Data Firehose, MSK, Data Exchange e AppFlow, OpenSearch e Quick Sight, e os serviços prontos de IA, mídia e front-end (Comprehend, Lex, Polly, Rekognition, Textract, Transcribe, Translate, SageMaker AI, Kinesis Video Streams, MediaConvert, Amplify e Device Farm). Os labs de Athena e Glue usam preços reais da AWS. Nove fases e o desafio final **Plataforma de Dados**. Recomenda (sem exigir) a AWS Foundations e a S3 Expedition.
 
 > Projeto educacional independente, sem afiliação com a Amazon Web Services. Não usa conta, credenciais nem recursos AWS reais: tudo é simulado no navegador.
 
@@ -38,17 +39,18 @@ npm run dev          # servidor de desenvolvimento (http://localhost:5173)
 | `npm run prices:database` | Atualiza a tabela de preços dos bancos de dados (RDS, Aurora, DynamoDB, ElastiCache e Redshift) |
 | `npm run prices:governance` | Atualiza a tabela de preços do monitoramento (CloudWatch, CloudTrail e Config) |
 | `npm run prices:network` | Atualiza a tabela de preços de rede (NAT Gateway, endpoints, Transit Gateway, VPN e Client VPN) |
+| `npm run prices:analytics` | Atualiza a tabela de preços de análise de dados (Athena e Glue) |
 
 O build usa caminhos relativos e rotas com `#`. Por isso, `dist/` pode ser servido de qualquer hospedagem estática, inclusive de um bucket S3.
 
 ## O que tem dentro
 
-- **65 fases** (58 fases e 7 desafios finais), **251 missões** e **794 atividades avaliadas**.
-- **513 conceitos**, cada um com referências à documentação oficial, e **1.531 itens de revisão espaçada**.
-- **Banco de 320 questões de simulado** (65 da Computação, 64 do Monitoramento e governança, 55 da IAM, 49 dos Bancos de dados, 36 de Redes, 34 da S3 e 17 da Foundations), no formato do exame: cada uma mostra a dificuldade, o conceito avaliado e o domínio, e explica todas as alternativas. Dá para treinar com a explicação na hora ou fazer um simulado cronometrado, com resultado por domínio e por conceito.
-- **151 conquistas**.
+- **75 fases** (67 fases e 8 desafios finais), **287 missões** e **883 atividades avaliadas**.
+- **571 conceitos**, cada um com referências à documentação oficial, e **1.661 itens de revisão espaçada**.
+- **Banco de 359 questões de simulado** (65 da Computação, 64 do Monitoramento e governança, 55 da IAM, 49 dos Bancos de dados, 39 da Análise de dados, 36 de Redes, 34 da S3 e 17 da Foundations), no formato do exame: cada uma mostra a dificuldade, o conceito avaliado e o domínio, e explica todas as alternativas. Dá para treinar com a explicação na hora ou fazer um simulado cronometrado, com resultado por domínio e por conceito.
+- **171 conquistas**.
 - **8 tipos de interação**: decisão com justificativa, classificação, associação, ordenação, predição, estimativa, investigação e laboratório.
-- **52 simuladores**:
+- **58 simuladores**:
   - escolha de Região (fatos verificados + premissas do cenário);
   - resiliência entre AZs (derrubar uma AZ ou a Região);
   - fluxo do CloudFront (POP, Regional Edge Cache e origem);
@@ -100,7 +102,11 @@ O build usa caminhos relativos e rotas com `#`. Por isso, `dist/` pode ser servi
   - caminho até os serviços da AWS (NAT, endpoint de gateway e de interface, com preços reais);
   - conectividade híbrida (VPN, Direct Connect e Client VPN);
   - respostas do Route 53 por política de roteamento e escolha da política;
-  - escolha da solução de rede e de proteção de borda.
+  - escolha da solução de rede e de proteção de borda;
+  - formato, compressão e partição do data lake, com o dado lido e o custo do Athena;
+  - permissões do Lake Formation célula a célula (colunas, linhas e LF-Tags);
+  - cluster do EMR com nós primário, core e task e a retomada de instâncias Spot;
+  - escolha do caminho de ingestão, do serviço pronto de IA e da solução de dados.
 - **Progressão**:
   - XP só por ações avaliadas; níveis;
   - domínio por conceito e revisão espaçada (Leitner), alimentados também pelo banco de questões;
