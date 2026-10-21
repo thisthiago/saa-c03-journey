@@ -55,6 +55,20 @@ import { LambdaLab } from '../simulators/lambda/LambdaLab'
 import type { LambdaLabResponse } from '../simulators/lambda/lab'
 import { ChooserLab } from '../simulators/chooser/ChooserLab'
 import type { ChooserLabResponse } from '../simulators/chooser/lab'
+import { DbSizingLab } from '../simulators/dbsize/DbSizingLab'
+import type { DbSizingLabResponse } from '../simulators/dbsize/lab'
+import { RdsHaLab } from '../simulators/rdsha/RdsHaLab'
+import type { RdsHaLabResponse } from '../simulators/rdsha/lab'
+import { DdbKeysLab } from '../simulators/dynamo/DdbKeysLab'
+import type { DdbKeysLabResponse } from '../simulators/dynamo/lab'
+import { DbChooserLab } from '../simulators/dbchooser/DbChooserLab'
+import type { DbChooserLabResponse } from '../simulators/dbchooser/lab'
+import { CacheLab } from '../simulators/cachedb/CacheLab'
+import type { CacheLabResponse } from '../simulators/cachedb/lab'
+import { DbSecureLab } from '../simulators/dbsecure/DbSecureLab'
+import type { DbSecureLabResponse } from '../simulators/dbsecure/lab'
+import { MigrationLab } from '../simulators/migration/MigrationLab'
+import type { MigrationLabResponse } from '../simulators/migration/lab'
 import type { TransferLabResponse } from '../simulators/transfer/lab'
 import type { GatewayLabResponse } from '../simulators/gateway/lab'
 import type { RPLabResponse } from '../simulators/requester-pays/lab'
@@ -164,6 +178,20 @@ export function ActivityView({ activity, value, onChange, disabled, evaluation, 
           return <LambdaLab config={activity.config} value={value as unknown as LambdaLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
         case 'compute-chooser':
           return <ChooserLab config={activity.config} value={value as unknown as ChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'db-sizing':
+          return <DbSizingLab config={activity.config} value={value as unknown as DbSizingLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'rds-ha':
+          return <RdsHaLab config={activity.config} value={value as unknown as RdsHaLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'ddb-keys':
+          return <DdbKeysLab config={activity.config} value={value as unknown as DdbKeysLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'db-chooser':
+          return <DbChooserLab config={activity.config} value={value as unknown as DbChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'cache-sim':
+          return <CacheLab config={activity.config} value={value as unknown as CacheLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'db-secure':
+          return <DbSecureLab config={activity.config} value={value as unknown as DbSecureLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'migration':
+          return <MigrationLab config={activity.config} value={value as unknown as MigrationLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
       }
   }
 }

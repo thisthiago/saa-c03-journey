@@ -35,6 +35,13 @@ import { evaluateLbLab, lbInitial, type LbLabResponse } from '../../simulators/l
 import { evaluateScalingLab, type ScalingLabResponse } from '../../simulators/scaling/lab'
 import { evaluateLambdaLab, type LambdaLabResponse } from '../../simulators/lambda/lab'
 import { chooserSolution, evaluateChooserLab, type ChooserLabResponse } from '../../simulators/chooser/lab'
+import { dbSizingSolution, evaluateDbSizingLab, type DbSizingLabResponse } from '../../simulators/dbsize/lab'
+import { evaluateRdsHaLab, rdsHaInitial, rdsHaSolution, type RdsHaLabResponse } from '../../simulators/rdsha/lab'
+import { ddbKeysSolution, evaluateDdbKeysLab, type DdbKeysLabResponse } from '../../simulators/dynamo/lab'
+import { dbChooserSolution, evaluateDbChooserLab, type DbChooserLabResponse } from '../../simulators/dbchooser/lab'
+import { cacheInitial, cacheSolution, evaluateCacheLab, type CacheLabResponse } from '../../simulators/cachedb/lab'
+import { dbSecureSolution, evaluateDbSecureLab, type DbSecureLabResponse } from '../../simulators/dbsecure/lab'
+import { evaluateMigrationLab, migrationInitial, migrationSolution, type MigrationLabResponse } from '../../simulators/migration/lab'
 import type { LabActivity } from '../types'
 
 export interface LabItemScore {
@@ -129,6 +136,20 @@ export function evaluateLab(activity: LabActivity, response: unknown): LabResult
       return evaluateLambdaLab(activity.config, (response as LambdaLabResponse | undefined) ?? { settings: structuredClone(activity.config.initial) })
     case 'compute-chooser':
       return evaluateChooserLab(activity.config, (response as ChooserLabResponse | undefined) ?? { placements: {} })
+    case 'db-sizing':
+      return evaluateDbSizingLab(activity.config, (response as DbSizingLabResponse | undefined) ?? { configs: {} })
+    case 'rds-ha':
+      return evaluateRdsHaLab(activity.config, (response as RdsHaLabResponse | undefined) ?? rdsHaInitial(activity.config))
+    case 'ddb-keys':
+      return evaluateDdbKeysLab(activity.config, (response as DdbKeysLabResponse | undefined) ?? { tables: {} })
+    case 'db-chooser':
+      return evaluateDbChooserLab(activity.config, (response as DbChooserLabResponse | undefined) ?? { placements: {} })
+    case 'cache-sim':
+      return evaluateCacheLab(activity.config, (response as CacheLabResponse | undefined) ?? cacheInitial(activity.config))
+    case 'db-secure':
+      return evaluateDbSecureLab(activity.config, (response as DbSecureLabResponse | undefined) ?? structuredClone(activity.config.initial))
+    case 'migration':
+      return evaluateMigrationLab(activity.config, (response as MigrationLabResponse | undefined) ?? migrationInitial(activity.config))
   }
 }
 
@@ -190,6 +211,20 @@ export function labSolution(activity: LabActivity): unknown {
       return { settings: structuredClone(activity.config.solution) }
     case 'compute-chooser':
       return chooserSolution(activity.config)
+    case 'db-sizing':
+      return dbSizingSolution(activity.config)
+    case 'rds-ha':
+      return rdsHaSolution(activity.config)
+    case 'ddb-keys':
+      return ddbKeysSolution(activity.config)
+    case 'db-chooser':
+      return dbChooserSolution(activity.config)
+    case 'cache-sim':
+      return cacheSolution(activity.config)
+    case 'db-secure':
+      return dbSecureSolution(activity.config)
+    case 'migration':
+      return migrationSolution(activity.config)
   }
 }
 
@@ -253,5 +288,19 @@ export function labInitialResponse(activity: LabActivity): unknown {
       return { settings: structuredClone(activity.config.initial) }
     case 'compute-chooser':
       return { placements: {} }
+    case 'db-sizing':
+      return { configs: {} }
+    case 'rds-ha':
+      return rdsHaInitial(activity.config)
+    case 'ddb-keys':
+      return { tables: {} }
+    case 'db-chooser':
+      return { placements: {} }
+    case 'cache-sim':
+      return cacheInitial(activity.config)
+    case 'db-secure':
+      return structuredClone(activity.config.initial)
+    case 'migration':
+      return migrationInitial(activity.config)
   }
 }
