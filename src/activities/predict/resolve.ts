@@ -34,6 +34,10 @@ import { evaluateRule, RULES } from '../../simulators/compliance/model'
 import { EFFECT_LABEL as CFN_EFFECT_LABEL, planUpdate } from '../../simulators/stack/model'
 import { METHOD_LABEL, NEEDS_INBOUND_PORT, notManagedReasons } from '../../simulators/ssm/model'
 import { dailyTotals, firstAlertDay } from '../../simulators/budget/model'
+import { blockProblems, lookupRoute, overlaps, parseCidr, usableIps, type Cidr } from '../../simulators/vpcnet/model'
+import { OUTCOME_LABEL as REACH_LABEL, traceFlow } from '../../simulators/reach/model'
+import { reaches } from '../../simulators/connect/model'
+import { resolveDns } from '../../simulators/dns/model'
 import type { PredictSpec } from './specs'
 
 export interface PredictResult {
@@ -338,6 +342,37 @@ export function resolvePredict(spec: PredictSpec): PredictResult {
     case 'log-filter': {
       const yes = matchFilter(spec.pattern, spec.line)
       return { outcome: yes ? 'yes' : 'no', detail: [`O padrão ${spec.pattern} ${yes ? 'conta' : 'não conta'} a linha ${spec.line}.`] }
+    }
+    case 'cidr': {
+      const q = spec.query
+      if (q.type === 'usable') {
+        const c = parseCidr(q.cidr) as Cidr
+        return { outcome: String(usableIps(c.prefix)), detail: [`${q.cidr} tem ${2 ** (32 - c.prefix)} endereços. A AWS reserva os quatro primeiros e o último, e sobram ${usableIps(c.prefix)}.`] }
+      }
+      if (q.type === 'valid') {
+        const vpc = q.vpc ? (parseCidr(q.vpc) as Cidr) : undefined
+        const pb = blockProblems(q.cidr, q.kind, vpc)
+        return { outcome: pb.length ? 'invalid' : 'valid', detail: pb.length ? [`A AWS recusa: ${pb.join('; ')}.`] : [`${q.cidr} é aceito como bloco de ${q.kind === 'vpc' ? 'VPC' : 'sub-rede'}.`] }
+      }
+      const yes = overlaps(parseCidr(q.a) as Cidr, parseCidr(q.b) as Cidr)
+      return { outcome: yes ? 'yes' : 'no', detail: [yes ? `${q.a} e ${q.b} têm endereços em comum.` : `${q.a} e ${q.b} não têm nenhum endereço em comum.`] }
+    }
+    case 'route': {
+      const r = lookupRoute(spec.routes, spec.destination, spec.prefixLists)
+      return { outcome: r.route?.target ?? 'drop', detail: r.trace }
+    }
+    case 'reach': {
+      const r = traceFlow(spec.world, spec.flow)
+      return { outcome: r.outcome, detail: [...r.trace, `Resultado: ${REACH_LABEL[r.outcome]}.`] }
+    }
+    case 'connect': {
+      const r = reaches(spec.nets, spec.topology, spec.from, spec.to)
+      return { outcome: r.ok ? 'yes' : 'no', detail: [r.why] }
+    }
+    case 'dns': {
+      const r = resolveDns(spec.records, spec.client)
+      if (spec.query === 'share') return { outcome: String(Math.round((r.shares?.[spec.record!] ?? 0) * 10000) / 100), detail: r.trace }
+      return { outcome: r.answers.length ? r.answers.join('+') : 'none', detail: r.trace }
     }
     case 'cost-cheapest': {
       const prices = regionPrices(spec.region)
