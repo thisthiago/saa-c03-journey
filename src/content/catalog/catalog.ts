@@ -84,11 +84,10 @@ export const TERRITORIES: TerritoryDef[] = [
   {
     id: 'integracao',
     title: 'Integração e mensageria',
-    summary: 'Filas, tópicos, eventos e orquestração.',
+    summary: 'Filas, tópicos, eventos, orquestração, APIs e streams.',
     glyph: 'queue',
-    status: 'planned',
+    status: 'active',
     examDomains: ['d2'],
-    plannedServices: ['Amazon SQS', 'Amazon SNS', 'Amazon EventBridge', 'AWS Step Functions'],
   },
   {
     id: 'seguranca',
@@ -135,7 +134,6 @@ export const LEVEL_TITLES = [
 
 /** Trilhas com plano pronto em docs/, mostradas na Base como "em desenvolvimento". */
 export const PLANNED_TRACKS: PlannedTrackDef[] = [
-  { id: 'integration.aws-integration', title: 'Integração e mensageria na AWS', subtitle: 'Filas, tópicos, eventos, orquestração e APIs', territory: 'integracao', glyph: 'queue', examDomains: ['d2', 'd3'], plan: 'docs/PLANO-IMPLEMENTACAO-MODULO-INTEGRACAO-E-MENSAGERIA.md' },
   { id: 'files.aws-files', title: 'Arquivos e backup na AWS', subtitle: 'EFS, FSx, transferência de arquivos e AWS Backup', territory: 'armazenamento', glyph: 'file', examDomains: ['d2', 'd3', 'd4'], plan: 'docs/PLANO-IMPLEMENTACAO-MODULO-ARQUIVOS-E-BACKUP.md' },
   { id: 'architecture.well-architected', title: 'Arquitetura e otimização na AWS', subtitle: 'Well-Architected, resiliência, desempenho, custo e migração', territory: 'arquitetura', glyph: 'flag', examDomains: ['d2', 'd3', 'd4'], plan: 'docs/PLANO-IMPLEMENTACAO-MODULO-ARQUITETURA-E-OTIMIZACAO.md' },
 ]
