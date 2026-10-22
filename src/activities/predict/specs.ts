@@ -37,6 +37,9 @@ import type { DnsClient, DnsRecord } from '../../simulators/dns/model'
 import type { LakeTable, Layout } from '../../simulators/datalake/model'
 import type { Grant, PermTable } from '../../simulators/lakeperm/model'
 import type { EmrCluster, EmrJob } from '../../simulators/emr/model'
+import type { KmsRequest, KmsWorld } from '../../simulators/kms/model'
+import type { Reader, RotationMoment, RotationStrategy } from '../../simulators/secrets/model'
+import type { Certificate } from '../../simulators/certs/model'
 
 export type PredictSpec =
   | {
@@ -145,6 +148,12 @@ export type PredictSpec =
   | { sim: 'lakeperm'; table: PermTable; grants: Grant[]; measure: 'rows' | 'column'; column?: string }
   /** EMR: o resultado do job no cluster (ok, late, cluster-ended, hdfs-lost, stalled, no-ha). */
   | { sim: 'emr'; job: EmrJob; cluster: EmrCluster }
+  /** KMS: o pedido é permitido (allow) ou negado (deny), pela key policy, pelo IAM e pelos grants. */
+  | { sim: 'kms'; world: KmsWorld; request: KmsRequest }
+  /** Secrets Manager: o login do leitor no momento da rotação (ok-v1, ok-v2, ok-v3 ou fail). */
+  | { sim: 'secrets'; strategy: RotationStrategy; moment: RotationMoment; reader: Reader }
+  /** ACM: `renewal` → auto, action ou expires; `placement` → ok, wrong-region ou cannot-attach. */
+  | { sim: 'certs'; cert: Certificate; measure: 'renewal' | 'placement' }
 
 
 /** Uma requisição é permitida ou negada? (resultado calculado pelo avaliador de acesso) */
