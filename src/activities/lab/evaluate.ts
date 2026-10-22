@@ -78,6 +78,13 @@ import { evaluateIntChooserLab, intChooserSolution, type IntChooserLabResponse }
 import { evaluateFilesystemLab, filesystemSolution, type FilesystemLabResponse } from '../../simulators/filesystem/lab'
 import { evaluateFsChooserLab, fsChooserSolution, type FsChooserLabResponse } from '../../simulators/fschooser/model'
 import { backupSolution, evaluateBackupLab, type BackupLabResponse } from '../../simulators/backup/lab'
+import { evaluateWaReviewLab, waReviewSolution, type WaReviewLabResponse } from '../../simulators/wareview/lab'
+import { drSolution, evaluateDrLab, type DrLabResponse } from '../../simulators/dr/lab'
+import { evaluatePerfChooserLab, perfChooserSolution, type PerfChooserLabResponse } from '../../simulators/perfchooser/model'
+import { evaluateTransferCostLab, transferCostSolution, type TransferCostLabResponse } from '../../simulators/transfercost/lab'
+import { evaluateRightsizingLab, rightsizingSolution, type RightsizingLabResponse } from '../../simulators/rightsizing/lab'
+import { evaluateMigrationPlanLab, migrationPlanSolution, type MigrationPlanLabResponse } from '../../simulators/migplan/lab'
+import { evaluateExamReaderLab, examReaderSolution, type ExamReaderLabResponse } from '../../simulators/examreader/lab'
 import { gridInitial } from '../../simulators/shared/grid'
 import type { LabActivity } from '../types'
 
@@ -258,6 +265,20 @@ export function evaluateLab(activity: LabActivity, response: unknown): LabResult
       return evaluateFsChooserLab(activity.config, (response as FsChooserLabResponse | undefined) ?? { placements: {} })
     case 'backup':
       return evaluateBackupLab(activity.config, (response as BackupLabResponse | undefined) ?? gridInitial())
+    case 'wa-review':
+      return evaluateWaReviewLab(activity.config, (response as WaReviewLabResponse | undefined) ?? gridInitial())
+    case 'dr':
+      return evaluateDrLab(activity.config, (response as DrLabResponse | undefined) ?? gridInitial())
+    case 'perf-chooser':
+      return evaluatePerfChooserLab(activity.config, (response as PerfChooserLabResponse | undefined) ?? { placements: {} })
+    case 'transfer-cost':
+      return evaluateTransferCostLab(activity.config, (response as TransferCostLabResponse | undefined) ?? gridInitial())
+    case 'rightsizing':
+      return evaluateRightsizingLab(activity.config, (response as RightsizingLabResponse | undefined) ?? gridInitial())
+    case 'migration-plan':
+      return evaluateMigrationPlanLab(activity.config, (response as MigrationPlanLabResponse | undefined) ?? gridInitial())
+    case 'exam-reader':
+      return evaluateExamReaderLab(activity.config, (response as ExamReaderLabResponse | undefined) ?? gridInitial())
   }
 }
 
@@ -404,6 +425,20 @@ export function labSolution(activity: LabActivity): unknown {
       return fsChooserSolution(activity.config)
     case 'backup':
       return backupSolution(activity.config)
+    case 'wa-review':
+      return waReviewSolution(activity.config)
+    case 'dr':
+      return drSolution(activity.config)
+    case 'perf-chooser':
+      return perfChooserSolution(activity.config)
+    case 'transfer-cost':
+      return transferCostSolution(activity.config)
+    case 'rightsizing':
+      return rightsizingSolution(activity.config)
+    case 'migration-plan':
+      return migrationPlanSolution(activity.config)
+    case 'exam-reader':
+      return examReaderSolution(activity.config)
   }
 }
 
@@ -519,6 +554,7 @@ export function labInitialResponse(activity: LabActivity): unknown {
     case 'sec-chooser':
     case 'int-chooser':
     case 'fs-chooser':
+    case 'perf-chooser':
       return { placements: {} }
     case 'kms':
       return kmsInitial()
@@ -533,6 +569,12 @@ export function labInitialResponse(activity: LabActivity): unknown {
     case 'eventbus':
     case 'filesystem':
     case 'backup':
+    case 'wa-review':
+    case 'dr':
+    case 'transfer-cost':
+    case 'rightsizing':
+    case 'migration-plan':
+    case 'exam-reader':
       return gridInitial()
   }
 }
