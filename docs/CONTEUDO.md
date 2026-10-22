@@ -188,6 +188,35 @@ Módulo `src/content/modules/analytics/`, território novo `analise` ("Análise 
 
 **Desktop primeiro.** As capturas de tela desta trilha cobrem só o desktop.
 
+## Trilha Segurança e proteção de dados na AWS
+
+Módulo `src/content/modules/security/`, no território `seguranca`, que passa a ter duas trilhas (esta e a IAM e Access Management). Reaproveita, sem redeclarar, `kms.key-policy`, `s3.bucket-keys`, `s3.object-lock` e `macie.sensitive-data` (S3 Expedition), `iam.instance-profile` (IAM), `db.secrets` e `db.tls` (Bancos de dados), `ssm.parameter-store` e `cfg.what` (Monitoramento e governança), `edgesec.waf-managed` e `edgesec.shield-standard` (Redes) e `srm.model` (AWS Foundations). Acrescenta conceitos `kms.*`, `hsm.*`, `secret.*`, `acm.*`, `gd.*`, `insp.*`, `det.*`, `macie.*`, `bkp.vault-lock`, `shub.*`, `artifact.*` e `sec.*`.
+
+| Fase | Tema | Empresas fictícias | Laboratórios |
+|---|---|---|---|
+| 1 | Criptografia e KMS | Banco Digital Ponte | Key policy e grants (`kms`) |
+| 2 | KMS avançado e CloudHSM | Seguradora Horizonte | Investigação da chave que parou |
+| 3 | Segredos da aplicação | Plataforma de Cursos Aprende Já | Rotação passo a passo (`secrets`) |
+| 4 | Certificados e TLS | Rede de Farmácias Cuidar | Inventário de certificados (`certs`) |
+| 5 | Detecção de ameaças | Entrega Certa | Triagem de achados (`findings`) |
+| 6 | Classificação e retenção | Hospital Vida Plena | Investigação dos achados do Macie |
+| 7 | Postura e conformidade | PagFácil | Painel da véspera da auditoria (`findings`) |
+| 8 | Ameaças externas e resposta | Loja Virtual Casa & Cia | Classificação dos ataques e ordem da resposta |
+| 9 | Escolhendo a proteção | Grupo Educacional Saber | Serviço de cada pedido (`sec-chooser`) |
+| Final | Auditoria de Segurança | Clínica Bem Viver | Arquitetura em 8 etapas, com dimensões Seguro, Resiliente, Alto desempenho, Custo e Requisitos |
+
+**Decisões adotadas** (as recomendadas no plano): 9 fases e o desafio final; WAF, Shield, Network Firewall e Firewall Manager continuam ensinados na trilha de Redes, e a Fase 8 trata das ameaças reaproveitando esses conceitos; o ACM é ensinado aqui (Fase 4); a comparação Secrets Manager × Parameter Store é ensinada aqui (Fase 3); preços reais de KMS, Secrets Manager e CloudHSM, com GuardDuty, Inspector, Macie e Security Hub fora da tabela.
+
+**Dependências.** As Fases 2, 3 e 4 exigem a 1; a 7 exige a 5 e a 6; a 8 exige a 5; a 9 exige a 2, a 3, a 4, a 7 e a 8; a 5 e a 6 só recomendam a anterior; o desafio final exige as nove. A trilha recomenda a AWS Foundations, a IAM e Access Management e a S3 Expedition. O mapa usa quatro colunas (x = 90, 270, 630 e 815), com altura de 840.
+
+**Laboratórios em grade.** Os labs `secrets`, `certs` e `findings` usam o motor `simulators/shared/grid.ts` e a interface `shared/GridLab.tsx`: cada linha recebe uma resposta por coluna, e o simulador da trilha calcula a resposta certa e o porquê. O lab `kms` usa o motor de políticas da trilha IAM para a key policy e o IAM, e acrescenta os grants.
+
+**Previsões calculadas.** As previsões `kms`, `secrets` e `certs` usam os simuladores de mesmo nome.
+
+**Preços.** A Fase 2 estima o custo mensal de um cluster do CloudHSM com a tabela de `simulators/security-prices.ts`.
+
+**Desktop primeiro.** As capturas de tela desta trilha cobrem só o desktop.
+
 ## Princípios de escrita
 
 - **Aprender fazendo.** Cada missão segue a ordem: contexto (briefing) → conceitos-chave (intel, até ~80 palavras por carta) → desafios → resultado (debrief). Na interface aparecem só os nomes em português.
@@ -225,6 +254,8 @@ Cada módulo tem um `questions.ts` com questões no formato do exame. Para escre
 Os testes recusam questão com conceito inexistente, formato errado, alternativa sem explicação, alternativas repetidas ou setas no texto.
 
 ## Preços
+
+`src/content/pricing/security-prices.json` é gerado por `npm run prices:security` (KMS: chave gerenciada pelo cliente por mês e requisições simétricas; Secrets Manager: segredo por mês e chamadas de API; CloudHSM: HSM por hora; us-east-1 e sa-east-1), a partir das ofertas awskms, AWSSecretsManager e CloudHSM da AWS Price List Bulk API; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
 
 `src/content/pricing/analytics-prices.json` é gerado por `npm run prices:analytics` (Athena: dado lido e capacidade reservada; Glue: DPU-hora de jobs padrão, Flex e Glue 6.0 ou mais novo, crawlers e Data Catalog; us-east-1 e sa-east-1), a partir das ofertas AmazonAthena e AWSGlue da AWS Price List Bulk API; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
 
