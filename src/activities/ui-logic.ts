@@ -29,6 +29,12 @@ import { streamComplete, type StreamLabResponse } from '../simulators/stream/lab
 import { filterComplete, type FilterLabResponse } from '../simulators/eventbus/lab'
 import { filesystemComplete, type FilesystemLabResponse } from '../simulators/filesystem/lab'
 import { backupComplete, type BackupLabResponse } from '../simulators/backup/lab'
+import { waReviewComplete, type WaReviewLabResponse } from '../simulators/wareview/lab'
+import { drComplete, type DrLabResponse } from '../simulators/dr/lab'
+import { transferCostComplete, type TransferCostLabResponse } from '../simulators/transfercost/lab'
+import { rightsizingComplete, type RightsizingLabResponse } from '../simulators/rightsizing/lab'
+import { migrationPlanComplete, type MigrationPlanLabResponse } from '../simulators/migplan/lab'
+import { examReaderComplete, type ExamReaderLabResponse } from '../simulators/examreader/lab'
 import type {
   ActivityResponse,
   DecisionResponse,
@@ -128,6 +134,7 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
         case 'sec-chooser':
         case 'int-chooser':
         case 'fs-chooser':
+        case 'perf-chooser':
           return activity.config.items.every((i) => Boolean((response as unknown as { placements?: Record<string, string> }).placements?.[i.id]))
         case 'support':
           return activity.config.scenarios.every((sc) => Boolean((response as unknown as { choices?: Record<string, string> }).choices?.[sc.id]))
@@ -188,6 +195,18 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
           return filesystemComplete(activity.config, response as unknown as FilesystemLabResponse)
         case 'backup':
           return backupComplete(activity.config, response as unknown as BackupLabResponse)
+        case 'wa-review':
+          return waReviewComplete(activity.config, response as unknown as WaReviewLabResponse)
+        case 'dr':
+          return drComplete(activity.config, response as unknown as DrLabResponse)
+        case 'transfer-cost':
+          return transferCostComplete(activity.config, response as unknown as TransferCostLabResponse)
+        case 'rightsizing':
+          return rightsizingComplete(activity.config, response as unknown as RightsizingLabResponse)
+        case 'migration-plan':
+          return migrationPlanComplete(activity.config, response as unknown as MigrationPlanLabResponse)
+        case 'exam-reader':
+          return examReaderComplete(activity.config, response as unknown as ExamReaderLabResponse)
         case 'vpc-planner':
           return vpcPlannerComplete(activity.config, response as unknown as VpcPlannerLabResponse)
         case 'connect':
@@ -261,6 +280,7 @@ function labHint(activity: Extract<ActivityDef, { kind: 'lab' }>): string {
     case 'hybrid':
     case 'dns-policy':
     case 'net-chooser':
+    case 'perf-chooser':
       return 'Posicione todos os cartões.'
     case 'support':
       return 'Escolha um plano para cada organização.'
@@ -321,6 +341,18 @@ function labHint(activity: Extract<ActivityDef, { kind: 'lab' }>): string {
       return activity.config.mode === 'access' ? 'Escolha o tipo e os mount targets de cada carga.' : 'Escolha a vazão e o ciclo de vida de cada sistema de arquivos.'
     case 'backup':
       return 'Escolha a frequência, o frio, a cópia e a trava de cada recurso.'
+    case 'wa-review':
+      return 'Escolha o pilar e o nível de risco de cada achado.'
+    case 'dr':
+      return 'Escolha a estratégia e a Região de recuperação de cada sistema.'
+    case 'transfer-cost':
+      return 'Escolha a cobrança por GB e a mudança de cada fluxo.'
+    case 'rightsizing':
+      return 'Escolha o tamanho e a compra de cada frota.'
+    case 'migration-plan':
+      return 'Escolha a estratégia e a ferramenta de cada sistema.'
+    case 'exam-reader':
+      return 'Escolha o veredito e o motivo de cada alternativa.'
     default:
       return 'Responda a todas as tarefas.'
   }
