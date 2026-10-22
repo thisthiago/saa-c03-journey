@@ -95,11 +95,13 @@ export function TrackMapPage() {
           <p>
             {trackRecommended.map((t, i) => (
               <span key={t.id}>
-                {i > 0 && ', '}
+                {i > 0 && (i === trackRecommended.length - 1 ? ' e ' : ', ')}
                 <Link to={`/trilha/${t.id}`}>{t.title}</Link>
               </span>
             ))}{' '}
-            prepara os fundamentos usados aqui, mas não é obrigatória. Você pode jogar as duas trilhas em paralelo.
+            {trackRecommended.length === 1
+              ? 'prepara os fundamentos usados aqui, mas não é obrigatória. Você pode jogar as duas trilhas em paralelo.'
+              : 'preparam os fundamentos usados aqui, mas não são obrigatórias. Você pode jogar as trilhas em paralelo.'}
           </p>
         </Callout>
       )}
