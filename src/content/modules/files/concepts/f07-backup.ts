@@ -1,0 +1,103 @@
+/**
+ * Conceitos da Fase 7 — AWS Backup. Reaproveita bkp.aws-backup (Bancos de
+ * dados), bkp.vault-lock (Segurança), backup.independent-copy (S3
+ * Expedition), ebs.snapshots (Computação) e gov.org-policies (Monitoramento e
+ * governança).
+ * Fatos conferidos em 22/10/2026 (ver docs/VERIFICACAO-DE-CONTEUDO.md).
+ */
+import type { ConceptDef } from '../../../../engine/types'
+import { R } from './refs'
+
+export const F07_FIL_CONCEPTS: ConceptDef[] = [
+  {
+    id: 'bkp.plan',
+    title: 'Planos e regras de backup',
+    officialName: 'Backup plans and backup rules',
+    serviceIds: ['aws.backup'],
+    summary: 'Um **plano de backup** tem uma ou mais **regras**: **frequência** (a cada hora, 12 horas, dia, semana ou mês, ou uma expressão cron), **janela** de início, **retenção** (de 1 dia a 100 anos), cofre de destino, cópias e passagem para o frio. Os recursos entram no plano por **tags** ou pela lista de recursos.',
+    facts: ['A janela padrão do console começa às 0h30, com até 8 horas para iniciar e 7 dias para terminar.', 'Quando duas regras se sobrepõem, o AWS Backup fica com o backup da regra de retenção maior.', 'Os backups são incrementais nos serviços que suportam: só o primeiro é completo.'],
+    comparisons: [{ with: 'dr.rpo-rto', text: 'A frequência define o RPO dos backups: com um backup por dia, perde-se até um dia de dados.' }],
+    recommendations: ['Use tags (por exemplo, backup=diario) para que todo recurso novo entre no plano sem ninguém lembrar.'],
+    commonMistakes: ['Agendar backups mais frequentes do que o RPO pede e pagar por pontos de recuperação que ninguém vai usar'],
+    exam: { domains: ['d2'], relevance: 'alta', notes: 'A tarefa 4.1 cita estratégias de backup; a 1.3, recuperação de dados.' },
+    references: [R.bkpPlan],
+    tags: ['recuperacao'],
+  },
+  {
+    id: 'bkp.vault',
+    title: 'Cofres de backup',
+    officialName: 'Backup vaults',
+    serviceIds: ['aws.backup', 'aws.kms'],
+    summary: 'O **cofre** guarda os pontos de recuperação, **separados da origem**: apagar a instância ou o volume não apaga os backups. Cada cofre tem uma **chave do KMS** e uma **política de acesso** que diz quem pode fazer o quê com os backups. O conteúdo de cada backup é **imutável**.',
+    facts: ['Nos recursos com gerenciamento completo, como EFS e S3, o backup é criptografado com a chave do cofre, não com a da origem.'],
+    comparisons: [{ with: 'backup.independent-copy', text: 'O cofre é a cópia independente: segue a própria retenção, mesmo que a origem seja apagada.' }],
+    commonMistakes: ['Dar a quem administra os servidores permissão para apagar os pontos de recuperação do cofre'],
+    exam: { domains: ['d1', 'd2'], relevance: 'media' },
+    references: [R.bkpWhat],
+    tags: ['seguranca', 'recuperacao'],
+  },
+  {
+    id: 'bkp.cold-storage',
+    title: 'Armazenamento frio dos backups',
+    officialName: 'Lifecycle to cold storage',
+    serviceIds: ['aws.backup'],
+    summary: 'A regra pode mover os backups do armazenamento **quente** para o **frio**, mais barato. No frio, o backup fica **no mínimo 90 dias**: a retenção precisa ser **90 dias maior** que o prazo da transição. Só alguns recursos têm frio, como **EFS**, **EBS** (pelo EBS Snapshot Archive, com backups mensais ou menos frequentes) e **DynamoDB** com recursos avançados.',
+    facts: ['A AWS recomenda deixar pelo menos 8 dias no quente antes de esfriar backups incrementais.', 'O prazo de transição não muda depois que o backup já foi para o frio.', 'RDS e FSx não têm armazenamento frio no AWS Backup.'],
+    commonMistakes: ['Configurar frio depois de 30 dias com retenção de 60 dias: o plano é recusado'],
+    exam: { domains: ['d4'], relevance: 'media' },
+    references: [R.bkpPlan, R.bkpFeatures],
+    tags: ['custos'],
+  },
+  {
+    id: 'bkp.copy',
+    title: 'Cópias entre Regiões e contas',
+    officialName: 'Cross-Region and cross-account backup copies',
+    serviceIds: ['aws.backup', 'aws.organizations'],
+    summary: 'Cada regra pode **copiar** o backup para um cofre em **outra Região**, em **outra conta** da organização ou nas duas. A cópia em outra Região protege contra a **perda da Região**; a cópia em outra conta protege contra quem **domina a conta** de origem. A cópia tem a própria retenção.',
+    facts: ['A cópia entre contas exige que as contas estejam no mesmo AWS Organizations.', 'A cópia de um backup contínuo vira um snapshot comum, sem restauração a qualquer momento.', 'EFS, EBS, RDS, Aurora, os quatro FSx e S3 aceitam cópia entre Regiões e entre contas.'],
+    recommendations: ['Concentre as cópias numa conta de backup isolada, com acesso restrito a poucas pessoas.'],
+    commonMistakes: ['Guardar os backups só na conta de produção e na mesma Região'],
+    exam: { domains: ['d2'], relevance: 'alta' },
+    references: [R.bkpWhat, R.bkpFeatures],
+    tags: ['recuperacao', 'seguranca'],
+  },
+  {
+    id: 'bkp.continuous',
+    title: 'Backup contínuo',
+    officialName: 'Continuous backup and point-in-time restore (PITR)',
+    serviceIds: ['aws.backup', 'aws.rds', 'aws.s3'],
+    summary: 'O **backup contínuo** registra as mudanças o tempo todo e permite **restaurar qualquer momento** dentro da retenção, que vai de **1 a 35 dias**. Existe para **RDS, Aurora, S3** e SAP HANA em EC2. Para guardar por mais tempo, combina-se com snapshots periódicos.',
+    facts: ['O contínuo não tem horário nem expressão cron.', 'O RDS em cluster Multi-AZ não tem backup contínuo pelo AWS Backup.'],
+    comparisons: [{ with: 'bkp.plan', text: 'O snapshot periódico perde até o intervalo entre dois backups; o contínuo perde segundos ou minutos.' }],
+    commonMistakes: ['Pedir 90 dias de retenção para o backup contínuo'],
+    exam: { domains: ['d2'], relevance: 'media' },
+    references: [R.bkpPlan, R.bkpFeatures],
+    tags: ['recuperacao'],
+  },
+  {
+    id: 'bkp.air-gapped',
+    title: 'Cofre logicamente isolado',
+    officialName: 'Logically air-gapped vault',
+    serviceIds: ['aws.backup'],
+    summary: 'O **cofre logicamente isolado** vem com o **Vault Lock em conformidade** e pode ser **compartilhado** com outras contas (pelo AWS RAM ou por aprovação de várias pessoas), que restauram os backups direto dele. Serve para voltar rápido mesmo se a conta dona do cofre for comprometida.',
+    facts: ['É criptografado por padrão com uma chave da AWS, ou com uma chave gerenciada pelo cliente.', 'Guarda backups primários ou cópias de backups feitos num cofre comum.'],
+    comparisons: [{ with: 'bkp.vault-lock', text: 'O Vault Lock tranca um cofre comum; o cofre isolado já nasce trancado em conformidade e pode ser compartilhado para restauração.' }],
+    commonMistakes: ['Contar só com o cofre da própria conta para se recuperar de um ataque de ransomware'],
+    exam: { domains: ['d1', 'd2'], relevance: 'baixa' },
+    references: [R.bkpAirGapped],
+    tags: ['seguranca', 'recuperacao'],
+  },
+  {
+    id: 'bkp.restore-testing',
+    title: 'Teste de restauração',
+    officialName: 'Restore testing',
+    serviceIds: ['aws.backup'],
+    summary: 'O **teste de restauração** restaura, num agendamento, backups escolhidos (o mais recente ou um aleatório), **mede o tempo** de cada restauração e **apaga** o que foi restaurado ao fim do teste. O resultado mostra se os backups funcionam e se a restauração cabe no **RTO**.',
+    facts: ['O AWS Backup Audit Manager pode conferir se o tempo de restauração ficou dentro da meta.', 'Cada teste tem custo, além do custo das restaurações.', 'A AWS recomenda usar uma conta separada para os testes.'],
+    comparisons: [{ with: 'dr.rpo-rto', text: 'O backup garante o RPO; o teste de restauração prova o RTO.' }],
+    commonMistakes: ['Descobrir no dia do desastre que a restauração leva mais tempo do que o negócio aceita'],
+    exam: { domains: ['d2'], relevance: 'media' },
+    references: [R.bkpRestoreTesting],
+    tags: ['recuperacao'],
+  },
+]
