@@ -61,6 +61,10 @@ import {
   Video,
   Waves,
   ScanText,
+  FileBadge,
+  Radar,
+  Siren,
+  ShieldCheck,
   type LucideIcon,
 } from 'lucide-react'
 import type { GlyphName } from '../engine/types'
@@ -140,6 +144,10 @@ const ICONS: Record<Exclude<GlyphName, 'bucket'>, LucideIcon> = {
   video: Video,
   waves: Waves,
   scan: ScanText,
+  certificate: FileBadge,
+  radar: Radar,
+  siren: Siren,
+  'shield-check': ShieldCheck,
 }
 
 export function Glyph({ name, size = 22, className }: { name: GlyphName; size?: number; className?: string }) {
