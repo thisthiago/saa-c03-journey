@@ -19,6 +19,9 @@ import { budgetLabComplete, type BudgetLabResponse } from '../simulators/budget/
 import { vpcPlannerComplete, type VpcPlannerLabResponse } from '../simulators/vpcnet/planner'
 import { connectComplete, type ConnectLabResponse } from '../simulators/connect/lab'
 import { endpointsComplete, type EndpointsLabResponse } from '../simulators/endpoints/lab'
+import { secretsComplete, type SecretsLabResponse } from '../simulators/secrets/lab'
+import { certsComplete, type CertsLabResponse } from '../simulators/certs/lab'
+import { findingsComplete, type FindingsLabResponse } from '../simulators/findings/lab'
 import type {
   ActivityResponse,
   DecisionResponse,
@@ -115,6 +118,7 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
         case 'ingest':
         case 'ai-chooser':
         case 'ana-chooser':
+        case 'sec-chooser':
           return activity.config.items.every((i) => Boolean((response as unknown as { placements?: Record<string, string> }).placements?.[i.id]))
         case 'support':
           return activity.config.scenarios.every((sc) => Boolean((response as unknown as { choices?: Record<string, string> }).choices?.[sc.id]))
@@ -152,7 +156,14 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
         case 'datalake':
         case 'lakeperm':
         case 'emr':
+        case 'kms':
           return true
+        case 'secrets':
+          return secretsComplete(activity.config, response as unknown as SecretsLabResponse)
+        case 'certs':
+          return certsComplete(activity.config, response as unknown as CertsLabResponse)
+        case 'findings':
+          return findingsComplete(activity.config, response as unknown as FindingsLabResponse)
         case 'vpc-planner':
           return vpcPlannerComplete(activity.config, response as unknown as VpcPlannerLabResponse)
         case 'connect':
@@ -265,6 +276,12 @@ function labHint(activity: Extract<ActivityDef, { kind: 'lab' }>): string {
       return 'Escolha as concessões de cada analista.'
     case 'emr':
       return 'Monte o cluster de cada job.'
+    case 'secrets':
+      return 'Escolha o que acontece em cada momento da rotação.'
+    case 'certs':
+      return 'Responda as duas perguntas de cada certificado.'
+    case 'findings':
+      return 'Escolha a origem e a ação de cada achado.'
     default:
       return 'Responda a todas as tarefas.'
   }
