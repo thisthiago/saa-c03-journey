@@ -41,6 +41,9 @@ import { resolveDns } from '../../simulators/dns/model'
 import { describeLayout, formatSize, layoutMonthly, scannedGB } from '../../simulators/datalake/model'
 import { describeGrant, visibleColumns, visibleRows } from '../../simulators/lakeperm/model'
 import { describeCluster, runJob } from '../../simulators/emr/model'
+import { kmsDecide } from '../../simulators/kms/model'
+import { loginOutcome } from '../../simulators/secrets/model'
+import { placement as certPlacement, renewal as certRenewal } from '../../simulators/certs/model'
 import type { PredictSpec } from './specs'
 
 export interface PredictResult {
@@ -390,6 +393,18 @@ export function resolvePredict(spec: PredictSpec): PredictResult {
     case 'emr': {
       const r = runJob(spec.job, spec.cluster)
       return { outcome: r.outcome, detail: [`Cluster: ${describeCluster(spec.cluster)}.`, ...r.trace] }
+    }
+    case 'kms': {
+      const d = kmsDecide(spec.world, spec.request)
+      return { outcome: d.allowed ? 'allow' : 'deny', detail: d.trace }
+    }
+    case 'secrets': {
+      const r = loginOutcome(spec.strategy, spec.moment, spec.reader)
+      return { outcome: r.outcome, detail: [r.detail] }
+    }
+    case 'certs': {
+      const r = spec.measure === 'renewal' ? certRenewal(spec.cert) : certPlacement(spec.cert)
+      return { outcome: r.result, detail: [r.why] }
     }
     case 'lakeperm': {
       const detail = spec.grants.length ? spec.grants.map((g) => `Concessão: ${describeGrant(spec.table, g)}.`) : ['Nenhuma concessão.']

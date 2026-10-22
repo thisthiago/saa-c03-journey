@@ -801,3 +801,105 @@ O site da documentação da AWS devolve 200 para páginas que não existem; as 8
 - **Lake Formation:** concessões de leitura que se somam; as permissões do IAM já liberam o Athena.
 - **EMR:** um lote por nó core ou task por hora; uma retomada de Spot na hora indicada, sem reposição; grupo primário em Spot retomado inteiro; core perdido com HDFS faz o job falhar; desconto do Spot de 70% e taxa do EMR fora da conta.
 - **Escolhas (ingestão, IA e solução de dados):** a complexidade que desempata as opções é julgamento de arquitetura.
+
+# Trilha Segurança e proteção de dados na AWS — conferido em 22/10/2026
+
+O site da documentação da AWS devolve 200 para páginas que não existem; as 47 URLs usadas nos conceitos e as dos 7 serviços novos do catálogo (ACM, CloudHSM, GuardDuty, Inspector, Detective, Security Hub e Artifact) foram conferidas pelo título da página em 22/10/2026. O Secrets Manager já estava no catálogo.
+
+## Escopo do exame e situação dos serviços
+
+| Fato | Fonte |
+|---|---|
+| A tarefa 1.2 cita a segurança da configuração e das credenciais da aplicação, Cognito, GuardDuty e Macie, ameaças externas como DDoS e injeção de SQL, e Shield, WAF, IAM Identity Center e Secrets Manager. A tarefa 1.3 cita retenção e classificação de dados, gestão de chaves, KMS para dados em repouso, ACM com TLS para dados em trânsito, políticas de acesso às chaves, rotação de chaves e renovação de certificados. | [Content Domain 1: Design Secure Architectures](https://docs.aws.amazon.com/aws-certification/latest/solutions-architect-associate-03/solutions-architect-associate-03-domain1.html) |
+| Hoje são dois serviços: o Security Hub CSPM (o antigo Security Hub) faz as checagens de postura; o Security Hub correlaciona esses achados com os do Inspector, do GuardDuty e do Macie para apontar exposições. A AWS recomenda ligar os dois; sem o CSPM, o Security Hub não usa os achados de postura. A lista do exame cita só "AWS Security Hub". | [What are Security Hub and Security Hub CSPM?](https://docs.aws.amazon.com/securityhub/latest/userguide/what-are-securityhub-services.html) |
+
+## Criptografia e KMS (Fase 1)
+
+| Fato | Fonte |
+|---|---|
+| Três tipos de chave: do cliente (controle total, custo mensal), gerenciada pela AWS (na conta, alias aws/serviço, rotação anual obrigatória, sem custo mensal, não compartilhável com outras contas; serviços novos não a criam desde 2021) e da AWS (numa conta do serviço, invisível, sem custo). | [AWS KMS keys](https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html) |
+| A key policy não dá acesso automático à conta; o statement com o principal da conta habilita as políticas IAM (sem ele, IAM que permite não vale, IAM que nega vale). Statement de administradores (Create*, Describe*, Enable*, List*, Put*, Update*, Revoke*, Disable*, Get*, Delete*, TagResource, UntagResource, ScheduleKeyDeletion, CancelKeyDeletion, RotateKeyOnDemand) sem operações criptográficas; statement de usuários com Encrypt, Decrypt, ReEncrypt*, GenerateDataKey* e DescribeKey. | [Default key policy](https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-default.html) |
+| Encrypt aceita até 4.096 bytes com chave simétrica (446 bytes com RSA 4096 e OAEP SHA-256); para dados maiores, GenerateDataKey devolve a chave de dados aberta e cifrada. | [Encrypt](https://docs.aws.amazon.com/kms/latest/APIReference/API_Encrypt.html) |
+
+## KMS avançado e CloudHSM (Fase 2)
+
+| Fato | Fonte |
+|---|---|
+| Rotação automática a cada 365 dias por padrão, com período configurável; rotação sob demanda; só em chaves simétricas do cliente (a sob demanda também com material importado); o material antigo é guardado e escolhido para decifrar; a rotação não cifra de novo os dados; a primeira e a segunda rotação aumentam a cobrança, as seguintes não. | [Rotate AWS KMS keys](https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html) |
+| Material importado pode expirar ou ser apagado; a chave fica inutilizável e passa ao estado PendingImport. | [Rotate AWS KMS keys](https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html), [Key states of AWS KMS keys](https://docs.aws.amazon.com/kms/latest/developerguide/key-state.html) |
+| Chaves multi-Região: mesmo material e ID; key policy, grants, alias, tags e estado independentes; não são globais; uma chave de uma Região não vira multi-Região; a AWS indica chaves de uma Região para a maioria dos casos. | [Multi-Region keys](https://docs.aws.amazon.com/kms/latest/developerguide/multi-region-keys-overview.html) |
+| Grants só permitem; uma chave por grant; o grantee usa sem citar; token para uso imediato; 50.000 grants por chave; usados por serviços como o EBS. | [Grants in AWS KMS](https://docs.aws.amazon.com/kms/latest/developerguide/grants.html) |
+| Cota compartilhada das operações simétricas: 10.000 por segundo, 20.000 em algumas Regiões e 100.000 em us-east-1, us-west-2 e eu-west-1; acima disso, ThrottlingException; pedidos feitos por serviços em seu nome contam. | [Request quotas](https://docs.aws.amazon.com/kms/latest/developerguide/requests-per-second.html) |
+| CloudHSM: HSMs de um só cliente, FIPS 140-2 ou 140-3 nível 3 no modo FIPS; a AWS não vê os dados; o cliente gerencia os próprios usuários; o guia indica o KMS para quem não precisa operar HSMs. | [What is AWS CloudHSM?](https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html) |
+
+## Segredos da aplicação (Fase 3)
+
+| Fato | Fonte |
+|---|---|
+| Quatro etapas da função de rotação: createSecret (AWSPENDING), setSecret, testSecret e finishSecret (AWSCURRENT para a nova, AWSPREVIOUS para a anterior); a função não pode chamar outra função para girar. | [Lambda rotation functions](https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_lambda-functions.html) |
+| Rotação tão frequente quanto a cada 4 horas e tão espaçada quanto a cada 999 dias; janela de no mínimo uma hora; expressões rate() e cron() em UTC. | [Rotation schedules](https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_schedule.html) |
+| Usuário único: curto intervalo em que o banco pode recusar a senha; conexões abertas não caem. Usuários alternados: clone na primeira rotação, as duas credenciais valem depois, exige segredo de superusuário. | [Rotation strategies](https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotation-strategy.html) |
+| Rotação gerenciada, sem Lambda, para a senha principal do RDS, do Aurora e do DocumentDB e a de administrador do Redshift; costuma terminar em até um minuto. | [Managed rotation](https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotate-secrets_managed.html) |
+| Réplicas em outras Regiões; a rotação da principal chega às réplicas; chave do KMS da própria Região; réplica promovível. | [Replicate secrets](https://docs.aws.amazon.com/secretsmanager/latest/userguide/create-manage-multi-region-secrets.html) |
+| O componente de cache atualiza os segredos a cada hora por padrão. | [Client-side caching (Python)](https://docs.aws.amazon.com/secretsmanager/latest/userguide/retrieving-secrets_cache-python.html) |
+| Parameter Store padrão: 10.000 parâmetros, 4 KB, sem custo extra; avançado: 100.000, 8 KB, políticas, com custo. | [Parameter tiers](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-advanced-parameters.html) |
+
+## Certificados e TLS (Fase 4)
+
+| Fato | Fonte |
+|---|---|
+| Certificados públicos do ACM sem custo adicional (os exportáveis têm custo); regionais; não se copiam entre Regiões; para o CloudFront, us-east-1. | [What is AWS Certificate Manager?](https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html) |
+| Serviços integrados: ELB, CloudFront, EKS (ACK), Cognito, Elastic Beanstalk, App Runner, API Gateway, Nitro Enclaves, CloudFormation, Amplify, OpenSearch e Network Firewall; certificado gerenciado direto numa instância EC2 só com Nitro Enclaves. | [Managed automation with integrated services](https://docs.aws.amazon.com/acm/latest/userguide/acm-services.html) |
+| Renovação gerenciada: elegível se associado a um serviço integrado ou exportado; não elegível se importado ou vencido. DNS: a 45 dias, renova se em uso e com os CNAMEs; eventos a 30, 15, 7, 3 e 1 dia se não validar. E-mail: exige ação, avisos a partir de 45 dias. Validade de 198 dias. | [Managed renewal](https://docs.aws.amazon.com/acm/latest/userguide/managed-renewal.html), [DNS renewal](https://docs.aws.amazon.com/acm/latest/userguide/dns-renewal-validation.html), [validation](https://docs.aws.amazon.com/acm/latest/userguide/domain-ownership-validation.html), [characteristics](https://docs.aws.amazon.com/acm/latest/userguide/acm-certificate-characteristics.html) |
+| Importados não são renovados pelo ACM; reimportar mantém o ARN; eventos de vencimento a partir de 45 dias (importados e privados) e 30 dias (públicos). | [Import certificates](https://docs.aws.amazon.com/acm/latest/userguide/import-certificate.html), [EventBridge](https://docs.aws.amazon.com/acm/latest/userguide/supported-events.html) |
+| Exportáveis: para EC2, contêineres e servidores próprios; 198 dias; renovados 45 dias antes; implantação com o cliente. | [Exportable public certificates](https://docs.aws.amazon.com/acm/latest/userguide/acm-exportable-certificates.html) |
+
+## Detecção de ameaças (Fase 5)
+
+| Fato | Fonte |
+|---|---|
+| GuardDuty: fontes básicas (eventos de gerenciamento do CloudTrail, VPC Flow Logs e DNS) sem ligar nada; Extended Threat Detection sem custo extra; planos S3, EKS, Runtime Monitoring, Malware Protection (EC2, S3, AWS Backup), RDS, Lambda e AI Protection; teste de 30 dias com todos menos o Runtime Monitoring. | [What is Amazon GuardDuty?](https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html) |
+| Formato Propósito:Recurso/Família.Mecanismo!Artefato e a lista de propósitos; tipos usados: UnauthorizedAccess:EC2/SSHBruteForce, CryptoCurrency:EC2/BitcoinTool.B!DNS, Recon:EC2/PortProbeUnprotectedPort, Backdoor:EC2/C&CActivity.B, UnauthorizedAccess:IAMUser/MaliciousIPCaller e Policy:IAMUser/RootCredentialUsage. | [Finding format](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-format.html), [EC2 types](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-ec2.html), [IAM types](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-iam.html) |
+| Achados no EventBridge: novos quase em tempo real; ocorrências seguintes agrupadas a cada 6 horas (ou 15 minutos e 1 hora); evento "GuardDuty Finding" com source aws.guardduty; achados guardados por 90 dias. | [EventBridge](https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_findings_cloudwatch.html) |
+| Inspector: EC2, imagens do ECR e Lambda, varredura contínua, nota de risco ajustada, ativação para a organização. Tipos: Package vulnerability, Code vulnerability (Lambda) e Network reachability (EC2, a cada 12 horas). | [What is Amazon Inspector?](https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html), [finding types](https://docs.aws.amazon.com/inspector/latest/user/findings-types.html) |
+| Detective: CloudTrail, VPC Flow Logs e achados do GuardDuty; grafo de comportamento; até um ano de histórico; administrador designado pela organização. | [What is Amazon Detective?](https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html) |
+
+## Classificação e retenção (Fase 6)
+
+| Fato | Fonte |
+|---|---|
+| Descoberta automática do Macie por amostragem, todo dia; trabalhos com análise completa, uma vez ou recorrentes; identificadores gerenciados e personalizados; listas de permissão. | [Automated discovery](https://docs.aws.amazon.com/macie/latest/user/discovery-asdd.html), [jobs](https://docs.aws.amazon.com/macie/latest/user/discovery-jobs.html) |
+| Achados de política (Policy:IAMUser/S3…) e de dados sensíveis (SensitiveData:S3Object/…); guardados por 90 dias; os de política só para mudanças depois de o Macie ser ligado. | [Types of Macie findings](https://docs.aws.amazon.com/macie/latest/user/findings-types.html) |
+| Vault Lock: modo governança (removível com permissão) e conformidade (imutável depois da carência, de no mínimo 3 dias, nem a AWS muda); sem custo adicional. | [AWS Backup Vault Lock](https://docs.aws.amazon.com/aws-backup/latest/devguide/vault-lock.html) |
+
+## Postura e conformidade (Fase 7)
+
+| Fato | Fonte |
+|---|---|
+| Security Hub CSPM: padrões FSBP, CIS, PCI DSS e NIST; controles com achados; recebe achados do GuardDuty, do Inspector e do Macie; só achados novos e da Região ligada; o AWS Config precisa estar ligado e gravando para a maioria dos controles; teste de 30 dias. | [Introduction to AWS Security Hub CSPM](https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html), [standards](https://docs.aws.amazon.com/securityhub/latest/userguide/standards-view-manage.html) |
+| Controles [S3.5] (TLS, regra s3-bucket-ssl-requests-only) e [S3.8] (bloqueio de acesso público no bucket). | [Security Hub CSPM controls for Amazon S3](https://docs.aws.amazon.com/securityhub/latest/userguide/s3-controls.html) |
+| Artifact: relatórios ISO, PCI e SOC da AWS e acordos, sem custo; a empresa documenta a parte dela. | [What is AWS Artifact?](https://docs.aws.amazon.com/artifact/latest/ug/what-is-aws-artifact.html) |
+
+## Ameaças externas e resposta (Fase 8)
+
+| Fato | Fonte |
+|---|---|
+| Core rule set (AWSManagedRulesCommonRuleSet) com regras de cross-site scripting; SQL database (AWSManagedRulesSQLiRuleSet) contra injeção de SQL. | [Baseline rule groups](https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-baseline.html), [use-case rule groups](https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-use-case.html) |
+| Contenção do EC2 trocando os security groups por um grupo restritivo; conexões já rastreadas não caem; contenção do IAM com política que nega tudo; ciclo detecção, contenção, erradicação e recuperação. | [Contain](https://docs.aws.amazon.com/security-ir/latest/userguide/contain.html) |
+
+## Escolha e desafio final (Fase 9 e Auditoria de Segurança)
+
+- Reaproveitam os fatos das Fases 1 a 8. A preferência pela opção com menos operação e a rubrica do desafio final são julgamento pedagógico do AWS Quest.
+
+## Preços
+
+- `src/content/pricing/security-prices.json` é gerado por `npm run prices:security` a partir da AWS Price List Bulk API (ofertas awskms, AWSSecretsManager e CloudHSM de 11/9/2026), para us-east-1 e sa-east-1, consultada em 22/10/2026: KMS a US$ 1 por chave gerenciada pelo cliente por mês e US$ 0,03 por 10.000 requisições simétricas; Secrets Manager a US$ 0,40 por segredo por mês e US$ 0,05 por 10.000 chamadas; CloudHSM a US$ 1,60 por HSM-hora em us-east-1 e US$ 2,72 em sa-east-1.
+- GuardDuty, Inspector, Macie e Security Hub não entram na tabela: a cobrança depende do volume analisado.
+
+## Premissas e simplificações da trilha
+
+- **KMS:** as políticas IAM das roles estão fixas; um Deny explícito vence também os grants; restrições de grant, tokens e grants entre contas não são simulados.
+- **Secrets Manager:** a aplicação com cache guardou a versão 1 antes da rotação e não renovou a cópia no momento perguntado; atrasos de propagação no banco não são simulados.
+- **ACM:** todos os certificados do laboratório estão a menos de 45 dias do vencimento; certificados privados e a validação por HTTP ficam de fora.
+- **Achados:** aparecem com o tipo e um resumo; a ação certa de cada achado é julgamento de arquitetura.
+- **Escolhas:** a complexidade que desempata as opções é julgamento de arquitetura.

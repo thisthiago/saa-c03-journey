@@ -98,3 +98,10 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+/* Cartões lado a lado nos laboratórios em grade; uma coluna em telas estreitas. */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: var(--space-3);
+  align-items: start;
+}

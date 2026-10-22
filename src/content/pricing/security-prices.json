@@ -1,0 +1,63 @@
+{
+  "source": "AWS Price List Bulk API",
+  "sourceDocs": "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-price-list-query-api.html",
+  "retrievedAt": "2026-10-22",
+  "currency": "USD",
+  "notes": [
+    "Valores de referência para fins didáticos, extraídos da AWS Price List na data indicada.",
+    "Apenas a primeira faixa paga de cada item; sem nível gratuito, impostos ou descontos por volume.",
+    "O KMS cobra cada chave gerenciada pelo cliente por mês; a cobrança cresce na primeira e na segunda rotação e para de crescer depois.",
+    "GuardDuty, Inspector, Macie e Security Hub não entram na tabela: a cobrança deles depende do volume analisado.",
+    "Preços mudam: consulte as páginas de preço de cada serviço antes de qualquer decisão real."
+  ],
+  "regions": {
+    "us-east-1": {
+      "label": "US East (N. Virginia)",
+      "offers": {
+        "awskms": "2026-09-11T12:46:01Z",
+        "AWSSecretsManager": "2026-09-11T12:46:10Z",
+        "CloudHSM": "2026-09-11T12:46:25Z"
+      },
+      "kms": {
+        "keyMonth": 1,
+        "request": 0.000003
+      },
+      "secretsManager": {
+        "secretMonth": 0.4,
+        "apiRequest": 0.000005
+      },
+      "cloudHsm": {
+        "hsmHour": 1.6
+      },
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/awskms/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSSecretsManager/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/CloudHSM/current/us-east-1/index.json"
+      ]
+    },
+    "sa-east-1": {
+      "label": "América do Sul (São Paulo)",
+      "offers": {
+        "awskms": "2026-09-11T12:46:01Z",
+        "AWSSecretsManager": "2026-09-11T12:46:10Z",
+        "CloudHSM": "2026-09-11T12:46:25Z"
+      },
+      "kms": {
+        "keyMonth": 1,
+        "request": 0.000003
+      },
+      "secretsManager": {
+        "secretMonth": 0.4,
+        "apiRequest": 0.000005
+      },
+      "cloudHsm": {
+        "hsmHour": 2.72
+      },
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/awskms/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSSecretsManager/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/CloudHSM/current/sa-east-1/index.json"
+      ]
+    }
+  }
+}

@@ -64,6 +64,12 @@ import { evaluateEmrLab, emrSolution, type EmrLabResponse } from '../../simulato
 import { evaluateIngestLab, ingestSolution, type IngestLabResponse } from '../../simulators/ingest/model'
 import { evaluateAiChooserLab, aiChooserSolution, type AiChooserLabResponse } from '../../simulators/aichooser/model'
 import { evaluateAnaChooserLab, anaChooserSolution, type AnaChooserLabResponse } from '../../simulators/anachooser/model'
+import { evaluateKmsLab, kmsInitial, kmsSolution, type KmsLabResponse } from '../../simulators/kms/lab'
+import { evaluateSecretsLab, secretsSolution, type SecretsLabResponse } from '../../simulators/secrets/lab'
+import { certsSolution, evaluateCertsLab, type CertsLabResponse } from '../../simulators/certs/lab'
+import { evaluateFindingsLab, findingsSolution, type FindingsLabResponse } from '../../simulators/findings/lab'
+import { evaluateSecChooserLab, secChooserSolution, type SecChooserLabResponse } from '../../simulators/secchooser/model'
+import { gridInitial } from '../../simulators/shared/grid'
 import type { LabActivity } from '../types'
 
 export interface LabItemScore {
@@ -214,6 +220,16 @@ export function evaluateLab(activity: LabActivity, response: unknown): LabResult
       return evaluateAiChooserLab(activity.config, (response as AiChooserLabResponse | undefined) ?? { placements: {} })
     case 'ana-chooser':
       return evaluateAnaChooserLab(activity.config, (response as AnaChooserLabResponse | undefined) ?? { placements: {} })
+    case 'kms':
+      return evaluateKmsLab(activity.config, (response as KmsLabResponse | undefined) ?? kmsInitial())
+    case 'secrets':
+      return evaluateSecretsLab(activity.config, (response as SecretsLabResponse | undefined) ?? gridInitial())
+    case 'certs':
+      return evaluateCertsLab(activity.config, (response as CertsLabResponse | undefined) ?? gridInitial())
+    case 'findings':
+      return evaluateFindingsLab(activity.config, (response as FindingsLabResponse | undefined) ?? gridInitial())
+    case 'sec-chooser':
+      return evaluateSecChooserLab(activity.config, (response as SecChooserLabResponse | undefined) ?? { placements: {} })
   }
 }
 
@@ -331,6 +347,16 @@ export function labSolution(activity: LabActivity): unknown {
       return aiChooserSolution(activity.config)
     case 'ana-chooser':
       return anaChooserSolution(activity.config)
+    case 'kms':
+      return kmsSolution(activity.config)
+    case 'secrets':
+      return secretsSolution(activity.config)
+    case 'certs':
+      return certsSolution(activity.config)
+    case 'findings':
+      return findingsSolution(activity.config)
+    case 'sec-chooser':
+      return secChooserSolution(activity.config)
   }
 }
 
@@ -443,6 +469,13 @@ export function labInitialResponse(activity: LabActivity): unknown {
     case 'ingest':
     case 'ai-chooser':
     case 'ana-chooser':
+    case 'sec-chooser':
       return { placements: {} }
+    case 'kms':
+      return kmsInitial()
+    case 'secrets':
+    case 'certs':
+    case 'findings':
+      return gridInitial()
   }
 }

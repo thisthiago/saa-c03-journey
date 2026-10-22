@@ -729,6 +729,47 @@ test.describe('trilha Análise de dados', () => {
   }
 })
 
+/** Missões da trilha Segurança na ordem do mapa (as anteriores ficam aprovadas no progresso semeado). */
+const SEC_MISSIONS = [
+  ...['f01', 'f02', 'f03', 'f04', 'f05', 'f06', 'f07', 'f08'].flatMap((f) => ['m1', 'm2', 'm3', 'boss'].map((m) => `sec.${f}.${m}`)),
+  ...['m1', 'm2', 'boss'].map((m) => `sec.f09.${m}`),
+  'sec.final.auditoria',
+]
+
+// Módulo novo: por enquanto, só o desktop (tablet e celular ficam para uma etapa própria).
+test.describe('trilha Segurança', () => {
+  const CASES: { name: string; mission?: string; step?: number; path?: string }[] = [
+    { name: 'sec-f1-chave', mission: 'sec.f01.boss', step: 2 },
+    { name: 'sec-f2-madrugada', mission: 'sec.f02.boss', step: 2 },
+    { name: 'sec-f3-rotacao', mission: 'sec.f03.boss', step: 2 },
+    { name: 'sec-f4-certificados', mission: 'sec.f04.boss', step: 2 },
+    { name: 'sec-f5-achados', mission: 'sec.f05.boss', step: 2 },
+    { name: 'sec-f6-macie', mission: 'sec.f06.boss', step: 2 },
+    { name: 'sec-f7-painel', mission: 'sec.f07.boss', step: 2 },
+    { name: 'sec-f8-ataque', mission: 'sec.f08.boss', step: 2 },
+    { name: 'sec-f9-escolha', mission: 'sec.f09.boss', step: 2 },
+    { name: 'sec-final', mission: 'sec.final.auditoria', step: 2 },
+    { name: 'sec-mapa', path: '/#/trilha/security.aws-security' },
+  ]
+  const vp = VIEWPORTS.find((v) => v.name === 'desktop')!
+  for (const c of CASES) {
+    test(`${c.name} — ${vp.name}`, async ({ page }) => {
+      await page.setViewportSize({ width: vp.width, height: vp.height })
+      await page.emulateMedia({ colorScheme: 'dark' })
+      const before = c.mission ? SEC_MISSIONS.slice(0, SEC_MISSIONS.indexOf(c.mission)) : []
+      const base = progressWithPhase1(new Date(), { missions: before })
+      const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+      await seedProgress(page, seeded)
+      await page.goto(c.path ?? `/#/missao/${c.mission}`)
+      await page.waitForLoadState('networkidle')
+      await page.waitForTimeout(250)
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+      expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+      await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+    })
+  }
+})
+
 test.describe('banco de questões', () => {
   for (const vp of VIEWPORTS) {
     test(`treino e simulado — ${vp.name}`, async ({ page }) => {
