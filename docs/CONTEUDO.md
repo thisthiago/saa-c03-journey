@@ -269,6 +269,33 @@ Módulo `src/content/modules/files/`, no território `armazenamento`, que passa 
 
 **Desktop primeiro.** As capturas de tela desta trilha cobrem só o desktop.
 
+## Trilha Arquitetura e otimização na AWS
+
+Módulo `src/content/modules/architecture/`, no território `arquitetura`, que passa a ficar ativo. É a trilha de fechamento: ensina a decidir entre os serviços das outras trilhas, por isso reaproveita muitos conceitos sem redeclarar, entre eles `infra.*` e `edge.*` (Foundations), `dr.rpo-rto`, `mig.*`, `sc.intelligent-tiering` e `s3.transfer-acceleration` (S3 Expedition), `iam.roles`, `fed.identity-center` e `iam.least-privilege` (IAM e S3), `asg.*`, `elb.health-checks`, `ec2.*`, `ebs.io2`, `lambda.pricing`, `cmp.evs` e `cmp.beanstalk-deploy` (Computação), `rds.*`, `ddb.*`, `aur.global-database`, `cache.*`, `db.*`, `dms.what` e `bkp.aws-backup` (Bancos de dados), `ops.service-quotas`, `gov.account-structure`, `fin.cost-allocation-tags`, `cfn.what`, `trail.org-trail` e `ssm.session-manager` (Monitoramento e governança), `dns.*`, `pl.*`, `rt.public-private`, `sg.reference` e `edgesec.waf` (Redes), `sec.*` e `secret.where` (Segurança), `int.*`, `eb.bus` e `apigw.*` (Integração) e `bkp.copy` e `xfer.transfer-family` (Arquivos e backup). Fica no fim de `MODULES`.
+
+| Fase | Tema | Empresas fictícias | Laboratórios |
+|---|---|---|---|
+| 1 | Well-Architected Framework | Feira Digital | Pilar e nível de risco de oito achados, lidos nas páginas das boas práticas (`wa-review`) |
+| 2 | Arquiteturas resilientes | Palco Livre | Investigação do ponto único de falha; bilheteria que perde qualquer AZ com a capacidade inteira (`zones`, reaproveitado) |
+| 3 | Recuperação de desastres | Saúde Já | Estratégia e Região de recuperação de quatro sistemas, com custo real de EC2 e RDS (`dr`) |
+| 4 | Alto desempenho | Arena Play | Recurso de desempenho de nove gargalos (`perf-chooser`) |
+| 5 | Segurança na arquitetura | Crédito Unido | Investigação de um vazamento por credencial longa |
+| 6 | Otimização de custos | Leia Mais | Tamanho e compra de cinco frotas (`rightsizing`); cobrança e mudança de sete fluxos de dados (`transfer-cost`) |
+| 7 | Migração | Forte Aço | Estratégia e ferramenta de oito sistemas (`migration-plan`) |
+| 8 | Padrões de arquitetura | Viagem Fácil | Arquitetura em 4 etapas, com dimensões Resiliente, Alto desempenho, Custo e Requisitos |
+| 9 | Como o exame pergunta | Grupo de estudos AWS Quest | Veredito e motivo das alternativas de três enunciados próprios (`exam-reader`) |
+| Final | A Revisão Well-Architected | EducaMais | Arquitetura em 8 etapas, com dimensões Seguro, Resiliente, Alto desempenho, Custo e Requisitos |
+
+**Decisões adotadas** (as recomendadas no plano): 9 fases e o desafio final; trilha de fechamento, que recomenda a Foundations, a S3 Expedition, a IAM e a Computação sem exigir; leitura de questões como fase própria (F9), com enunciados do AWS Quest; migração com os 7 Rs e o AWS Transform MGN aqui (F7); AWS Backup e Transfer Family só citados (são ensinados em Arquivos e backup); preços reais de S3, Computação e Bancos de dados reaproveitados, mais a tabela nova de transferência de dados (`npm run prices:transfer`). O `passThreshold` do final ficou em 0,7, igual ao das outras trilhas.
+
+**Fatos que mudaram o conteúdo.** O AWS Application Migration Service hoje se chama AWS Transform MGN; o catálogo usa o nome novo e avisa que a lista do exame ainda usa o antigo. A Snow Family não aceita novos clientes, então a cópia em massa da F7 vai pelo DataSync com Direct Connect ou pelo AWS Data Transfer Terminal.
+
+**Dependências.** A Fase 2, a 4, a 5 e a 6 exigem a 1; a 3 exige a 2; a 7 exige a 3; a 8 exige a 2 e a 4; a 9 exige a 3, a 5, a 6 e a 8; o desafio final exige as nove. O mapa usa cinco colunas e altura 800.
+
+**Laboratórios.** `wa-review`, `dr`, `transfer-cost`, `rightsizing`, `migration-plan` e `exam-reader` usam o motor em grade (`simulators/shared/grid.ts`); `perf-chooser` usa o motor de escolha. O `dr` escolhe a estratégia mais barata que cumpre o RPO e o RTO (pior caso de cada faixa do REL13-BP02, como premissa) e mostra o custo mensal da Região de recuperação. O `rightsizing` reduz um tamanho a cada vez que o pico de CPU e memória dobrado continua abaixo de 80% e escolhe a compra válida mais barata. O `transfer-cost` calcula o custo mensal de cada caminho e recusa empates. O `migplan` foi chamado assim para não se confundir com o `migration` (DMS) da trilha de Bancos de dados.
+
+**Desktop primeiro.** As capturas de tela desta trilha cobrem só o desktop.
+
 ## Princípios de escrita
 
 - **Aprender fazendo.** Cada missão segue a ordem: contexto (briefing) → conceitos-chave (intel, até ~80 palavras por carta) → desafios → resultado (debrief). Na interface aparecem só os nomes em português.
