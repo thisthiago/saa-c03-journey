@@ -260,6 +260,16 @@ export const SERVICES: ServiceDef[] = [
     glyph: 'cycle',
   },
   {
+    id: 'aws.transfer-family',
+    officialName: 'AWS Transfer Family',
+    shortName: 'Transfer Family',
+    territory: 'armazenamento',
+    summary: 'Servidores gerenciados de SFTP, FTPS, FTP e AS2 que gravam e leem arquivos no Amazon S3 e no Amazon EFS.',
+    docsUrl: 'https://docs.aws.amazon.com/transfer/latest/userguide/what-is-aws-transfer-family.html',
+    availability: current,
+    glyph: 'migrate',
+  },
+  {
     id: 'aws.snowball-edge',
     officialName: 'AWS Snowball Edge',
     shortName: 'AWS Snowball Edge',
