@@ -93,11 +93,10 @@ export const TERRITORIES: TerritoryDef[] = [
   {
     id: 'seguranca',
     title: 'Segurança e identidade',
-    summary: 'Identidades, permissões, federação, organizações, chaves e segredos.',
+    summary: 'Identidades, permissões, federação, organizações, chaves, segredos, certificados, detecção e conformidade.',
     glyph: 'shield',
     status: 'active',
     examDomains: ['d1'],
-    plannedServices: ['AWS KMS', 'AWS Secrets Manager'],
   },
   {
     id: 'monitoramento',
@@ -137,7 +136,6 @@ export const LEVEL_TITLES = [
 /** Trilhas com plano pronto em docs/, mostradas na Base como "em desenvolvimento". */
 export const PLANNED_TRACKS: PlannedTrackDef[] = [
   { id: 'integration.aws-integration', title: 'Integração e mensageria na AWS', subtitle: 'Filas, tópicos, eventos, orquestração e APIs', territory: 'integracao', glyph: 'queue', examDomains: ['d2', 'd3'], plan: 'docs/PLANO-IMPLEMENTACAO-MODULO-INTEGRACAO-E-MENSAGERIA.md' },
-  { id: 'security.aws-security', title: 'Segurança e proteção de dados na AWS', subtitle: 'Chaves, segredos, certificados, detecção e conformidade', territory: 'seguranca', glyph: 'lock', examDomains: ['d1'], plan: 'docs/PLANO-IMPLEMENTACAO-MODULO-SEGURANCA.md' },
   { id: 'files.aws-files', title: 'Arquivos e backup na AWS', subtitle: 'EFS, FSx, transferência de arquivos e AWS Backup', territory: 'armazenamento', glyph: 'file', examDomains: ['d2', 'd3', 'd4'], plan: 'docs/PLANO-IMPLEMENTACAO-MODULO-ARQUIVOS-E-BACKUP.md' },
   { id: 'architecture.well-architected', title: 'Arquitetura e otimização na AWS', subtitle: 'Well-Architected, resiliência, desempenho, custo e migração', territory: 'arquitetura', glyph: 'flag', examDomains: ['d2', 'd3', 'd4'], plan: 'docs/PLANO-IMPLEMENTACAO-MODULO-ARQUITETURA-E-OTIMIZACAO.md' },
 ]
