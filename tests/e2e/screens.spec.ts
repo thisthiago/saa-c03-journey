@@ -869,6 +869,58 @@ test.describe('trilha Arquivos e backup', () => {
   }
 })
 
+/** Missões da trilha Arquitetura e otimização na ordem do mapa (as anteriores ficam aprovadas no progresso semeado). */
+const ARQ_MISSIONS = [
+  ...(
+    [
+      ['f01', 3],
+      ['f02', 4],
+      ['f03', 3],
+      ['f04', 3],
+      ['f05', 3],
+      ['f06', 3],
+      ['f07', 3],
+      ['f08', 3],
+      ['f09', 3],
+    ] as const
+  ).flatMap(([f, n]) => [...Array.from({ length: n }, (_, i) => `arq.${f}.m${i + 1}`), `arq.${f}.boss`]),
+  'arq.final.revisao',
+]
+
+// Módulo novo: por enquanto, só o desktop (tablet e celular ficam para uma etapa própria).
+test.describe('trilha Arquitetura e otimização', () => {
+  const CASES: { name: string; mission?: string; step?: number; path?: string }[] = [
+    { name: 'arq-f1-revisao', mission: 'arq.f01.boss', step: 2 },
+    { name: 'arq-f2-zonas', mission: 'arq.f02.boss', step: 2 },
+    { name: 'arq-f3-dr', mission: 'arq.f03.boss', step: 2 },
+    { name: 'arq-f4-desempenho', mission: 'arq.f04.boss', step: 2 },
+    { name: 'arq-f5-investigacao', mission: 'arq.f05.boss', step: 2 },
+    { name: 'arq-f6-custos', mission: 'arq.f06.boss', step: 2 },
+    { name: 'arq-f7-migracao', mission: 'arq.f07.boss', step: 2 },
+    { name: 'arq-f8-padroes', mission: 'arq.f08.boss', step: 2 },
+    { name: 'arq-f9-exame', mission: 'arq.f09.boss', step: 2 },
+    { name: 'arq-final', mission: 'arq.final.revisao', step: 2 },
+    { name: 'arq-mapa', path: '/#/trilha/architecture.well-architected' },
+  ]
+  const vp = VIEWPORTS.find((v) => v.name === 'desktop')!
+  for (const c of CASES) {
+    test(`${c.name} — ${vp.name}`, async ({ page }) => {
+      await page.setViewportSize({ width: vp.width, height: vp.height })
+      await page.emulateMedia({ colorScheme: 'dark' })
+      const before = c.mission ? ARQ_MISSIONS.slice(0, ARQ_MISSIONS.indexOf(c.mission)) : []
+      const base = progressWithPhase1(new Date(), { missions: before })
+      const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+      await seedProgress(page, seeded)
+      await page.goto(c.path ?? `/#/missao/${c.mission}`)
+      await page.waitForLoadState('networkidle')
+      await page.waitForTimeout(250)
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+      expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+      await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+    })
+  }
+})
+
 test.describe('banco de questões', () => {
   for (const vp of VIEWPORTS) {
     test(`treino e simulado — ${vp.name}`, async ({ page }) => {
