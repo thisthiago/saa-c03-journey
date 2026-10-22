@@ -4,7 +4,7 @@ Plataforma web gamificada para aprender AWS **fazendo**: simulações, decisões
 
 Jogue em **https://thisthiago.github.io/saa-c03-journey/**. O site é publicado no GitHub Pages a cada push na branch `main`, pelo workflow `.github/workflows/pages.yml`, depois de passar no lint e nos testes.
 
-Onze trilhas estão disponíveis:
+Doze trilhas estão disponíveis:
 
 - **AWS Foundations — Infraestrutura Global, Segurança e Suporte**: Regiões, AZs, Local Zones, Wavelength, Outposts e borda; planos de suporte; modelo de responsabilidade compartilhada. Três fases e o desafio final **Architecture Foundations**. É a trilha sugerida para quem está começando.
 - **S3 Expedition — Domínio do Armazenamento AWS**: 11 fases e o desafio final **Projeto Atlas**. Recomenda (sem exigir) a AWS Foundations.
@@ -17,6 +17,7 @@ Onze trilhas estão disponíveis:
 - **Segurança e proteção de dados na AWS — Chaves, segredos, certificados, detecção e conformidade**: KMS (tipos de chave, key policy, criptografia em envelope, rotação, chaves multi-Região, grants e cotas), CloudHSM, Secrets Manager (rotação, estratégias de usuário, réplicas e cache) e Parameter Store, ACM (validação, renovação, CloudFront e certificados exportáveis), GuardDuty, Inspector e Detective, Macie, Object Lock e Vault Lock, Security Hub e Security Hub CSPM, AWS Artifact, regras gerenciadas do WAF e resposta automática a incidentes. Os preços de KMS, Secrets Manager e CloudHSM vêm da AWS Price List. Nove fases e o desafio final **Auditoria de Segurança**. Recomenda (sem exigir) a AWS Foundations, a IAM e Access Management e a S3 Expedition.
 - **Integração e mensageria na AWS — Filas, tópicos, eventos, orquestração e streaming**: SQS (visibilidade, retenção, long polling, DLQ, filas FIFO, deduplicação e Lambda lendo da fila), SNS (fan-out, políticas de filtro, tópicos FIFO, novas tentativas e DLQ), EventBridge (barramentos, padrões de evento, alvos, eventos entre contas, arquivamento e replay, Scheduler e Pipes), Step Functions (Standard e Express, estados, Retry e Catch, callback), API Gateway (REST ou HTTP, endpoints, limites, usage plans, cache e autorização), Kinesis Data Streams (shards, chave de partição e enhanced fan-out), Data Firehose, MSK, Amazon MQ, AppFlow e os padrões de saga, idempotência e buffer de escrita. Os preços de SQS, SNS, EventBridge, Step Functions, API Gateway, Kinesis e Firehose vêm da AWS Price List. Nove fases e o desafio final **Arquitetura Orientada a Eventos**. Recomenda (sem exigir) a AWS Foundations e a Computação.
 - **Arquivos e backup na AWS — EFS, FSx, transferência de arquivos e AWS Backup**: Amazon EFS (Regional e One Zone, mount targets, access points, autorização pelo IAM, criptografia, modos de vazão, classes de armazenamento, ciclo de vida e replicação), FSx for Windows File Server (Active Directory, Single-AZ e Multi-AZ, SSD e HDD, cópias de sombra e desduplicação), FSx for Lustre (scratch e persistente, ligação com o S3), FSx for NetApp ONTAP e FSx for OpenZFS, a escolha entre EFS, FSx, S3 e EBS, AWS Transfer Family (endpoints e identidade) e AWS Backup (planos, cofres, armazenamento frio, backup contínuo, cópias entre Regiões e contas, Vault Lock, cofre logicamente isolado e teste de restauração). Os labs de custo usam preços reais da AWS. Sete fases e o desafio final **A Mudança do Escritório**. Recomenda (sem exigir) a AWS Foundations e a S3 Expedition.
+- **Arquitetura e otimização na AWS — Well-Architected, resiliência, desempenho, custo e migração**: a trilha de fechamento. Well-Architected Framework (pilares, princípios, trade-offs) e Well-Architected Tool (riscos altos e médios, lentes e marcos), arquiteturas resilientes (escalar na horizontal, degradação controlada, plano de dados, legado sem mexer no código), as quatro estratégias de recuperação de desastres, alto desempenho (armazenamento pelo acesso, cache em camadas, réplicas e borda), segurança em camadas, otimização de custos (dimensionamento, modelo de compra, horário de uso e transferência de dados), migração com os 7 Rs e o AWS Transform MGN, padrões de arquitetura e de implantação (strangler fig, várias Regiões, blue/green, canário) e a leitura das questões do exame. Os labs de recuperação, dimensionamento e transferência usam preços reais da AWS. Nove fases e o desafio final **A Revisão Well-Architected**. Recomenda (sem exigir) a AWS Foundations, a S3 Expedition, a IAM e Access Management e a Computação.
 
 > Projeto educacional independente, sem afiliação com a Amazon Web Services. Não usa conta, credenciais nem recursos AWS reais: tudo é simulado no navegador.
 
@@ -46,17 +47,18 @@ npm run dev          # servidor de desenvolvimento (http://localhost:5173)
 | `npm run prices:security` | Atualiza a tabela de preços de segurança (KMS, Secrets Manager e CloudHSM) |
 | `npm run prices:integration` | Atualiza a tabela de preços de integração (SQS, SNS, EventBridge, Step Functions, API Gateway, Kinesis e Firehose) |
 | `npm run prices:files` | Atualiza a tabela de preços de arquivos e backup (EFS, FSx, AWS Backup e Transfer Family) |
+| `npm run prices:transfer` | Atualiza a tabela de transferência de dados (internet, entre AZs, entre Regiões e CloudFront) |
 
 O build usa caminhos relativos e rotas com `#`. Por isso, `dist/` pode ser servido de qualquer hospedagem estática, inclusive de um bucket S3.
 
 ## O que tem dentro
 
-- **103 fases** (92 fases e 11 desafios finais), **392 missões** e **1.114 atividades avaliadas**.
-- **707 conceitos**, cada um com referências à documentação oficial, e **2.030 itens de revisão espaçada**.
-- **Banco de 443 questões de simulado** (65 da Computação, 64 do Monitoramento e governança, 55 da IAM, 49 dos Bancos de dados, 39 da Análise de dados, 36 de Redes, 34 da S3, 32 da Segurança, 28 de Arquivos e backup, 24 da Integração e 17 da Foundations), no formato do exame: cada uma mostra a dificuldade, o conceito avaliado e o domínio, e explica todas as alternativas. Dá para treinar com a explicação na hora ou fazer um simulado cronometrado, com resultado por domínio e por conceito.
-- **226 conquistas**.
+- **113 fases** (101 fases e 12 desafios finais), **430 missões** e **1.217 atividades avaliadas**.
+- **769 conceitos**, cada um com referências à documentação oficial, e **2.221 itens de revisão espaçada**.
+- **Banco de 483 questões de simulado** (65 da Computação, 64 do Monitoramento e governança, 55 da IAM, 49 dos Bancos de dados, 40 da Arquitetura e otimização, 39 da Análise de dados, 36 de Redes, 34 da S3, 32 da Segurança, 28 de Arquivos e backup, 24 da Integração e 17 da Foundations), no formato do exame: cada uma mostra a dificuldade, o conceito avaliado e o domínio, e explica todas as alternativas. Dá para treinar com a explicação na hora ou fazer um simulado cronometrado, com resultado por domínio e por conceito.
+- **246 conquistas**.
 - **8 tipos de interação**: decisão com justificativa, classificação, associação, ordenação, predição, estimativa, investigação e laboratório.
-- **73 simuladores**:
+- **80 simuladores**:
   - escolha de Região (fatos verificados + premissas do cenário);
   - resiliência entre AZs (derrubar uma AZ ou a Região);
   - fluxo do CloudFront (POP, Regional Edge Cache e origem);
@@ -127,7 +129,14 @@ O build usa caminhos relativos e rotas com `#`. Por isso, `dist/` pode ser servi
   - acesso ao EFS com uma AZ fora e custo mensal por modo de vazão e ciclo de vida;
   - falhas do FSx (servidor e AZ) por tipo de implantação;
   - escolha do armazenamento de arquivos e do caminho de entrada;
-  - planos do AWS Backup (RPO, frio, cópias, Vault Lock e desastres).
+  - planos do AWS Backup (RPO, frio, cópias, Vault Lock e desastres);
+  - revisão Well-Architected (pilar e risco de cada achado);
+  - estratégias de recuperação de desastres (RPO, RTO e custo da Região de recuperação);
+  - escolha do recurso de desempenho;
+  - dimensionamento e modelo de compra de frotas;
+  - custo da transferência de dados por caminho;
+  - plano de migração com os 7 Rs;
+  - leitura de questões no formato do exame.
 - **Progressão**:
   - XP só por ações avaliadas; níveis;
   - domínio por conceito e revisão espaçada (Leitner), alimentados também pelo banco de questões;
