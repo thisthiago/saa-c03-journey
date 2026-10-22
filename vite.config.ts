@@ -24,6 +24,7 @@ export default defineConfig({
             { name: 'content-security', test: /src[\\/]content[\\/]modules[\\/]security[\\/]/ },
             { name: 'content-integration', test: /src[\\/]content[\\/]modules[\\/]integration[\\/]/ },
             { name: 'content-files', test: /src[\\/]content[\\/]modules[\\/]files[\\/]/ },
+            { name: 'content-architecture', test: /src[\\/]content[\\/]modules[\\/]architecture[\\/]/ },
             { name: 'content', test: /src[\\/]content[\\/]/ },
           ],
         },
