@@ -68,6 +68,9 @@ import type { ApiLabConfig } from '../../simulators/apigw/lab'
 import type { StreamLabConfig } from '../../simulators/stream/lab'
 import type { FilterLabConfig } from '../../simulators/eventbus/lab'
 import type { IntChooserLabConfig } from '../../simulators/intchooser/model'
+import type { FilesystemLabConfig } from '../../simulators/filesystem/lab'
+import type { FsChooserLabConfig } from '../../simulators/fschooser/model'
+import type { BackupLabConfig } from '../../simulators/backup/lab'
 
 export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'; config: CostLabConfig } | { lab: 'access'; config: AccessLabConfig }
   | { lab: 'versioning'; config: VersioningLabConfig }
@@ -137,5 +140,8 @@ export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'
   | { lab: 'pubsub'; config: FilterLabConfig }
   | { lab: 'eventbus'; config: FilterLabConfig }
   | { lab: 'int-chooser'; config: IntChooserLabConfig }
+  | { lab: 'filesystem'; config: FilesystemLabConfig }
+  | { lab: 'fs-chooser'; config: FsChooserLabConfig }
+  | { lab: 'backup'; config: BackupLabConfig }
 
 export type LabId = LabSpec['lab']
