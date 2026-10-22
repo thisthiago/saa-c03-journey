@@ -15,9 +15,10 @@ import { governanceModule } from './modules/governance'
 import { networkModule } from './modules/network'
 import { analyticsModule } from './modules/analytics'
 import { securityModule } from './modules/security'
+import { integrationModule } from './modules/integration'
 
 /** A ordem define a ordem das trilhas na Base e a primeira missão sugerida a quem começa. */
-export const MODULES: ContentModule[] = [catalogModule, foundationsModule, storageModule, identityModule, computeModule, databaseModule, governanceModule, networkModule, analyticsModule, securityModule]
+export const MODULES: ContentModule[] = [catalogModule, foundationsModule, storageModule, identityModule, computeModule, databaseModule, governanceModule, networkModule, analyticsModule, securityModule, integrationModule]
 
 export const registry: Registry = createRegistry({
   modules: MODULES,
@@ -27,4 +28,4 @@ export const registry: Registry = createRegistry({
 })
 
 /** Versão do conteúdo (exibida em "Sobre"). */
-export const CONTENT_VERSION = '2026.10.9'
+export const CONTENT_VERSION = '2026.10.10'
