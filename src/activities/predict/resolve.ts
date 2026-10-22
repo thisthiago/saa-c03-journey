@@ -44,6 +44,11 @@ import { describeCluster, runJob } from '../../simulators/emr/model'
 import { kmsDecide } from '../../simulators/kms/model'
 import { loginOutcome } from '../../simulators/secrets/model'
 import { placement as certPlacement, renewal as certRenewal } from '../../simulators/certs/model'
+import { fifoAccept, runMessage } from '../../simulators/queue/model'
+import { matches, patternText } from '../../simulators/eventbus/pattern'
+import { runTask } from '../../simulators/workflow/model'
+import { effectiveLimit, throttle } from '../../simulators/apigw/model'
+import { hotShard, LIMIT_LABEL, shardsNeeded } from '../../simulators/stream/model'
 import type { PredictSpec } from './specs'
 
 export interface PredictResult {
@@ -405,6 +410,36 @@ export function resolvePredict(spec: PredictSpec): PredictResult {
     case 'certs': {
       const r = spec.measure === 'renewal' ? certRenewal(spec.cert) : certPlacement(spec.cert)
       return { outcome: r.result, detail: [r.why] }
+    }
+    case 'queue': {
+      const r = runMessage(spec.run)
+      return { outcome: r.outcome, detail: r.trace }
+    }
+    case 'fifo': {
+      const r = fifoAccept(spec.sends)
+      const order = r.byGroup[spec.group] ?? []
+      return { outcome: order.join('+') || 'none', detail: [r.dropped.length ? `Descartadas como repetidas dentro de 5 minutos: ${r.dropped.join(', ')}.` : 'Nenhuma mensagem repetida dentro de 5 minutos.', `Ordem no grupo ${spec.group}: ${order.join(', ') || 'nenhuma'}.`] }
+    }
+    case 'eventbus': {
+      const ok = !spec.pattern || matches(spec.pattern, spec.event)
+      return { outcome: ok ? 'yes' : 'no', detail: [spec.pattern ? `Padrão: ${patternText(spec.pattern)}.` : 'Sem padrão: tudo passa.', ok ? 'Todos os campos do padrão casam com o evento.' : 'Pelo menos um campo do padrão não casa com o evento.'] }
+    }
+    case 'workflow': {
+      const r = runTask(spec.task, spec.handling)
+      return { outcome: r.outcome, detail: r.trace }
+    }
+    case 'apigw': {
+      const lim = effectiveLimit(...spec.limits)
+      const r = throttle(spec.demand, lim)
+      return { outcome: String(r.throttled), detail: [`Limite efetivo: ${lim.rate} req/s com burst de ${lim.burst}.`, r.throttled ? `${r.throttled} requisições recebem 429.` : 'Nenhuma requisição recebe 429.'] }
+    }
+    case 'stream': {
+      if (spec.measure === 'hot') {
+        const h = hotShard(spec.load.writeMBps, spec.hotKeyShare ?? 0)
+        return { outcome: h.overloaded ? 'yes' : 'no', detail: [`A chave quente leva ${h.mbps.toLocaleString('pt-BR')} MB/s a um só shard, que aceita 1 MB/s.`] }
+      }
+      const n = shardsNeeded(spec.load, spec.mode)
+      return { outcome: String(n.shards), detail: [`Quem decide é ${LIMIT_LABEL[n.limit]}.`] }
     }
     case 'lakeperm': {
       const detail = spec.grants.length ? spec.grants.map((g) => `Concessão: ${describeGrant(spec.table, g)}.`) : ['Nenhuma concessão.']
