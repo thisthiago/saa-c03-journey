@@ -108,11 +108,10 @@ export const TERRITORIES: TerritoryDef[] = [
   {
     id: 'arquitetura',
     title: 'Arquitetura e otimização',
-    summary: 'Alta disponibilidade, recuperação de desastres, custos e Well-Architected.',
+    summary: 'Well-Architected, resiliência, recuperação de desastres, desempenho, custos e migração.',
     glyph: 'flag',
-    status: 'planned',
-    examDomains: ['d2', 'd4'],
-    plannedServices: ['AWS Well-Architected Framework'],
+    status: 'active',
+    examDomains: ['d2', 'd3', 'd4'],
   },
 ]
 
@@ -133,6 +132,4 @@ export const LEVEL_TITLES = [
 ]
 
 /** Trilhas com plano pronto em docs/, mostradas na Base como "em desenvolvimento". */
-export const PLANNED_TRACKS: PlannedTrackDef[] = [
-  { id: 'architecture.well-architected', title: 'Arquitetura e otimização na AWS', subtitle: 'Well-Architected, resiliência, desempenho, custo e migração', territory: 'arquitetura', glyph: 'flag', examDomains: ['d2', 'd3', 'd4'], plan: 'docs/PLANO-IMPLEMENTACAO-MODULO-ARQUITETURA-E-OTIMIZACAO.md' },
-]
+export const PLANNED_TRACKS: PlannedTrackDef[] = []
