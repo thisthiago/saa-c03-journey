@@ -1,0 +1,155 @@
+{
+  "source": "AWS Price List Bulk API",
+  "sourceDocs": "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-price-list-query-api.html",
+  "retrievedAt": "2026-10-22",
+  "currency": "USD",
+  "notes": [
+    "Valores de referência para fins didáticos, extraídos da AWS Price List na data indicada.",
+    "Apenas a primeira faixa paga de cada item; sem nível gratuito, impostos ou descontos por volume.",
+    "O EFS Infrequent Access tem um preço com vazão Elastic e outro com vazão Bursting ou Provisioned.",
+    "A vazão Provisioned do EFS cobra só o que passa da base incluída pelo armazenamento na classe Standard.",
+    "Preços mudam: consulte as páginas de preço de cada serviço antes de qualquer decisão real."
+  ],
+  "regions": {
+    "us-east-1": {
+      "label": "US East (N. Virginia)",
+      "offers": {
+        "AmazonEFS": "2026-09-11T12:44:25Z",
+        "AmazonFSx": "2026-09-11T12:44:32Z",
+        "AWSBackup": "2026-10-14T00:18:56Z",
+        "AWSTransfer": "2026-09-11T12:46:19Z"
+      },
+      "efs": {
+        "standard": 0.3,
+        "standardOneZone": 0.16,
+        "ia": 0.025,
+        "iaElastic": 0.016,
+        "iaOneZone": 0.0133,
+        "archive": 0.008,
+        "iaRead": 0.01,
+        "archiveRead": 0.03,
+        "elasticRead": 0.03,
+        "elasticWrite": 0.06,
+        "provisionedMiBpsMonth": 6
+      },
+      "fsx": {
+        "windows": {
+          "ssdSingleAz": 0.13,
+          "ssdMultiAz": 0.23,
+          "hddSingleAz": 0.013,
+          "hddMultiAz": 0.025,
+          "throughputSingleAz": 2.2,
+          "throughputMultiAz": 4.5
+        },
+        "lustre": {
+          "scratchSsd": 0.14,
+          "persistentSsd125": 0.145,
+          "persistentHdd12": 0.025
+        },
+        "ontap": {
+          "ssdSingleAz": 0.125,
+          "ssdMultiAz": 0.25,
+          "capacityPoolSingleAz": 0.0219,
+          "capacityPoolMultiAz": 0.0438,
+          "throughputSingleAz": 0.72,
+          "throughputMultiAz": 1.2
+        },
+        "openzfs": {
+          "ssdSingleAz": 0.09,
+          "ssdMultiAz": 0.18,
+          "throughputSingleAz": 0.26,
+          "throughputMultiAz": 0.87
+        }
+      },
+      "backup": {
+        "efsWarm": 0.05,
+        "efsCold": 0.01,
+        "efsCrossRegion": 0.04,
+        "efsRestoreWarm": 0.02,
+        "efsRestoreCold": 0.03,
+        "restoreTest": 1.5
+      },
+      "transfer": {
+        "protocolHour": 0.3,
+        "uploadGB": 0.04,
+        "downloadGB": 0.04
+      },
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEFS/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonFSx/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSBackup/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSTransfer/current/us-east-1/index.json"
+      ]
+    },
+    "sa-east-1": {
+      "label": "América do Sul (São Paulo)",
+      "offers": {
+        "AmazonEFS": "2026-09-11T12:44:25Z",
+        "AmazonFSx": "2026-09-11T12:44:32Z",
+        "AWSBackup": "2026-10-14T00:18:56Z",
+        "AWSTransfer": "2026-09-11T12:46:19Z"
+      },
+      "efs": {
+        "standard": 0.57,
+        "standardOneZone": 0.304,
+        "ia": 0.044,
+        "iaElastic": 0.0332,
+        "iaOneZone": 0.0235,
+        "archive": 0.0166,
+        "iaRead": 0.019,
+        "archiveRead": 0.057,
+        "elasticRead": 0.06,
+        "elasticWrite": 0.11,
+        "provisionedMiBpsMonth": 11.4
+      },
+      "fsx": {
+        "windows": {
+          "ssdSingleAz": 0.247,
+          "ssdMultiAz": 0.437,
+          "hddSingleAz": 0.023,
+          "hddMultiAz": 0.045,
+          "throughputSingleAz": 2.97,
+          "throughputMultiAz": 6.075
+        },
+        "lustre": {
+          "scratchSsd": 0.223,
+          "persistentSsd125": 0.245,
+          "persistentHdd12": 0.044
+        },
+        "ontap": {
+          "ssdSingleAz": 0.238,
+          "ssdMultiAz": 0.475,
+          "capacityPoolSingleAz": 0.0385,
+          "capacityPoolMultiAz": 0.077,
+          "throughputSingleAz": 1.11,
+          "throughputMultiAz": 1.849
+        },
+        "openzfs": {
+          "ssdSingleAz": 0.171,
+          "ssdMultiAz": 0.342,
+          "throughputSingleAz": 0.351,
+          "throughputMultiAz": 1.3405
+        }
+      },
+      "backup": {
+        "efsWarm": 0.07,
+        "efsCold": 0.014,
+        "efsCrossRegion": 0.18,
+        "efsRestoreWarm": 0.028,
+        "efsRestoreCold": 0.042,
+        "restoreTest": 2.1
+      },
+      "transfer": {
+        "protocolHour": 0.3,
+        "uploadGB": 0.04,
+        "downloadGB": 0.04
+      },
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEFS/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonFSx/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSBackup/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSTransfer/current/sa-east-1/index.json"
+      ]
+    }
+  }
+}
