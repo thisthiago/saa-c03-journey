@@ -138,6 +138,20 @@ import { FsChooserLab } from '../simulators/fschooser/FsChooserLab'
 import type { FsChooserLabResponse } from '../simulators/fschooser/model'
 import { BackupLab } from '../simulators/backup/BackupLab'
 import type { BackupLabResponse } from '../simulators/backup/lab'
+import { WaReviewLab } from '../simulators/wareview/WaReviewLab'
+import type { WaReviewLabResponse } from '../simulators/wareview/lab'
+import { DrLab } from '../simulators/dr/DrLab'
+import type { DrLabResponse } from '../simulators/dr/lab'
+import { PerfChooserLab } from '../simulators/perfchooser/PerfChooserLab'
+import type { PerfChooserLabResponse } from '../simulators/perfchooser/model'
+import { TransferCostLab } from '../simulators/transfercost/TransferCostLab'
+import type { TransferCostLabResponse } from '../simulators/transfercost/lab'
+import { RightsizingLab } from '../simulators/rightsizing/RightsizingLab'
+import type { RightsizingLabResponse } from '../simulators/rightsizing/lab'
+import { MigrationPlanLab } from '../simulators/migplan/MigrationPlanLab'
+import type { MigrationPlanLabResponse } from '../simulators/migplan/lab'
+import { ExamReaderLab } from '../simulators/examreader/ExamReaderLab'
+import type { ExamReaderLabResponse } from '../simulators/examreader/lab'
 import type { NetChooserLabResponse } from '../simulators/netchooser/model'
 import type { TransferLabResponse } from '../simulators/transfer/lab'
 import type { GatewayLabResponse } from '../simulators/gateway/lab'
@@ -334,6 +348,20 @@ export function ActivityView({ activity, value, onChange, disabled, evaluation, 
           return <FsChooserLab config={activity.config} value={value as unknown as FsChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
         case 'backup':
           return <BackupLab config={activity.config} value={value as unknown as BackupLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'wa-review':
+          return <WaReviewLab config={activity.config} value={value as unknown as WaReviewLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'dr':
+          return <DrLab config={activity.config} value={value as unknown as DrLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'perf-chooser':
+          return <PerfChooserLab config={activity.config} value={value as unknown as PerfChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'transfer-cost':
+          return <TransferCostLab config={activity.config} value={value as unknown as TransferCostLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'rightsizing':
+          return <RightsizingLab config={activity.config} value={value as unknown as RightsizingLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'migration-plan':
+          return <MigrationPlanLab config={activity.config} value={value as unknown as MigrationPlanLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'exam-reader':
+          return <ExamReaderLab config={activity.config} value={value as unknown as ExamReaderLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
       }
   }
 }
