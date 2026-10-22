@@ -75,6 +75,9 @@ import { evaluateApiLab, apiSolution, type ApiLabResponse } from '../../simulato
 import { evaluateStreamLab, streamSolution, type StreamLabResponse } from '../../simulators/stream/lab'
 import { evaluateFilterLab, filterSolution, type FilterLabResponse } from '../../simulators/eventbus/lab'
 import { evaluateIntChooserLab, intChooserSolution, type IntChooserLabResponse } from '../../simulators/intchooser/model'
+import { evaluateFilesystemLab, filesystemSolution, type FilesystemLabResponse } from '../../simulators/filesystem/lab'
+import { evaluateFsChooserLab, fsChooserSolution, type FsChooserLabResponse } from '../../simulators/fschooser/model'
+import { backupSolution, evaluateBackupLab, type BackupLabResponse } from '../../simulators/backup/lab'
 import { gridInitial } from '../../simulators/shared/grid'
 import type { LabActivity } from '../types'
 
@@ -249,6 +252,12 @@ export function evaluateLab(activity: LabActivity, response: unknown): LabResult
       return evaluateFilterLab(activity.config, (response as FilterLabResponse | undefined) ?? gridInitial())
     case 'int-chooser':
       return evaluateIntChooserLab(activity.config, (response as IntChooserLabResponse | undefined) ?? { placements: {} })
+    case 'filesystem':
+      return evaluateFilesystemLab(activity.config, (response as FilesystemLabResponse | undefined) ?? gridInitial())
+    case 'fs-chooser':
+      return evaluateFsChooserLab(activity.config, (response as FsChooserLabResponse | undefined) ?? { placements: {} })
+    case 'backup':
+      return evaluateBackupLab(activity.config, (response as BackupLabResponse | undefined) ?? gridInitial())
   }
 }
 
@@ -389,6 +398,12 @@ export function labSolution(activity: LabActivity): unknown {
       return filterSolution(activity.config)
     case 'int-chooser':
       return intChooserSolution(activity.config)
+    case 'filesystem':
+      return filesystemSolution(activity.config)
+    case 'fs-chooser':
+      return fsChooserSolution(activity.config)
+    case 'backup':
+      return backupSolution(activity.config)
   }
 }
 
@@ -503,6 +518,7 @@ export function labInitialResponse(activity: LabActivity): unknown {
     case 'ana-chooser':
     case 'sec-chooser':
     case 'int-chooser':
+    case 'fs-chooser':
       return { placements: {} }
     case 'kms':
       return kmsInitial()
@@ -515,6 +531,8 @@ export function labInitialResponse(activity: LabActivity): unknown {
     case 'stream':
     case 'pubsub':
     case 'eventbus':
+    case 'filesystem':
+    case 'backup':
       return gridInitial()
   }
 }
