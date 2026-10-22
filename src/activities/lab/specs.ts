@@ -62,6 +62,12 @@ import type { SecretsLabConfig } from '../../simulators/secrets/lab'
 import type { CertsLabConfig } from '../../simulators/certs/lab'
 import type { FindingsLabConfig } from '../../simulators/findings/lab'
 import type { SecChooserLabConfig } from '../../simulators/secchooser/model'
+import type { QueueLabConfig } from '../../simulators/queue/lab'
+import type { WorkflowLabConfig } from '../../simulators/workflow/lab'
+import type { ApiLabConfig } from '../../simulators/apigw/lab'
+import type { StreamLabConfig } from '../../simulators/stream/lab'
+import type { FilterLabConfig } from '../../simulators/eventbus/lab'
+import type { IntChooserLabConfig } from '../../simulators/intchooser/model'
 
 export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'; config: CostLabConfig } | { lab: 'access'; config: AccessLabConfig }
   | { lab: 'versioning'; config: VersioningLabConfig }
@@ -124,5 +130,12 @@ export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'
   | { lab: 'certs'; config: CertsLabConfig }
   | { lab: 'findings'; config: FindingsLabConfig }
   | { lab: 'sec-chooser'; config: SecChooserLabConfig }
+  | { lab: 'queue'; config: QueueLabConfig }
+  | { lab: 'workflow'; config: WorkflowLabConfig }
+  | { lab: 'apigw'; config: ApiLabConfig }
+  | { lab: 'stream'; config: StreamLabConfig }
+  | { lab: 'pubsub'; config: FilterLabConfig }
+  | { lab: 'eventbus'; config: FilterLabConfig }
+  | { lab: 'int-chooser'; config: IntChooserLabConfig }
 
 export type LabId = LabSpec['lab']
