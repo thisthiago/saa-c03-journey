@@ -1,0 +1,80 @@
+/**
+ * Conceitos da Fase 1 — Desacoplamento e SQS essencial.
+ * Fatos conferidos em 22/10/2026 (ver docs/VERIFICACAO-DE-CONTEUDO.md).
+ */
+import type { ConceptDef } from '../../../../engine/types'
+import { R } from './refs'
+
+export const F01_INT_CONCEPTS: ConceptDef[] = [
+  {
+    id: 'int.sync-async',
+    title: 'Chamada síncrona ou assíncrona',
+    officialName: 'Synchronous and asynchronous communication',
+    serviceIds: ['aws.sqs'],
+    summary: 'Na chamada **síncrona**, quem pede espera a resposta: se o outro lado está lento ou fora do ar, o pedido falha junto. Na **assíncrona**, quem pede deixa a mensagem numa **fila** e segue; quem processa lê no próprio ritmo. A fila **desacopla** os dois lados e **absorve picos**.',
+    recommendations: ['Use fila quando quem pede não precisa da resposta na hora e o processamento pode atrasar um pouco.'],
+    commonMistakes: ['Chamar direto um serviço lento a cada pedido e derrubar o site quando ele trava'],
+    exam: { domains: ['d2'], relevance: 'alta', notes: 'A tarefa 2.1 cita arquiteturas desacopladas e o uso de filas.' },
+    references: [R.sqsWhat],
+    tags: ['integracao', 'disponibilidade'],
+  },
+  {
+    id: 'sqs.what',
+    title: 'Amazon SQS e a fila padrão',
+    officialName: 'Amazon Simple Queue Service (standard queue)',
+    serviceIds: ['aws.sqs'],
+    summary: 'O **SQS** é uma fila gerenciada: o produtor envia, o consumidor **recebe**, processa e **apaga** a mensagem. A **fila padrão** tem vazão praticamente ilimitada, entrega **pelo menos uma vez** (uma mensagem pode chegar em dobro) e a ordem é de **melhor esforço**.',
+    facts: ['Uma operação de envio, recebimento ou exclusão aceita lotes de até 10 mensagens.', 'Na fila padrão, cabem cerca de 120.000 mensagens em processamento ao mesmo tempo.'],
+    commonMistakes: ['Esquecer de apagar a mensagem depois de processar e vê-la voltar à fila'],
+    exam: { domains: ['d2'], relevance: 'alta' },
+    references: [R.sqsWhat, R.sqsStandard],
+    tags: ['integracao'],
+  },
+  {
+    id: 'sqs.visibility',
+    title: 'Tempo de visibilidade',
+    officialName: 'Visibility timeout',
+    serviceIds: ['aws.sqs'],
+    summary: 'Quando um consumidor recebe a mensagem, ela fica **invisível** para os outros pelo **tempo de visibilidade** (padrão de **30 s**, de 0 s a **12 horas**). Se o consumidor não a apagar antes do fim do prazo, ela **volta a ficar visível** e outro consumidor pode processá-la de novo.',
+    facts: ['O prazo pode ser estendido durante o processamento com ChangeMessageVisibility.', 'O limite de 12 horas conta a partir do primeiro recebimento.'],
+    commonMistakes: ['Deixar a visibilidade menor que o tempo de processamento e processar a mesma mensagem em dobro'],
+    exam: { domains: ['d2'], relevance: 'alta' },
+    references: [R.sqsVisibility],
+    tags: ['integracao'],
+  },
+  {
+    id: 'sqs.retention-size',
+    title: 'Retenção e tamanho da mensagem',
+    officialName: 'Message retention period and maximum message size',
+    serviceIds: ['aws.sqs', 'aws.s3'],
+    summary: 'A fila guarda cada mensagem por **4 dias** por padrão, configurável de **1 minuto a 14 dias**; depois disso, ela é apagada mesmo sem ser processada. Uma mensagem tem até **1 MiB**; para cargas maiores, guarde o conteúdo no **S3** e envie só a referência (a biblioteca Extended Client faz isso, até 2 GB).',
+    commonMistakes: ['Confiar que a fila guarda mensagens para sempre enquanto o consumidor está parado'],
+    exam: { domains: ['d2'], relevance: 'media' },
+    references: [R.sqsMessageQuotas, R.sqsLarge],
+    tags: ['integracao', 'durabilidade'],
+  },
+  {
+    id: 'sqs.long-polling',
+    title: 'Long polling',
+    officialName: 'Short polling and long polling',
+    serviceIds: ['aws.sqs'],
+    summary: 'No **short polling**, o recebimento consulta só uma parte dos servidores e responde na hora, às vezes vazio. No **long polling**, o recebimento espera até **20 s** por mensagens e consulta todos os servidores: menos respostas vazias, menos chamadas e **menor custo**.',
+    facts: ['O long polling é ligado com WaitTimeSeconds maior que zero, na chamada ou como padrão da fila.'],
+    commonMistakes: ['Consultar a fila em laço com short polling e pagar por milhares de respostas vazias'],
+    exam: { domains: ['d4'], relevance: 'media' },
+    references: [R.sqsPolling],
+    tags: ['integracao', 'custos'],
+  },
+  {
+    id: 'sqs.dlq',
+    title: 'Fila de mensagens mortas (DLQ)',
+    officialName: 'Dead-letter queue and redrive',
+    serviceIds: ['aws.sqs'],
+    summary: 'A **DLQ** recebe as mensagens que falharam demais: quando uma mensagem é recebida mais vezes que o **maxReceiveCount** sem ser apagada, ela sai da fila de origem. Assim a mensagem com defeito não trava o consumidor nem some ao fim da retenção. Depois de corrigir o problema, o **redrive** devolve as mensagens à fila de origem.',
+    facts: ['A DLQ fica na mesma conta e na mesma Região da fila de origem.', 'Na fila padrão, a mensagem guarda a data original de entrada; por isso a retenção da DLQ deve ser maior que a da origem. Na FIFO, a data recomeça ao chegar à DLQ.', 'A AWS avisa: numa fila FIFO em que a ordem exata importa, a DLQ quebra essa ordem.'],
+    commonMistakes: ['Usar maxReceiveCount 1 e mandar para a DLQ mensagens que dariam certo na segunda tentativa'],
+    exam: { domains: ['d2'], relevance: 'alta' },
+    references: [R.sqsDlq],
+    tags: ['integracao', 'recuperacao'],
+  },
+]
