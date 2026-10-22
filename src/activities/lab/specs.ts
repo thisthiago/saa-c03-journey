@@ -57,6 +57,11 @@ import type { EmrLabConfig } from '../../simulators/emr/lab'
 import type { IngestLabConfig } from '../../simulators/ingest/model'
 import type { AiChooserLabConfig } from '../../simulators/aichooser/model'
 import type { AnaChooserLabConfig } from '../../simulators/anachooser/model'
+import type { KmsLabConfig } from '../../simulators/kms/lab'
+import type { SecretsLabConfig } from '../../simulators/secrets/lab'
+import type { CertsLabConfig } from '../../simulators/certs/lab'
+import type { FindingsLabConfig } from '../../simulators/findings/lab'
+import type { SecChooserLabConfig } from '../../simulators/secchooser/model'
 
 export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'; config: CostLabConfig } | { lab: 'access'; config: AccessLabConfig }
   | { lab: 'versioning'; config: VersioningLabConfig }
@@ -114,5 +119,10 @@ export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'
   | { lab: 'ingest'; config: IngestLabConfig }
   | { lab: 'ai-chooser'; config: AiChooserLabConfig }
   | { lab: 'ana-chooser'; config: AnaChooserLabConfig }
+  | { lab: 'kms'; config: KmsLabConfig }
+  | { lab: 'secrets'; config: SecretsLabConfig }
+  | { lab: 'certs'; config: CertsLabConfig }
+  | { lab: 'findings'; config: FindingsLabConfig }
+  | { lab: 'sec-chooser'; config: SecChooserLabConfig }
 
 export type LabId = LabSpec['lab']
