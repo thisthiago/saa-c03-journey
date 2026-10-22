@@ -49,6 +49,10 @@ import { matches, patternText } from '../../simulators/eventbus/pattern'
 import { runTask } from '../../simulators/workflow/model'
 import { effectiveLimit, throttle } from '../../simulators/apigw/model'
 import { hotShard, LIMIT_LABEL, shardsNeeded } from '../../simulators/stream/model'
+import { cheapestEfs, clientAccess, fmtUsd, THROUGHPUT_LABEL } from '../../simulators/filesystem/model'
+import { filesPrices } from '../../simulators/files-prices'
+import { fsxFailure } from '../../simulators/fsx/model'
+import { FREQUENCY_HOURS, planProblem, survives } from '../../simulators/backup/model'
 import type { PredictSpec } from './specs'
 
 export interface PredictResult {
@@ -449,6 +453,32 @@ export function resolvePredict(spec: PredictSpec): PredictResult {
       }
       const sees = visibleColumns(spec.table, spec.grants).has(spec.column!)
       return { outcome: sees ? 'yes' : 'no', detail: [...detail, sees ? 'A coluna aparece para o analista.' : 'A coluna fica oculta para o analista.'] }
+    }
+    case 'efs-access': {
+      const r = clientAccess(spec.topology, spec.clientAz, spec.failedAz)
+      return { outcome: r.outcome, detail: [r.why] }
+    }
+    case 'efs-cost': {
+      const { best, all } = cheapestEfs(spec.usage, filesPrices(spec.region).efs, undefined, [spec.lifecycle])
+      return {
+        outcome: best.mode,
+        detail: all.map((x) => `${THROUGHPUT_LABEL[x.mode]}: ${!x.cost.valid || !x.cost.meets ? x.cost.reason : `${fmtUsd(x.cost.total)} por mês`}`),
+      }
+    }
+    case 'fsx-failure': {
+      const r = fsxFailure(spec.deployment, spec.event)
+      return { outcome: r.outcome, detail: [r.why] }
+    }
+    case 'backup': {
+      const problem = planProblem(spec.plan)
+      if (spec.query.type === 'valid') return { outcome: problem ? 'rejected' : 'accepted', detail: [problem ?? 'O plano cumpre as regras de frequência, retenção e armazenamento frio.'] }
+      if (problem) throw new Error(`Plano inválido na previsão: ${problem}`)
+      if (spec.query.type === 'rpo') {
+        const h = FREQUENCY_HOURS[spec.plan.frequency]
+        return { outcome: String(h), detail: [h === 0 ? 'O backup contínuo permite restaurar qualquer momento dentro da retenção.' : `Entre dois backups passam ${h} horas: no pior caso, perdem-se ${h} horas de dados.`] }
+      }
+      const r = survives(spec.plan, spec.query.disaster)
+      return { outcome: r.ok ? 'yes' : 'no', detail: [r.why] }
     }
     case 'cost-cheapest': {
       const prices = regionPrices(spec.region)
