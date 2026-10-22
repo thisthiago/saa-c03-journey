@@ -244,6 +244,31 @@ Módulo `src/content/modules/integration/`, no território `integracao`, que pas
 
 **Desktop primeiro.** As capturas de tela desta trilha cobrem só o desktop.
 
+## Trilha Arquivos e backup na AWS
+
+Módulo `src/content/modules/files/`, no território `armazenamento`, que passa a ter duas trilhas (S3 Expedition e esta). Reaproveita, sem redeclarar, `storage.file`, `sgw.s3-file`, `sgw.fsx-file`, `mig.datasync`, `backup.independent-copy` e `dr.rpo-rto` (S3 Expedition), `fed.directory-service` (IAM), `ebs.snapshots` (Computação), `bkp.aws-backup` (Bancos de dados), `gov.org-policies` (Monitoramento e governança) e `bkp.vault-lock` (Segurança). Fica no fim de `MODULES` para que o Codex mostre esses conceitos nas trilhas que os declaram.
+
+| Fase | Tema | Empresas fictícias | Laboratórios |
+|---|---|---|---|
+| 1 | EFS essencial | Escola Aberta | Tipo e mount targets de quatro sistemas de arquivos (`filesystem`, modo `access`) |
+| 2 | EFS: desempenho e custo | Grupo Atlântico | Vazão e ciclo de vida pelo menor custo, com preços reais (`filesystem`, modo `cost`) |
+| 3 | FSx for Windows File Server | Construtora Alicerce | Investigação da parada do Single-AZ; configuração e custo do Multi-AZ |
+| 4 | FSx for Lustre | Laboratório Genoma Sul | Scratch, persistente ou EFS para cinco cargas |
+| 5 | FSx for NetApp ONTAP e OpenZFS | Seguradora Horizonte e Estúdio Pixel | Sistema de arquivos de seis cargas (`fs-chooser`) |
+| 6 | Escolha e caminho de entrada | Distribuidora Rota Sul | Armazenamento e caminho de entrada de nove necessidades (`fs-chooser`) |
+| 7 | AWS Backup | Hospital Santa Aurora | Frequência, frio, cópia e trava de cinco recursos (`backup`) |
+| Final | A Mudança do Escritório | Estúdio Traço Livre | Arquitetura em 7 etapas, com dimensões Seguro, Resiliente, Alto desempenho, Custo e Requisitos |
+
+**Decisões adotadas** (as recomendadas no plano): trilha curta, com 7 fases e o desafio final; o AWS Backup é ensinado aqui (Fase 7), e as trilhas de Bancos de dados e de Arquitetura e otimização só o citam; o Transfer Family é ensinado aqui (Fase 6); preços reais da AWS Price List para EFS, FSx, AWS Backup e Transfer Family.
+
+**Dependências.** A Fase 2 exige a 1; a 4 e a 5 exigem a 3; a 6 exige a 2, a 4 e a 5; a 3 e a 7 só recomendam a anterior; o desafio final exige as sete. A trilha recomenda a AWS Foundations e a S3 Expedition. O mapa usa quatro colunas e a altura padrão.
+
+**Laboratórios.** `filesystem` e `backup` usam o motor em grade (`simulators/shared/grid.ts`); `fs-chooser` usa o motor de escolha (`simulators/shared/chooser.ts`). O custo do `filesystem` escolhe a combinação válida mais barata entre os três modos de vazão e os três ciclos de vida, e o modelo recusa empates (diferença menor que 1%).
+
+**Previsões calculadas.** `efs-access` e `efs-cost` usam `simulators/filesystem/`; `fsx-failure` usa `simulators/fsx/`; `backup` usa `simulators/backup/`.
+
+**Desktop primeiro.** As capturas de tela desta trilha cobrem só o desktop.
+
 ## Princípios de escrita
 
 - **Aprender fazendo.** Cada missão segue a ordem: contexto (briefing) → conceitos-chave (intel, até ~80 palavras por carta) → desafios → resultado (debrief). Na interface aparecem só os nomes em português.
@@ -283,6 +308,8 @@ Os testes recusam questão com conceito inexistente, formato errado, alternativa
 ## Preços
 
 `src/content/pricing/integration-prices.json` é gerado por `npm run prices:integration` (SQS padrão e FIFO, SNS, EventBridge com eventos personalizados, Pipes e Scheduler, Step Functions Standard e Express, API Gateway REST, HTTP e WebSocket, Kinesis Data Streams e Data Firehose; us-east-1 e sa-east-1), a partir das ofertas AWSQueueService, AmazonSNS, AWSEvents, AmazonStates, AmazonApiGateway, AmazonKinesis e AmazonKinesisFirehose da AWS Price List Bulk API; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
+
+`src/content/pricing/files-prices.json` é gerado por `npm run prices:files` (EFS por classe, leitura das classes frias, vazão Elastic e Provisioned; armazenamento e vazão dos quatro FSx; backups do EFS no quente e no frio, cópia entre Regiões, restauração e teste de restauração no AWS Backup; protocolo por hora e dados no Transfer Family; us-east-1 e sa-east-1). O script falha se algum preço faltar ou for ambíguo.
 
 `src/content/pricing/security-prices.json` é gerado por `npm run prices:security` (KMS: chave gerenciada pelo cliente por mês e requisições simétricas; Secrets Manager: segredo por mês e chamadas de API; CloudHSM: HSM por hora; us-east-1 e sa-east-1), a partir das ofertas awskms, AWSSecretsManager e CloudHSM da AWS Price List Bulk API; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
 
