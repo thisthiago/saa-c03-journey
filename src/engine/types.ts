@@ -99,6 +99,10 @@ export type GlyphName =
   | 'video'
   | 'waves'
   | 'scan'
+  | 'certificate'
+  | 'radar'
+  | 'siren'
+  | 'shield-check'
 
 export interface TerritoryDef {
   id: string
