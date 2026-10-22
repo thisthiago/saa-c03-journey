@@ -44,7 +44,7 @@ export const TERRITORIES: TerritoryDef[] = [
   {
     id: 'armazenamento',
     title: 'Armazenamento',
-    summary: 'Objetos, blocos, arquivos, transferência e armazenamento híbrido.',
+    summary: 'Objetos, blocos, arquivos, backup, transferência e armazenamento híbrido.',
     glyph: 'bucket',
     status: 'active',
     examDomains: ['d3', 'd4', 'd1'],
@@ -134,6 +134,5 @@ export const LEVEL_TITLES = [
 
 /** Trilhas com plano pronto em docs/, mostradas na Base como "em desenvolvimento". */
 export const PLANNED_TRACKS: PlannedTrackDef[] = [
-  { id: 'files.aws-files', title: 'Arquivos e backup na AWS', subtitle: 'EFS, FSx, transferência de arquivos e AWS Backup', territory: 'armazenamento', glyph: 'file', examDomains: ['d2', 'd3', 'd4'], plan: 'docs/PLANO-IMPLEMENTACAO-MODULO-ARQUIVOS-E-BACKUP.md' },
   { id: 'architecture.well-architected', title: 'Arquitetura e otimização na AWS', subtitle: 'Well-Architected, resiliência, desempenho, custo e migração', territory: 'arquitetura', glyph: 'flag', examDomains: ['d2', 'd3', 'd4'], plan: 'docs/PLANO-IMPLEMENTACAO-MODULO-ARQUITETURA-E-OTIMIZACAO.md' },
 ]
