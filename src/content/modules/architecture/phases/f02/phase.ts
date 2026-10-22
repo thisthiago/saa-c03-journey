@@ -1,0 +1,421 @@
+/** Fase 2 — Arquiteturas resilientes (empresa fictícia: Palco Livre, venda de ingressos). */
+import type { PhaseDef } from '../../../../../engine/types'
+import type { ZonesTopology } from '../../../../../simulators/zones/model'
+import { META } from '../meta'
+
+const SLOTS = ['web-1', 'web-2', 'web-3', 'web-4', 'web-5', 'web-6', 'web-7', 'web-8', 'web-9']
+
+/** Como a bilheteria está hoje: quase tudo na AZ a. */
+export const PALCO_HOJE: ZonesTopology = {
+  azs: ['a', 'b', 'c'],
+  required: 6,
+  instances: { 'web-1': 'a', 'web-2': 'a', 'web-3': 'a', 'web-4': 'a', 'web-5': 'b', 'web-6': 'b', 'web-7': undefined, 'web-8': undefined, 'web-9': undefined },
+  albAzs: ['a', 'b'],
+  nat: { mode: 'zonal-single', az: 'a' },
+  needsInternet: true,
+  db: { mode: 'single-az', primary: 'a' },
+}
+
+export const PALCO_SOLUCAO: ZonesTopology = {
+  ...PALCO_HOJE,
+  instances: Object.fromEntries(SLOTS.map((id, i) => [id, ['a', 'b', 'c'][i % 3]])),
+  albAzs: ['a', 'b', 'c'],
+  nat: { mode: 'zonal-per-az' },
+  db: { mode: 'multi-az', primary: 'a', standby: 'b' },
+}
+
+/** Seis instâncias espalhadas, sem sobra: com uma AZ fora, sobram quatro. */
+const PALCO_SEM_SOBRA: ZonesTopology = {
+  ...PALCO_SOLUCAO,
+  instances: { ...Object.fromEntries(SLOTS.map((id, i) => [id, i < 6 ? ['a', 'b', 'c'][i % 3] : undefined])) },
+}
+
+const AZ_OUTCOMES = [
+  { id: 'ok', text: 'Continua disponível, com a capacidade necessária', outcome: 'available' },
+  { id: 'deg', text: 'Continua respondendo, mas abaixo da capacidade necessária', outcome: 'degraded' },
+  { id: 'down', text: 'Fica fora do ar', outcome: 'down' },
+]
+
+export const F02_ARQ: PhaseDef = {
+  ...META.f02,
+  concepts: [
+    'infra.spof',
+    'infra.multi-az',
+    'infra.static-stability',
+    'infra.nat-zonal-regional',
+    'infra.rds-multi-az',
+    'infra.alb-zones',
+    'res.horizontal-scaling',
+    'asg.group',
+    'res.graceful-degradation',
+    'int.sync-async',
+    'int.write-buffer',
+    'res.data-plane',
+    'ops.service-quotas',
+    'res.legacy-reliability',
+    'elb.health-checks',
+    'rds.proxy',
+    'dns.health-checks',
+  ],
+  availability: 'available',
+  simplifications: ['A bilheteria e os números de capacidade são fictícios.', 'No laboratório de zonas, o failover é instantâneo e a AZ falha por inteiro.'],
+  missions: [
+    // -----------------------------------------------------------------------
+    {
+      id: 'arq.f02.m1',
+      title: 'O que caiu junto?',
+      type: 'mission',
+      summary: 'Encontrar o ponto único de falha numa arquitetura que parecia redundante.',
+      briefing: {
+        company: 'Palco Livre',
+        role: 'Você investiga a queda da bilheteria on-line de shows.',
+        situation: 'A bilheteria tem instâncias em duas AZs atrás de um ALB. Mesmo assim, ficou fora do ar por uma hora quando uma AZ teve problema. O time jura que "estava tudo em Multi-AZ".',
+        objective: 'Achar o que ficou de fora da redundância.',
+        successCriteria: ['Separar evidência de sintoma', 'Achar o ponto único de falha', 'Propor a correção'],
+      },
+      intel: [
+        { conceptId: 'infra.spof', body: ['O **ponto único de falha** costuma ser o que ficou fora da redundância: um banco Single-AZ, um NAT gateway zonal compartilhado, um volume EBS. Multi-AZ só funciona se **toda a cadeia** for redundante.'] },
+        { conceptId: 'infra.rds-multi-az' },
+      ],
+      activities: [
+        {
+          id: 'arq.f02.m1.a1',
+          kind: 'investigate',
+          title: 'A hora sem ingressos',
+          prompt: 'Leia os registros da noite da queda e encontre a causa.',
+          concepts: [{ id: 'infra.spof' }, { id: 'infra.rds-multi-az', weight: 0.5 }],
+          xp: 70,
+          difficulty: 2,
+          explanation: ['As instâncias da AZ b estavam de pé, mas o banco Single-AZ ficou na AZ a, que caiu. Sem banco, nenhuma compra fecha: o banco era o ponto único de falha.'],
+          artifacts: [
+            {
+              id: 'eventos',
+              title: 'Eventos da sexta-feira',
+              format: 'log',
+              lines: [
+                { id: 'l1', text: '21:00 Painel de saúde da AWS: problema de energia na AZ use1-az1 (a)', isIssue: true, explanation: 'É o evento que dispara tudo.' },
+                { id: 'l2', text: '21:01 ALB: alvos da AZ a doentes; tráfego segue para a AZ b', isIssue: false, explanation: 'O balanceador fez o papel dele.' },
+                { id: 'l3', text: '21:01 RDS bilheteria-db: MultiAZ=false, AvailabilityZone=use1-az1', isIssue: true, explanation: 'O banco estava só na AZ que caiu.' },
+                { id: 'l4', text: '21:02 Instâncias da AZ b: timeout ao conectar no banco', isIssue: false, explanation: 'É o sintoma da falta do banco.' },
+                { id: 'l5', text: '21:05 CPU média das instâncias da AZ b: 12%', isIssue: false, explanation: 'Capacidade não era o problema.' },
+                { id: 'l6', text: '22:04 AZ use1-az1 restabelecida; compras voltam', isIssue: false, explanation: 'A volta acompanha a AZ, não o tráfego.' },
+              ],
+            },
+          ],
+          rootCause: {
+            prompt: 'Qual é a causa?',
+            options: [
+              { id: 'a', text: 'O banco Single-AZ estava na AZ que caiu', correct: true, feedback: 'Com o banco fora, as instâncias saudáveis não fecham compras.' },
+              { id: 'b', text: 'Faltaram instâncias na AZ b', correct: false, feedback: 'A CPU estava em 12%: sobrava capacidade.' },
+              { id: 'c', text: 'O ALB não mandou tráfego para a AZ b', correct: false, feedback: 'O ALB desviou o tráfego em um minuto.' },
+            ],
+          },
+          remediations: {
+            prompt: 'O que evita a próxima queda?',
+            options: [
+              { id: 'a', text: 'Ligar o RDS Multi-AZ, com o standby em outra AZ e failover automático', correct: true, feedback: 'O standby assume quando a AZ do primário cai.' },
+              { id: 'b', text: 'Dobrar o tamanho das instâncias da AZ b', correct: false, feedback: 'Elas já estavam folgadas; o banco continuaria fora.' },
+              { id: 'c', text: 'Criar uma réplica de leitura na mesma AZ do primário', correct: false, feedback: 'Cairia junto, e réplica de leitura não aceita compras.' },
+            ],
+          },
+        },
+        {
+          id: 'arq.f02.m1.a2',
+          kind: 'classify',
+          title: 'Redundante ou ponto único?',
+          prompt: 'A bilheteria usa três AZs. Classifique cada componente.',
+          concepts: [{ id: 'infra.spof' }, { id: 'infra.multi-az', weight: 0.5 }],
+          xp: 50,
+          difficulty: 2,
+          explanation: ['Componente zonal sozinho numa AZ é ponto único de falha; serviço regional ou recurso repetido em cada AZ não é.'],
+          bins: [
+            { id: 'ok', label: 'Aguenta a queda de uma AZ' },
+            { id: 'spof', label: 'Ponto único de falha' },
+          ],
+          items: [
+            { id: 'i1', text: 'Um NAT gateway zonal na AZ a, usado pelas três AZs', bin: 'spof', explanation: 'Se a AZ a cai, as outras perdem a saída para a internet.', concepts: ['infra.nat-zonal-regional'] },
+            { id: 'i2', text: 'ALB com sub-redes nas três AZs', bin: 'ok', explanation: 'O balanceador está em todas as zonas habilitadas.', concepts: ['infra.alb-zones'] },
+            { id: 'i3', text: 'Banco RDS Multi-AZ', bin: 'ok', explanation: 'O standby assume em outra AZ.', concepts: ['infra.rds-multi-az'] },
+            { id: 'i4', text: 'Uma instância que gera os PDFs dos ingressos, sozinha na AZ c', bin: 'spof', explanation: 'Sem ela, nenhum ingresso é emitido.', concepts: ['infra.spof'] },
+            { id: 'i5', text: 'Bucket S3 com os mapas dos teatros', bin: 'ok', explanation: 'O S3 guarda os objetos em várias AZs da Região.', concepts: ['infra.multi-az'] },
+          ],
+        },
+      ],
+      debrief: { takeaways: ['Multi-AZ vale para a cadeia inteira, não só para as instâncias.', 'Banco Single-AZ e NAT zonal compartilhado são pontos únicos de falha comuns.'] },
+    },
+    // -----------------------------------------------------------------------
+    {
+      id: 'arq.f02.m2',
+      title: 'Muitos pequenos ou um grande?',
+      type: 'mission',
+      summary: 'Escalar na horizontal e deixar sobra para perder uma AZ.',
+      briefing: {
+        company: 'Palco Livre',
+        role: 'Você define a frota para a pré-venda de um festival.',
+        situation: 'O time quer trocar as instâncias por uma única instância enorme "para não ter erro". A pré-venda precisa de seis instâncias médias e não pode cair nem se uma AZ falhar.',
+        objective: 'Escolher entre crescer na vertical e na horizontal e calcular a frota.',
+        successCriteria: ['Escalar na horizontal', 'Ter capacidade mesmo sem uma AZ'],
+      },
+      intel: [
+        { conceptId: 'res.horizontal-scaling' },
+        { conceptId: 'infra.static-stability' },
+        { conceptId: 'asg.group' },
+      ],
+      activities: [
+        {
+          id: 'arq.f02.m2.a1',
+          kind: 'decision',
+          title: 'A instância enorme',
+          prompt: 'O time propõe trocar a frota por uma única instância grande o bastante para o festival. Qual é o problema?',
+          concepts: [{ id: 'res.horizontal-scaling' }],
+          xp: 40,
+          difficulty: 1,
+          explanation: ['Uma instância só é ponto único de falha. Várias menores, em várias AZs, dividem a carga e a falha.'],
+          options: [
+            { id: 'a', text: 'Vira um ponto único de falha: várias instâncias menores atrás do ALB, em várias AZs, aguentam a queda de uma', correct: true, consequence: 'Uma falha leva só uma parte da capacidade.' },
+            { id: 'b', text: 'Nenhum: instâncias grandes falham menos', correct: false, consequence: 'Qualquer instância pode falhar; sozinha, ela derruba tudo.' },
+            { id: 'c', text: 'Só o custo, que fica maior', correct: false, consequence: 'O problema principal é a disponibilidade, não o preço.' },
+          ],
+        },
+        {
+          id: 'arq.f02.m2.a2',
+          kind: 'estimate',
+          title: 'Quantas para perder uma AZ?',
+          prompt: 'A pré-venda precisa de **6 instâncias** atendendo. Elas ficam igualmente divididas em **3 AZs**, e a capacidade não pode cair se uma AZ inteira falhar, sem esperar o Auto Scaling. Quantas instâncias implantar?',
+          concepts: [{ id: 'infra.static-stability' }],
+          xp: 50,
+          difficulty: 2,
+          explanation: ['Perdendo uma AZ, sobram duas. Para ter 6 nelas, cada AZ precisa de 3: 9 instâncias no total.'],
+          unit: 'instâncias',
+          min: 1,
+          max: 20,
+          step: 1,
+          answer: 9,
+          tolerance: 0,
+        },
+        {
+          id: 'arq.f02.m2.a3',
+          kind: 'decision',
+          title: 'Quem repõe a instância doente',
+          prompt: 'Durante a venda, uma instância trava. Quem garante que outra entra no lugar sem ninguém acordar de madrugada?',
+          concepts: [{ id: 'asg.group' }, { id: 'res.horizontal-scaling', weight: 0.5 }],
+          xp: 40,
+          difficulty: 1,
+          explanation: ['O grupo do Auto Scaling mantém a capacidade desejada: quando uma instância falha no health check, ele lança outra.'],
+          options: [
+            { id: 'a', text: 'Um grupo do Auto Scaling com a capacidade desejada e health checks do ALB', correct: true, consequence: 'A instância doente sai, e outra entra sozinha.' },
+            { id: 'b', text: 'Um alarme que manda e-mail para o plantão', correct: false, consequence: 'Alguém ainda precisa agir de madrugada.' },
+            { id: 'c', text: 'Uma AMI atualizada', correct: false, consequence: 'A AMI define o que roda, mas não repõe nada sozinha.' },
+          ],
+        },
+      ],
+      debrief: { takeaways: ['Vários pequenos em várias AZs no lugar de um grande.', 'Estabilidade estática: a sobra já está rodando.', 'O Auto Scaling repõe instâncias doentes.'] },
+    },
+    // -----------------------------------------------------------------------
+    {
+      id: 'arq.f02.m3',
+      title: 'A vitrine sem recomendações',
+      type: 'mission',
+      summary: 'Degradar com controle, desacoplar e recuperar pelo plano de dados.',
+      briefing: {
+        company: 'Palco Livre',
+        role: 'Você revisa como a bilheteria reage a falhas das dependências.',
+        situation: 'Na semana passada, o serviço de recomendações caiu, e a página inicial inteira mostrou erro. No pico, o banco também recusou conexões e pedidos se perderam.',
+        objective: 'Fazer a bilheteria continuar vendendo quando algo ao redor falha.',
+        successCriteria: ['A vitrine segue sem o componente secundário', 'Nenhum pedido se perde no pico', 'A recuperação não depende de criar recursos na hora'],
+      },
+      intel: [
+        { conceptId: 'res.graceful-degradation' },
+        { conceptId: 'int.write-buffer' },
+        { conceptId: 'res.data-plane' },
+      ],
+      activities: [
+        {
+          id: 'arq.f02.m3.a1',
+          kind: 'decision',
+          title: 'Sem recomendações, sem vendas?',
+          prompt: 'O serviço de recomendações cai e a página inicial mostra erro. O que fazer?',
+          concepts: [{ id: 'res.graceful-degradation' }],
+          xp: 40,
+          difficulty: 1,
+          explanation: ['A função principal é vender. A vitrine mostra o resto da página, sem o bloco de recomendações, quando ele não responde.'],
+          options: [
+            { id: 'a', text: 'Mostrar a vitrine sem o bloco de recomendações enquanto ele não responder', correct: true, consequence: 'Os clientes seguem comprando, só sem as sugestões.' },
+            { id: 'b', text: 'Tentar de novo sem limite até o serviço voltar', correct: false, consequence: 'As tentativas sobrecarregam um serviço que já está com problema.' },
+            { id: 'c', text: 'Dobrar a frota de recomendações', correct: false, consequence: 'Ajuda na carga, mas a página continua dependendo dele para abrir.' },
+          ],
+        },
+        {
+          id: 'arq.f02.m3.a2',
+          kind: 'decision',
+          title: 'Os pedidos que se perdem',
+          prompt: 'No pico, o banco recusa conexões e os pedidos falham. Os pedidos podem ser confirmados por e-mail alguns minutos depois. O que mudar?',
+          concepts: [{ id: 'int.write-buffer' }, { id: 'int.sync-async', weight: 0.5 }],
+          xp: 50,
+          difficulty: 2,
+          explanation: ['Uma fila na frente do banco recebe o pico; os consumidores gravam no ritmo que o banco aguenta. A gravação passa a ser assíncrona, e nada se perde.'],
+          options: [
+            { id: 'a', text: 'Enfileirar os pedidos no SQS e gravar no banco por consumidores no ritmo dele', correct: true, consequence: 'O pico espera na fila, e o banco não é sobrecarregado.' },
+            { id: 'b', text: 'Trocar o banco por uma instância maior antes de cada festival', correct: false, consequence: 'Funciona até o próximo pico maior, e continua síncrono.' },
+            { id: 'c', text: 'Pedir aos clientes para tentar de novo', correct: false, consequence: 'Parte deles desiste da compra.' },
+          ],
+        },
+        {
+          id: 'arq.f02.m3.a3',
+          kind: 'decision',
+          title: 'Recuperar sem criar nada',
+          prompt: 'O plano de recuperação de uma AZ diz: "quando a AZ cair, o Auto Scaling lança instâncias nas outras". Qual é o ponto fraco desse plano?',
+          concepts: [{ id: 'res.data-plane' }, { id: 'infra.static-stability', weight: 0.5 }],
+          xp: 50,
+          difficulty: 3,
+          explanation: ['Lançar instâncias é operação de plano de controle, menos disponível que o plano de dados. Ter a capacidade já rodando (estabilidade estática) tira essa dependência.'],
+          options: [
+            { id: 'a', text: 'Depende de criar recursos durante a falha; o mais seguro é já ter a capacidade rodando nas outras AZs', correct: true, consequence: 'A perda da AZ não espera nenhuma criação de recurso.' },
+            { id: 'b', text: 'Nenhum: o Auto Scaling é sempre a melhor resposta', correct: false, consequence: 'Ele funciona, mas é um trade-off: custa menos e depende do plano de controle.' },
+            { id: 'c', text: 'Deveria usar instâncias maiores', correct: false, consequence: 'O problema é depender de criar recursos, não o tamanho deles.' },
+          ],
+        },
+        {
+          id: 'arq.f02.m3.a4',
+          kind: 'decision',
+          title: 'A cota esquecida',
+          prompt: 'No ensaio de recuperação, o grupo não conseguiu passar de 20 instâncias na outra Região, embora o máximo fosse 60. O que aconteceu?',
+          concepts: [{ id: 'ops.service-quotas' }, { id: 'res.data-plane', weight: 0.5 }],
+          xp: 40,
+          difficulty: 2,
+          explanation: ['As cotas são por Região. A Região de recuperação precisa ter cotas para escalar até a capacidade de produção.'],
+          options: [
+            { id: 'a', text: 'A cota de instâncias da Região de recuperação era menor que a necessária; é preciso pedir o aumento antes', correct: true, consequence: 'Com a cota ajustada, o ensaio chega às 60 instâncias.' },
+            { id: 'b', text: 'O Auto Scaling não funciona em outra Região', correct: false, consequence: 'Funciona; a cota é que limitou.' },
+            { id: 'c', text: 'A AMI não estava na outra Região', correct: false, consequence: 'Sem a AMI, nenhuma instância subiria, e 20 subiram.' },
+          ],
+        },
+      ],
+      debrief: { takeaways: ['Dependência secundária fora não derruba a função principal.', 'Fila na frente do banco absorve o pico.', 'Recuperação confiável usa o plano de dados e cotas já ajustadas.'] },
+    },
+    // -----------------------------------------------------------------------
+    {
+      id: 'arq.f02.m4',
+      title: 'O sistema que ninguém pode mexer',
+      type: 'mission',
+      summary: 'Confiabilidade para um legado sem alterar o código.',
+      briefing: {
+        company: 'Palco Livre',
+        role: 'Você cuida do sistema antigo de credenciamento de imprensa.',
+        situation: 'O sistema roda numa instância só, conecta no banco por um nome fixo e abre conexões novas a cada pedido. O fornecedor sumiu e ninguém pode alterar o código. Mesmo assim, ele precisa aguentar a queda de uma AZ.',
+        objective: 'Melhorar a confiabilidade só com infraestrutura.',
+        successCriteria: ['Sem ponto único de falha', 'Sem mudar o código', 'Conexões protegidas no failover do banco'],
+      },
+      intel: [
+        { conceptId: 'res.legacy-reliability' },
+        { conceptId: 'rds.proxy' },
+      ],
+      activities: [
+        {
+          id: 'arq.f02.m4.a1',
+          kind: 'decision',
+          title: 'O que dá para fazer por fora',
+          prompt: 'Selecione todas as mudanças que melhoram a confiabilidade do credenciamento sem alterar o código.',
+          concepts: [{ id: 'res.legacy-reliability' }],
+          xp: 60,
+          difficulty: 2,
+          multiple: true,
+          explanation: ['Balanceador, Auto Scaling em várias AZs, RDS Multi-AZ e RDS Proxy ficam do lado de fora da aplicação. Trocar o protocolo ou reescrever exige mexer no código.'],
+          options: [
+            { id: 'a', text: 'Colocar a aplicação atrás de um ALB, num grupo do Auto Scaling em duas AZs', correct: true, consequence: 'Instância doente sai do balanceador e é reposta.' },
+            { id: 'b', text: 'Ligar o RDS Multi-AZ', correct: true, consequence: 'O banco aguenta a queda de uma AZ, com o mesmo endereço.' },
+            { id: 'c', text: 'Pôr o RDS Proxy entre a aplicação e o banco, trocando só o endereço na configuração', correct: true, consequence: 'O pool de conexões segura o pico e o failover.' },
+            { id: 'd', text: 'Reescrever o sistema em funções Lambda', correct: false, consequence: 'Exige mudar todo o código, o que não é possível.' },
+            { id: 'e', text: 'Fazer a aplicação ler as sessões do DynamoDB', correct: false, consequence: 'Exige mudar o código da aplicação.' },
+          ],
+        },
+        {
+          id: 'arq.f02.m4.a2',
+          kind: 'match',
+          title: 'Quem verifica a saúde de quem',
+          prompt: 'Ligue cada verificação ao que ela faz pelo credenciamento.',
+          concepts: [{ id: 'res.legacy-reliability' }, { id: 'elb.health-checks', weight: 0.5 }, { id: 'dns.health-checks', weight: 0.5 }],
+          xp: 50,
+          difficulty: 2,
+          explanation: ['Cada camada tem a sua verificação: o ALB tira alvos doentes, o Auto Scaling repõe instâncias, o Route 53 troca o destino do nome.'],
+          leftLabel: 'Verificação',
+          rightLabel: 'O que ela faz',
+          pairs: [
+            { id: 'p1', left: 'Health check do ALB', right: 'Para de mandar requisições para a instância que não responde', explanation: 'Só alvos saudáveis recebem tráfego.', concepts: ['elb.health-checks'] },
+            { id: 'p2', left: 'Health check do grupo do Auto Scaling', right: 'Substitui a instância marcada como doente', explanation: 'O grupo mantém a capacidade desejada.', concepts: ['asg.group'] },
+            { id: 'p3', left: 'Health check do Route 53', right: 'Faz o nome apontar para outro endereço quando o principal falha', explanation: 'Base do failover por DNS.', concepts: ['dns.health-checks'] },
+          ],
+        },
+        {
+          id: 'arq.f02.m4.a3',
+          kind: 'decision',
+          title: 'Conexões no failover',
+          prompt: 'O legado abre uma conexão nova a cada pedido e não sabe reconectar bem quando o banco troca de primário. O que ajuda sem mudar o código?',
+          concepts: [{ id: 'rds.proxy' }],
+          xp: 40,
+          difficulty: 2,
+          explanation: ['O RDS Proxy mantém um pool de conexões com o banco e segura as conexões dos clientes durante o failover.'],
+          options: [
+            { id: 'a', text: 'RDS Proxy, com a aplicação apontando para o endereço do proxy', correct: true, consequence: 'As conexões são reaproveitadas, e o failover fica transparente para o legado.' },
+            { id: 'b', text: 'Uma réplica de leitura', correct: false, consequence: 'Não aceita gravações nem segura conexões.' },
+            { id: 'c', text: 'Aumentar o max_connections do banco', correct: false, consequence: 'Adia o problema dos picos e não ajuda no failover.' },
+          ],
+        },
+      ],
+      debrief: { takeaways: ['Legado intocável ganha confiabilidade com infraestrutura em volta.', 'ALB, Auto Scaling, RDS Multi-AZ, RDS Proxy e health checks do Route 53.'] },
+    },
+    // -----------------------------------------------------------------------
+    {
+      id: 'arq.f02.boss',
+      title: 'A noite da pré-venda',
+      type: 'boss',
+      summary: 'Reorganizar a bilheteria para perder qualquer AZ sem perder capacidade.',
+      briefing: {
+        company: 'Palco Livre',
+        role: 'Você entrega a arquitetura da pré-venda do maior festival do ano.',
+        situation: 'Hoje, quatro instâncias estão na AZ a e duas na b, com um NAT gateway só, banco Single-AZ e um ALB em duas AZs. A pré-venda precisa de seis instâncias atendendo o tempo todo.',
+        objective: 'Aguentar a queda de qualquer AZ com a capacidade inteira, com no máximo nove instâncias.',
+        successCriteria: ['Sobreviver à falha de qualquer AZ', 'Manter seis instâncias atendendo sem uma AZ', 'Usar no máximo nove instâncias'],
+      },
+      intel: [{ conceptId: 'infra.static-stability', body: ['Com 6 instâncias necessárias em 3 AZs, implante **9**: perder uma AZ deixa 6. Olhe também NAT, ALB e banco.'] }],
+      activities: [
+        {
+          id: 'arq.f02.boss.a1',
+          kind: 'lab',
+          lab: 'zones',
+          title: 'Derrube cada AZ',
+          prompt: 'Simule a falha de cada AZ e reorganize instâncias, ALB, NAT e banco até cumprir os objetivos.',
+          concepts: [{ id: 'infra.static-stability' }, { id: 'infra.spof' }, { id: 'infra.multi-az', weight: 0.5 }, { id: 'infra.nat-zonal-regional', weight: 0.5 }, { id: 'infra.rds-multi-az', weight: 0.5 }],
+          xp: 250,
+          difficulty: 3,
+          hints: ['Três instâncias por AZ dão seis com qualquer AZ fora.', 'Olhe o que só existe na AZ a: NAT e banco.'],
+          explanation: ['Três instâncias por AZ, ALB nas três AZs, um NAT gateway por AZ (ou o regional) e RDS Multi-AZ.', 'Perder qualquer AZ deixa seis instâncias com saída para a internet, e o standby do banco assume.'],
+          config: {
+            initial: PALCO_HOJE,
+            solution: PALCO_SOLUCAO,
+            goals: [
+              { kind: 'valid', concepts: ['infra.alb-zones'] },
+              { kind: 'normal-ok', concepts: ['infra.alb-zones'] },
+              { kind: 'survive-az', concepts: ['infra.spof', 'infra.rds-multi-az', 'infra.nat-zonal-regional'] },
+              { kind: 'full-capacity', concepts: ['infra.static-stability', 'infra.multi-az'] },
+              { kind: 'max-instances', max: 9, concepts: ['infra.static-stability'] },
+            ],
+          },
+        },
+        {
+          id: 'arq.f02.boss.a2',
+          kind: 'predict',
+          title: 'Seis instâncias, sem sobra',
+          prompt: 'Outra proposta espalha **seis** instâncias pelas três AZs, com NAT por AZ e RDS Multi-AZ. A AZ a cai no meio da pré-venda. O que acontece?',
+          concepts: [{ id: 'infra.static-stability' }],
+          xp: 50,
+          difficulty: 2,
+          explanation: ['Sem a AZ a, sobram quatro instâncias. A bilheteria segue no ar, mas abaixo das seis necessárias: faltou a sobra da estabilidade estática.'],
+          spec: { sim: 'zones', topology: PALCO_SEM_SOBRA, failure: 'a' },
+          options: AZ_OUTCOMES,
+        },
+      ],
+      debrief: { takeaways: ['A sobra para perder uma AZ já precisa estar rodando.', 'NAT e banco também entram na conta da redundância.'] },
+    },
+  ],
+}
