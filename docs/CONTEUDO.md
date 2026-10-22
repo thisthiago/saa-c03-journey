@@ -217,6 +217,33 @@ Módulo `src/content/modules/security/`, no território `seguranca`, que passa a
 
 **Desktop primeiro.** As capturas de tela desta trilha cobrem só o desktop.
 
+## Trilha Integração e mensageria na AWS
+
+Módulo `src/content/modules/integration/`, no território `integracao`, que passa a ser ativo. Reaproveita, sem redeclarar, `ev.fanout`, `ev.eventbridge` e `ev.at-least-once` (S3 Expedition) e `kds.streams`, `fh.delivery`, `fh.parquet`, `msk.kafka` e `ingest.third-party` (Análise de dados). Acrescenta conceitos `sqs.*`, `sns.*`, `eb.*`, `sfn.*`, `apigw.*`, `kds.partition-key`, `kds.enhanced-fanout`, `mq.*` e `int.*`. Step Functions, API Gateway e Amazon MQ entram no catálogo de serviços.
+
+| Fase | Tema | Empresas fictícias | Laboratórios |
+|---|---|---|---|
+| 1 | Desacoplamento e SQS | Livraria Página Viva | Visibilidade e DLQ de quatro filas (`queue`) |
+| 2 | SQS em escala | Ingressos Já | Filas lidas por Lambda e por servidor (`queue`) |
+| 3 | Tópicos com SNS | Academias Movimento | Política de filtro de cada assinatura (`pubsub`) |
+| 4 | Eventos com EventBridge | Transportadora Rota Certa | Padrão de evento de cada regra (`eventbus`) |
+| 5 | Fluxos com Step Functions | Seguradora Amparo | Retry e Catch de cada passo (`workflow`) |
+| 6 | APIs com API Gateway | Clima Já | Taxa e burst de cada cliente (`apigw`) |
+| 7 | Streaming | Frota Conectada | Modo de leitura e shards de cada stream (`stream`) |
+| 8 | Brokers e SaaS | Cooperativa de Crédito Raiz | Investigação da parada do broker |
+| 9 | Padrões e escolha | Marketplace Feira Livre | Serviço de cada pedido (`int-chooser`) |
+| Final | Arquitetura Orientada a Eventos | Loja Virtual Vitrine | Arquitetura em 8 etapas, com dimensões Seguro, Resiliente, Alto desempenho, Custo e Requisitos |
+
+**Decisões adotadas** (as recomendadas no plano): 9 fases e o desafio final; o API Gateway é ensinado aqui (Fase 6); Kinesis Data Streams e Data Firehose entram na Fase 7, reaproveitando os conceitos da Análise de dados, e o MSK é citado; preços reais da AWS Price List. Parameter Store, Secrets Manager e ACM continuam ensinados nas trilhas de Monitoramento e de Segurança, sem conceito novo aqui.
+
+**Dependências.** As Fases 2 e 3 exigem a 1; a 4 exige a 3; a 7 exige a 2; a 9 exige a 4, a 5 e a 7; a 5, a 6 e a 8 só recomendam outras fases; o desafio final exige as nove. A trilha recomenda a AWS Foundations e a Computação. O mapa usa cinco colunas (x = 90, 270, 450, 630 e 815), com altura de 800.
+
+**Laboratórios em grade.** Os labs `queue`, `pubsub`, `eventbus`, `workflow`, `apigw` e `stream` usam o motor `simulators/shared/grid.ts`. `pubsub` e `eventbus` compartilham o modelo de `simulators/eventbus/` (o casamento de padrões vale para as políticas de filtro do SNS e para os padrões do EventBridge): a resposta certa de cada destino é o único padrão da paleta que entrega exatamente o que ele quer. O lab `int-chooser` usa o motor de escolha de `simulators/shared/chooser.ts`.
+
+**Previsões calculadas.** As previsões `queue`, `fifo`, `eventbus`, `workflow`, `apigw` e `stream` usam os simuladores de mesmo nome.
+
+**Desktop primeiro.** As capturas de tela desta trilha cobrem só o desktop.
+
 ## Princípios de escrita
 
 - **Aprender fazendo.** Cada missão segue a ordem: contexto (briefing) → conceitos-chave (intel, até ~80 palavras por carta) → desafios → resultado (debrief). Na interface aparecem só os nomes em português.
@@ -254,6 +281,8 @@ Cada módulo tem um `questions.ts` com questões no formato do exame. Para escre
 Os testes recusam questão com conceito inexistente, formato errado, alternativa sem explicação, alternativas repetidas ou setas no texto.
 
 ## Preços
+
+`src/content/pricing/integration-prices.json` é gerado por `npm run prices:integration` (SQS padrão e FIFO, SNS, EventBridge com eventos personalizados, Pipes e Scheduler, Step Functions Standard e Express, API Gateway REST, HTTP e WebSocket, Kinesis Data Streams e Data Firehose; us-east-1 e sa-east-1), a partir das ofertas AWSQueueService, AmazonSNS, AWSEvents, AmazonStates, AmazonApiGateway, AmazonKinesis e AmazonKinesisFirehose da AWS Price List Bulk API; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
 
 `src/content/pricing/security-prices.json` é gerado por `npm run prices:security` (KMS: chave gerenciada pelo cliente por mês e requisições simétricas; Secrets Manager: segredo por mês e chamadas de API; CloudHSM: HSM por hora; us-east-1 e sa-east-1), a partir das ofertas awskms, AWSSecretsManager e CloudHSM da AWS Price List Bulk API; com `PRICES_CACHE=<pasta>`, lê arquivos já baixados.
 

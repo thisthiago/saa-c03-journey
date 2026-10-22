@@ -69,6 +69,12 @@ import { evaluateSecretsLab, secretsSolution, type SecretsLabResponse } from '..
 import { certsSolution, evaluateCertsLab, type CertsLabResponse } from '../../simulators/certs/lab'
 import { evaluateFindingsLab, findingsSolution, type FindingsLabResponse } from '../../simulators/findings/lab'
 import { evaluateSecChooserLab, secChooserSolution, type SecChooserLabResponse } from '../../simulators/secchooser/model'
+import { evaluateQueueLab, queueSolution, type QueueLabResponse } from '../../simulators/queue/lab'
+import { evaluateWorkflowLab, workflowSolution, type WorkflowLabResponse } from '../../simulators/workflow/lab'
+import { evaluateApiLab, apiSolution, type ApiLabResponse } from '../../simulators/apigw/lab'
+import { evaluateStreamLab, streamSolution, type StreamLabResponse } from '../../simulators/stream/lab'
+import { evaluateFilterLab, filterSolution, type FilterLabResponse } from '../../simulators/eventbus/lab'
+import { evaluateIntChooserLab, intChooserSolution, type IntChooserLabResponse } from '../../simulators/intchooser/model'
 import { gridInitial } from '../../simulators/shared/grid'
 import type { LabActivity } from '../types'
 
@@ -230,6 +236,19 @@ export function evaluateLab(activity: LabActivity, response: unknown): LabResult
       return evaluateFindingsLab(activity.config, (response as FindingsLabResponse | undefined) ?? gridInitial())
     case 'sec-chooser':
       return evaluateSecChooserLab(activity.config, (response as SecChooserLabResponse | undefined) ?? { placements: {} })
+    case 'queue':
+      return evaluateQueueLab(activity.config, (response as QueueLabResponse | undefined) ?? gridInitial())
+    case 'workflow':
+      return evaluateWorkflowLab(activity.config, (response as WorkflowLabResponse | undefined) ?? gridInitial())
+    case 'apigw':
+      return evaluateApiLab(activity.config, (response as ApiLabResponse | undefined) ?? gridInitial())
+    case 'stream':
+      return evaluateStreamLab(activity.config, (response as StreamLabResponse | undefined) ?? gridInitial())
+    case 'pubsub':
+    case 'eventbus':
+      return evaluateFilterLab(activity.config, (response as FilterLabResponse | undefined) ?? gridInitial())
+    case 'int-chooser':
+      return evaluateIntChooserLab(activity.config, (response as IntChooserLabResponse | undefined) ?? { placements: {} })
   }
 }
 
@@ -357,6 +376,19 @@ export function labSolution(activity: LabActivity): unknown {
       return findingsSolution(activity.config)
     case 'sec-chooser':
       return secChooserSolution(activity.config)
+    case 'queue':
+      return queueSolution(activity.config)
+    case 'workflow':
+      return workflowSolution(activity.config)
+    case 'apigw':
+      return apiSolution(activity.config)
+    case 'stream':
+      return streamSolution(activity.config)
+    case 'pubsub':
+    case 'eventbus':
+      return filterSolution(activity.config)
+    case 'int-chooser':
+      return intChooserSolution(activity.config)
   }
 }
 
@@ -470,12 +502,19 @@ export function labInitialResponse(activity: LabActivity): unknown {
     case 'ai-chooser':
     case 'ana-chooser':
     case 'sec-chooser':
+    case 'int-chooser':
       return { placements: {} }
     case 'kms':
       return kmsInitial()
     case 'secrets':
     case 'certs':
     case 'findings':
+    case 'queue':
+    case 'workflow':
+    case 'apigw':
+    case 'stream':
+    case 'pubsub':
+    case 'eventbus':
       return gridInitial()
   }
 }

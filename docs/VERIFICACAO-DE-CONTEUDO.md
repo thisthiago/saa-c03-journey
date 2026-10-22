@@ -903,3 +903,106 @@ O site da documentação da AWS devolve 200 para páginas que não existem; as 4
 - **ACM:** todos os certificados do laboratório estão a menos de 45 dias do vencimento; certificados privados e a validação por HTTP ficam de fora.
 - **Achados:** aparecem com o tipo e um resumo; a ação certa de cada achado é julgamento de arquitetura.
 - **Escolhas:** a complexidade que desempata as opções é julgamento de arquitetura.
+
+# Trilha Integração e mensageria na AWS — conferido em 22/10/2026
+
+O site da documentação da AWS devolve 200 para páginas que não existem; as 49 URLs usadas nos conceitos e as dos 3 serviços novos do catálogo (Step Functions, API Gateway e Amazon MQ) foram conferidas pelo título da página em 22/10/2026. Sete títulos diferiam do esperado (por exemplo, "Amazon EventBridge event bus (default and Classic)" e "Deployment options for Amazon MQ for ActiveMQ brokers") e foram corrigidos nas referências.
+
+## SQS essencial (Fase 1)
+
+| Fato | Fonte |
+|---|---|
+| Fila padrão: vazão praticamente ilimitada, entrega pelo menos uma vez e ordem de melhor esforço; lotes de até 10 mensagens; cerca de 120.000 mensagens em processamento. | [Standard queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/standard-queues.html) |
+| Tempo de visibilidade: padrão de 30 s, de 0 s a 12 horas, contadas a partir do primeiro recebimento; se a mensagem não é apagada no prazo, volta a ficar visível; ChangeMessageVisibility estende o prazo. | [Visibility timeout](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html) |
+| Retenção padrão de 4 dias, de 1 minuto a 14 dias; mensagem de até 1 MiB; para cargas maiores, S3 com a biblioteca Extended Client, até 2 GB. | [Message quotas](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/quotas-messages.html), [Large messages](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-s3-messages.html) |
+| Short polling consulta parte dos servidores; long polling espera até 20 s e consulta todos, com menos respostas vazias e menos custo. | [Short and long polling](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-short-and-long-polling.html) |
+| DLQ: maxReceiveCount; mesma conta e Região; na fila padrão, a mensagem mantém a data original de entrada (retenção da DLQ maior que a da origem); na FIFO, a data recomeça; a AWS desaconselha DLQ na FIFO quando a ordem exata importa; redrive devolve as mensagens. | [Dead-letter queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html) |
+
+## SQS em escala (Fase 2)
+
+| Fato | Fonte |
+|---|---|
+| Fila FIFO: ordem dentro do grupo de mensagens, processamento exatamente uma vez, nome terminado em .fifo; uma fila padrão não vira FIFO. | [FIFO queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-fifo-queues.html) |
+| Deduplicação em janela de 5 minutos, pelo ID do produtor ou por hash SHA-256 do corpo (deduplicação por conteúdo). | [Exactly-once processing](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues-exactly-once-processing.html) |
+| FIFO: 300 transações por segundo por ação sem lote, 3.000 mensagens com lotes de 10; modo de alta vazão com limites por Região (70.000 em us-east-1; 4.500 em São Paulo), exigindo muitos grupos. | [FIFO queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-fifo-queues.html), [High throughput](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/high-throughput-fifo.html) |
+| Fila com atraso de 0 a 15 minutos; temporizador por mensagem só na fila padrão ("FIFO queues don't support timers on individual messages"). | [Delay queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-delay-queues.html), [Message timers](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-timers.html) |
+| Lambda com SQS: lote de até 10.000 (padrão) ou 10 (FIFO), janela de até 5 minutos; visibilidade de pelo menos seis vezes o tempo limite da função; maxReceiveCount de pelo menos 5; escala a partir de 5 consumidores, mais 300 por minuto, até 1.250; concorrência máxima de 2 a 1.000; na FIFO, limitada pelo número de grupos; entrega pelo menos uma vez, com função idempotente. | [Using Lambda with SQS](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html), [Configure](https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html), [Scaling](https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-scaling.html) |
+| Falha parcial do lote com ReportBatchItemFailures e batchItemFailures. | [Error handling](https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html) |
+
+## SNS (Fase 3)
+
+| Fato | Fonte |
+|---|---|
+| Assinaturas: HTTP e HTTPS, e-mail, Firehose, SQS, Lambda, notificações para celular e SMS. | [What is Amazon SNS?](https://docs.aws.amazon.com/sns/latest/dg/welcome.html) |
+| Política de filtro por atributos ou corpo; nomes de propriedade com E, valores com OU; sem política, a assinatura recebe tudo; operadores de valor exato, prefixo, sufixo, anything-but, numérico, exists, equals-ignore-case e IP. | [Message filtering](https://docs.aws.amazon.com/sns/latest/dg/sns-message-filtering.html), [Filter policies](https://docs.aws.amazon.com/sns/latest/dg/sns-subscription-filter-policies.html) |
+| Tópico FIFO com ordem e deduplicação, integrado a filas SQS FIFO. | [FIFO topics](https://docs.aws.amazon.com/sns/latest/dg/sns-fifo-topics.html) |
+| Novas tentativas: destinos gerenciados pela AWS (SQS, Lambda) 100.015 tentativas em 23 dias; destinos do cliente (HTTP) 50 em 6 horas; depois, descarte, a menos que a assinatura tenha DLQ (fila SQS). | [Delivery retries](https://docs.aws.amazon.com/sns/latest/dg/sns-message-delivery-retries.html), [Dead-letter queues](https://docs.aws.amazon.com/sns/latest/dg/sns-dead-letter-queues.html) |
+| Fan-out com uma fila SQS por assinante. | [Fanout to SQS](https://docs.aws.amazon.com/sns/latest/dg/sns-sqs-as-subscriber.html) |
+
+## EventBridge (Fase 4)
+
+| Fato | Fonte |
+|---|---|
+| Barramento padrão em toda conta, barramentos personalizados e de parceiros; a página atual separa os barramentos clássicos (regras e alvos) do novo Custom Event Bus (assinaturas criadas pelos consumidores e eventos guardados para reprocessamento). | [Event bus (default and Classic)](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus.html) |
+| Padrão com a mesma estrutura do evento; campos com E, lista com OU, campos não citados ignorados; operadores prefix, suffix, anything-but, numeric, exists e equals-ignore-case. | [Event patterns](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html), [Comparison operators](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-pattern-operators.html) |
+| Até cinco alvos por regra; DLQ do alvo é uma fila SQS padrão; regras agendadas como recurso legado, com o Scheduler recomendado. | [Rules](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rules.html), [Targets](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-targets.html) |
+| Barramento de outra conta como alvo, liberado pela política de recurso do barramento de destino. | [Between accounts](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-cross-account.html) |
+| Arquivo com retenção indefinida por padrão; replay para o mesmo barramento; até 10 reprocessamentos ao mesmo tempo. | [Archive and replay](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-archive.html) |
+| Pipes: integração ponto a ponto entre origem e alvo, com filtro e enriquecimento opcionais. | [Pipes](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-pipes.html) |
+| Scheduler: milhões de agendamentos, mais de 270 serviços, janela flexível e novas tentativas. | [What is EventBridge Scheduler?](https://docs.aws.amazon.com/scheduler/latest/UserGuide/what-is-scheduler.html) |
+
+Não confirmado e fora do conteúdo: os números da política de novas tentativas dos alvos do EventBridge.
+
+## Step Functions (Fase 5)
+
+| Fato | Fonte |
+|---|---|
+| Standard: até um ano, exatamente uma vez, cobrança por transição, histórico de 90 dias, .sync e .waitForTaskToken. Express: até 5 minutos; assíncrono pelo menos uma vez e síncrono no máximo uma vez; cobrança por execução, duração e memória; só resposta imediata. | [Choosing workflow type](https://docs.aws.amazon.com/step-functions/latest/dg/choosing-workflow-type.html) |
+| Estados Task, Choice, Parallel, Map, Pass, Wait, Succeed e Fail. | [Workflow states](https://docs.aws.amazon.com/step-functions/latest/dg/workflow-states.html) |
+| Sem tratamento, o erro faz a execução falhar; Retry com IntervalSeconds 1, MaxAttempts 3 e BackoffRate 2.0 por padrão; Catch com Next; States.ALL casa com qualquer erro. | [Handling errors](https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html) |
+| Padrões de integração: resposta imediata, execução até o fim (.sync) e espera por callback (.waitForTaskToken), com heartbeat. | [Service integration patterns](https://docs.aws.amazon.com/step-functions/latest/dg/connect-to-resource.html) |
+| Saga: orquestração com coordenador central (a AWS cita o Step Functions) e coreografia sem coordenador, mais difícil de acompanhar e de tratar prazos e novas tentativas; transações de compensação. | [Saga orchestration](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/saga-orchestration.html), [Saga choreography](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/saga-choreography.html) |
+
+## API Gateway (Fase 6)
+
+| Fato | Fonte |
+|---|---|
+| REST tem chaves de API, limite por cliente, validação de requisição, WAF, endpoint privado e cache; HTTP é mais simples e mais barata, com autorizador JWT; as duas aceitam IAM, Cognito e autorizador Lambda; políticas de recurso só na REST. | [REST or HTTP](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vs-rest.html) |
+| Endpoints otimizados para borda (padrão da REST), regionais e privados. | [Endpoint types](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-endpoint-types.html) |
+| Balde de tokens; 429 Too Many Requests; conta com 10.000 requisições por segundo e burst de 5.000 por Região; ordem dos limites: usage plan por cliente, método no estágio, conta. | [Throttling](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html) |
+| Usage plans com taxa, burst e cota por chave de API; chave de API não serve para autorização (use IAM, Cognito ou autorizador Lambda). | [Usage plans](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-api-usage-plans.html) |
+| Cache do estágio só na REST; TTL padrão de 300 s, máximo de 3.600 s; GET por padrão; cobrança por hora conforme o tamanho escolhido. | [Cache settings](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-caching.html) |
+
+## Streaming (Fase 7)
+
+| Fato | Fonte |
+|---|---|
+| Chave de partição com hash MD5 decide o shard; registro de até 1 MB; shard com 1 MB/s ou 1.000 registros por segundo de escrita e 2 MB/s de leitura. | [Terminology and concepts](https://docs.aws.amazon.com/streams/latest/dev/key-concepts.html), [Quotas and limits](https://docs.aws.amazon.com/streams/latest/dev/service-sizes-and-limits.html) |
+| Enhanced fan-out: 2 MB/s por consumidor por shard, por push, cerca de 70 ms contra cerca de 200 ms; até 20 consumidores (50 no On-demand Advantage); cobra a leitura dos dados e a hora de consumidor por shard. | [Enhanced fan-out](https://docs.aws.amazon.com/streams/latest/dev/enhanced-consumers.html) |
+| Kinesis Data Streams (retenção e modos), Data Firehose (entrega e Parquet) e MSK seguem os fatos da trilha Análise de dados. | ver a seção da trilha Análise de dados |
+
+## Amazon MQ e SaaS (Fase 8)
+
+| Fato | Fonte |
+|---|---|
+| Brokers ActiveMQ Classic e RabbitMQ; JMS, AMQP, MQTT, OpenWire e STOMP; migrar sem reescrever; SQS e SNS recomendados para aplicações novas. | [What is Amazon MQ?](https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/welcome.html) |
+| Instância única numa zona; ativo e em espera com dois brokers em duas zonas e EFS; dois endpoints por protocolo, um ativo por vez; RabbitMQ com filas de quórum entre zonas. | [Deployment options](https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/amazon-mq-broker-architecture.html) |
+| AppFlow segue os fatos da trilha Análise de dados (`ingest.third-party`). | ver a seção da trilha Análise de dados |
+
+## Padrões, escolha e desafio final (Fase 9 e Arquitetura Orientada a Eventos)
+
+- Reaproveitam os fatos das Fases 1 a 8. A idempotência segue a recomendação da página "Using Lambda with Amazon SQS". O buffer de escrita, a preferência pela opção com menos operação e a rubrica do desafio final são julgamento pedagógico do AWS Quest.
+
+## Preços
+
+- `src/content/pricing/integration-prices.json` é gerado por `npm run prices:integration` a partir da AWS Price List Bulk API (ofertas AWSQueueService, AmazonSNS, AWSEvents, AmazonStates, AmazonApiGateway, AmazonKinesis e AmazonKinesisFirehose), para us-east-1 e sa-east-1, consultada em 22/10/2026. Em us-east-1: SQS a US$ 0,40 por milhão de requisições padrão e US$ 0,50 na FIFO; SNS a US$ 0,50 por milhão de publicações; EventBridge a US$ 1,00 por milhão de eventos personalizados; Step Functions Standard a US$ 0,025 por mil transições; API Gateway a US$ 3,50 por milhão na REST e US$ 1,00 na HTTP; Kinesis a US$ 0,015 por shard-hora; Firehose a US$ 0,029 por GB.
+- O conteúdo usa a comparação de preço entre REST e HTTP; os outros valores ficam disponíveis para laboratórios de custo futuros.
+
+## Premissas e simplificações da trilha
+
+- **Filas:** um consumidor por vez recebe a mensagem; o processamento leva sempre o mesmo tempo; a janela de lote do Lambda fica fora da conta da visibilidade.
+- **Filtros:** o laboratório filtra atributos; $or, wildcard e cidr ficam de fora; cada regra tem um alvo.
+- **Step Functions:** cada passo falha sempre com o mesmo tipo de erro; o Retry usa a espera padrão.
+- **API Gateway:** o balde é reabastecido uma vez por segundo; só o limite do usage plan entra no laboratório.
+- **Kinesis:** os dados se espalham por igual entre os shards (exceto a chave quente); o limite de 5 leituras por segundo do shard fica de fora.
+- **Escolhas:** a complexidade que desempata as opções é julgamento de arquitetura.

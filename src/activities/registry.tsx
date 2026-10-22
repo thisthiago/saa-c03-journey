@@ -120,6 +120,18 @@ import { FindingsLab } from '../simulators/findings/FindingsLab'
 import type { FindingsLabResponse } from '../simulators/findings/lab'
 import { SecChooserLab } from '../simulators/secchooser/SecChooserLab'
 import type { SecChooserLabResponse } from '../simulators/secchooser/model'
+import { QueueLab } from '../simulators/queue/QueueLab'
+import type { QueueLabResponse } from '../simulators/queue/lab'
+import { WorkflowLab } from '../simulators/workflow/WorkflowLab'
+import type { WorkflowLabResponse } from '../simulators/workflow/lab'
+import { ApiLab } from '../simulators/apigw/ApiLab'
+import type { ApiLabResponse } from '../simulators/apigw/lab'
+import { StreamLab } from '../simulators/stream/StreamLab'
+import type { StreamLabResponse } from '../simulators/stream/lab'
+import { FilterLab } from '../simulators/eventbus/FilterLab'
+import type { FilterLabResponse } from '../simulators/eventbus/lab'
+import { IntChooserLab } from '../simulators/intchooser/IntChooserLab'
+import type { IntChooserLabResponse } from '../simulators/intchooser/model'
 import type { NetChooserLabResponse } from '../simulators/netchooser/model'
 import type { TransferLabResponse } from '../simulators/transfer/lab'
 import type { GatewayLabResponse } from '../simulators/gateway/lab'
@@ -296,6 +308,20 @@ export function ActivityView({ activity, value, onChange, disabled, evaluation, 
           return <FindingsLab config={activity.config} value={value as unknown as FindingsLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
         case 'sec-chooser':
           return <SecChooserLab config={activity.config} value={value as unknown as SecChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'queue':
+          return <QueueLab config={activity.config} value={value as unknown as QueueLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'workflow':
+          return <WorkflowLab config={activity.config} value={value as unknown as WorkflowLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'apigw':
+          return <ApiLab config={activity.config} value={value as unknown as ApiLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'stream':
+          return <StreamLab config={activity.config} value={value as unknown as StreamLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'pubsub':
+          return <FilterLab kind="sns" config={activity.config} value={value as unknown as FilterLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'eventbus':
+          return <FilterLab kind="eventbridge" config={activity.config} value={value as unknown as FilterLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'int-chooser':
+          return <IntChooserLab config={activity.config} value={value as unknown as IntChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
       }
   }
 }

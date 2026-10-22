@@ -22,6 +22,7 @@ export default defineConfig({
             { name: 'content-network', test: /src[\\/]content[\\/]modules[\\/]network[\\/]/ },
             { name: 'content-analytics', test: /src[\\/]content[\\/]modules[\\/]analytics[\\/]/ },
             { name: 'content-security', test: /src[\\/]content[\\/]modules[\\/]security[\\/]/ },
+            { name: 'content-integration', test: /src[\\/]content[\\/]modules[\\/]integration[\\/]/ },
             { name: 'content', test: /src[\\/]content[\\/]/ },
           ],
         },

@@ -103,6 +103,9 @@ export type GlyphName =
   | 'radar'
   | 'siren'
   | 'shield-check'
+  | 'workflow'
+  | 'api'
+  | 'ordered'
 
 export interface TerritoryDef {
   id: string

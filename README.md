@@ -4,7 +4,7 @@ Plataforma web gamificada para aprender AWS **fazendo**: simulações, decisões
 
 Jogue em **https://thisthiago.github.io/saa-c03-journey/**. O site é publicado no GitHub Pages a cada push na branch `main`, pelo workflow `.github/workflows/pages.yml`, depois de passar no lint e nos testes.
 
-Nove trilhas estão disponíveis:
+Dez trilhas estão disponíveis:
 
 - **AWS Foundations — Infraestrutura Global, Segurança e Suporte**: Regiões, AZs, Local Zones, Wavelength, Outposts e borda; planos de suporte; modelo de responsabilidade compartilhada. Três fases e o desafio final **Architecture Foundations**. É a trilha sugerida para quem está começando.
 - **S3 Expedition — Domínio do Armazenamento AWS**: 11 fases e o desafio final **Projeto Atlas**. Recomenda (sem exigir) a AWS Foundations.
@@ -15,6 +15,7 @@ Nove trilhas estão disponíveis:
 - **Redes na AWS — VPC, conectividade, DNS e entrega de conteúdo**: VPC e endereçamento, tabelas de rotas, internet gateway e NAT Gateway, security groups e network ACLs, VPC Flow Logs, peering e Transit Gateway, endpoints de gateway e de interface (PrivateLink), Site-to-Site VPN, Direct Connect e Client VPN, Route 53, CloudFront e Global Accelerator, WAF, Shield, Network Firewall e Firewall Manager. Os labs de custo usam preços reais da AWS. Nove fases e o desafio final **Projeto de Rede**. Recomenda (sem exigir) a AWS Foundations e a Computação.
 - **Análise de dados e serviços de IA na AWS — Data lake, consultas, processamento, streaming e serviços prontos**: data lake no S3 (camadas, formatos colunares, compressão e partições), AWS Glue (Data Catalog, crawlers, jobs e bookmarks), Athena (custo por dado lido, workgroups, consultas federadas), Lake Formation (permissões por coluna, linha e LF-Tags), EMR (tipos de nó e Spot), Kinesis Data Streams, Data Firehose, MSK, Data Exchange e AppFlow, OpenSearch e Quick Sight, e os serviços prontos de IA, mídia e front-end (Comprehend, Lex, Polly, Rekognition, Textract, Transcribe, Translate, SageMaker AI, Kinesis Video Streams, MediaConvert, Amplify e Device Farm). Os labs de Athena e Glue usam preços reais da AWS. Nove fases e o desafio final **Plataforma de Dados**. Recomenda (sem exigir) a AWS Foundations e a S3 Expedition.
 - **Segurança e proteção de dados na AWS — Chaves, segredos, certificados, detecção e conformidade**: KMS (tipos de chave, key policy, criptografia em envelope, rotação, chaves multi-Região, grants e cotas), CloudHSM, Secrets Manager (rotação, estratégias de usuário, réplicas e cache) e Parameter Store, ACM (validação, renovação, CloudFront e certificados exportáveis), GuardDuty, Inspector e Detective, Macie, Object Lock e Vault Lock, Security Hub e Security Hub CSPM, AWS Artifact, regras gerenciadas do WAF e resposta automática a incidentes. Os preços de KMS, Secrets Manager e CloudHSM vêm da AWS Price List. Nove fases e o desafio final **Auditoria de Segurança**. Recomenda (sem exigir) a AWS Foundations, a IAM e Access Management e a S3 Expedition.
+- **Integração e mensageria na AWS — Filas, tópicos, eventos, orquestração e streaming**: SQS (visibilidade, retenção, long polling, DLQ, filas FIFO, deduplicação e Lambda lendo da fila), SNS (fan-out, políticas de filtro, tópicos FIFO, novas tentativas e DLQ), EventBridge (barramentos, padrões de evento, alvos, eventos entre contas, arquivamento e replay, Scheduler e Pipes), Step Functions (Standard e Express, estados, Retry e Catch, callback), API Gateway (REST ou HTTP, endpoints, limites, usage plans, cache e autorização), Kinesis Data Streams (shards, chave de partição e enhanced fan-out), Data Firehose, MSK, Amazon MQ, AppFlow e os padrões de saga, idempotência e buffer de escrita. Os preços de SQS, SNS, EventBridge, Step Functions, API Gateway, Kinesis e Firehose vêm da AWS Price List. Nove fases e o desafio final **Arquitetura Orientada a Eventos**. Recomenda (sem exigir) a AWS Foundations e a Computação.
 
 > Projeto educacional independente, sem afiliação com a Amazon Web Services. Não usa conta, credenciais nem recursos AWS reais: tudo é simulado no navegador.
 
@@ -42,17 +43,18 @@ npm run dev          # servidor de desenvolvimento (http://localhost:5173)
 | `npm run prices:network` | Atualiza a tabela de preços de rede (NAT Gateway, endpoints, Transit Gateway, VPN e Client VPN) |
 | `npm run prices:analytics` | Atualiza a tabela de preços de análise de dados (Athena e Glue) |
 | `npm run prices:security` | Atualiza a tabela de preços de segurança (KMS, Secrets Manager e CloudHSM) |
+| `npm run prices:integration` | Atualiza a tabela de preços de integração (SQS, SNS, EventBridge, Step Functions, API Gateway, Kinesis e Firehose) |
 
 O build usa caminhos relativos e rotas com `#`. Por isso, `dist/` pode ser servido de qualquer hospedagem estática, inclusive de um bucket S3.
 
 ## O que tem dentro
 
-- **85 fases** (76 fases e 9 desafios finais), **323 missões** e **965 atividades avaliadas**.
-- **625 conceitos**, cada um com referências à documentação oficial, e **1.788 itens de revisão espaçada**.
-- **Banco de 391 questões de simulado** (65 da Computação, 64 do Monitoramento e governança, 55 da IAM, 49 dos Bancos de dados, 39 da Análise de dados, 36 de Redes, 34 da S3, 32 da Segurança e 17 da Foundations), no formato do exame: cada uma mostra a dificuldade, o conceito avaliado e o domínio, e explica todas as alternativas. Dá para treinar com a explicação na hora ou fazer um simulado cronometrado, com resultado por domínio e por conceito.
-- **191 conquistas**.
+- **95 fases** (85 fases e 10 desafios finais), **365 missões** e **1.046 atividades avaliadas**.
+- **671 conceitos**, cada um com referências à documentação oficial, e **1.915 itens de revisão espaçada**.
+- **Banco de 415 questões de simulado** (65 da Computação, 64 do Monitoramento e governança, 55 da IAM, 49 dos Bancos de dados, 39 da Análise de dados, 36 de Redes, 34 da S3, 32 da Segurança, 24 da Integração e 17 da Foundations), no formato do exame: cada uma mostra a dificuldade, o conceito avaliado e o domínio, e explica todas as alternativas. Dá para treinar com a explicação na hora ou fazer um simulado cronometrado, com resultado por domínio e por conceito.
+- **211 conquistas**.
 - **8 tipos de interação**: decisão com justificativa, classificação, associação, ordenação, predição, estimativa, investigação e laboratório.
-- **63 simuladores**:
+- **69 simuladores**:
   - escolha de Região (fatos verificados + premissas do cenário);
   - resiliência entre AZs (derrubar uma AZ ou a Região);
   - fluxo do CloudFront (POP, Regional Edge Cache e origem);
@@ -113,7 +115,13 @@ O build usa caminhos relativos e rotas com `#`. Por isso, `dist/` pode ser servi
   - rotação de um segredo no Secrets Manager (etapas, rótulos de versão, usuário único ou alternado e cache);
   - certificados do ACM (onde podem ser usados e o que acontece no vencimento);
   - origem e ação dos achados do GuardDuty, do Inspector, do Macie, do Security Hub CSPM e do AWS Config;
-  - escolha do serviço de segurança.
+  - escolha do serviço de segurança;
+  - fila do SQS (visibilidade, DLQ e retenção) e fila FIFO (grupos e deduplicação);
+  - políticas de filtro do SNS e padrões de evento do EventBridge;
+  - Retry e Catch de um estado do Step Functions;
+  - limites do API Gateway (balde de tokens por cliente e entre camadas);
+  - shards do Kinesis Data Streams (escrita, leitura compartilhada, enhanced fan-out e chave quente);
+  - escolha do serviço de integração.
 - **Progressão**:
   - XP só por ações avaliadas; níveis;
   - domínio por conceito e revisão espaçada (Leitner), alimentados também pelo banco de questões;

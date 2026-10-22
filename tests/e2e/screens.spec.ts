@@ -770,6 +770,58 @@ test.describe('trilha Segurança', () => {
   }
 })
 
+/** Missões da trilha Integração na ordem do mapa (as anteriores ficam aprovadas no progresso semeado). */
+const INT_MISSIONS = [
+  ...(
+    [
+      ['f01', 3],
+      ['f02', 3],
+      ['f03', 3],
+      ['f04', 4],
+      ['f05', 4],
+      ['f06', 4],
+      ['f07', 4],
+      ['f08', 3],
+      ['f09', 4],
+    ] as const
+  ).flatMap(([f, n]) => [...Array.from({ length: n }, (_, i) => `int.${f}.m${i + 1}`), `int.${f}.boss`]),
+  'int.final.vitrine',
+]
+
+// Módulo novo: por enquanto, só o desktop (tablet e celular ficam para uma etapa própria).
+test.describe('trilha Integração', () => {
+  const CASES: { name: string; mission?: string; step?: number; path?: string }[] = [
+    { name: 'int-f1-filas', mission: 'int.f01.boss', step: 2 },
+    { name: 'int-f2-lambda', mission: 'int.f02.boss', step: 2 },
+    { name: 'int-f3-filtros', mission: 'int.f03.boss', step: 2 },
+    { name: 'int-f4-regras', mission: 'int.f04.boss', step: 2 },
+    { name: 'int-f5-fluxo', mission: 'int.f05.boss', step: 2 },
+    { name: 'int-f6-planos', mission: 'int.f06.boss', step: 2 },
+    { name: 'int-f7-streams', mission: 'int.f07.boss', step: 2 },
+    { name: 'int-f8-broker', mission: 'int.f08.boss', step: 2 },
+    { name: 'int-f9-escolha', mission: 'int.f09.boss', step: 2 },
+    { name: 'int-final', mission: 'int.final.vitrine', step: 2 },
+    { name: 'int-mapa', path: '/#/trilha/integration.aws-integration' },
+  ]
+  const vp = VIEWPORTS.find((v) => v.name === 'desktop')!
+  for (const c of CASES) {
+    test(`${c.name} — ${vp.name}`, async ({ page }) => {
+      await page.setViewportSize({ width: vp.width, height: vp.height })
+      await page.emulateMedia({ colorScheme: 'dark' })
+      const before = c.mission ? INT_MISSIONS.slice(0, INT_MISSIONS.indexOf(c.mission)) : []
+      const base = progressWithPhase1(new Date(), { missions: before })
+      const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+      await seedProgress(page, seeded)
+      await page.goto(c.path ?? `/#/missao/${c.mission}`)
+      await page.waitForLoadState('networkidle')
+      await page.waitForTimeout(250)
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+      expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+      await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+    })
+  }
+})
+
 test.describe('banco de questões', () => {
   for (const vp of VIEWPORTS) {
     test(`treino e simulado — ${vp.name}`, async ({ page }) => {
