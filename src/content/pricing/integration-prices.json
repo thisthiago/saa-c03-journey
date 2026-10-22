@@ -1,0 +1,114 @@
+{
+  "source": "AWS Price List Bulk API",
+  "sourceDocs": "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-price-list-query-api.html",
+  "retrievedAt": "2026-10-22",
+  "currency": "USD",
+  "notes": [
+    "Valores de referência para fins didáticos, extraídos da AWS Price List na data indicada.",
+    "Apenas a primeira faixa paga de cada item; sem nível gratuito, impostos ou descontos por volume.",
+    "Os preços são por requisição, evento, transição ou mensagem; a página de preços de cada serviço explica como os tamanhos são arredondados.",
+    "Preços mudam: consulte as páginas de preço de cada serviço antes de qualquer decisão real."
+  ],
+  "regions": {
+    "us-east-1": {
+      "label": "US East (N. Virginia)",
+      "offers": {
+        "AWSQueueService": "2026-09-11T12:46:07Z",
+        "AmazonSNS": "2026-09-15T15:19:44Z",
+        "AWSEvents": "2026-09-24T16:39:03Z",
+        "AmazonStates": "2026-09-11T12:45:11Z",
+        "AmazonApiGateway": "2026-10-13T00:30:44Z",
+        "AmazonKinesis": "2026-09-11T12:44:43Z",
+        "AmazonKinesisFirehose": "2026-09-11T12:44:46Z"
+      },
+      "sqs": {
+        "standardRequest": 4e-7,
+        "fifoRequest": 5e-7
+      },
+      "sns": {
+        "publishRequest": 5e-7
+      },
+      "eventbridge": {
+        "customEvent": 0.000001,
+        "pipesRequest": 4e-7,
+        "schedulerInvocation": 0.000001
+      },
+      "stepFunctions": {
+        "standardTransition": 0.000025,
+        "expressRequest": 0.000001,
+        "expressGbSecond": 0.00001667
+      },
+      "apiGateway": {
+        "restRequest": 0.0000035,
+        "httpRequest": 0.000001,
+        "websocketMessage": 0.000001
+      },
+      "kinesis": {
+        "shardHour": 0.015,
+        "putPayloadUnit": 1.4e-8
+      },
+      "firehose": {
+        "gbIngested": 0.029
+      },
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSQueueService/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSNS/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSEvents/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonStates/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonApiGateway/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonKinesis/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonKinesisFirehose/current/us-east-1/index.json"
+      ]
+    },
+    "sa-east-1": {
+      "label": "América do Sul (São Paulo)",
+      "offers": {
+        "AWSQueueService": "2026-09-11T12:46:07Z",
+        "AmazonSNS": "2026-09-15T15:19:44Z",
+        "AWSEvents": "2026-09-24T16:39:03Z",
+        "AmazonStates": "2026-09-11T12:45:11Z",
+        "AmazonApiGateway": "2026-10-13T00:30:44Z",
+        "AmazonKinesis": "2026-09-11T12:44:43Z",
+        "AmazonKinesisFirehose": "2026-09-11T12:44:46Z"
+      },
+      "sqs": {
+        "standardRequest": 4e-7,
+        "fifoRequest": 5e-7
+      },
+      "sns": {
+        "publishRequest": 5e-7
+      },
+      "eventbridge": {
+        "customEvent": 0.000001,
+        "pipesRequest": 6.9e-7,
+        "schedulerInvocation": 0.0000017
+      },
+      "stepFunctions": {
+        "standardTransition": 0.0000375,
+        "expressRequest": 0.000001,
+        "expressGbSecond": 0.00001667
+      },
+      "apiGateway": {
+        "restRequest": 0.00000425,
+        "httpRequest": 0.00000159,
+        "websocketMessage": 0.00000155
+      },
+      "kinesis": {
+        "shardHour": 0.03,
+        "putPayloadUnit": 2.8e-8
+      },
+      "firehose": {
+        "gbIngested": 0.058
+      },
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSQueueService/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonSNS/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSEvents/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonStates/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonApiGateway/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonKinesis/current/sa-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonKinesisFirehose/current/sa-east-1/index.json"
+      ]
+    }
+  }
+}
