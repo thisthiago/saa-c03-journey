@@ -65,6 +65,9 @@ import {
   Radar,
   Siren,
   ShieldCheck,
+  Workflow,
+  Webhook,
+  ListOrdered,
   type LucideIcon,
 } from 'lucide-react'
 import type { GlyphName } from '../engine/types'
@@ -148,6 +151,9 @@ const ICONS: Record<Exclude<GlyphName, 'bucket'>, LucideIcon> = {
   radar: Radar,
   siren: Siren,
   'shield-check': ShieldCheck,
+  workflow: Workflow,
+  api: Webhook,
+  ordered: ListOrdered,
 }
 
 export function Glyph({ name, size = 22, className }: { name: GlyphName; size?: number; className?: string }) {
