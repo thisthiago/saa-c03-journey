@@ -1,0 +1,288 @@
+/**
+ * Fase 3 — FSx for Windows File Server. A família FSx, SMB com Active
+ * Directory, Single-AZ e Multi-AZ, SSD e HDD, cópias de sombra e
+ * desduplicação.
+ */
+import type { PhaseDef } from '../../../../../engine/types'
+import { META } from '../meta'
+
+export const F03_FIL: PhaseDef = {
+  ...META.f03,
+  concepts: ['fsx.family', 'fsxw.what', 'fed.directory-service', 'fsxw.deployment', 'fsxw.storage', 'fsxw.shadow-copies', 'fsxw.dedup'],
+  availability: 'available',
+  simplifications: ['A construtora, os compartilhamentos e os volumes são fictícios.', 'Os custos usam a tabela da AWS Price List em us-east-1, sem nível gratuito, impostos nem backups.'],
+  missions: [
+    // -----------------------------------------------------------------------
+    {
+      id: 'fil.f03.m1',
+      title: 'Os compartilhamentos do escritório',
+      type: 'mission',
+      summary: 'A família FSx e o FSx for Windows File Server com Active Directory.',
+      briefing: {
+        company: 'Construtora Alicerce',
+        role: 'Você conduz a saída do data center de uma construtora.',
+        situation: 'Os 400 funcionários abrem as pastas de projetos pelo Windows Explorer, com permissões por departamento definidas no Active Directory. O servidor de arquivos tem dez anos e a garantia acabou.',
+        objective: 'Levar os compartilhamentos para a AWS sem mudar o jeito de trabalhar nem as permissões.',
+        successCriteria: ['Escolher o serviço certo da família FSx', 'Escolher o Active Directory compatível'],
+      },
+      intel: [
+        { conceptId: 'fsx.family', body: ['O **FSx** traz quatro sistemas de arquivos gerenciados: **Windows File Server**, **Lustre**, **NetApp ONTAP** e **OpenZFS**. Cada um resolve um problema diferente.'] },
+        { conceptId: 'fsxw.what', body: ['O **FSx for Windows** fala **SMB**, entra num **Active Directory** na criação (AWS Managed Microsoft AD ou um AD próprio) e mantém as **ACLs do Windows**. Não funciona com AD Connector nem com Simple AD.'] },
+      ],
+      activities: [
+        {
+          id: 'fil.f03.m1.a1',
+          kind: 'decision',
+          title: 'O novo servidor de arquivos',
+          prompt: 'Os funcionários usam Windows, abrem as pastas por SMB e as permissões vêm do Active Directory. Qual serviço usar?',
+          concepts: [{ id: 'fsxw.what' }, { id: 'fsx.family', weight: 0.5 }],
+          xp: 40,
+          difficulty: 1,
+          explanation: ['O FSx for Windows File Server é o servidor de arquivos Windows gerenciado: SMB, Active Directory e ACLs, sem mudar o jeito de trabalhar.'],
+          options: [
+            { id: 'a', text: 'Amazon FSx for Windows File Server, ligado ao Active Directory', correct: true, consequence: 'As pastas e as permissões migram como estão.' },
+            { id: 'b', text: 'Amazon EFS', correct: false, consequence: 'O EFS é NFS e não funciona com instâncias Windows.' },
+            { id: 'c', text: 'Amazon FSx for Lustre', correct: false, consequence: 'O Lustre é para alto desempenho em Linux, não para pastas de escritório.' },
+          ],
+        },
+        {
+          id: 'fil.f03.m1.a2',
+          kind: 'classify',
+          title: 'Qual diretório serve',
+          prompt: 'Indique quais opções de diretório o FSx for Windows File Server aceita.',
+          concepts: [{ id: 'fsxw.what' }, { id: 'fed.directory-service' }],
+          xp: 40,
+          difficulty: 2,
+          explanation: ['O FSx entra no AWS Managed Microsoft AD ou num AD próprio, no local ou em EC2. AD Connector e Simple AD não são aceitos.'],
+          bins: [
+            { id: 'ok', label: 'O FSx aceita' },
+            { id: 'no', label: 'O FSx não aceita' },
+          ],
+          items: [
+            { id: 'managed', text: 'AWS Managed Microsoft AD', bin: 'ok', explanation: 'Opção gerenciada pela AWS.', concepts: ['fsxw.what', 'fed.directory-service'] },
+            { id: 'onprem', text: 'O AD que a construtora já tem no data center, alcançado por VPN', bin: 'ok', explanation: 'AD próprio (self-managed) é aceito.', concepts: ['fsxw.what'] },
+            { id: 'connector', text: 'AD Connector apontando para o AD local', bin: 'no', explanation: 'O FSx não funciona com AD Connector.', concepts: ['fsxw.what', 'fed.directory-service'] },
+            { id: 'simple', text: 'Simple AD', bin: 'no', explanation: 'O FSx não funciona com Simple AD.', concepts: ['fsxw.what', 'fed.directory-service'] },
+          ],
+        },
+      ],
+      debrief: { takeaways: ['Windows, SMB e Active Directory: FSx for Windows File Server.', 'AWS Managed Microsoft AD ou AD próprio; nada de AD Connector nem Simple AD.'] },
+    },
+    // -----------------------------------------------------------------------
+    {
+      id: 'fil.f03.m2',
+      title: 'O compartilhamento sumiu',
+      type: 'mission',
+      summary: 'Single-AZ e Multi-AZ.',
+      briefing: {
+        company: 'Construtora Alicerce',
+        role: 'Você investiga uma parada na primeira semana na nuvem.',
+        situation: 'Na terça de manhã, todas as pastas sumiram para os funcionários por quase duas horas. O sistema de arquivos tinha sido criado como Single-AZ para economizar.',
+        objective: 'Descobrir a causa e escolher a implantação certa.',
+        successCriteria: ['Encontrar a causa nos registros', 'Prever o efeito de cada falha'],
+      },
+      intel: [{ conceptId: 'fsxw.deployment', body: ['No **Single-AZ**, a AWS troca o que falha, com cerca de **30 minutos** de parada, e uma AZ fora derruba o compartilhamento. No **Multi-AZ**, o servidor em espera em outra AZ assume em **menos de 30 segundos**, com o mesmo nome.'] }],
+      activities: [
+        {
+          id: 'fil.f03.m2.a1',
+          kind: 'investigate',
+          title: 'A manhã sem pastas',
+          prompt: 'Leia os registros e encontre a causa da parada.',
+          concepts: [{ id: 'fsxw.deployment' }],
+          xp: 60,
+          difficulty: 2,
+          explanation: ['O sistema de arquivos era Single-AZ, numa AZ que teve problemas. Com Multi-AZ, o servidor em espera teria assumido em segundos.'],
+          artifacts: [
+            {
+              id: 'eventos',
+              title: 'Eventos da terça-feira',
+              format: 'log',
+              lines: [
+                { id: 'l1', text: '08:02 Painel de saúde da AWS: problema de conectividade em us-east-1, AZ use1-az4', isIssue: true, explanation: 'A AZ do sistema de arquivos teve problema.' },
+                { id: 'l2', text: '08:03 FSx fs-0a1: DeploymentType=SINGLE_AZ_2, sub-rede em use1-az4', isIssue: true, explanation: 'Um só servidor, numa só AZ: a mesma que falhou.' },
+                { id: 'l3', text: '08:04 Estações: falha ao abrir \\\\arquivos\\projetos', isIssue: false, explanation: 'É o sintoma, não a causa.' },
+                { id: 'l4', text: '08:10 Backup automático diário concluído às 01:00', isIssue: false, explanation: 'O backup estava em dia; não causou a parada.' },
+                { id: 'l5', text: '09:58 AZ use1-az4 restabelecida; compartilhamento volta', isIssue: false, explanation: 'Mostra a duração, ligada à AZ.' },
+              ],
+            },
+          ],
+          rootCause: {
+            prompt: 'Qual é a causa?',
+            options: [
+              { id: 'a', text: 'O sistema de arquivos Single-AZ dependia de uma AZ que ficou fora', correct: true, feedback: 'Single-AZ fica fora junto com a AZ.' },
+              { id: 'b', text: 'O backup diário travou o servidor', correct: false, feedback: 'O backup terminou de madrugada.' },
+              { id: 'c', text: 'As estações perderam a confiança no Active Directory', correct: false, feedback: 'Os registros mostram a AZ fora, não um erro de autenticação.' },
+            ],
+          },
+          remediations: {
+            prompt: 'O que evita a próxima parada?',
+            options: [
+              { id: 'a', text: 'Usar um sistema de arquivos Multi-AZ, com o servidor em espera em outra AZ', correct: true, feedback: 'O failover leva menos de 30 segundos e mantém o nome.' },
+              { id: 'b', text: 'Fazer backups a cada hora', correct: false, feedback: 'Reduz a perda de dados, mas não evita a parada.' },
+              { id: 'c', text: 'Aumentar a capacidade de vazão', correct: false, feedback: 'Não muda a dependência de uma AZ.' },
+            ],
+          },
+        },
+        {
+          id: 'fil.f03.m2.a2',
+          kind: 'predict',
+          title: 'Multi-AZ e a AZ fora',
+          prompt: 'Com o sistema de arquivos em Multi-AZ, a AZ do servidor preferido fica fora. O que os funcionários com Windows percebem?',
+          concepts: [{ id: 'fsxw.deployment' }],
+          xp: 40,
+          difficulty: 1,
+          explanation: ['O servidor em espera assume em menos de 30 segundos, com o mesmo nome DNS, e as estações Windows seguem trabalhando.'],
+          spec: { sim: 'fsx-failure', deployment: 'windows-multi-az', event: 'az-outage' },
+          options: [
+            { id: 'a', text: 'Uma pausa de segundos, e o servidor em espera assume', outcome: 'failover' },
+            { id: 'b', text: 'O compartilhamento fica fora enquanto a AZ estiver fora', outcome: 'down' },
+            { id: 'c', text: 'Uma parada de cerca de 30 minutos, até a AWS trocar o servidor', outcome: 'recovers' },
+          ],
+        },
+        {
+          id: 'fil.f03.m2.a3',
+          kind: 'predict',
+          title: 'Single-AZ e o disco com defeito',
+          prompt: 'Num sistema de arquivos Single-AZ de testes, o servidor de arquivos tem uma falha de hardware. A AZ continua de pé. O que acontece?',
+          concepts: [{ id: 'fsxw.deployment' }],
+          xp: 40,
+          difficulty: 2,
+          explanation: ['O Single-AZ se recupera sozinho trocando o componente, com cerca de 30 minutos de parada.'],
+          spec: { sim: 'fsx-failure', deployment: 'windows-single-az', event: 'server-failure' },
+          options: [
+            { id: 'a', text: 'Uma parada de cerca de 30 minutos, até a AWS trocar o componente', outcome: 'recovers' },
+            { id: 'b', text: 'Uma pausa de segundos, e o servidor em espera assume', outcome: 'failover' },
+            { id: 'c', text: 'Os arquivos daquele servidor se perdem', outcome: 'lost' },
+          ],
+        },
+      ],
+      debrief: { takeaways: ['Multi-AZ para produção: failover em menos de 30 segundos.', 'Single-AZ: cerca de 30 minutos de parada numa falha, e fora junto com a AZ.'] },
+    },
+    // -----------------------------------------------------------------------
+    {
+      id: 'fil.f03.m3',
+      title: 'Apaguei sem querer',
+      type: 'mission',
+      summary: 'Cópias de sombra, desduplicação, SSD e HDD.',
+      briefing: {
+        company: 'Construtora Alicerce',
+        role: 'Você ajusta o sistema de arquivos depois da migração.',
+        situation: 'O suporte recebe dez pedidos por semana de "apaguei a planta sem querer". O armazenamento já está em 80%, com muitas cópias das mesmas plantas em pastas diferentes.',
+        objective: 'Deixar os usuários recuperarem sozinhos, economizar espaço e escolher o tipo de disco.',
+        successCriteria: ['Ligar a recuperação pelo próprio usuário', 'Reduzir o espaço usado', 'Escolher SSD ou HDD'],
+      },
+      intel: [
+        { conceptId: 'fsxw.shadow-copies', body: ['As **cópias de sombra** deixam o próprio usuário recuperar uma versão anterior pelo Explorador de Arquivos. Não vêm ligadas e **não substituem** o backup.'] },
+        { conceptId: 'fsxw.dedup', body: ['A **desduplicação** guarda uma vez só os trechos repetidos: economia típica de **50% a 60%** em compartilhamentos gerais.'] },
+        { conceptId: 'fsxw.storage', body: ['**SSD** para latência baixa e cópias de sombra; **HDD**, mais barato, para diretórios pessoais e pastas pouco usadas. Dá para passar de HDD para SSD, mas não voltar.'] },
+      ],
+      activities: [
+        {
+          id: 'fil.f03.m3.a1',
+          kind: 'decision',
+          title: 'Os dez pedidos por semana',
+          prompt: 'Como acabar com os pedidos de "apaguei sem querer" sem abrir uma restauração de backup para cada um?',
+          concepts: [{ id: 'fsxw.shadow-copies' }],
+          xp: 40,
+          difficulty: 1,
+          explanation: ['Com as cópias de sombra ligadas e agendadas, o usuário clica com o botão direito e usa "Restaurar versões anteriores".'],
+          options: [
+            { id: 'a', text: 'Ligar e agendar as cópias de sombra', correct: true, consequence: 'O próprio usuário recupera a versão anterior em segundos.' },
+            { id: 'b', text: 'Restaurar o backup diário num sistema de arquivos novo a cada pedido', correct: false, consequence: 'Funciona, mas leva horas e custa um sistema de arquivos por pedido.' },
+            { id: 'c', text: 'Desligar a permissão de apagar para todos', correct: false, consequence: 'Os funcionários precisam reorganizar as próprias pastas.' },
+          ],
+        },
+        {
+          id: 'fil.f03.m3.a2',
+          kind: 'decision',
+          title: 'O armazenamento em 80%',
+          prompt: 'O compartilhamento tem muitas cópias das mesmas plantas. Qual é a primeira medida para recuperar espaço?',
+          concepts: [{ id: 'fsxw.dedup' }],
+          xp: 40,
+          difficulty: 2,
+          explanation: ['A desduplicação guarda uma vez só os trechos repetidos, em segundo plano; em compartilhamentos gerais a economia típica é de 50% a 60%.'],
+          options: [
+            { id: 'a', text: 'Ligar a desduplicação de dados', correct: true, consequence: 'O espaço usado cai sem ninguém mexer nas pastas.' },
+            { id: 'b', text: 'Dobrar a capacidade de armazenamento', correct: false, consequence: 'Resolve agora, mas paga duas vezes pelas cópias.' },
+            { id: 'c', text: 'Ligar as cópias de sombra', correct: false, consequence: 'As cópias de sombra ocupam mais espaço, não menos.' },
+          ],
+        },
+        {
+          id: 'fil.f03.m3.a3',
+          kind: 'classify',
+          title: 'SSD ou HDD',
+          prompt: 'Indique o tipo de armazenamento de cada sistema de arquivos.',
+          concepts: [{ id: 'fsxw.storage' }],
+          xp: 40,
+          difficulty: 2,
+          explanation: ['SSD para latência baixa, muitos usuários e cópias de sombra; HDD para dados pouco acessados, por um custo menor.'],
+          bins: [
+            { id: 'ssd', label: 'SSD' },
+            { id: 'hdd', label: 'HDD' },
+          ],
+          items: [
+            { id: 'sql', text: 'Bancos do SQL Server da área de orçamentos', bin: 'ssd', explanation: 'Banco é sensível à latência.', concepts: ['fsxw.storage'] },
+            { id: 'home', text: 'Diretórios pessoais, pouco acessados', bin: 'hdd', explanation: 'Pouca leitura e gravação, custo menor.', concepts: ['fsxw.storage'] },
+            { id: 'projetos', text: 'Pastas de projetos com milhares de arquivos pequenos e cópias de sombra', bin: 'ssd', explanation: 'A AWS recomenda SSD para muitos arquivos pequenos e para cópias de sombra.', concepts: ['fsxw.storage', 'fsxw.shadow-copies'] },
+            { id: 'arquivo', text: 'Obras entregues há anos, abertas raramente', bin: 'hdd', explanation: 'Dado frio em compartilhamento.', concepts: ['fsxw.storage'] },
+          ],
+        },
+      ],
+      debrief: { takeaways: ['Cópias de sombra: o usuário recupera sozinho; não substituem backup.', 'Desduplicação: 50% a 60% a menos em compartilhamentos gerais.', 'SSD para latência e cópias de sombra; HDD para dados frios.'] },
+    },
+    // -----------------------------------------------------------------------
+    {
+      id: 'fil.f03.boss',
+      title: 'O servidor de arquivos da construtora',
+      type: 'boss',
+      summary: 'A configuração completa do FSx for Windows e o custo.',
+      briefing: {
+        company: 'Construtora Alicerce',
+        role: 'Você entrega a configuração definitiva à diretoria.',
+        situation: 'O compartilhamento de projetos é usado o dia todo por 400 pessoas e não pode parar. A diretoria quer saber quanto vai custar e o que está protegido.',
+        objective: 'Fechar a configuração e estimar o custo mensal.',
+        successCriteria: ['Escolher todas as configurações adequadas', 'Estimar o custo do armazenamento e da vazão'],
+      },
+      intel: [{ conceptId: 'fsxw.deployment', body: ['Multi-AZ custa mais por GB e por MBps de vazão que o Single-AZ: confira na tabela antes de prometer o orçamento.'] }],
+      activities: [
+        {
+          id: 'fil.f03.boss.a1',
+          kind: 'decision',
+          title: 'A configuração do compartilhamento',
+          prompt: 'Selecione todas as configurações adequadas para o compartilhamento de projetos.',
+          concepts: [{ id: 'fsxw.deployment' }, { id: 'fsxw.what' }, { id: 'fsxw.shadow-copies' }, { id: 'fsxw.dedup' }],
+          xp: 100,
+          difficulty: 3,
+          multiple: true,
+          explanation: ['Multi-AZ porque não pode parar; o AD da empresa para manter as permissões; cópias de sombra para o "apaguei sem querer"; desduplicação para as plantas repetidas. AD Connector não é aceito, e cópia de sombra não substitui backup.'],
+          options: [
+            { id: 'a', text: 'Implantação Multi-AZ', correct: true, consequence: 'O servidor em espera assume em segundos.' },
+            { id: 'b', text: 'Ingresso no Active Directory da empresa (próprio ou AWS Managed Microsoft AD)', correct: true, consequence: 'As permissões continuam as mesmas.' },
+            { id: 'c', text: 'Cópias de sombra agendadas', correct: true, consequence: 'Os usuários recuperam versões sozinhos.' },
+            { id: 'd', text: 'Desduplicação de dados ligada', correct: true, consequence: 'As plantas repetidas ocupam menos espaço.' },
+            { id: 'e', text: 'Ingresso pelo AD Connector', correct: false, consequence: 'O FSx não aceita AD Connector.' },
+            { id: 'f', text: 'Desligar os backups automáticos, porque as cópias de sombra bastam', correct: false, consequence: 'Cópia de sombra fica no próprio sistema de arquivos e não substitui backup.' },
+          ],
+        },
+        {
+          id: 'fil.f03.boss.a2',
+          kind: 'estimate',
+          title: 'O custo mensal',
+          prompt: 'O compartilhamento de projetos terá 2.000 GB em SSD Multi-AZ (US$ 0,23 por GB-mês) e capacidade de vazão de 32 MBps Multi-AZ (US$ 4,50 por MBps-mês). Quanto custa por mês, em dólares, sem os backups?',
+          concepts: [{ id: 'fsxw.storage' }, { id: 'fsxw.deployment', weight: 0.5 }],
+          xp: 80,
+          difficulty: 2,
+          explanation: ['Armazenamento: 2.000 × 0,23 = US$ 460. Vazão: 32 × 4,50 = US$ 144. Total: US$ 604 por mês. Em HDD, o armazenamento cairia para US$ 50, mas as pastas de projetos pedem SSD.'],
+          scenario: ['Preços de us-east-1 na tabela da AWS Price List de 22/10/2026.'],
+          unit: 'US$ por mês',
+          min: 0,
+          max: 1200,
+          step: 1,
+          answer: 604,
+          tolerance: 0.05,
+        },
+      ],
+      debrief: { takeaways: ['Multi-AZ, Active Directory, cópias de sombra e desduplicação: o servidor de arquivos completo.', 'No FSx, a vazão também entra na conta.'] },
+    },
+  ],
+}
