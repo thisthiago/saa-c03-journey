@@ -45,6 +45,9 @@ import type { EventData, Pattern } from '../../simulators/eventbus/pattern'
 import type { ErrorHandling, TaskBehavior } from '../../simulators/workflow/model'
 import type { Bucket } from '../../simulators/apigw/model'
 import type { ReadMode, StreamLoad } from '../../simulators/stream/model'
+import type { EfsTopology, EfsUsage, Lifecycle } from '../../simulators/filesystem/model'
+import type { FsxDeployment, FsxEvent } from '../../simulators/fsx/model'
+import type { BackupPlan, Disaster } from '../../simulators/backup/model'
 
 export type PredictSpec =
   | {
@@ -171,6 +174,14 @@ export type PredictSpec =
   | { sim: 'apigw'; demand: number[]; limits: Bucket[] }
   /** Kinesis: `shards` → quantos shards; `hot` → o shard da chave quente fica sobrecarregado (yes/no). */
   | { sim: 'stream'; load: StreamLoad; mode: ReadMode; measure: 'shards' | 'hot'; hotKeyShare?: number }
+  /** EFS: o servidor da AZ `clientAz` com a AZ `failedAz` fora (ok, ok-cross-az ou no-access). */
+  | { sim: 'efs-access'; topology: EfsTopology; clientAz: string; failedAz?: string }
+  /** EFS: o modo de vazão mais barato que atende à carga com o ciclo de vida dado (elastic, provisioned ou bursting). */
+  | { sim: 'efs-cost'; usage: EfsUsage; lifecycle: Lifecycle; region?: string }
+  /** FSx: o que acontece na falha (failover, recovers, down ou lost). */
+  | { sim: 'fsx-failure'; deployment: FsxDeployment; event: FsxEvent }
+  /** AWS Backup: `valid` → accepted/rejected; `survives` → yes/no; `rpo` → horas de perda máxima. */
+  | { sim: 'backup'; plan: BackupPlan; query: { type: 'valid' } | { type: 'survives'; disaster: Disaster } | { type: 'rpo' } }
 
 
 /** Uma requisição é permitida ou negada? (resultado calculado pelo avaliador de acesso) */
