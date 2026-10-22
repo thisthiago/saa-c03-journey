@@ -1,0 +1,20 @@
+/** Conquistas da trilha Arquivos e backup na AWS. */
+import type { AchievementDef } from '../../../engine/types'
+
+export const FILES_ACHIEVEMENTS: AchievementDef[] = [
+  { id: 'ach.fil-efs', title: 'Arquivos para todos', description: 'Conclua a Fase 1 da trilha Arquivos e backup: EFS essencial.', category: 'disponibilidade', glyph: 'file', xp: 50, condition: { type: 'phase-completed', phaseId: 'fil.f01' } },
+  { id: 'ach.fil-mount', title: 'Um por zona', description: 'Configure os quatro sistemas de arquivos do chefe da Fase 1 na primeira tentativa, sem dicas.', category: 'disponibilidade', glyph: 'file', xp: 40, condition: { type: 'perfect-first-try', activityId: 'fil.f01.boss.a1' } },
+  { id: 'ach.fil-custo', title: 'Vazão na medida', description: 'Conclua a Fase 2 da trilha Arquivos e backup: EFS, desempenho e custo.', category: 'custos', glyph: 'gauge', xp: 50, condition: { type: 'phase-completed', phaseId: 'fil.f02' } },
+  { id: 'ach.fil-conta', title: 'A conta enxuta', description: 'Tire 90% ou mais no chefe "A conta do Grupo Atlântico".', category: 'custos', glyph: 'gauge', xp: 60, condition: { type: 'mission-score', missionId: 'fil.f02.boss', min: 0.9 } },
+  { id: 'ach.fil-windows', title: 'Pastas no lugar', description: 'Conclua a Fase 3 da trilha Arquivos e backup: FSx for Windows File Server.', category: 'disponibilidade', glyph: 'users', xp: 50, condition: { type: 'phase-completed', phaseId: 'fil.f03' } },
+  { id: 'ach.fil-lustre', title: 'Sem esperar o download', description: 'Conclua a Fase 4 da trilha Arquivos e backup: FSx for Lustre.', category: 'desempenho', glyph: 'bolt', xp: 50, condition: { type: 'phase-completed', phaseId: 'fil.f04' } },
+  { id: 'ach.fil-scratch', title: 'Nada se perde no scratch', description: 'Tire 90% ou mais no chefe "A semana do laboratório".', category: 'desempenho', glyph: 'bolt', xp: 60, condition: { type: 'mission-score', missionId: 'fil.f04.boss', min: 0.9 } },
+  { id: 'ach.fil-ontap', title: 'Migração sem reescrever', description: 'Conclua a Fase 5 da trilha Arquivos e backup: FSx for NetApp ONTAP e OpenZFS.', category: 'aprendizagem', glyph: 'layers', xp: 50, condition: { type: 'phase-completed', phaseId: 'fil.f05' } },
+  { id: 'ach.fil-quatro', title: 'Os quatro FSx', description: 'Posicione as seis cargas do chefe da Fase 5 na primeira tentativa, sem dicas.', category: 'aprendizagem', glyph: 'layers', xp: 40, condition: { type: 'perfect-first-try', activityId: 'fil.f05.boss.a1' } },
+  { id: 'ach.fil-entrada', title: 'Cada arquivo pela porta certa', description: 'Conclua a Fase 6 da trilha Arquivos e backup: escolha e caminho de entrada.', category: 'aprendizagem', glyph: 'split', xp: 50, condition: { type: 'phase-completed', phaseId: 'fil.f06' } },
+  { id: 'ach.fil-mapa', title: 'Nove necessidades', description: 'Posicione as nove necessidades do chefe da Fase 6 na primeira tentativa, sem dicas.', category: 'aprendizagem', glyph: 'split', xp: 40, condition: { type: 'perfect-first-try', activityId: 'fil.f06.boss.a1' } },
+  { id: 'ach.fil-backup', title: 'Backup que ninguém apaga', description: 'Conclua a Fase 7 da trilha Arquivos e backup: AWS Backup.', category: 'recuperacao', glyph: 'history', xp: 50, condition: { type: 'phase-completed', phaseId: 'fil.f07' } },
+  { id: 'ach.fil-hospital', title: 'Plano aprovado na auditoria', description: 'Tire 90% ou mais no chefe "O plano de backup do hospital".', category: 'recuperacao', glyph: 'history', xp: 60, condition: { type: 'mission-score', missionId: 'fil.f07.boss', min: 0.9 } },
+  { id: 'ach.fil-final', title: 'A Mudança do Escritório', description: 'Conclua o desafio final A Mudança do Escritório.', category: 'aprendizagem', glyph: 'trophy', xp: 80, condition: { type: 'phase-completed', phaseId: 'fil.final' } },
+  { id: 'ach.fil-final-90', title: 'Referência em arquivos e backup', description: 'Tire 90% ou mais na Mudança do Escritório.', category: 'aprendizagem', glyph: 'trophy', xp: 100, condition: { type: 'mission-score', missionId: 'fil.final.mudanca', min: 0.9 } },
+]
