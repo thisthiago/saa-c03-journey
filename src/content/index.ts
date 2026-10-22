@@ -17,9 +17,10 @@ import { analyticsModule } from './modules/analytics'
 import { securityModule } from './modules/security'
 import { integrationModule } from './modules/integration'
 import { filesModule } from './modules/files'
+import { architectureModule } from './modules/architecture'
 
 /** A ordem define a ordem das trilhas na Base e a primeira missão sugerida a quem começa. */
-export const MODULES: ContentModule[] = [catalogModule, foundationsModule, storageModule, identityModule, computeModule, databaseModule, governanceModule, networkModule, analyticsModule, securityModule, integrationModule, filesModule]
+export const MODULES: ContentModule[] = [catalogModule, foundationsModule, storageModule, identityModule, computeModule, databaseModule, governanceModule, networkModule, analyticsModule, securityModule, integrationModule, filesModule, architectureModule]
 
 export const registry: Registry = createRegistry({
   modules: MODULES,

@@ -1088,3 +1088,93 @@ O site da documentação da AWS devolve 200 para páginas que não existem; as U
 - **FSx:** um sistema de arquivos de uma AZ só fica fora enquanto a AZ estiver fora; a recuperação a partir de backup em outra AZ é outra ação.
 - **AWS Backup:** cada recurso tem uma regra; o custo considera só o armazenamento dos backups do EFS, com o tamanho guardado como premissa e a fração no frio proporcional ao tempo de retenção.
 - **Escolhas:** a complexidade que desempata as opções é julgamento de arquitetura.
+
+# Trilha Arquitetura e otimização na AWS — conferido em 22/10/2026
+
+O site da documentação da AWS devolve 200 para páginas que não existem; as URLs usadas nos conceitos e nos dois serviços novos do catálogo (AWS Well-Architected Tool e AWS Transform MGN) foram conferidas pelo título da página em 22/10/2026. As páginas `intro.html` e `workloads-improvement-plan.html` do guia da Well-Architected Tool só devolvem o título: o conteúdo usado está em [Workloads](https://docs.aws.amazon.com/wellarchitected/latest/userguide/workloads.html), [Milestones](https://docs.aws.amazon.com/wellarchitected/latest/userguide/milestones.html), [Lenses](https://docs.aws.amazon.com/wellarchitected/latest/userguide/lenses.html) e [Tool profiles](https://docs.aws.amazon.com/wellarchitected/latest/userguide/profiles.html). A página de princípios do pilar de segurança no guia do pilar também só devolve o título; a usada é a do framework.
+
+## Exame (Geral e Fase 9)
+
+| Fato | Fonte |
+|---|---|
+| Múltipla escolha com uma certa e três distratores; resposta múltipla com duas ou mais certas entre cinco ou mais; distratores plausíveis para quem tem conhecimento incompleto; em branco conta como errada, sem penalidade por chute; 50 questões pontuadas e 15 não pontuadas, sem identificação; escala de 100 a 1.000, mínimo de 720; modelo compensatório; pesos 30%, 26%, 24% e 20%. | [SAA-C03 exam guide](https://docs.aws.amazon.com/aws-certification/latest/solutions-architect-associate-03/solutions-architect-associate-03.html) |
+| A lista de serviços do exame traz o AWS Well-Architected Tool e o AWS Application Migration Service (nome antigo do AWS Transform MGN); não traz Elastic Disaster Recovery, Resilience Hub, Fault Injection Service nem Migration Hub. | [In-scope services](https://docs.aws.amazon.com/aws-certification/latest/solutions-architect-associate-03/saa-03-in-scope-services.html) (conferido em 20/10/2026) |
+
+## Well-Architected Framework e Tool (Fase 1)
+
+| Fato | Fonte |
+|---|---|
+| Seis pilares: excelência operacional, segurança, confiabilidade, eficiência de desempenho, otimização de custos e sustentabilidade. | [The pillars of the framework](https://docs.aws.amazon.com/wellarchitected/latest/framework/the-pillars-of-the-framework.html) |
+| Princípios gerais: parar de adivinhar a capacidade, testar em escala de produção, automatizar pensando em experimentar, arquiteturas evolutivas, decidir com dados e game days. | [General design principles](https://docs.aws.amazon.com/wellarchitected/latest/framework/general-design-principles.html) |
+| Princípios de cada pilar (oito de operação, sete de segurança, cinco de confiabilidade, cinco de desempenho, cinco de custo e seis de sustentabilidade); economia de cerca de 75% com 40 de 168 horas; dois servidores a 30% gastam mais que um a 60%. | [Operação](https://docs.aws.amazon.com/wellarchitected/latest/framework/oe-design-principles.html), [Segurança](https://docs.aws.amazon.com/wellarchitected/latest/framework/sec-design.html), [Confiabilidade](https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/design-principles.html), [Desempenho](https://docs.aws.amazon.com/wellarchitected/latest/performance-efficiency-pillar/design-principles.html), [Custo](https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/design-principles.html), [Sustentabilidade](https://docs.aws.amazon.com/wellarchitected/latest/sustainability-pillar/design-principles-for-sustainability-in-the-cloud.html) |
+| Riscos altos (HRIs) e médios (MRIs) saem das respostas; são orientações; motivos para não seguir uma boa prática são documentados nas notas; só o dono apaga a carga, com os marcos; compartilhamento com contas, usuários, organização e OUs. | [Workloads](https://docs.aws.amazon.com/wellarchitected/latest/userguide/workloads.html) |
+| Marco grava o estado da carga num momento; lente do framework aplicada a toda carga; lentes do catálogo e personalizadas; até 5 por vez e 20 no total; dados guardados ao remover uma lente; perfis priorizam perguntas; sem cobrança própria. | [Milestones](https://docs.aws.amazon.com/wellarchitected/latest/userguide/milestones.html), [Lenses](https://docs.aws.amazon.com/wellarchitected/latest/userguide/lenses.html), [Tool profiles](https://docs.aws.amazon.com/wellarchitected/latest/userguide/profiles.html), [Pricing](https://aws.amazon.com/well-architected-tool/pricing/) |
+| Nível de risco de cada boa prática do laboratório `wa-review`: alto em OPS05-BP01, SEC02-BP01, SEC02-BP02, SEC08-BP02, REL05-BP01, REL09-BP01, REL10-BP01, REL13-BP02, PERF03-BP01, COST04-BP01 e COST07-BP01; médio em REL08-BP04, PERF04-BP06 e SUS02-BP01; baixo em COST06-BP03. | Páginas de cada boa prática em `docs.aws.amazon.com/wellarchitected/latest/framework/` (URLs em `src/simulators/wareview/model.ts`) |
+
+## Resiliência (Fase 2)
+
+| Fato | Fonte |
+|---|---|
+| Degradação controlada (REL05-BP01, risco alto): seguir com a função principal, com exemplos de página parcial, parâmetros padrão e gravações enfileiradas. | [REL05-BP01](https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_graceful_degradation.html) |
+| Planos de dados têm metas de disponibilidade maiores que os de controle; o Auto Scaling na recuperação é dependência do plano de controle; cotas da Região de recuperação precisam permitir a capacidade de produção. | [Disaster recovery options in the cloud](https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html) |
+| Produção em pelo menos duas AZs; antipadrão de várias Regiões quando várias AZs bastam; dependências entre Regiões aumentam o risco. | [REL10-BP01](https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_fault_isolation_multiaz_region_system.html) |
+
+## Recuperação de desastres (Fase 3)
+
+| Fato | Fonte |
+|---|---|
+| Em ordem crescente de custo e decrescente de RPO e RTO: backup e restauração (RPO em horas, RTO de até 24 horas; PITR pode levar o RPO a cerca de 5 minutos), pilot light (minutos e dezenas de minutos), warm standby (segundos e minutos; capacidade total é hot standby) e ativo-ativo (perto de zero e potencialmente zero); não usar estratégia mais rígida que a meta; REL13-BP02 com risco alto. | [REL13-BP02](https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_planning_for_recovery_disaster_recovery.html) |
+| Pilot light não atende sem ação prévia; warm standby já atende reduzido; conta separada por Região; replicação contínua não protege contra corrupção; estratégias de gravação write global, write local e por partição. | [Disaster recovery options in the cloud](https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html) |
+
+## Desempenho (Fase 4)
+
+| Fato | Fonte |
+|---|---|
+| Armazenamento pela característica do dado e do acesso; antipadrão de ficar num tipo de banco por experiência; cache e réplicas para cargas de leitura; risco alto. | [PERF03-BP01](https://docs.aws.amazon.com/wellarchitected/latest/framework/perf_data_use_purpose_built_data_store.html) |
+| Local pela necessidade de rede, borda (CloudFront, Global Accelerator), Local Zones, Wavelength e placement groups; risco médio. | [PERF04-BP06](https://docs.aws.amazon.com/wellarchitected/latest/framework/perf_networking_choose_workload_location_network_requirements.html) |
+
+## Segurança (Fase 5)
+
+| Fato | Fonte |
+|---|---|
+| Credenciais temporárias no lugar de chaves longas, roles para máquinas e federação para pessoas; risco alto. | [SEC02-BP02](https://docs.aws.amazon.com/wellarchitected/latest/framework/sec_identities_unique.html) |
+| Criptografia em repouso por padrão (inclusive a padrão de novos volumes EBS); risco alto. | [SEC08-BP02](https://docs.aws.amazon.com/wellarchitected/latest/framework/sec_protect_data_rest_encrypt.html) |
+
+## Custos (Fase 6)
+
+| Fato | Fonte |
+|---|---|
+| Candidatas a reduzir: uso máximo de CPU e memória abaixo de 40% em quatro semanas; risco baixo. | [COST06-BP03](https://docs.aws.amazon.com/wellarchitected/latest/framework/cost_type_size_number_resources_metrics.html) |
+| Análise do modelo de compra por componente; Spot até 90%; Savings Plans para EC2, Lambda e Fargate; desligar EC2 e RDS fora do horário reduz 70% ou mais; risco alto. | [COST07-BP01](https://docs.aws.amazon.com/wellarchitected/latest/framework/cost_pricing_model_analysis.html) |
+| Rastrear recursos por tags, com dono, função e data de desativação; risco alto. | [COST04-BP01](https://docs.aws.amazon.com/wellarchitected/latest/framework/cost_decomissioning_resources_track.html) |
+| Entre AZs, cobrado na entrada e na saída; entre Regiões, só a saída da origem; entrada da internet sem cobrança. | [Understanding data transfer charges](https://docs.aws.amazon.com/cur/latest/userguide/cur-data-transfers-charges.html) |
+| Mesma AZ sem cobrança; NAT Gateway cobra o processamento por GB; endpoints de gateway sem cobrança de transferência. | [Overview of Data Transfer Costs](https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/) |
+| 100 GB por mês de saída para a internet gratuitos, somando serviços e Regiões. | [EC2 On-Demand Pricing](https://aws.amazon.com/ec2/pricing/on-demand/) |
+
+## Migração (Fase 7)
+
+| Fato | Fonte |
+|---|---|
+| Os 7 Rs e seus casos de uso (retire com 90 dias sem conexões e aplicações zumbis abaixo de 5%; retain; rehost; relocate; repurchase; replatform com o exemplo do SQL Server para o RDS; refactor como a mais complexa); em migrações grandes, rehost, relocate e replatform primeiro. | [About the migration strategies](https://docs.aws.amazon.com/prescriptive-guidance/latest/large-migration-guide/migration-strategies.html) |
+| AWS Transform MGN: novo nome do Application Migration Service; replicação contínua em nível de bloco; corte em minutos; templates de replicação, lançamento e pós-lançamento; aplicações e ondas; recomendado para rehost. | [What Is AWS Transform MGN?](https://docs.aws.amazon.com/mgn/latest/ug/what-is-application-migration-service.html), [When to choose](https://aws.amazon.com/application-migration-service/when-to-choose-aws-mgn/) |
+| Estados do servidor (Not ready, Ready for testing, Test in progress, Ready for cutover, Cutover in progress, Cutover complete); terminar instâncias de teste; finalizar o corte encerra a replicação. | [Migration lifecycle](https://docs.aws.amazon.com/mgn/latest/ug/lifecycle.html) |
+
+## Padrões (Fase 8)
+
+| Fato | Fonte |
+|---|---|
+| Strangler fig: proxy na frente do monólito, troca gradual, camada anticorrupção, proxy como possível ponto único de falha (API Gateway Multi-AZ reduz o risco), exige acesso ao código. O Migration Hub Refactor Spaces não aceita novos clientes desde 07/11/2025 e não é citado no conteúdo. | [Strangler fig pattern](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/strangler-fig.html) |
+| Infraestrutura imutável, canário e blue/green; risco médio. | [REL08-BP04](https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_tracking_change_management_immutable_infrastructure.html) |
+| In-place (de uma vez ou em ondas), blue/green, canário, linear e all at once; rolling mais rápido que blue/green, sem isolamento. | [Deployment strategies](https://docs.aws.amazon.com/whitepapers/latest/introduction-devops-aws/deployment-strategies.html), [Rolling deployments](https://docs.aws.amazon.com/whitepapers/latest/overview-deployment-options/rolling-deployments.html) |
+
+## Preços
+
+- `src/content/pricing/transfer-prices.json` é gerado por `npm run prices:transfer` a partir da AWS Price List Bulk API (oferta AWSDataTransfer de us-east-1 e oferta global AmazonCloudFront), consultada em 22/10/2026: entrada da internet US$ 0; saída para a internet US$ 0,09 por GB (primeira faixa paga); entre AZs US$ 0,01 por GB em cada sentido; saída para us-east-2 US$ 0,01 e para us-west-2, sa-east-1 e eu-west-1 US$ 0,02 por GB; da Região para o CloudFront US$ 0; saída do CloudFront nos Estados Unidos US$ 0,085 por GB. O script falha se um item cobrado a zero passar a ter preço.
+- Os labs reaproveitam as tabelas de Computação (EC2, Savings Plans e Lambda), Bancos de dados (RDS) e Redes (NAT Gateway e endpoints).
+
+## Premissas e simplificações da trilha
+
+- **Recuperação:** cada estratégia vale pelo pior caso da faixa (24 horas e 24 horas; 15 minutos e 1 hora; 1 minuto e 15 minutos; perto de zero); warm standby com um quarto da frota; custo só de instâncias On-Demand, réplica Single-AZ e armazenamento dos backups.
+- **Dimensionamento:** cada tamanho abaixo tem metade das vCPUs e da memória e dobra o pico, que precisa ficar abaixo de 80%; Spot com o desconto premissa da trilha de Computação.
+- **Transferência:** primeira faixa, sem os 100 GB gratuitos; NAT já existente; endpoint de interface novo cobrado por hora em duas AZs.
+- **Leitura de questões:** enunciados do AWS Quest; quais restrições cada alternativa cumpre e a ordem no requisito decisivo são julgamento de arquitetura.

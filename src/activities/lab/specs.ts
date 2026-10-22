@@ -71,6 +71,13 @@ import type { IntChooserLabConfig } from '../../simulators/intchooser/model'
 import type { FilesystemLabConfig } from '../../simulators/filesystem/lab'
 import type { FsChooserLabConfig } from '../../simulators/fschooser/model'
 import type { BackupLabConfig } from '../../simulators/backup/lab'
+import type { WaReviewLabConfig } from '../../simulators/wareview/lab'
+import type { DrLabConfig } from '../../simulators/dr/lab'
+import type { PerfChooserLabConfig } from '../../simulators/perfchooser/model'
+import type { TransferCostLabConfig } from '../../simulators/transfercost/lab'
+import type { RightsizingLabConfig } from '../../simulators/rightsizing/lab'
+import type { MigrationPlanLabConfig } from '../../simulators/migplan/lab'
+import type { ExamReaderLabConfig } from '../../simulators/examreader/lab'
 
 export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'; config: CostLabConfig } | { lab: 'access'; config: AccessLabConfig }
   | { lab: 'versioning'; config: VersioningLabConfig }
@@ -143,5 +150,12 @@ export type LabSpec = { lab: 'bucket'; config: BucketLabConfig } | { lab: 'cost'
   | { lab: 'filesystem'; config: FilesystemLabConfig }
   | { lab: 'fs-chooser'; config: FsChooserLabConfig }
   | { lab: 'backup'; config: BackupLabConfig }
+  | { lab: 'wa-review'; config: WaReviewLabConfig }
+  | { lab: 'dr'; config: DrLabConfig }
+  | { lab: 'perf-chooser'; config: PerfChooserLabConfig }
+  | { lab: 'transfer-cost'; config: TransferCostLabConfig }
+  | { lab: 'rightsizing'; config: RightsizingLabConfig }
+  | { lab: 'migration-plan'; config: MigrationPlanLabConfig }
+  | { lab: 'exam-reader'; config: ExamReaderLabConfig }
 
 export type LabId = LabSpec['lab']

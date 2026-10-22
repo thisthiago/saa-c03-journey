@@ -242,7 +242,8 @@ export function HomePage() {
             )
           })}
         </div>
-        <h3 className={s.devTitle}>Trilhas em desenvolvimento</h3>
+        {PLANNED_TRACKS.length > 0 && <h3 className={s.devTitle}>Trilhas em desenvolvimento</h3>}
+        {PLANNED_TRACKS.length > 0 && (
         <div className={s.terrGrid}>
           {PLANNED_TRACKS.map((p) => (
             <div key={p.id} className={s.terr} data-status="development">
@@ -258,6 +259,7 @@ export function HomePage() {
             </div>
           ))}
         </div>
+        )}
       </section>
     </div>
   )

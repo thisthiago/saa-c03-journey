@@ -1,0 +1,37 @@
+{
+  "source": "AWS Price List Bulk API",
+  "sourceDocs": "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-price-list-query-api.html",
+  "retrievedAt": "2026-10-22",
+  "currency": "USD",
+  "notes": [
+    "Valores de referência para fins didáticos, extraídos da AWS Price List na data indicada.",
+    "Apenas a primeira faixa paga de cada item; sem os 100 GB gratuitos por mês de saída para a internet, impostos ou descontos por volume.",
+    "A transferência entre zonas de disponibilidade é cobrada em cada sentido; entre Regiões, só a saída da Região de origem.",
+    "A saída do CloudFront usa o preço dos Estados Unidos; outras partes do mundo custam diferente.",
+    "Preços mudam: consulte as páginas de preço de cada serviço antes de qualquer decisão real."
+  ],
+  "regions": {
+    "us-east-1": {
+      "label": "US East (N. Virginia)",
+      "offers": {
+        "AWSDataTransfer": "2026-09-16T13:22:08Z",
+        "AmazonCloudFront": "2026-10-19T15:05:00Z"
+      },
+      "internetInPerGB": 0,
+      "internetOutPerGB": 0.09,
+      "interAzPerGB": 0.01,
+      "interRegionOutPerGB": {
+        "us-east-2": 0.01,
+        "us-west-2": 0.02,
+        "sa-east-1": 0.02,
+        "eu-west-1": 0.02
+      },
+      "cloudFrontOriginFetchPerGB": 0,
+      "cloudFrontOutPerGB": 0.085,
+      "sourceUrls": [
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSDataTransfer/current/us-east-1/index.json",
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudFront/current/index.json"
+      ]
+    }
+  }
+}
