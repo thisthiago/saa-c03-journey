@@ -22,6 +22,11 @@ import { endpointsComplete, type EndpointsLabResponse } from '../simulators/endp
 import { secretsComplete, type SecretsLabResponse } from '../simulators/secrets/lab'
 import { certsComplete, type CertsLabResponse } from '../simulators/certs/lab'
 import { findingsComplete, type FindingsLabResponse } from '../simulators/findings/lab'
+import { queueComplete, type QueueLabResponse } from '../simulators/queue/lab'
+import { workflowComplete, type WorkflowLabResponse } from '../simulators/workflow/lab'
+import { apiComplete, type ApiLabResponse } from '../simulators/apigw/lab'
+import { streamComplete, type StreamLabResponse } from '../simulators/stream/lab'
+import { filterComplete, type FilterLabResponse } from '../simulators/eventbus/lab'
 import type {
   ActivityResponse,
   DecisionResponse,
@@ -119,6 +124,7 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
         case 'ai-chooser':
         case 'ana-chooser':
         case 'sec-chooser':
+        case 'int-chooser':
           return activity.config.items.every((i) => Boolean((response as unknown as { placements?: Record<string, string> }).placements?.[i.id]))
         case 'support':
           return activity.config.scenarios.every((sc) => Boolean((response as unknown as { choices?: Record<string, string> }).choices?.[sc.id]))
@@ -164,6 +170,17 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
           return certsComplete(activity.config, response as unknown as CertsLabResponse)
         case 'findings':
           return findingsComplete(activity.config, response as unknown as FindingsLabResponse)
+        case 'queue':
+          return queueComplete(activity.config, response as unknown as QueueLabResponse)
+        case 'workflow':
+          return workflowComplete(activity.config, response as unknown as WorkflowLabResponse)
+        case 'apigw':
+          return apiComplete(activity.config, response as unknown as ApiLabResponse)
+        case 'stream':
+          return streamComplete(activity.config, response as unknown as StreamLabResponse)
+        case 'pubsub':
+        case 'eventbus':
+          return filterComplete(activity.config, response as unknown as FilterLabResponse)
         case 'vpc-planner':
           return vpcPlannerComplete(activity.config, response as unknown as VpcPlannerLabResponse)
         case 'connect':
@@ -282,6 +299,17 @@ function labHint(activity: Extract<ActivityDef, { kind: 'lab' }>): string {
       return 'Responda as duas perguntas de cada certificado.'
     case 'findings':
       return 'Escolha a origem e a ação de cada achado.'
+    case 'queue':
+      return 'Escolha a visibilidade e a DLQ de cada consumidor.'
+    case 'workflow':
+      return 'Escolha o Retry e o Catch de cada passo.'
+    case 'apigw':
+      return 'Escolha a taxa e o burst de cada cliente.'
+    case 'stream':
+      return 'Escolha a leitura e os shards de cada fluxo.'
+    case 'pubsub':
+    case 'eventbus':
+      return 'Escolha um padrão para cada destino.'
     default:
       return 'Responda a todas as tarefas.'
   }
