@@ -40,6 +40,11 @@ import type { EmrCluster, EmrJob } from '../../simulators/emr/model'
 import type { KmsRequest, KmsWorld } from '../../simulators/kms/model'
 import type { Reader, RotationMoment, RotationStrategy } from '../../simulators/secrets/model'
 import type { Certificate } from '../../simulators/certs/model'
+import type { FifoSend, MessageRun } from '../../simulators/queue/model'
+import type { EventData, Pattern } from '../../simulators/eventbus/pattern'
+import type { ErrorHandling, TaskBehavior } from '../../simulators/workflow/model'
+import type { Bucket } from '../../simulators/apigw/model'
+import type { ReadMode, StreamLoad } from '../../simulators/stream/model'
 
 export type PredictSpec =
   | {
@@ -154,6 +159,18 @@ export type PredictSpec =
   | { sim: 'secrets'; strategy: RotationStrategy; moment: RotationMoment; reader: Reader }
   /** ACM: `renewal` → auto, action ou expires; `placement` → ok, wrong-region ou cannot-attach. */
   | { sim: 'certs'; cert: Certificate; measure: 'renewal' | 'placement' }
+  /** SQS: o desfecho da mensagem (processed, duplicated, dlq ou expired). */
+  | { sim: 'queue'; run: MessageRun }
+  /** SQS FIFO: as mensagens do grupo `group` que entram, em ordem, unidas por "+". */
+  | { sim: 'fifo'; sends: FifoSend[]; group: string }
+  /** EventBridge ou SNS: o evento casa com o padrão (yes/no)? Sem padrão, tudo casa. */
+  | { sim: 'eventbus'; pattern: Pattern | null; event: EventData }
+  /** Step Functions: o desfecho do estado Task (succeeded, caught ou failed). */
+  | { sim: 'workflow'; task: TaskBehavior; handling: ErrorHandling }
+  /** API Gateway: quantas requisições recebem 429, com o menor limite entre as camadas. */
+  | { sim: 'apigw'; demand: number[]; limits: Bucket[] }
+  /** Kinesis: `shards` → quantos shards; `hot` → o shard da chave quente fica sobrecarregado (yes/no). */
+  | { sim: 'stream'; load: StreamLoad; mode: ReadMode; measure: 'shards' | 'hot'; hotKeyShare?: number }
 
 
 /** Uma requisição é permitida ou negada? (resultado calculado pelo avaliador de acesso) */
