@@ -27,6 +27,8 @@ import { workflowComplete, type WorkflowLabResponse } from '../simulators/workfl
 import { apiComplete, type ApiLabResponse } from '../simulators/apigw/lab'
 import { streamComplete, type StreamLabResponse } from '../simulators/stream/lab'
 import { filterComplete, type FilterLabResponse } from '../simulators/eventbus/lab'
+import { filesystemComplete, type FilesystemLabResponse } from '../simulators/filesystem/lab'
+import { backupComplete, type BackupLabResponse } from '../simulators/backup/lab'
 import type {
   ActivityResponse,
   DecisionResponse,
@@ -125,6 +127,7 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
         case 'ana-chooser':
         case 'sec-chooser':
         case 'int-chooser':
+        case 'fs-chooser':
           return activity.config.items.every((i) => Boolean((response as unknown as { placements?: Record<string, string> }).placements?.[i.id]))
         case 'support':
           return activity.config.scenarios.every((sc) => Boolean((response as unknown as { choices?: Record<string, string> }).choices?.[sc.id]))
@@ -181,6 +184,10 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
         case 'pubsub':
         case 'eventbus':
           return filterComplete(activity.config, response as unknown as FilterLabResponse)
+        case 'filesystem':
+          return filesystemComplete(activity.config, response as unknown as FilesystemLabResponse)
+        case 'backup':
+          return backupComplete(activity.config, response as unknown as BackupLabResponse)
         case 'vpc-planner':
           return vpcPlannerComplete(activity.config, response as unknown as VpcPlannerLabResponse)
         case 'connect':
@@ -310,6 +317,10 @@ function labHint(activity: Extract<ActivityDef, { kind: 'lab' }>): string {
     case 'pubsub':
     case 'eventbus':
       return 'Escolha um padrão para cada destino.'
+    case 'filesystem':
+      return activity.config.mode === 'access' ? 'Escolha o tipo e os mount targets de cada carga.' : 'Escolha a vazão e o ciclo de vida de cada sistema de arquivos.'
+    case 'backup':
+      return 'Escolha a frequência, o frio, a cópia e a trava de cada recurso.'
     default:
       return 'Responda a todas as tarefas.'
   }
