@@ -110,6 +110,16 @@ import { AiChooserLab } from '../simulators/aichooser/AiChooserLab'
 import type { AiChooserLabResponse } from '../simulators/aichooser/model'
 import { AnaChooserLab } from '../simulators/anachooser/AnaChooserLab'
 import type { AnaChooserLabResponse } from '../simulators/anachooser/model'
+import { KmsLab } from '../simulators/kms/KmsLab'
+import type { KmsLabResponse } from '../simulators/kms/lab'
+import { SecretsLab } from '../simulators/secrets/SecretsLab'
+import type { SecretsLabResponse } from '../simulators/secrets/lab'
+import { CertsLab } from '../simulators/certs/CertsLab'
+import type { CertsLabResponse } from '../simulators/certs/lab'
+import { FindingsLab } from '../simulators/findings/FindingsLab'
+import type { FindingsLabResponse } from '../simulators/findings/lab'
+import { SecChooserLab } from '../simulators/secchooser/SecChooserLab'
+import type { SecChooserLabResponse } from '../simulators/secchooser/model'
 import type { NetChooserLabResponse } from '../simulators/netchooser/model'
 import type { TransferLabResponse } from '../simulators/transfer/lab'
 import type { GatewayLabResponse } from '../simulators/gateway/lab'
@@ -276,6 +286,16 @@ export function ActivityView({ activity, value, onChange, disabled, evaluation, 
           return <AiChooserLab config={activity.config} value={value as unknown as AiChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
         case 'ana-chooser':
           return <AnaChooserLab config={activity.config} value={value as unknown as AnaChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'kms':
+          return <KmsLab config={activity.config} value={value as unknown as KmsLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'secrets':
+          return <SecretsLab config={activity.config} value={value as unknown as SecretsLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'certs':
+          return <CertsLab config={activity.config} value={value as unknown as CertsLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'findings':
+          return <FindingsLab config={activity.config} value={value as unknown as FindingsLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'sec-chooser':
+          return <SecChooserLab config={activity.config} value={value as unknown as SecChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
       }
   }
 }
