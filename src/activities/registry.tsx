@@ -132,6 +132,12 @@ import { FilterLab } from '../simulators/eventbus/FilterLab'
 import type { FilterLabResponse } from '../simulators/eventbus/lab'
 import { IntChooserLab } from '../simulators/intchooser/IntChooserLab'
 import type { IntChooserLabResponse } from '../simulators/intchooser/model'
+import { FilesystemLab } from '../simulators/filesystem/FilesystemLab'
+import type { FilesystemLabResponse } from '../simulators/filesystem/lab'
+import { FsChooserLab } from '../simulators/fschooser/FsChooserLab'
+import type { FsChooserLabResponse } from '../simulators/fschooser/model'
+import { BackupLab } from '../simulators/backup/BackupLab'
+import type { BackupLabResponse } from '../simulators/backup/lab'
 import type { NetChooserLabResponse } from '../simulators/netchooser/model'
 import type { TransferLabResponse } from '../simulators/transfer/lab'
 import type { GatewayLabResponse } from '../simulators/gateway/lab'
@@ -322,6 +328,12 @@ export function ActivityView({ activity, value, onChange, disabled, evaluation, 
           return <FilterLab kind="eventbridge" config={activity.config} value={value as unknown as FilterLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
         case 'int-chooser':
           return <IntChooserLab config={activity.config} value={value as unknown as IntChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'filesystem':
+          return <FilesystemLab config={activity.config} value={value as unknown as FilesystemLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'fs-chooser':
+          return <FsChooserLab config={activity.config} value={value as unknown as FsChooserLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
+        case 'backup':
+          return <BackupLab config={activity.config} value={value as unknown as BackupLabResponse} onChange={set} disabled={disabled} evaluation={evaluation} />
       }
   }
 }

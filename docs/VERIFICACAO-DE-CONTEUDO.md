@@ -1006,3 +1006,85 @@ Não confirmado e fora do conteúdo: os números da política de novas tentativa
 - **API Gateway:** o balde é reabastecido uma vez por segundo; só o limite do usage plan entra no laboratório.
 - **Kinesis:** os dados se espalham por igual entre os shards (exceto a chave quente); o limite de 5 leituras por segundo do shard fica de fora.
 - **Escolhas:** a complexidade que desempata as opções é julgamento de arquitetura.
+
+# Trilha Arquivos e backup na AWS — conferido em 22/10/2026
+
+O site da documentação da AWS devolve 200 para páginas que não existem; as URLs usadas nos conceitos e a do serviço novo do catálogo (AWS Transfer Family) foram conferidas pelo título da página em 22/10/2026. As páginas `storage-classes.html` e `availability-durability.html` do EFS só devolvem o título: o conteúdo está em [Features of Amazon EFS](https://docs.aws.amazon.com/efs/latest/ug/features.html), que é a referência usada. A página antiga de desduplicação do FSx for Windows foi incorporada a [Managing storage](https://docs.aws.amazon.com/fsx/latest/WindowsGuide/managing-storage-configuration.html).
+
+## EFS essencial (Fase 1)
+
+| Fato | Fonte |
+|---|---|
+| NFS 4.0 e 4.1; elástico, sem provisionar capacidade; montado por EC2, ECS, EKS, Lambda e Fargate; não suportado em instâncias Windows; padrões recomendados General Purpose e Elastic. | [What is Amazon EFS?](https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html) |
+| Regional (recomendado) guarda os dados em várias AZs e segue acessível com AZs fora; One Zone guarda numa AZ e pode perder os dados com a perda da AZ; 11 noves de durabilidade nos dois; One Zone só em algumas AZs e com backup automático pelo AWS Backup. | [Features of Amazon EFS](https://docs.aws.amazon.com/efs/latest/ug/features.html) |
+| Um mount target por AZ no Regional; um só, na AZ do sistema de arquivos, no One Zone; acesso de outra AZ gera cobrança; IP do mount target não muda; security group no mount target. | [Managing mount targets](https://docs.aws.amazon.com/efs/latest/ug/manage-fs-access.html) |
+| Access points impõem usuário POSIX e diretório raiz; funcionam sobre mount targets; security groups ficam no mount target. | [Working with access points](https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html) |
+| Sem política, acesso total a qualquer cliente que alcance um mount target; ClientMount, ClientWrite e ClientRootAccess; aws:SecureTransport exige TLS; autorização pelo IAM exige o mount helper; basta um Allow na identidade ou no recurso. | [Using IAM to control access](https://docs.aws.amazon.com/efs/latest/ug/iam-access-control-nfs-efs.html) |
+| Criptografia em repouso escolhida na criação, sem mudança depois (replicar para um novo); ligada por padrão no console e não na CLI ou API; elasticfilesystem:Encrypted em políticas e SCPs. | [Encrypting data at rest](https://docs.aws.amazon.com/efs/latest/ug/encryption-at-rest.html) |
+
+## EFS: desempenho e custo (Fase 2)
+
+| Fato | Fonte |
+|---|---|
+| Elastic (padrão e recomendado) para picos ou média de até 5% do pico, cobrado por dado lido e gravado; Provisioned cobra o que passa da base da Standard; Bursting com base de 50 KiB/s por GiB na Standard, rajada de 100 MiB/s por TiB (mínimo de 100 MiB/s) e créditos; espera de 24 horas depois de mudar para Provisioned. | [Performance specifications](https://docs.aws.amazon.com/efs/latest/ug/performance.html) |
+| General Purpose recomendado sempre; Max I/O de geração anterior, sem One Zone e sem Elastic; IOPS não cobradas à parte. | [Performance specifications](https://docs.aws.amazon.com/efs/latest/ug/performance.html) |
+| Standard, Infrequent Access (poucas vezes por trimestre) e Archive (poucas vezes por ano); latência de dezenas de milissegundos nas frias; mínimo de 128 KiB por arquivo; Archive com 90 dias mínimos e só com Elastic; metadados sempre na Standard. | [Features of Amazon EFS](https://docs.aws.amazon.com/efs/latest/ug/features.html), [Managing storage lifecycle](https://docs.aws.amazon.com/efs/latest/ug/lifecycle-management-efs.html) |
+| Ciclo de vida pelo último acesso: IA em 30 dias e Archive em 90 por padrão; volta para a Standard opcional, no primeiro acesso; gravações em arquivos frios passam pela Standard e voltam a esfriar depois de 24 horas. | [Managing storage lifecycle](https://docs.aws.amazon.com/efs/latest/ug/lifecycle-management-efs.html) |
+| Replicação contínua para outra Região ou a mesma, com RPO de 15 minutos na maioria dos casos (mais com mais de 100 milhões de arquivos ou arquivos acima de 100 GB que mudam muito); failover e failback. | [Replicating EFS file systems](https://docs.aws.amazon.com/efs/latest/ug/efs-replication.html) |
+
+## FSx for Windows File Server (Fase 3)
+
+| Fato | Fonte |
+|---|---|
+| SMB 2.0 a 3.1.1, clientes Windows e Linux; AWS Managed Microsoft AD ou AD próprio; sem AD Connector nem Simple AD; domínio não muda depois da criação; acesso do local por Direct Connect ou VPN, não pela internet; backups diários automáticos. | [What is FSx for Windows?](https://docs.aws.amazon.com/fsx/latest/WindowsGuide/what-is.html), [Working with Microsoft AD](https://docs.aws.amazon.com/fsx/latest/WindowsGuide/aws-ad-integration-fsxW.html) |
+| Single-AZ com cerca de 30 minutos de parada na recuperação; Multi-AZ com failover em menos de 30 s, inclusive na AZ fora, e volta automática; clientes Linux não acompanham o failover pelo DNS; Multi-AZ recomendado para produção; HDD não existe no Single-AZ 1. | [Single-AZ and Multi-AZ](https://docs.aws.amazon.com/fsx/latest/WindowsGuide/high-availability-multiAZ.html) |
+| SSD para latência e cópias de sombra; HDD para diretórios pessoais; HDD para SSD sim, SSD para HDD não; capacidade só aumenta; desduplicação com economia típica de 50% a 60% (30% a 50% em documentos, 70% a 80% em desenvolvimento). | [Managing storage](https://docs.aws.amazon.com/fsx/latest/WindowsGuide/managing-storage-configuration.html) |
+| Cópias de sombra desligadas por padrão; restauração pelo Explorador de Arquivos; limite padrão de 10% do armazenamento; recomendação de menos de 64 cópias e SSD; não substituem backups. | [Shadow copies](https://docs.aws.amazon.com/fsx/latest/WindowsGuide/shadow-copies-fsxW.html) |
+
+## FSx for Lustre (Fase 4)
+
+| Fato | Fonte |
+|---|---|
+| ML, HPC, vídeo e modelagem financeira; latência abaixo de 1 ms, vários TB/s e milhões de IOPS; clientes Linux; EC2, ECS e EKS; SageMaker AI, Batch e ParallelCluster. | [What is FSx for Lustre?](https://docs.aws.amazon.com/fsx/latest/LustreGuide/what-is.html) |
+| Scratch sem replicação, servidor não trocado e erro de I/O nos arquivos do servidor com falha, base de 200 MBps por TiB e rajada de até seis vezes; persistente com replicação na AZ (entre AZs no Intelligent-Tiering) e servidor trocado em minutos; classes SSD, HDD e Intelligent-Tiering. | [Deployment and storage class options](https://docs.aws.amazon.com/fsx/latest/LustreGuide/using-fsx-lustre.html) |
+| Associação com repositório de dados: até 8 por sistema de arquivos; importação e exportação automáticas; sem associações no Scratch 1; conflitos de gravação ficam com a aplicação. | [Linking to an S3 bucket](https://docs.aws.amazon.com/fsx/latest/LustreGuide/create-dra-linked-data-repo.html) |
+
+## FSx for NetApp ONTAP e OpenZFS (Fase 5)
+
+| Fato | Fonte |
+|---|---|
+| ONTAP: NFS, SMB, iSCSI e NVMe; Linux, Windows e macOS; Single-AZ e Multi-AZ; snapshots, clones, SnapMirror e SnapLock; migrar NetApp sem mudar a aplicação. | [What is FSx for ONTAP?](https://docs.aws.amazon.com/fsx/latest/ONTAPGuide/what-is-fsx-ontap.html) |
+| Camada SSD provisionada e capacity pool elástico; política de tiering por volume; até 65% de economia com compressão e desduplicação em compartilhamentos gerais; recomendação de não passar de 80% de uso da SSD. | [Managing storage capacity](https://docs.aws.amazon.com/fsx/latest/ONTAPGuide/managing-storage-capacity.html) |
+| OpenZFS: NFS v3 a v4.2, sem SMB; Linux, Windows e macOS; até 2 milhões de IOPS com centenas de microssegundos; snapshots e clones; Multi-AZ (HA) e Single-AZ (HA) com failover em cerca de 60 s; Single-AZ (non-HA) com recuperação em cerca de 30 minutos. | [What is FSx for OpenZFS?](https://docs.aws.amazon.com/fsx/latest/OpenZFSGuide/what-is-fsx.html) |
+
+## Escolha e caminho de entrada (Fase 6)
+
+| Fato | Fonte |
+|---|---|
+| Transfer Family: SFTP, FTPS, FTP, AS2 e transferências pelo navegador; destinos S3 e EFS; até 3 AZs; fluxos gerenciados. | [What is AWS Transfer Family?](https://docs.aws.amazon.com/transfer/latest/userguide/what-is-aws-transfer-family.html) |
+| Endpoint na VPC interno ou voltado para a internet, com IPs elásticos e security groups; só SFTP e FTPS no voltado para a internet; usuários gerenciados pelo serviço ou provedor personalizado. | [Create a server in a VPC](https://docs.aws.amazon.com/transfer/latest/userguide/create-server-in-vpc.html) |
+| FTP sem criptografia, só com endpoint interno na VPC; identidade pelo AWS Managed Microsoft AD ou provedor personalizado (Lambda ou API Gateway). | [Create an FTP-enabled server](https://docs.aws.amazon.com/transfer/latest/userguide/create-server-ftp.html) |
+| DataSync: NFS e SMB para EFS e FSx com agente; S3 para EFS e FSx sem agente. | [DataSync locations](https://docs.aws.amazon.com/datasync/latest/userguide/working-with-locations.html) |
+
+## AWS Backup (Fase 7)
+
+| Fato | Fonte |
+|---|---|
+| Planos com regras; seleção por tags; incrementais; cofres com chave do KMS e política de acesso; conteúdo imutável; backups mantidos mesmo com a origem apagada; cópia entre Regiões e entre contas da organização; lista de serviços cobertos. | [What is AWS Backup?](https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html) |
+| Frequência de hora em hora a mensal, ou cron; janela padrão às 0h30, 8 horas para iniciar e 7 dias para terminar; retenção de 1 dia a 100 anos; contínuo de 1 a 35 dias; frio com 90 dias mínimos e retenção 90 dias maior que a transição; recomendação de 8 dias no quente; frio para CloudFormation, DynamoDB com recursos avançados, EBS (Snapshot Archive, backups mensais ou menos frequentes), EFS, SAP HANA, Timestream e VMware. | [Backup plan options](https://docs.aws.amazon.com/aws-backup/latest/devguide/plan-options-and-configuration.html) |
+| Contínuo para S3, RDS, Aurora e SAP HANA; cópia entre Regiões e contas para EC2, S3, EBS, RDS, Aurora, EFS, os quatro FSx e outros; sem contínuo no RDS em cluster Multi-AZ; cópia de contínuo vira snapshot. | [Feature availability](https://docs.aws.amazon.com/aws-backup/latest/devguide/backup-feature-availability.html) |
+| Cofre logicamente isolado com Vault Lock em conformidade, chave da AWS ou do cliente, compartilhável pelo AWS RAM ou por aprovação de várias pessoas para restaurar de outra conta. | [Logically air-gapped vault](https://docs.aws.amazon.com/aws-backup/latest/devguide/logicallyairgappedvault.html) |
+| Teste de restauração agendado, com ponto mais recente ou aleatório, tempo medido, recursos apagados ao fim, custo por teste e controle no Audit Manager. | [Restore testing](https://docs.aws.amazon.com/aws-backup/latest/devguide/restore-testing.html) |
+
+## Preços
+
+- `src/content/pricing/files-prices.json` é gerado por `npm run prices:files` a partir da AWS Price List Bulk API (ofertas AmazonEFS, AmazonFSx, AWSBackup e AWSTransfer), para us-east-1 e sa-east-1, consultada em 22/10/2026.
+- Em us-east-1: EFS Standard a US$ 0,30 por GB-mês (One Zone a US$ 0,16), Infrequent Access a US$ 0,016 com vazão Elastic e US$ 0,025 com Bursting ou Provisioned (a Price List traz os dois itens, com descrições próprias), Archive a US$ 0,008; leitura do IA a US$ 0,01 e do Archive a US$ 0,03 por GB; Elastic a US$ 0,03 por GB lido e US$ 0,06 por GB gravado; Provisioned a US$ 6,00 por MiB/s-mês.
+- FSx for Windows: SSD a US$ 0,13 (Single-AZ) e US$ 0,23 (Multi-AZ) por GB-mês; HDD a US$ 0,013 e US$ 0,025; vazão a US$ 2,20 e US$ 4,50 por MBps-mês. AWS Backup: backups do EFS a US$ 0,05 no quente e US$ 0,01 no frio por GB-mês. Transfer Family: US$ 0,30 por hora de protocolo e US$ 0,04 por GB.
+
+## Premissas e simplificações da trilha
+
+- **EFS:** a vazão média e o pico resumem a carga; os créditos do Bursting não são simulados minuto a minuto e as leituras não têm o desconto de medição; no Provisioned, a vazão contratada é igual ao pico; a cobrança única da transição entre classes fica de fora; 1 GB vale 1 GiB.
+- **FSx:** um sistema de arquivos de uma AZ só fica fora enquanto a AZ estiver fora; a recuperação a partir de backup em outra AZ é outra ação.
+- **AWS Backup:** cada recurso tem uma regra; o custo considera só o armazenamento dos backups do EFS, com o tamanho guardado como premissa e a fração no frio proporcional ao tempo de retenção.
+- **Escolhas:** a complexidade que desempata as opções é julgamento de arquitetura.

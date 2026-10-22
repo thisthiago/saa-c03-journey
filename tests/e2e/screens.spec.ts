@@ -822,6 +822,53 @@ test.describe('trilha Integração', () => {
   }
 })
 
+/** Missões da trilha Arquivos e backup na ordem do mapa (as anteriores ficam aprovadas no progresso semeado). */
+const FIL_MISSIONS = [
+  ...(
+    [
+      ['f01', 3],
+      ['f02', 3],
+      ['f03', 3],
+      ['f04', 2],
+      ['f05', 2],
+      ['f06', 3],
+      ['f07', 3],
+    ] as const
+  ).flatMap(([f, n]) => [...Array.from({ length: n }, (_, i) => `fil.${f}.m${i + 1}`), `fil.${f}.boss`]),
+  'fil.final.mudanca',
+]
+
+// Módulo novo: por enquanto, só o desktop (tablet e celular ficam para uma etapa própria).
+test.describe('trilha Arquivos e backup', () => {
+  const CASES: { name: string; mission?: string; step?: number; path?: string }[] = [
+    { name: 'fil-f1-efs', mission: 'fil.f01.boss', step: 2 },
+    { name: 'fil-f2-custo', mission: 'fil.f02.boss', step: 2 },
+    { name: 'fil-f3-investigacao', mission: 'fil.f03.m2', step: 2 },
+    { name: 'fil-f5-fsx', mission: 'fil.f05.boss', step: 2 },
+    { name: 'fil-f6-escolha', mission: 'fil.f06.boss', step: 2 },
+    { name: 'fil-f7-backup', mission: 'fil.f07.boss', step: 2 },
+    { name: 'fil-final', mission: 'fil.final.mudanca', step: 2 },
+    { name: 'fil-mapa', path: '/#/trilha/files.aws-files' },
+  ]
+  const vp = VIEWPORTS.find((v) => v.name === 'desktop')!
+  for (const c of CASES) {
+    test(`${c.name} — ${vp.name}`, async ({ page }) => {
+      await page.setViewportSize({ width: vp.width, height: vp.height })
+      await page.emulateMedia({ colorScheme: 'dark' })
+      const before = c.mission ? FIL_MISSIONS.slice(0, FIL_MISSIONS.indexOf(c.mission)) : []
+      const base = progressWithPhase1(new Date(), { missions: before })
+      const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+      await seedProgress(page, seeded)
+      await page.goto(c.path ?? `/#/missao/${c.mission}`)
+      await page.waitForLoadState('networkidle')
+      await page.waitForTimeout(250)
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+      expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+      await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+    })
+  }
+})
+
 test.describe('banco de questões', () => {
   for (const vp of VIEWPORTS) {
     test(`treino e simulado — ${vp.name}`, async ({ page }) => {

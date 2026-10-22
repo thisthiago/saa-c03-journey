@@ -90,7 +90,7 @@ export const F08_DB_CONCEPTS: ConceptDef[] = [
     officialName: 'AWS Backup',
     serviceIds: ['aws.backup'],
     summary: 'O **AWS Backup** centraliza os backups de vários serviços (RDS, Aurora, DynamoDB, EBS, EFS e outros) em **planos de backup** e **cofres**. O conteúdo de cada backup é **imutável**, e o **Vault Lock** aplica o modelo **WORM** (gravar uma vez, ler muitas). Ele também gerencia cópias **entre contas** da organização.',
-    facts: ['No modo compliance, depois do período de carência, um cofre com backups não pode ser apagado.', 'No modo governance, quem tem permissão suficiente pode remover a trava.', 'O Vault Lock não tem custo adicional.', 'O serviço é aprofundado no plano de Arquivos e backup.'],
+    facts: ['No modo compliance, depois do período de carência, um cofre com backups não pode ser apagado.', 'No modo governance, quem tem permissão suficiente pode remover a trava.', 'O Vault Lock não tem custo adicional.', 'O serviço é aprofundado na trilha Arquivos e backup na AWS.'],
     commonMistakes: ['Configurar o backup de cada banco separadamente quando a empresa precisa de uma política única e auditável'],
     exam: { domains: ['d2'], relevance: 'media' },
     references: [R.backupWhat, R.backupVaultLock],
