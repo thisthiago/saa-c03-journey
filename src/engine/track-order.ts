@@ -10,7 +10,14 @@ export interface TrackOrderStep {
   track: TrackDef
   /** Trilhas que devem vir antes, com os conceitos reaproveitados de cada uma. */
   after: { track: TrackDef; explicit: boolean; concepts: string[] }[]
+  tier: TrackTier
 }
+
+/**
+ * Grupo da trilha no mapa: o ponto de partida (sem dependências), a base (as
+ * que outra trilha recomenda ou exige) e o aprofundamento (as demais).
+ */
+export type TrackTier = 'start' | 'base' | 'deeper'
 
 /** Trilha dona de cada conceito: a do módulo que o declara. */
 function conceptOwners(reg: Registry): Map<string, string> {
@@ -51,6 +58,8 @@ export function recommendedTrackOrder(reg: Registry): TrackOrderStep[] {
     }
   }
 
+  const declared = new Set(tracks.flatMap((t) => [...(t.requires ?? []), ...(t.recommends ?? [])]))
+
   // Kahn com desempate pela ordem dos módulos; um ciclo restante é quebrado pela mesma ordem.
   const placed = new Set<string>()
   const order: TrackOrderStep[] = []
@@ -59,13 +68,12 @@ export function recommendedTrackOrder(reg: Registry): TrackOrderStep[] {
     const ready = pending.filter((t) => [...deps.get(t.id)!.keys()].every((o) => placed.has(o)))
     const next = (ready.length ? ready : pending).sort((a, b) => rank.get(a.id)! - rank.get(b.id)!)[0]
     placed.add(next.id)
-    order.push({
-      track: next,
-      after: [...deps.get(next.id)!]
-        .filter(([o]) => placed.has(o) && o !== next.id)
-        .map(([o, e]) => ({ track: reg.tracks.get(o)!, ...e }))
-        .sort((a, b) => rank.get(a.track.id)! - rank.get(b.track.id)!),
-    })
+    const after = [...deps.get(next.id)!]
+      .filter(([o]) => placed.has(o) && o !== next.id)
+      .map(([o, e]) => ({ track: reg.tracks.get(o)!, ...e }))
+      .sort((a, b) => rank.get(a.track.id)! - rank.get(b.track.id)!)
+    const tier: TrackTier = after.length === 0 ? 'start' : declared.has(next.id) ? 'base' : 'deeper'
+    order.push({ track: next, after, tier })
   }
   return order
 }
