@@ -1,29 +1,6 @@
-.top {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-  gap: var(--space-4);
-}
-@media (max-width: 760px) {
-  .top {
-    grid-template-columns: 1fr;
-  }
-}
-.player {
-  display: flex;
-  gap: var(--space-5);
-  align-items: center;
-}
-.player > div:last-child {
-  flex: 1;
-  min-width: 0;
-}
-.title {
-  margin: 0;
-}
-.xp {
-  color: var(--xp);
-  font-weight: 700;
-  margin: 2px 0 var(--space-2);
+.intro {
+  max-width: 72ch;
+  margin-bottom: var(--space-5);
 }
 .small {
   display: block;
@@ -31,42 +8,244 @@
   color: var(--text-muted);
   margin: 4px 0 0;
 }
-.stats {
+.small b {
+  color: var(--text);
+}
+
+/* 1. Resumo da jornada: a trilha atual é o foco; o nível fica ao lado, com menos peso. */
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: stretch;
+}
+@media (max-width: 760px) {
+  .top {
+    grid-template-columns: 1fr;
+  }
+}
+.journey {
+  padding: var(--space-6);
+  background:
+    radial-gradient(500px 220px at 100% 0%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+    var(--surface-glass);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+@media (max-width: 640px) {
+  .journey {
+    padding: var(--space-4);
+  }
+}
+.kicker {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+}
+.journeyTitle {
+  margin-bottom: var(--space-2);
+}
+.phase {
+  margin: 0 0 var(--space-3);
+  color: var(--text-muted);
+}
+.trackBar {
+  max-width: 520px;
+  margin-bottom: var(--space-3);
+}
+.now {
+  margin: 0 0 var(--space-4);
+}
+.lead {
+  max-width: 62ch;
+  color: var(--text-muted);
+  margin-bottom: var(--space-4);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.level {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  justify-content: center;
+}
+.levelHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.levelTitle {
+  margin: 0;
+  font-size: 1.15rem;
+}
+.xp {
+  color: var(--xp);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.keyStats {
+  margin-top: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+}
+.keyList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-4) var(--space-5);
+  margin: 0;
+}
+
+/* Indicador: rótulo, número e explicação juntos. */
+.stat dt {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.stat dd {
+  margin: 2px 0 0;
+}
+.stat b {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--text);
+}
+.statList {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+}
+
+/* Seções */
+.section {
+  margin-top: var(--space-7);
+}
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+.count {
+  color: var(--xp);
+  font-weight: 600;
+}
+.sectionLead {
+  max-width: 72ch;
+  margin-bottom: var(--space-4);
+}
+.block {
+  margin-top: var(--space-6);
+}
+.groupTitle {
+  font-size: 1.05rem;
+  margin-bottom: var(--space-3);
+}
+.blockAction {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  margin-top: var(--space-3);
+}
+.blockAction > a {
+  /* Os rótulos com o nome do domínio são longos: quebram a linha no celular. */
+  white-space: normal;
+  max-width: 100%;
+}
+.blockAction > p {
+  margin: 0;
+  flex: 1 1 320px;
+}
+.cardText {
+  margin: 0 0 var(--space-3);
+}
+
+/* 2. Progresso e desempenho */
+.perfGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: var(--space-4);
+}
+.domainRows {
   list-style: none;
   padding: 0;
   margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface-glass);
+}
+.domainRow {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 8px var(--space-4);
-  font-size: 0.93rem;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr);
+  gap: var(--space-3) var(--space-5);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
 }
-.stats b {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  color: var(--accent);
+.domainRow + .domainRow {
+  border-top: 1px solid var(--border);
 }
-.section {
-  margin-top: var(--space-6);
-}
-.domains {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
-  gap: var(--space-3);
-}
-.domain {
-  display: grid;
-  gap: 6px;
+@media (max-width: 900px) {
+  .domainRow {
+    grid-template-columns: 1fr;
+  }
 }
 .domainHead {
   display: flex;
-  justify-content: space-between;
-  gap: var(--space-2);
-  align-items: flex-start;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px var(--space-2);
 }
+.domainHead .small {
+  margin: 0;
+  width: 100%;
+}
+.domainStats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+}
+@media (max-width: 640px) {
+  .domainStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.domainStats dt {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.domainStats dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.simList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-2);
+  display: grid;
+  gap: 6px;
+}
+.simList li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px var(--space-4);
+}
+.simList .small {
+  margin: 0;
+}
+
+/* 3. Conquistas */
 .achGrid {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0 0 var(--space-2);
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: var(--space-3);
@@ -79,11 +258,11 @@
   border: 1px solid var(--border);
   background: var(--surface-glass);
 }
-.ach[data-got='false'] {
-  opacity: 0.7;
+.ach > div {
+  min-width: 0;
 }
 .ach[data-got='true'] {
-  border-color: var(--xp);
+  border-color: color-mix(in srgb, var(--xp) 60%, var(--border));
 }
 .achIcon {
   flex: none;
@@ -101,9 +280,162 @@
 }
 .achMeta {
   display: block;
-  font-size: 0.76rem;
-  color: var(--text-faint);
+  font-size: 0.78rem;
+  color: var(--text-muted);
   margin-top: 4px;
+}
+.goals {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: var(--space-3);
+}
+.goal {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-m);
+  border: 1px dashed var(--border-strong);
+}
+.goalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+.goalHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px var(--space-2);
+}
+.goalProgress {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: 4px;
+}
+.goalProgress .small {
+  margin: 0;
+}
+.goalLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.groups {
+  display: grid;
+  gap: var(--space-2);
+}
+.group {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface-glass);
+}
+.group > summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  font-weight: 600;
+  border-radius: var(--radius-m);
+}
+.group > summary .small {
+  margin: 0;
+  white-space: nowrap;
+}
+.group > summary::marker {
+  color: var(--text-faint);
+}
+.group[open] > summary {
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-m) var(--radius-m) 0 0;
+}
+.group > .achGrid {
+  padding: var(--space-3);
+  margin: 0;
+}
+
+/* 4. Atividade recente */
+.activityGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .activityGrid {
+    grid-template-columns: 1fr;
+  }
+}
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  max-width: 280px;
+  margin-bottom: var(--space-2);
+}
+.calDay {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  border: 1px solid var(--border-strong);
+}
+.calDay[data-active='true'] {
+  background: var(--xp);
+  border-color: var(--xp);
+}
+.logDay + .logDay {
+  margin-top: var(--space-4);
+}
+.logDate {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+.log {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+}
+.log li {
+  display: grid;
+  grid-template-columns: 3.2em minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: baseline;
+  font-size: 0.92rem;
+}
+.logTime {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.84rem;
+}
+.logText .small {
+  margin: 0;
+}
+.logXp {
+  color: var(--xp);
+  font-weight: 600;
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+/* 5. Conceitos estudados */
+.tiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
 }
 .masteryList {
   list-style: none;
@@ -119,29 +451,13 @@
   align-items: center;
   font-size: 0.92rem;
 }
-.ledger {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 6px;
+.conceptName .small {
+  display: inline;
+  margin-left: var(--space-2);
+  color: var(--mastery);
 }
-.ledger li {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  align-items: baseline;
-  font-size: 0.9rem;
-}
-.ledger li > span:nth-child(2) {
-  flex: 1;
-  min-width: 160px;
-}
-.ledgerXp {
-  min-width: 48px;
-  font-weight: 700;
-  color: var(--xp);
-}
+
+/* 6. Ajustes e dados */
 .settings {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
