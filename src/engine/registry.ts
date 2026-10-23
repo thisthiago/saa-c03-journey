@@ -76,6 +76,12 @@ export function trackPhases(track: TrackDef): PhaseDef[] {
   return track.final ? [...track.phases, track.final] : track.phases
 }
 
+/** Território a que a trilha pertence. */
+export function trackTerritory(reg: Registry, trackId: string): TerritoryDef | undefined {
+  const t = reg.tracks.get(trackId)
+  return reg.territories.find((x) => x.id === t?.territory)
+}
+
 export function createRegistry(input: RegistryInput): Registry {
   const reg: Registry = {
     modules: input.modules,
