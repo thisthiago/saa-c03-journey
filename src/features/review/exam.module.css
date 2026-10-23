@@ -8,28 +8,45 @@
   font-size: 1.15rem;
 }
 
+/* Formato do exame: fechado por padrão, para não ocupar a primeira dobra. */
+.format {
+  max-width: 720px;
+  margin-top: var(--space-2);
+  font-size: 0.9rem;
+}
+.format summary {
+  cursor: pointer;
+  width: fit-content;
+  color: var(--accent);
+  font-weight: 600;
+}
+.format p {
+  margin: var(--space-2) 0 0;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+/* Progresso no banco: uma barra e uma frase. */
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
-  gap: var(--space-3);
-  margin: var(--space-4) 0;
-}
-.stats > div {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-3);
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border);
   border-radius: var(--radius-m);
   background: var(--surface);
 }
-.stats b {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-}
-.stats span {
-  font-size: 0.85rem;
+.stats p {
+  margin: 0;
+  font-size: 0.9rem;
   color: var(--text-muted);
+}
+
+.scope {
+  font-size: 0.88rem;
+  padding: 6px 10px;
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
 }
 
 .filters {
@@ -98,6 +115,21 @@
 .modes p {
   margin: 0;
 }
+/* Os botões de começar ficam alinhados na base dos dois cartões. */
+.modes > section > button:last-child {
+  margin-top: auto;
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2) var(--space-4);
+}
+.controls .check {
+  flex: 1;
+  min-width: 200px;
+  padding-bottom: 8px;
+}
 
 .listSection {
   margin-top: var(--space-6);
@@ -149,13 +181,23 @@ summary[data-ok='false'] .listIcon {
 .listMeta {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  align-items: center;
+  gap: 6px 10px;
   margin: 0 0 6px;
+}
+.listConcept {
+  font-size: 0.88rem;
+  color: var(--text);
+}
+.listDifficulty {
+  font-size: 0.82rem;
+  color: var(--text-muted);
 }
 .listText {
   margin: 0;
-  font-size: 0.9rem;
-  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text);
   overflow-wrap: anywhere;
 }
 @media (max-width: 560px) {
