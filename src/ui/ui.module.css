@@ -212,3 +212,35 @@
   color: var(--text);
   min-width: 0;
 }
+
+/* Domínios do exame: cores dos tokens semânticos, que já têm versão clara e escura. */
+.domainTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.domainTag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.domainTag[data-domain='d1'] {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+.domainTag[data-domain='d2'] {
+  color: var(--success);
+  background: var(--success-soft);
+}
+.domainTag[data-domain='d3'] {
+  color: var(--warning);
+  background: var(--warning-soft);
+}
+.domainTag[data-domain='d4'] {
+  color: var(--info);
+  background: var(--info-soft);
+}
