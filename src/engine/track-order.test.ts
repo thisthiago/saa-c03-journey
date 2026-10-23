@@ -26,4 +26,18 @@ describe('recommendedTrackOrder', () => {
   it('começa pela AWS Foundations', () => {
     expect(order[0].track.id).toBe('foundations.aws-foundations')
   })
+
+  it('só a AWS Foundations é o ponto de partida', () => {
+    expect(order.filter((s) => s.tier === 'start').map((s) => s.track.id)).toEqual(['foundations.aws-foundations'])
+  })
+
+  it('a base reúne as trilhas que outra trilha recomenda', () => {
+    const declared = new Set([...registry.tracks.values()].flatMap((t) => [...(t.requires ?? []), ...(t.recommends ?? [])]))
+    for (const step of order) if (step.tier !== 'start') expect(step.tier === 'base').toBe(declared.has(step.track.id))
+  })
+
+  it('os grupos aparecem em blocos contínuos, na ordem partida, base e aprofundamento', () => {
+    const rank = { start: 0, base: 1, deeper: 2 }
+    for (let i = 1; i < order.length; i++) expect(rank[order[i].tier]).toBeGreaterThanOrEqual(rank[order[i - 1].tier])
+  })
 })
