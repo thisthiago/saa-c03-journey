@@ -4,7 +4,7 @@ import { Link } from 'react-router'
 import { registry } from '../../content'
 import { masteredConceptIds } from '../../engine/achievements'
 import { domainReadiness, focusDomain, relevantTracks, studyRecommendation, type StudyRecommendation, type TrackPick } from '../../engine/guide'
-import { trackPhases } from '../../engine/registry'
+import { trackPhases, trackTerritory } from '../../engine/registry'
 import { nextReviewDate } from '../../engine/review'
 import { isMissionPassed, streakDays } from '../../engine/selectors'
 import { recommendedTrackOrder } from '../../engine/track-order'
@@ -15,6 +15,7 @@ import { DomainTag, DomainTags } from '../../ui/DomainTag'
 import { Glyph } from '../../ui/Glyph'
 import { renderInline } from '../../ui/inline'
 import { phaseLabel, phaseRef, plural, relativeDays } from '../../app/format'
+import { TRACK_STATUS } from '../map/status'
 import s from './home.module.css'
 
 const ORDER = recommendedTrackOrder(registry)
@@ -22,11 +23,6 @@ const ORDER = recommendedTrackOrder(registry)
 /** Conceitos ensinados em alguma fase (os que o Codex agrupa). */
 const TAUGHT_CONCEPTS = new Set([...registry.tracks.values()].flatMap((t) => trackPhases(t).flatMap((p) => p.concepts))).size
 const ACTIVE_TERRITORIES = registry.territories.filter((t) => t.status === 'active').length
-
-function territoryOf(trackId: string) {
-  const t = registry.tracks.get(trackId)
-  return registry.territories.find((x) => x.id === t?.territory)
-}
 
 /** Título, explicação e ação principal de cada contexto do estudante. */
 function nextStepCopy(rec: StudyRecommendation, due: number) {
@@ -342,16 +338,10 @@ function ExamPrep({ firstVisit }: { firstVisit: boolean }) {
   )
 }
 
-const TRACK_STATE = {
-  'not-started': { label: 'Não iniciada', tone: 'neutral', action: 'Começar trilha' },
-  'in-progress': { label: 'Em andamento', tone: 'info', action: 'Continuar trilha' },
-  completed: { label: 'Concluída', tone: 'success', action: 'Ver mapa da trilha' },
-} as const
-
 function TrackCard({ pick }: { pick: TrackPick }) {
   const { track, progress: tp } = pick
-  const st = TRACK_STATE[pick.state]
-  const territory = territoryOf(track.id)
+  const st = TRACK_STATUS[pick.state]
+  const territory = trackTerritory(registry, track.id)
   const to = pick.state !== 'completed' && pick.nextMissionId ? `/missao/${pick.nextMissionId}` : `/trilha/${track.id}`
   return (
     <Card as="article" className={s.trackCard} aria-labelledby={`track-${track.id}`}>
