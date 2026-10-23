@@ -164,6 +164,21 @@ test('revisão aparece para conceitos fracos e concede domínio', async ({ page 
   await expect(page.getByText(/item 1 de/)).toBeVisible()
 })
 
+test('revisão: escolher quantos itens entram na rodada', async ({ page }) => {
+  const p = progressWithFirstMission()
+  const old = new Date(Date.now() - 3 * 86_400_000).toISOString()
+  for (const id of ['s3.metadata', 's3.storage-class-analysis', 's3.version-id', 'storage.object', 'storage.block', 'storage.file', 's3.service', 's3.object-key', 's3.bucket-naming', 's3.durability', 's3.availability', 's3.object', 's3.consistency', 's3.region']) {
+    ;(p.concepts as Record<string, unknown>)[id] = { mastery: 0.4, evidence: 1, box: 1, nextReviewAt: old, lastSeenAt: old, recentErrors: 0 }
+  }
+  await seedProgress(page, p)
+  await page.goto('/#/revisao')
+  const sizes = page.getByRole('group', { name: 'Itens nesta rodada' }).first()
+  await expect(sizes.getByRole('radio', { name: '8' })).toBeChecked()
+  await sizes.getByRole('radio', { name: '5' }).check()
+  await page.getByRole('button', { name: 'Começar revisão' }).click()
+  await expect(page.getByText('item 1 de 5')).toBeVisible()
+})
+
 test('arrastar com o mouse: o bloco fica colado no cursor e cai no destino', async ({ page }) => {
   await page.goto('/#/missao/s3x.f01.m1')
   await page.getByRole('button', { name: 'Ver conceitos-chave' }).click()
