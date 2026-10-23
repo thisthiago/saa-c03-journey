@@ -29,6 +29,7 @@ import type { QuestionRef } from '../../engine/registry'
 import type { ExamDomainId, ExamQuestion } from '../../engine/types'
 import { useDocumentTitle } from '../../app/hooks'
 import { clock, useGame } from '../../store/gameStore'
+import { DomainTag } from '../../ui/DomainTag'
 import { Badge, Button, ButtonLink, Callout, Card, Modal, ProgressBar } from '../../ui/kit'
 import { ExamQuestionView } from './ExamQuestionView'
 import s from './exam.module.css'
@@ -58,9 +59,13 @@ const STATUSES: QuestionStatus[] = ['nova', 'errou', 'acertou']
 const LIST_PAGE = 15
 
 const plainText = (t: string) => t.replace(/\*\*|`/g, '').replace(/\[\[[^|\]]+\|([^\]]+)\]\]/g, '$1')
+/** Começo do cenário, cortado no fim de uma palavra. */
 const excerpt = (q: ExamQuestion) => {
   const t = plainText(q.stem.join(' '))
-  return t.length > 140 ? `${t.slice(0, 137).trimEnd()}…` : t
+  if (t.length <= 160) return t
+  const cut = t.slice(0, 157)
+  const space = cut.lastIndexOf(' ')
+  return `${(space > 100 ? cut.slice(0, space) : cut).replace(/[\s,;:.]+$/, '')}…`
 }
 const percent = (n: number, d: number) => (d === 0 ? 0 : Math.round((n / d) * 100))
 
@@ -172,35 +177,26 @@ function BankHome({ onStart }: { onStart: (mode: Mode, refs: QuestionRef[], time
       </p>
       <h1>Banco de questões</h1>
       <p className="muted" style={{ maxWidth: 720 }}>
-        Questões no estilo do exame SAA-C03, cada uma com a dificuldade, o conceito avaliado, o domínio do exame e a explicação de todas as alternativas. As respostas atualizam o domínio dos conceitos e trazem de volta para a revisão o que você errou. Não valem XP, porque
-        a mesma questão pode ser repetida.
+        Questões no formato do exame SAA-C03, com a explicação de todas as alternativas. Cada resposta atualiza o domínio dos conceitos e traz de volta para a revisão o que você errou (não vale XP, porque a mesma questão pode ser repetida).
       </p>
-
-      <div className={s.stats}>
-        <div>
-          <b>{stats.total}</b>
-          <span>questões no banco</span>
-        </div>
-        <div>
-          <b>{stats.answered}</b>
-          <span>já respondidas</span>
-        </div>
-        <div>
-          <b>{stats.answered ? `${percent(stats.rightNow, stats.answered)}%` : 'Sem dados'}</b>
-          <span>de acerto na última resposta</span>
-        </div>
-        <div>
-          <b>{last ? `${last.correct} de ${last.total}` : 'Nenhum'}</b>
-          <span>{last ? `no último simulado (${new Date(last.at).toLocaleDateString('pt-BR')})` : 'simulado feito'}</span>
-        </div>
-      </div>
-
-      <Callout kind="info" title="Formato do exame">
+      <details className={s.format}>
+        <summary>Como é o exame SAA-C03</summary>
         <p>
           O SAA-C03 tem {EXAM_FORMAT.questions} questões em {EXAM_FORMAT.minutes} minutos, de dois tipos: <b>múltipla escolha</b> (uma correta entre quatro) e <b>resposta múltipla</b> (duas ou mais corretas entre cinco ou mais). Questão sem resposta conta como errada, e
           chutar não tira pontos. O banco segue o mesmo formato.
         </p>
-      </Callout>
+      </details>
+
+      <div className={s.stats}>
+        <ProgressBar value={stats.answered / stats.total} color="var(--mastery)" label={`${stats.answered} de ${stats.total} questões respondidas`} />
+        <p>
+          {stats.answered === 0
+            ? `Você ainda não respondeu nenhuma das ${stats.total} questões.`
+            : `Você respondeu ${stats.answered} de ${stats.total} questões (${percent(stats.answered, stats.total)}%), e ${stats.rightNow === stats.answered ? (stats.answered === 1 ? 'ela está certa' : 'todas estão certas') : `${stats.rightNow} ${stats.rightNow === 1 ? 'está certa' : 'estão certas'}`} na última tentativa.`}
+          {last && ` Último simulado: ${last.correct} de ${last.total}, em ${new Date(last.at).toLocaleDateString('pt-BR')}.`}{' '}
+          <Link to="/dossie">Ver o domínio por área do exame</Link>
+        </p>
+      </div>
 
       <Card className={s.filters} aria-labelledby="filtros-titulo">
         <h2 id="filtros-titulo" className={s.cardTitle}>
@@ -279,6 +275,7 @@ function BankHome({ onStart }: { onStart: (mode: Mode, refs: QuestionRef[], time
             <Dumbbell size={20} aria-hidden="true" /> Treino com explicação
           </h2>
           <p className="muted">Uma questão por vez, com a explicação logo depois de responder. Começa pelas que você errou, depois as que nunca respondeu.</p>
+          <PoolScope count={pool.length} />
           <label className={s.inline}>
             Quantidade
             <select value={practiceChoice} onChange={(e) => setPracticeSize(Number(e.target.value))} disabled={pool.length === 0}>
@@ -297,22 +294,25 @@ function BankHome({ onStart }: { onStart: (mode: Mode, refs: QuestionRef[], time
           <h2 className={s.cardTitle}>
             <Timer size={20} aria-hidden="true" /> Simulado
           </h2>
-          <p className="muted">Responda tudo primeiro e veja o resultado no final, por domínio e por dificuldade, com a explicação de cada questão. Dá para marcar questões para rever antes de finalizar.</p>
-          <label className={s.inline}>
-            Quantidade
-            <select value={simChoice} onChange={(e) => setSimSize(Number(e.target.value))} disabled={pool.length === 0}>
-              {sizes([10, 20, EXAM_FORMAT.questions]).map((n) => (
-                <option key={n} value={n}>
-                  {n === pool.length ? `Todas (${n})` : n}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={s.check}>
-            <input type="checkbox" checked={timed} onChange={(e) => setTimed(e.target.checked)} />
-            Com cronômetro: 2 minutos por questão, o ritmo do exame ({EXAM_FORMAT.minutes} minutos para {EXAM_FORMAT.questions} questões)
-          </label>
-          <Button variant="secondary" onClick={() => onStart('simulado', simuladoSample(pool, simChoice, seed()), timed)} disabled={pool.length === 0}>
+          <p className="muted">Responda tudo primeiro e veja no final o resultado por domínio e por dificuldade, com a explicação de cada questão. Dá para marcar questões para rever.</p>
+          <PoolScope count={pool.length} />
+          <div className={s.controls}>
+            <label className={s.inline}>
+              Quantidade
+              <select value={simChoice} onChange={(e) => setSimSize(Number(e.target.value))} disabled={pool.length === 0}>
+                {sizes([10, 20, EXAM_FORMAT.questions]).map((n) => (
+                  <option key={n} value={n}>
+                    {n === pool.length ? `Todas (${n})` : n}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={s.check}>
+              <input type="checkbox" checked={timed} onChange={(e) => setTimed(e.target.checked)} />
+              Com cronômetro: 2 minutos por questão, o ritmo do exame
+            </label>
+          </div>
+          <Button onClick={() => onStart('simulado', simuladoSample(pool, simChoice, seed()), timed)} disabled={pool.length === 0}>
             Começar simulado
           </Button>
         </Card>
@@ -329,6 +329,7 @@ function BankHome({ onStart }: { onStart: (mode: Mode, refs: QuestionRef[], time
             {pool.slice(0, shown).map((r) => {
               const q = r.question
               const st = questionStatus(progress, q.id)
+              const concept = registry.concepts.get(q.concept)?.title ?? q.concept
               return (
                 <li key={q.id} data-status={st}>
                   <span className={s.listIcon} aria-label={STATUS_LABEL[st]} title={STATUS_LABEL[st]}>
@@ -336,15 +337,15 @@ function BankHome({ onStart }: { onStart: (mode: Mode, refs: QuestionRef[], time
                   </span>
                   <div className={s.listBody}>
                     <p className={s.listMeta}>
-                      <Badge tone="mastery">{registry.concepts.get(q.concept)?.title ?? q.concept}</Badge>
-                      <Badge>Dificuldade: {DIFFICULTY_LABEL[q.difficulty]}</Badge>
-                      <Badge>Domínio {q.domain.slice(1)}</Badge>
+                      <b className={s.listConcept}>{concept}</b>
+                      <span className={s.listDifficulty}>{DIFFICULTY_LABEL[q.difficulty]}</span>
+                      <DomainTag id={q.domain} />
                       {isMultiple(q) && <Badge tone="info">Resposta múltipla</Badge>}
                     </p>
                     <p className={s.listText}>{excerpt(q)}</p>
                   </div>
-                  <Button variant="ghost" size="small" onClick={() => onStart('treino', [r])}>
-                    Responder
+                  <Button variant="secondary" size="small" onClick={() => onStart('treino', [r])} aria-label={`${st === 'nova' ? 'Responder' : 'Responder de novo'} a questão sobre ${concept}`}>
+                    {st === 'nova' ? 'Responder' : 'Responder de novo'}
                   </Button>
                 </li>
               )
@@ -358,6 +359,22 @@ function BankHome({ onStart }: { onStart: (mode: Mode, refs: QuestionRef[], time
         )}
       </section>
     </div>
+  )
+}
+
+/** Diz de onde o modo sorteia as questões: o recorte dos filtros. */
+function PoolScope({ count }: { count: number }) {
+  if (count === 0) return <p className={s.scope}>Nenhuma questão atende aos filtros acima.</p>
+  return (
+    <p className={s.scope}>
+      {count === 1 ? (
+        'Usa a única questão que atende aos filtros acima.'
+      ) : (
+        <>
+          Sorteia entre as <b>{count}</b> questões que atendem aos filtros acima.
+        </>
+      )}
+    </p>
   )
 }
 
