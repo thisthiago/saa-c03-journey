@@ -13,9 +13,23 @@ test('quem começa agora recebe a primeira missão da AWS Foundations', async ({
 
 test('o mapa lista todas as trilhas', async ({ page }) => {
   await page.goto('/#/mapa')
+  await expect(page.getByRole('heading', { level: 1, name: 'Trilhas' })).toBeVisible()
   for (const name of ['AWS Foundations', 'S3 Expedition', 'IAM e Access Management', 'Computação na AWS', 'Bancos de dados na AWS']) {
     await expect(page.getByRole('link', { name: new RegExp(name) }).first()).toBeVisible()
   }
+  // Cada trilha aparece uma vez só.
+  await expect(page.locator('main a[href^="#/trilha/"]')).toHaveCount(12)
+})
+
+test('o mapa e a Base sugerem a mesma trilha e a mesma missão', async ({ page }) => {
+  await seedProgress(page, progressWithFirstMission())
+  await page.goto('/')
+  const base = await page.getByRole('link', { name: 'Começar missão' }).first().getAttribute('href')
+  await page.goto('/#/mapa')
+  await expect(page.getByRole('link', { name: 'Começar missão' })).toHaveAttribute('href', base!)
+  const suggested = page.locator('li[data-status="next"]')
+  await expect(suggested).toHaveCount(1)
+  await expect(suggested.getByRole('link', { name: 'S3 Expedition' })).toBeVisible()
 })
 
 test('dossiê: primeiro acesso explica o que vai aparecer e sugere a primeira missão', async ({ page }) => {
