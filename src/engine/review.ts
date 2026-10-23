@@ -8,6 +8,8 @@ import type { Registry } from './registry'
 import type { ProgressState } from './types'
 
 export const REVIEW_SESSION_SIZE = 8
+/** Tamanhos de rodada que o estudante pode escolher na Revisão. */
+export const REVIEW_SIZE_OPTIONS = [5, 8, 12, 16] as const
 export const WEAK_MASTERY = 0.5
 
 export interface ReviewEntry {
@@ -54,6 +56,11 @@ export function buildReviewSession(state: ProgressState, reg: Registry, now: Dat
     }
   }
   return session
+}
+
+/** Opções de tamanho que cabem no que há para revisar; a última é "todos" quando sobra menos que 16. */
+export function sessionSizeOptions(available: number): number[] {
+  return [...new Set([...REVIEW_SIZE_OPTIONS.filter((n) => n < available), Math.min(available, REVIEW_SIZE_OPTIONS.at(-1)!)])].filter((n) => n > 0)
 }
 
 export function dueCount(state: ProgressState, reg: Registry, now: Date): number {
