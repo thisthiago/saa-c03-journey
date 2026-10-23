@@ -107,6 +107,11 @@ export function studyRecommendation(state: ProgressState, reg: Registry, now: Da
   return { kind: switched ? 'next-track' : 'next', missionId, completedTrackId: switched ? completedTrackId : undefined, opensPhase: opensPhase(missionId), overdueIds, overdue }
 }
 
+/** Trilha da missão que a Base sugere; o mapa marca a mesma, para as duas páginas concordarem. */
+export function suggestedTrackId(rec: StudyRecommendation, reg: Registry): string | undefined {
+  return rec.missionId ? reg.missions.get(rec.missionId)?.track.id : undefined
+}
+
 export type TrackState = 'not-started' | 'in-progress' | 'completed'
 
 export interface TrackPick {
