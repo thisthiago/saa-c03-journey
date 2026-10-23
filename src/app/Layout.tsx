@@ -7,17 +7,19 @@ import { Celebrations } from './Celebrations'
 import { useDueCount, usePlayer, useThemeSettings } from './hooks'
 import s from './layout.module.css'
 
+// Rótulos funcionais no menu; os títulos das páginas mantêm o tom temático (Mapa do mundo, Codex, Dossiê).
+// `short` é o rótulo do menu inferior do celular, onde cinco itens dividem a largura.
 const NAV = [
-  { to: '/', label: 'Base', icon: House, end: true },
-  { to: '/mapa', label: 'Mapa', icon: Compass },
+  { to: '/', label: 'Início', icon: House, end: true },
+  { to: '/mapa', label: 'Trilhas', icon: Compass },
   { to: '/revisao', label: 'Revisão', icon: RotateCcw, badge: true },
-  { to: '/codex', label: 'Codex', icon: BookOpen },
-  { to: '/dossie', label: 'Dossiê', icon: UserRound },
+  { to: '/codex', label: 'Conceitos', icon: BookOpen },
+  { to: '/dossie', label: 'Meu progresso', short: 'Progresso', icon: UserRound },
 ]
 
 function Logo() {
   return (
-    <NavLink to="/" className={s.logo} aria-label="AWS Quest — Base de Operações">
+    <NavLink to="/" className={s.logo} aria-label="AWS Quest, Início">
       <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
         <defs>
           <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
@@ -132,7 +134,7 @@ export function Layout() {
               <n.icon size={20} aria-hidden="true" />
               {n.badge && due > 0 && <span className={s.dot} aria-label={`${due} para revisar`} />}
             </span>
-            <span>{n.label}</span>
+            <span>{n.short ?? n.label}</span>
           </NavLink>
         ))}
       </nav>
