@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { registry } from '../content'
-import { domainReadiness, focusDomain, relevantTracks, studyRecommendation, trackNextMission } from './guide'
+import { domainReadiness, focusDomain, relevantTracks, studyRecommendation, suggestedTrackId, trackNextMission } from './guide'
 import { createInitialProgress } from './progress'
 import { trackPhases } from './registry'
 import { recommendedTrackOrder } from './track-order'
@@ -102,6 +102,23 @@ describe('studyRecommendation', () => {
   it('tudo concluído: nada a sugerir', () => {
     const all = [...registry.tracks.keys()].flatMap(missionsOf)
     expect(studyRecommendation(pass(createInitialProgress(NOW), all), registry, NOW, order).kind).toBe('done')
+  })
+})
+
+describe('suggestedTrackId', () => {
+  const suggest = (s: ProgressState) => suggestedTrackId(studyRecommendation(s, registry, NOW, order), registry)
+
+  it('primeiro acesso: a AWS Foundations', () => {
+    expect(suggest(createInitialProgress(NOW))).toBe(FOUNDATIONS)
+  })
+
+  it('segue a trilha começada, mesmo com a AWS Foundations incompleta', () => {
+    expect(suggest(pass(createInitialProgress(NOW), [missionsOf(S3)[0]]))).toBe(S3)
+  })
+
+  it('tudo concluído: nenhuma trilha sugerida', () => {
+    const all = [...registry.tracks.keys()].flatMap(missionsOf)
+    expect(suggest(pass(createInitialProgress(NOW), all))).toBeUndefined()
   })
 })
 
