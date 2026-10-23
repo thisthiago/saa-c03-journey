@@ -1,63 +1,31 @@
-.territories {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
-  gap: var(--space-4);
-  margin-top: var(--space-5);
-}
-.territory {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  align-items: flex-start;
-}
-.terrHead {
-  display: flex;
-  gap: var(--space-3);
-  align-items: flex-start;
-}
-.terrTitle {
-  font-size: 1.15rem;
-  margin: 0 0 2px;
-}
-.terrDomains {
-  margin-top: var(--space-2);
-}
-.planned {
-  font-size: 0.85rem;
-  color: var(--text-faint);
-  margin: 0;
-}
-.trackLink {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-m);
-  border: 1px solid var(--accent);
-  background: var(--accent-soft);
-  color: var(--text);
-  text-decoration: none;
-}
-.trackLink:hover {
-  background: color-mix(in srgb, var(--accent) 22%, transparent);
-}
-.trackLinkText {
-  flex: 1;
-  display: grid;
-  gap: 6px;
-  min-width: 0;
-}
 .small {
   font-size: 0.84rem;
   color: var(--text-muted);
 }
-.order {
+.strip {
   margin-top: var(--space-5);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-5);
+  border-color: var(--accent);
 }
-.orderTitle {
+.stripTitle {
+  font-size: 1.05rem;
+  margin: 0;
+  flex: 1 1 360px;
+}
+.strip :global(.muted) {
+  margin: 0;
+  flex-basis: 100%;
+}
+.level {
+  margin-top: var(--space-6);
+}
+.levelTitle {
   font-size: 1.15rem;
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--space-1);
 }
 .orderList {
   list-style: none;
@@ -78,6 +46,9 @@
 .orderList > li[data-status='next'] {
   border-color: var(--accent);
   background: var(--accent-soft);
+}
+.orderList > li[data-status='in-progress'] {
+  border-color: var(--info);
 }
 .orderList > li[data-status='development'] {
   border-style: dashed;
@@ -106,6 +77,12 @@
   display: grid;
   gap: 4px;
   min-width: 0;
+}
+.orderBadges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
 }
 .orderHead {
   display: flex;
