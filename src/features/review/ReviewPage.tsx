@@ -3,13 +3,36 @@ import { useState } from 'react'
 import { registry } from '../../content'
 import { isDue, masteryTier, TIER_LABEL } from '../../engine/mastery'
 import { bankStats } from '../../engine/exam'
-import { buildPracticeSession, buildReviewSession, nextReviewDate, type ReviewEntry } from '../../engine/review'
+import { buildPracticeSession, buildReviewSession, nextReviewDate, REVIEW_SESSION_SIZE, sessionSizeOptions, type ReviewEntry } from '../../engine/review'
 import { clock, useGame } from '../../store/gameStore'
 import { useDocumentTitle } from '../../app/hooks'
 import { Badge, Button, ButtonLink, Card, ProgressBar } from '../../ui/kit'
 import { relativeDays } from '../../app/format'
 import { ActivityRunner } from '../mission/ActivityRunner'
 import s from './review.module.css'
+
+/** Escolha de quantos itens entram na rodada; some quando só há uma opção. */
+function SizePicker({ name, available, value, onChange }: { name: string; available: number; value: number; onChange: (n: number) => void }) {
+  const options = sessionSizeOptions(available)
+  if (options.length < 2) return null
+  return (
+    <fieldset className={s.sizes}>
+      <legend>Itens nesta rodada</legend>
+      {options.map((n) => (
+        <label key={n}>
+          <input type="radio" name={name} value={n} checked={value === n} onChange={() => onChange(n)} />
+          <span>{n === available ? `Todos (${n})` : n}</span>
+        </label>
+      ))}
+    </fieldset>
+  )
+}
+
+/** Tamanho efetivo: o escolhido, limitado ao que há para revisar. */
+function fit(choice: number, available: number) {
+  const options = sessionSizeOptions(available)
+  return options.includes(choice) ? choice : (options.filter((n) => n <= choice).at(-1) ?? options[0] ?? 0)
+}
 
 interface Answer {
   conceptId: string
@@ -28,11 +51,16 @@ export function ReviewPage() {
   const [answers, setAnswers] = useState<Answer[]>([])
   const [finished, setFinished] = useState(false)
   const now = clock.now()
-  const due = buildReviewSession(progress, registry, now)
+  const [reviewSize, setReviewSize] = useState(REVIEW_SESSION_SIZE)
+  const [practiceSize, setPracticeSize] = useState(REVIEW_SESSION_SIZE)
+  const due = buildReviewSession(progress, registry, now, Infinity)
+  const practicePool = buildPracticeSession(progress, registry, Infinity).length
   const studied = Object.values(progress.concepts).filter((c) => c.evidence > 0).length
+  const reviewChoice = fit(reviewSize, due.length)
+  const practiceChoice = fit(practiceSize, practicePool)
 
   const start = (practice: boolean) => {
-    const entries = practice ? buildPracticeSession(progress, registry) : buildReviewSession(progress, registry, clock.now())
+    const entries = practice ? buildPracticeSession(progress, registry, practiceChoice) : buildReviewSession(progress, registry, clock.now(), reviewChoice)
     setSession({ entries, practice })
     setIndex(0)
     setAnswers([])
@@ -68,6 +96,7 @@ export function ReviewPage() {
                     </li>
                   ))}
                 </ul>
+                <SizePicker name="review-size" available={due.length} value={reviewChoice} onChange={setReviewSize} />
                 <Button onClick={() => start(false)}>
                   <RotateCcw size={18} aria-hidden="true" /> Começar revisão
                 </Button>
@@ -82,9 +111,12 @@ export function ReviewPage() {
             </h2>
             <p className="muted">Pratique os conceitos já estudados, começando pelos mais frágeis. O domínio é atualizado, mas o treino fora do prazo não gera XP.</p>
             {studied > 0 ? (
-              <Button variant="secondary" onClick={() => start(true)}>
-                Treinar agora
-              </Button>
+              <>
+                <SizePicker name="practice-size" available={practicePool} value={practiceChoice} onChange={setPracticeSize} />
+                <Button variant="secondary" onClick={() => start(true)}>
+                  Treinar agora
+                </Button>
+              </>
             ) : (
               <ButtonLink to="/" variant="secondary">
                 Ir para a próxima missão
