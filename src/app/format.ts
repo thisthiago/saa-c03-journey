@@ -25,3 +25,8 @@ export function phaseMention(phase: { id: string; order: number; title: string }
   const label = ref && ref.track.id !== contextTrackId ? phaseRef(phase) : phaseLabel(phase)
   return `${label} (${phase.title})`
 }
+
+/** "1 missão aprovada", "3 missões aprovadas". */
+export function plural(n: number, one: string, many: string): string {
+  return `${n.toLocaleString('pt-BR')} ${n === 1 ? one : many}`
+}
