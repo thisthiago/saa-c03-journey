@@ -1,4 +1,5 @@
 import type { Tone } from '../../ui/kit'
+import type { TrackState } from '../../engine/guide'
 import type { MissionStatus, PhaseStatus } from '../../engine/selectors'
 import type { PhaseDef } from '../../engine/types'
 
@@ -15,6 +16,12 @@ export const MISSION_STATUS: Record<MissionStatus, { label: string; tone: Tone }
   available: { label: 'Disponível', tone: 'accent' },
   'in-progress': { label: 'Em andamento', tone: 'info' },
   passed: { label: 'Aprovada', tone: 'success' },
+}
+
+export const TRACK_STATUS: Record<TrackState, { label: string; tone: Tone; action: string }> = {
+  'not-started': { label: 'Não iniciada', tone: 'neutral', action: 'Começar trilha' },
+  'in-progress': { label: 'Em andamento', tone: 'info', action: 'Continuar trilha' },
+  completed: { label: 'Concluída', tone: 'success', action: 'Ver mapa da trilha' },
 }
 
 export const MEDAL_LABEL = { ouro: 'Medalha de ouro', prata: 'Medalha de prata', bronze: 'Medalha de bronze' } as const
