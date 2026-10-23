@@ -3,14 +3,45 @@ import { place, progressWithFirstMission, seedProgress } from './helpers'
 
 test('quem começa agora recebe a primeira missão da AWS Foundations', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: 'Sua expedição começa aqui' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Aprenda AWS tomando decisões de arquitetura' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Como funciona uma missão' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'AWS Foundations' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'S3 Expedition' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'IAM e Access Management' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Computação na AWS' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Bancos de dados na AWS' })).toBeVisible()
-  await page.getByRole('link', { name: 'Iniciar expedição' }).click()
+  await expect(page.getByRole('link', { name: /Ver todas as \d+ trilhas/ })).toBeVisible()
+  await page.getByRole('link', { name: 'Começar minha primeira missão' }).click()
   await expect(page.getByRole('heading', { name: 'Viajaí' })).toBeVisible()
+})
+
+test('o mapa lista todas as trilhas', async ({ page }) => {
+  await page.goto('/#/mapa')
+  for (const name of ['AWS Foundations', 'S3 Expedition', 'IAM e Access Management', 'Computação na AWS', 'Bancos de dados na AWS']) {
+    await expect(page.getByRole('link', { name: new RegExp(name) }).first()).toBeVisible()
+  }
+})
+
+test('dossiê: primeiro acesso explica o que vai aparecer e sugere a primeira missão', async ({ page }) => {
+  await page.goto('/#/dossie')
+  await expect(page.getByRole('heading', { name: 'Sua jornada ainda não começou' })).toBeVisible()
+  await expect(page.getByText(/^0 de \d+ desbloqueadas$/)).toBeVisible()
+  await expect(page.getByText('Primeira Região', { exact: true }).first()).toBeVisible()
+  await page.getByRole('link', { name: 'Começar minha primeira missão' }).click()
+  await expect(page.getByRole('heading', { name: 'Viajaí' })).toBeVisible()
+})
+
+test('dossiê: resumo, conquistas por trilha e o mesmo progresso depois de recarregar', async ({ page }) => {
+  await seedProgress(page, progressWithFirstMission())
+  await page.goto('/#/dossie')
+  await expect(page.getByRole('heading', { level: 2, name: 'S3 Expedition' })).toBeVisible()
+  await expect(page.getByText(/^1 de \d+ desbloqueadas$/)).toBeVisible()
+  await expect(page.getByText('Primeiros passos', { exact: true }).first()).toBeVisible()
+  const group = page.locator('details', { has: page.getByText('S3 Expedition', { exact: true }) })
+  await group.locator('summary').click()
+  await expect(group.getByText('Leitura de bucket', { exact: true })).toBeVisible()
+  const stored = await page.evaluate(() => localStorage.getItem('aws-quest/progress'))
+  await page.reload()
+  await expect(page.getByText(/^1 de \d+ desbloqueadas$/)).toBeVisible()
+  expect(JSON.parse((await page.evaluate(() => localStorage.getItem('aws-quest/progress')))!).missions).toEqual(JSON.parse(stored!).missions)
+  await page.getByRole('link', { name: /Começar missão|Continuar missão/ }).click()
+  await expect(page).toHaveURL(/#\/missao\/s3x\.f01\.m2/)
 })
 
 test('a S3 Expedition recomenda a AWS Foundations sem bloquear', async ({ page }) => {

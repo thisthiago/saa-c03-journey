@@ -8,6 +8,7 @@ import { useGame } from '../../store/gameStore'
 import { useDocumentTitle } from '../../app/hooks'
 import { PLANNED_TRACKS } from '../../content/catalog/catalog'
 import { Badge, Card, IconTile, ProgressBar } from '../../ui/kit'
+import { DomainTags } from '../../ui/DomainTag'
 import s from './map.module.css'
 
 const ORDER = recommendedTrackOrder(registry)
@@ -93,6 +94,9 @@ export function MapPage() {
                 <div>
                   <h2 className={s.terrTitle}>{t.title}</h2>
                   <span className="muted">{t.summary}</span>
+                  <div className={s.terrDomains}>
+                    <DomainTags ids={t.examDomains} />
+                  </div>
                 </div>
               </div>
               {t.status === 'planned' ? (
