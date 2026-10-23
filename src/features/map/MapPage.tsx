@@ -1,138 +1,167 @@
-import { ChevronRight } from 'lucide-react'
+import { ListChecks, Play, RotateCcw } from 'lucide-react'
+import { useMemo } from 'react'
 import { Link } from 'react-router'
 import { registry } from '../../content'
-import { trackPhases } from '../../engine/registry'
-import { isTrackCompleted, trackProgress, unmetTrackRecommendations, unmetTrackRequirements } from '../../engine/selectors'
-import { recommendedTrackOrder, type TrackOrderStep } from '../../engine/track-order'
-import { useGame } from '../../store/gameStore'
+import { studyRecommendation, suggestedTrackId, trackState, type StudyRecommendation } from '../../engine/guide'
+import { trackPhases, trackTerritory } from '../../engine/registry'
+import { trackProgress } from '../../engine/selectors'
+import { recommendedTrackOrder, type TrackOrderStep, type TrackTier } from '../../engine/track-order'
+import { clock, useGame } from '../../store/gameStore'
 import { useDocumentTitle } from '../../app/hooks'
+import { plural } from '../../app/format'
 import { PLANNED_TRACKS } from '../../content/catalog/catalog'
-import { Badge, Card, IconTile, ProgressBar } from '../../ui/kit'
-import { DomainTags } from '../../ui/DomainTag'
+import { Badge, ButtonLink, Card, ProgressBar } from '../../ui/kit'
+import { TRACK_STATUS } from './status'
 import s from './map.module.css'
 
 const ORDER = recommendedTrackOrder(registry)
 
-/** Explica, em uma frase, por que a trilha vem depois das anteriores. */
-function orderReason(step: TrackOrderStep): string {
-  if (step.after.length === 0) return 'Ponto de partida: apresenta a nuvem e os conceitos que as outras trilhas usam.'
-  const parts = step.after.map((a) => {
-    const n = a.concepts.length
-    if (n === 0) return a.track.title
-    return `${a.track.title} (${n} ${n === 1 ? 'conceito reaproveitado' : 'conceitos reaproveitados'})`
-  })
-  const list = parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} e ${parts[parts.length - 1]}`
-  return `Usa o que você aprende em ${list}.`
+const TIERS: Record<TrackTier, { title: string; lead: string }> = {
+  start: { title: 'Comece por aqui', lead: 'Apresenta a nuvem e os conceitos que todas as outras trilhas usam.' },
+  base: { title: 'Base das outras trilhas', lead: 'Outras trilhas recomendam estas antes, porque partem do que elas ensinam.' },
+  deeper: { title: 'Aprofundamento', lead: 'Cada uma reaproveita conceitos das trilhas que vêm antes dela na lista.' },
 }
 
-function conceptList(step: TrackOrderStep): string | undefined {
-  const titles = step.after.flatMap((a) => a.concepts.map((c) => registry.concepts.get(c)?.title ?? c))
-  return titles.length ? `Conceitos reaproveitados: ${titles.join(', ')}` : undefined
+/** Grupos da ordem sugerida, com o número da primeira trilha de cada um. */
+const GROUPS = ORDER.reduce<{ tier: TrackTier; start: number; steps: TrackOrderStep[] }[]>((acc, step, i) => {
+  const last = acc[acc.length - 1]
+  if (last && last.tier === step.tier) last.steps.push(step)
+  else acc.push({ tier: step.tier, start: i + 1, steps: [step] })
+  return acc
+}, [])
+
+function titles(list: string[]): string {
+  return list.length === 1 ? list[0] : `${list.slice(0, -1).join(', ')} e ${list[list.length - 1]}`
+}
+
+/** Frase e ação da faixa de continuidade, a partir da mesma sugestão da Base. */
+function stripCopy(rec: StudyRecommendation): { text: string; cta: string; to: string } | undefined {
+  const ref = rec.missionId ? registry.missions.get(rec.missionId) : undefined
+  if (!ref) return undefined
+  const to = `/missao/${ref.mission.id}`
+  switch (rec.kind) {
+    case 'first-visit':
+      return { text: `Comece pela ${ref.track.title}. A primeira missão é ${ref.mission.title}.`, cta: 'Começar a primeira missão', to }
+    case 'resume':
+    case 'in-progress':
+    case 'review':
+      return { text: `Você está em ${ref.track.title}, na missão ${ref.mission.title}.`, cta: 'Continuar missão', to }
+    case 'next':
+      return { text: `A próxima missão de ${ref.track.title} é ${ref.mission.title}.`, cta: 'Começar missão', to }
+    case 'next-track': {
+      const done = rec.completedTrackId ? registry.tracks.get(rec.completedTrackId) : undefined
+      const text = done ? `Você concluiu ${done.title}. A próxima trilha da ordem é ${ref.track.title}.` : `A próxima trilha da ordem é ${ref.track.title}.`
+      return { text, cta: 'Começar trilha', to }
+    }
+    default:
+      return undefined
+  }
+}
+
+function ContinueStrip({ rec }: { rec: StudyRecommendation }) {
+  const copy = stripCopy(rec)
+  if (rec.kind === 'done' || !copy) {
+    return (
+      <Card className={s.strip} aria-labelledby="strip-title">
+        <h2 id="strip-title" className={s.stripTitle}>
+          Você concluiu as {registry.tracks.size} trilhas
+        </h2>
+        <p className="muted">Mantenha o que aprendeu com revisões e pratique questões no formato do exame.</p>
+        <div className="row">
+          <ButtonLink to="/revisao/questoes">
+            <ListChecks size={18} aria-hidden="true" /> Praticar questões
+          </ButtonLink>
+          <ButtonLink to="/revisao" variant="ghost">
+            <RotateCcw size={18} aria-hidden="true" /> Revisar conceitos
+          </ButtonLink>
+        </div>
+      </Card>
+    )
+  }
+  return (
+    <Card className={s.strip} aria-labelledby="strip-title">
+      <h2 id="strip-title" className={s.stripTitle}>
+        {copy.text}
+      </h2>
+      <ButtonLink to={copy.to}>
+        <Play size={18} aria-hidden="true" /> {copy.cta}
+      </ButtonLink>
+    </Card>
+  )
 }
 
 export function MapPage() {
-  useDocumentTitle('Mapa')
+  useDocumentTitle('Trilhas')
   const progress = useGame((st) => st.progress)
-  const nextId = ORDER.find((step) => !isTrackCompleted(progress, step.track))?.track.id
+  const rec = useMemo(() => studyRecommendation(progress, registry, clock.now(), ORDER), [progress])
+  const suggested = suggestedTrackId(rec, registry)
   return (
     <div className="page">
-      <p className="eyebrow">Mapa do mundo</p>
-      <h1>Territórios AWS</h1>
+      <h1>Trilhas</h1>
       <p className="muted" style={{ maxWidth: 680 }}>
-        Cada território reúne trilhas de um grupo de serviços. Conceitos aprendidos em um território (como permissões do IAM) contam para os outros.
+        As {registry.tracks.size} trilhas na ordem que evita encontrar um conceito antes de aprendê-lo. Nenhuma fica bloqueada: a ordem é uma recomendação.
       </p>
-      <Card as="section" className={s.order} aria-labelledby="order-title">
-        <h2 id="order-title" className={s.orderTitle}>
-          Ordem sugerida das trilhas
-        </h2>
-        <p className="muted">
-          Nenhuma trilha fica bloqueada, mas esta ordem evita encontrar um conceito antes de aprendê-lo. Ela vem das trilhas que cada uma recomenda e dos conceitos que cada uma reaproveita das outras.
-        </p>
-        <ol className={s.orderList}>
-          {ORDER.map((step, i) => {
-            const done = isTrackCompleted(progress, step.track)
-            return (
-              <li key={step.track.id} data-status={done ? 'completed' : step.track.id === nextId ? 'next' : 'pending'}>
+      <ContinueStrip rec={rec} />
+      {GROUPS.map((g, gi) => (
+        <section key={g.tier} className={s.level} aria-labelledby={`tier-${g.tier}`}>
+          <h2 id={`tier-${g.tier}`} className={s.levelTitle}>
+            {TIERS[g.tier].title}
+          </h2>
+          <p className="muted">{TIERS[g.tier].lead}</p>
+          <ol className={s.orderList} start={g.start}>
+            {g.steps.map((step, i) => {
+              const tr = step.track
+              const st = trackState(progress, registry, tr)
+              const tp = trackProgress(progress, tr)
+              const building = trackPhases(tr).filter((p) => p.availability !== 'available').length
+              const isNext = tr.id === suggested
+              return (
+                <li key={tr.id} data-status={isNext ? 'next' : st === 'completed' ? 'completed' : st === 'in-progress' ? 'in-progress' : 'pending'}>
+                  <span className={s.orderNum} aria-hidden="true">
+                    {g.start + i}
+                  </span>
+                  <div className={s.orderText}>
+                    <span className={s.orderHead}>
+                      <Link to={`/trilha/${tr.id}`}>{tr.title}</Link>
+                    </span>
+                    <span className={s.orderBadges}>
+                      <Badge tone={TRACK_STATUS[st].tone}>{TRACK_STATUS[st].label}</Badge>
+                      {isNext && <Badge tone="accent">Sugestão</Badge>}
+                      <span className={s.small}>{trackTerritory(registry, tr.id)?.title}</span>
+                    </span>
+                    {st === 'not-started' ? (
+                      <span className={s.small}>{plural(tp.total, 'missão', 'missões')}</span>
+                    ) : (
+                      <>
+                        <ProgressBar value={tp.ratio} label={`Progresso em ${tr.title}`} />
+                        <span className={s.small}>
+                          {tp.passed} de {tp.total} missões aprovadas
+                        </span>
+                      </>
+                    )}
+                    {st === 'not-started' && step.after.length > 0 && <span className={s.small}>Usa o que você aprende em {titles(step.after.map((a) => a.track.title))}.</span>}
+                    {building > 0 && <span className={s.small}>{plural(building, 'fase em construção', 'fases em construção')}</span>}
+                  </div>
+                </li>
+              )
+            })}
+            {gi === GROUPS.length - 1 && PLANNED_TRACKS.length > 0 && (
+              <li data-status="development">
                 <span className={s.orderNum} aria-hidden="true">
-                  {i + 1}
+                  {ORDER.length + 1}
                 </span>
                 <div className={s.orderText}>
                   <span className={s.orderHead}>
-                    <Link to={`/trilha/${step.track.id}`}>{step.track.title}</Link>
-                    {done ? <Badge tone="success">Concluída</Badge> : step.track.id === nextId ? <Badge tone="accent">Sugestão atual</Badge> : null}
+                    <strong>Trilhas em desenvolvimento</strong>
+                    <Badge>Em breve</Badge>
                   </span>
-                  <span className={s.small} title={conceptList(step)}>
-                    {orderReason(step)}
-                  </span>
+                  <span className={s.small}>{PLANNED_TRACKS.map((p) => p.title).join(', ')}. Elas usam os conceitos das trilhas acima.</span>
                 </div>
               </li>
-            )
-          })}
-          {PLANNED_TRACKS.length > 0 && (
-            <li data-status="development">
-              <span className={s.orderNum} aria-hidden="true">
-                {ORDER.length + 1}
-              </span>
-              <div className={s.orderText}>
-                <span className={s.orderHead}>
-                  <strong>Trilhas em desenvolvimento</strong>
-                  <Badge>Em breve</Badge>
-                </span>
-                <span className={s.small}>{PLANNED_TRACKS.map((p) => p.title).join(', ')}. Elas usam os conceitos das trilhas acima.</span>
-              </div>
-            </li>
-          )}
-        </ol>
-      </Card>
-      <div className={s.territories}>
-        {registry.territories.map((t) => {
-          const tracks = [...registry.tracks.values()].filter((tr) => tr.territory === t.id)
-          return (
-            <Card key={t.id} className={s.territory} as="article" style={{ opacity: t.status === 'planned' ? 0.72 : 1 }}>
-              <div className={s.terrHead}>
-                <IconTile glyph={t.glyph} color={t.status === 'active' ? 'var(--accent)' : 'var(--text-faint)'} />
-                <div>
-                  <h2 className={s.terrTitle}>{t.title}</h2>
-                  <span className="muted">{t.summary}</span>
-                  <div className={s.terrDomains}>
-                    <DomainTags ids={t.examDomains} />
-                  </div>
-                </div>
-              </div>
-              {t.status === 'planned' ? (
-                <>
-                  <Badge>Em planejamento</Badge>
-                  {t.plannedServices && <p className={s.planned}>Previsto: {t.plannedServices.join(', ')}.</p>}
-                </>
-              ) : (
-                tracks.map((tr) => {
-                  const tp = trackProgress(progress, tr)
-                  const total = trackPhases(tr).length
-                  const live = trackPhases(tr).filter((p) => p.availability === 'available').length
-                  return (
-                    <Link key={tr.id} to={`/trilha/${tr.id}`} className={s.trackLink}>
-                      <div className={s.trackLinkText}>
-                        <strong>{tr.title}</strong>
-                        <span className="muted">{tr.subtitle}</span>
-                        <ProgressBar value={tp.ratio} label={`Progresso em ${tr.title}`} />
-                        <span className={s.small}>
-                          {live} de {total} fases liberadas · {tp.passed}/{tp.total} missões aprovadas
-                        </span>
-                        {unmetTrackRequirements(progress, registry, tr).length > 0 ? (
-                          <span className={s.small}>Bloqueada até concluir: {unmetTrackRequirements(progress, registry, tr).map((x) => x.title).join(', ')}</span>
-                        ) : unmetTrackRecommendations(progress, registry, tr).length > 0 ? (
-                          <span className={s.small}>Recomendado antes: {unmetTrackRecommendations(progress, registry, tr).map((x) => x.title).join(', ')}</span>
-                        ) : null}
-                      </div>
-                      <ChevronRight aria-hidden="true" />
-                    </Link>
-                  )
-                }).concat(t.plannedServices?.length ? [<p key="previsto" className={s.planned}>Também previsto neste território: {t.plannedServices.join(', ')}.</p>] : [])
-              )}
-            </Card>
-          )
-        })}
-      </div>
+            )}
+          </ol>
+        </section>
+      ))}
     </div>
   )
 }
