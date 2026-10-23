@@ -936,6 +936,11 @@ test.describe('banco de questões', () => {
       await page.goto('/#/revisao')
       await page.getByRole('link', { name: 'Abrir o banco de questões' }).click()
       await expect(page.getByRole('heading', { level: 1, name: 'Banco de questões' })).toBeVisible()
+      // No desktop, os dois modos aparecem sem rolar a página.
+      if (vp.name === 'desktop') {
+        await expect(page.getByRole('button', { name: 'Começar treino' })).toBeInViewport()
+        await expect(page.getByRole('button', { name: 'Começar simulado' })).toBeInViewport()
+      }
       await noOverflow('banco')
       await page.screenshot({ path: `screenshots/${vp.name}-questoes-banco.png`, fullPage: true })
 
