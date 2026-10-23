@@ -19,6 +19,9 @@
   font-size: 1.15rem;
   margin: 0 0 2px;
 }
+.terrDomains {
+  margin-top: var(--space-2);
+}
 .planned {
   font-size: 0.85rem;
   color: var(--text-faint);
