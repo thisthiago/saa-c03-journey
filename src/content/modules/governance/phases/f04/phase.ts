@@ -290,11 +290,11 @@ export const F04_GOV: PhaseDef = {
           id: 'gov.f04.m2.a6',
           kind: 'decision',
           title: 'Antes de criar o recurso',
-          prompt: 'O time quer saber, antes de implantar um modelo, se as propriedades de um bucket estariam em conformidade com as regras da conta. O que o Config oferece?',
+          prompt: 'O time quer saber, antes de implantar um modelo, se uma sub-rede nova estaria em conformidade com a regra `subnet-auto-assign-public-ip-disabled`, que aceita o modo proativo. O que o Config oferece?',
           concepts: [{ id: 'cfg.triggers' }],
           xp: 40,
           difficulty: 3,
-          explanation: ['A avaliação no modo proativo confere as propriedades de um recurso antes de ele ser criado e diz se seriam COMPLIANT ou NON_COMPLIANT. Ela só avisa: não impede a criação nem corrige o recurso depois.'],
+          explanation: ['A avaliação no modo proativo confere as propriedades de um recurso antes de ele ser criado e diz se seriam COMPLIANT ou NON_COMPLIANT. Ela só avisa: não impede a criação nem corrige o recurso depois.', 'Poucas regras gerenciadas aceitam o modo proativo, como `subnet-auto-assign-public-ip-disabled` e `eip-attached`. Para outros tipos de recurso, como buckets do S3, só uma regra personalizada faria essa avaliação.'],
           options: [
             { id: 'a', text: 'A avaliação proativa das regras, que só informa o resultado e não impede a criação', correct: true, consequence: 'O time ajusta o modelo antes de implantar.' },
             { id: 'b', text: 'A avaliação proativa, que bloqueia a criação de qualquer recurso NON_COMPLIANT', correct: false, consequence: 'As regras proativas não impedem a criação dos recursos.' },
