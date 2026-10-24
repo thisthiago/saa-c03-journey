@@ -43,6 +43,7 @@ Distribuição por dificuldade: 131 fáceis, 240 médias, 112 difíceis.
 | Lote 5, Segurança (24/10/2026) | 30 | 0 | 30 | 0 |
 | Lote 6, S3 (24/10/2026) | 32 | 14 | 18 | 0 |
 | Lote 7, Foundations (24/10/2026) | 15 | 5 | 10 | 0 |
+| Lote 8, Redes (24/10/2026) | 34 | 13 | 21 | 0 |
 
 ### Piloto
 
@@ -350,6 +351,40 @@ Métricas das 17 questões do módulo, antes e depois:
 - Duas ou mais `why` curtas: de 2 para 0.
 - Tamanho médio da explicação: de 239 para 368 caracteres.
 
+### Lote 8: Redes
+
+As duas questões do piloto (`q.net.vpn-ecmp` e `q.net.dx-encryption`) não entraram de novo. Preservadas sem mudança: `q.net.subnet-size`, `q.net.vpc-cidr`, `q.net.eigw`, `q.net.nat-instance`, `q.net.nacl-stateless`, `q.net.diagnostics`, `q.net.gateway-endpoint`, `q.net.dx-gateway`, `q.net.geo-default`, `q.net.cf-cert`, `q.net.signed-cookies`, `q.net.global-accelerator`, `q.net.edge-protection`. Nenhuma mudança de classificação.
+
+| Questão | Tarefa do guia | Situação | Mudança de classificação | Observação |
+|---|---|---|---|---|
+| `q.net.default-vpc` | 1.2 | Reescrita | — | Era memorização ("Qual afirmação é verdadeira"); virou o caso de uma instância exposta sem querer. |
+| `q.net.nat-per-az` | 2.2 | Reescrita | — | Distrator de NAT instance passou a ter duas instâncias na mesma zona. |
+| `q.net.longest-prefix` | 1.2 | Reescrita | — | Explicação curta (67 caracteres) completada com o uso prático da regra. |
+| `q.net.nacl-order` | 1.2 | Reescrita | — | Distrator "Remover a regra 100" trocado por regra de saída. |
+| `q.net.sg-reference` | 1.2 | Reescrita | — | Distrator de regra de negação trocado por liberar a sub-rede. |
+| `q.net.transitive` | 2.1 | Reescrita | — | Distratores "opção que não existe" e "Nada" trocados por instância de roteamento e uma confusão plausível. |
+| `q.net.tgw-many` | 2.1 | Reescrita | — | Explicação com a conta de peerings. |
+| `q.net.tgw-isolation` | 1.2 | Reescrita | — | Distrator de peerings trocado por security groups com negação. |
+| `q.net.onprem-s3` | 1.2 | Reescrita | — | Explicação de por que endpoints de gateway não se estendem para fora da VPC. |
+| `q.net.endpoint-service` | 1.2 | Reescrita | — | Distrator de endpoint de gateway trocado por API pública com chave. |
+| `q.net.endpoint-policy` | 1.2 | Reescrita | — | Distrator "Nada: a política padrão" trocado por bucket policies. |
+| `q.net.vpn-fast` | 1.2 | Reescrita | — | Distrator de VPC peering trocado por Direct Connect hospedado. |
+| `q.net.dx-resiliency` | 2.2 | Reescrita | — | `why` curtos completados. |
+| `q.net.client-vpn` | 1.2 | Reescrita | — | Explicação curta completada. |
+| `q.net.alias-apex` | 2.2 | Reescrita | — | Distrator MX trocado por AAAA com IPs fixos. |
+| `q.net.latency-routing` | 3.4 | Reescrita | — | Distrator "Simples" trocado por geoproximidade. |
+| `q.net.failover` | 2.2 | Reescrita | — | Distrator de geolocalização trocado por failover sem verificação de saúde. |
+| `q.net.hybrid-dns` | 2.2 | Reescrita | — | Distrator de peering trocado pela confusão entre endpoint de entrada e de saída. |
+| `q.net.oac` | 1.2 | Reescrita | — | A correta tinha 2,6 vezes o tamanho dos distratores. |
+| `q.net.waf-sqli` | 1.2 | Reescrita | — | Explicação dos grupos gerenciados. |
+| `q.net.shield-advanced` | 1.2 | Reescrita | — | Distrator do Auto Scaling trocado por WAF com limite de taxa. |
+
+Métricas das 36 questões do módulo, antes e depois:
+- Correta 1,6 vez mais longa: de 9 para 0.
+- Explicação curta: de 7 para 0.
+- Duas ou mais `why` curtas: de 7 para 0.
+- Tamanho médio da explicação: de 144 para 296 caracteres.
+
 ## Como retomar
 
 O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seguem esta ordem, um módulo por lote (Computação, Governança e IAM em dois lotes cada):
@@ -363,7 +398,7 @@ O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seg
 | 5 | Segurança | `security/questions.ts` | feito |
 | 6 | S3 | `storage/questions.ts` | feito |
 | 7 | Foundations | `foundations/questions.ts` | feito |
-| 8 | Redes | `network/questions.ts`, `network/questions-f06-f09.ts` | pendente |
+| 8 | Redes | `network/questions.ts`, `network/questions-f06-f09.ts` | feito |
 | 9 | Bancos de dados | `database/questions.ts` | pendente |
 | 10 | Computação | `compute/questions.ts` | pendente |
 | 11 | Governança | `governance/questions*.ts` | pendente |
