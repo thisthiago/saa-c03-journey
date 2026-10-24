@@ -340,15 +340,21 @@ export const ARCHITECTURE_QUESTIONS: ExamQuestion[] = [
     related: ['wa.sec-identity'],
     difficulty: 2,
     domain: 'd1',
-    stem: ['Na Startup Nuvem Azul, desenvolvimento e produção ficam na mesma conta. Um desenvolvedor apagou uma tabela de produção pensando estar em testes.'],
-    question: 'Qual mudança evita esse erro pela estrutura?',
-    options: [
-      { id: 'a', text: 'Contas separadas para desenvolvimento e produção numa organização do AWS Organizations', correct: true, why: 'O acesso a uma conta não alcança a outra.' },
-      { id: 'b', text: 'Tags de ambiente em todos os recursos', correct: false, why: 'Ajudam a identificar, mas não impedem o acesso.' },
-      { id: 'c', text: 'Uma VPC por ambiente na mesma conta', correct: false, why: 'As permissões da conta valem para as duas VPCs.' },
-      { id: 'd', text: 'Mais um alarme no CloudWatch', correct: false, why: 'Avisa depois do erro.' },
+    stem: [
+      'Na Startup Nuvem Azul, os ambientes de desenvolvimento e de produção ficam **na mesma conta AWS**, e os desenvolvedores usam a mesma role nos dois. Um desenvolvedor apagou uma tabela de produção achando que estava no ambiente de testes.',
+      'A empresa quer que esse erro fique **impossível pela própria estrutura**, sem depender de cada pessoa conferir o ambiente antes de agir.',
     ],
-    explanation: ['Contas separadas por ambiente isolam recursos e permissões.'],
+    question: 'Qual mudança atende ao requisito?',
+    options: [
+      { id: 'a', text: 'Mover a produção para uma conta própria numa organização do AWS Organizations, sem acesso dos desenvolvedores', correct: true, why: 'A conta é uma fronteira de isolamento de recursos e de permissões: quem só acessa a conta de desenvolvimento não alcança nada da conta de produção.' },
+      { id: 'b', text: 'Aplicar a tag de ambiente em todos os recursos e revisar as tags toda semana', correct: false, why: 'A tag ajuda a identificar o ambiente, mas, sozinha, não tira permissão de ninguém: a mesma role continua podendo apagar a tabela de produção.' },
+      { id: 'c', text: 'Criar uma VPC para produção e outra para desenvolvimento, sem conexão entre elas', correct: false, why: 'VPCs isolam o tráfego de rede, não as permissões do IAM. Apagar uma tabela é uma chamada à API da AWS, que a role da conta continua podendo fazer.' },
+      { id: 'd', text: 'Criar uma regra do EventBridge que avisa a equipe quando o CloudTrail registrar a exclusão de uma tabela', correct: false, why: 'Detecta o erro depois que ele acontece. É útil para auditoria e resposta, mas não impede a exclusão.' },
+    ],
+    explanation: [
+      'O requisito decisivo é tornar o erro impossível **pela estrutura**, sem contar com a atenção de cada pessoa. Na AWS, a **conta** é uma fronteira forte de isolamento para segurança, cobrança e acesso: uma role de uma conta não age em outra, a menos que alguém crie de propósito uma relação de confiança.',
+      'Por isso o Well-Architected recomenda separar ambientes e cargas de trabalho em contas, agrupadas no AWS Organizations. Tags e alertas ajudam a enxergar e a detectar, e VPCs separam a rede, mas nenhuma dessas medidas tira a permissão de apagar recursos de produção.',
+    ],
   },
   {
     id: 'q.arq.sec-people',
@@ -371,17 +377,23 @@ export const ARCHITECTURE_QUESTIONS: ExamQuestion[] = [
     id: 'q.arq.opt-rightsizing',
     concept: 'opt.rightsizing',
     related: ['ec2.compute-optimizer'],
-    difficulty: 1,
+    difficulty: 2,
     domain: 'd4',
-    stem: ['Nas últimas quatro semanas, as instâncias de uma API usaram no máximo 25% de CPU e 30% de memória.'],
-    question: 'Qual é a melhor ação para reduzir o custo?',
-    options: [
-      { id: 'a', text: 'Reduzir para um tamanho menor da mesma família, confirmando com o Compute Optimizer', correct: true, why: 'Abaixo de 40% de pico em quatro semanas, a instância é candidata a reduzir.' },
-      { id: 'b', text: 'Comprar Reserved Instances de 3 anos do tamanho atual', correct: false, why: 'Compromete o tamanho errado por três anos.' },
-      { id: 'c', text: 'Trocar por instâncias Spot', correct: false, why: 'Não se sabe se a API aguenta interrupções, e o tamanho continua errado.' },
-      { id: 'd', text: 'Não mudar nada', correct: false, why: 'Paga capacidade que não é usada.' },
+    stem: [
+      'A Fintech Grão Certo roda uma API interna em quatro instâncias m5.2xlarge On-Demand atrás de um Application Load Balancer. Nas últimas quatro semanas, o uso **máximo** foi de 25% de CPU e 30% de memória, inclusive nos horários de pico.',
+      'A API vai continuar no ar pelos próximos anos, e a empresa quer **reduzir o custo** sem prejudicar o desempenho.',
     ],
-    explanation: ['Dimensione primeiro, pelo pico de CPU e memória num período longo; depois escolha a compra.'],
+    question: 'Qual deve ser o **primeiro** passo?',
+    options: [
+      { id: 'a', text: 'Reduzir as instâncias para um tamanho menor da mesma família, conferindo a recomendação do AWS Compute Optimizer', correct: true, why: 'Com pico abaixo de 40% de CPU e de memória em quatro semanas, as instâncias são candidatas a reduzir. Ajustar o tamanho antes evita pagar capacidade ociosa.' },
+      { id: 'b', text: 'Comprar um Compute Savings Plan de 3 anos que cubra o gasto por hora atual das quatro instâncias', correct: false, why: 'Um compromisso longo faz sentido para uma API que vai durar anos, mas cobrir o gasto atual prende o desconto a uma capacidade que sobra. Dimensione primeiro e só depois assuma o compromisso.' },
+      { id: 'c', text: 'Trocar as quatro instâncias On-Demand por instâncias Spot do mesmo tipo', correct: false, why: 'O Spot é bem mais barato, mas pode ser interrompido, e nada no cenário diz que a API tolera isso. Além disso, o tamanho continuaria maior que o necessário.' },
+      { id: 'd', text: 'Colocar as instâncias num grupo do Auto Scaling com mínimo de quatro instâncias do tamanho atual', correct: false, why: 'O Auto Scaling acrescenta instâncias quando a demanda sobe, mas com mínimo de quatro do mesmo tamanho a frota nunca fica menor que a atual, e o desperdício continua.' },
+    ],
+    explanation: [
+      'O requisito decisivo é o uso medido: pico de 25% de CPU e 30% de memória ao longo de quatro semanas. O Well-Architected considera candidata a reduzir a instância que fica abaixo de 40% de pico nesse período, e o Compute Optimizer recomenda tamanhos a partir do uso medido.',
+      'A ordem importa: primeiro **ajustar o tamanho** (rightsizing), depois escolher o **modelo de compra** (Savings Plans, Reserved Instances ou Spot) para o tamanho certo. Comprar desconto antes de dimensionar prende a empresa ao desperdício por anos.',
+    ],
   },
   {
     id: 'q.arq.opt-pricing',
