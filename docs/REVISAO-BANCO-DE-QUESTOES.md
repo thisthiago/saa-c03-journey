@@ -37,6 +37,7 @@ Distribuição por dificuldade: 131 fáceis, 240 médias, 112 difíceis.
 |---|---|---|---|---|
 | Piloto (24/10/2026) | 24 | 4 | 20 | 0 |
 | Lote 1, Arquitetura (24/10/2026) | 38 | 0 | 38 | 0 |
+| Lote 2, Arquivos (24/10/2026) | 26 | 0 | 26 | 0 |
 
 ### Piloto
 
@@ -123,6 +124,45 @@ Métricas das 40 questões do módulo, antes e depois:
 - Explicação curta: de 34 para 0.
 - Tamanho médio da explicação: de 91 para 472 caracteres.
 
+### Lote 2: Arquivos
+
+As duas questões do piloto (`q.fil.efs-encryption` e `q.fil.efs-access-point`) não entraram de novo. Nenhuma mudança de classificação.
+
+| Questão | Tarefa do guia | Situação | Mudança de classificação | Observação |
+|---|---|---|---|---|
+| `q.fil.efs-shared` | 3.1 | Reescrita | — | Distrator do FSx for Windows explicado pela escolha, não por impossibilidade. |
+| `q.fil.efs-windows` | 3.1 | Reescrita | — | Distratores com detalhe comparável; explicação do erro comum. |
+| `q.fil.efs-onezone` | 4.1 | Reescrita | — | Explicação de quando o Regional continua indicado. |
+| `q.fil.efs-mount` | 2.2 | Reescrita | — | Explicação do mount target como caminho de rede. |
+| `q.fil.efs-throughput` | 4.1 | Reescrita | — | Explicação do Elastic, do Provisioned e da base do Bursting. |
+| `q.fil.efs-lifecycle` | 4.1 | Reescrita | — | Requisito de manter o caminho dos arquivos explícito. |
+| `q.fil.efs-replication` | 2.2 | Reescrita | — | Distrator "One Zone em outra Região" trocado por replicação na mesma Região. |
+| `q.fil.fsxw-ad` | 1.1 | Reescrita | — | Distratores explicados pelo que cada diretório faz. |
+| `q.fil.fsxw-multiaz` | 2.2 | Reescrita | — | Explicação com o tempo de recuperação do Single-AZ. |
+| `q.fil.fsxw-shadow` | 2.2 | Reescrita | — | Explicação dos limites das cópias de sombra. |
+| `q.fil.fsxw-storage` | 4.1 | Reescrita | — | Distrator de cópias de sombra ficou plausível. |
+| `q.fil.lustre-s3` | 3.1 | Reescrita | — | Distratores de EFS e EBS ficaram plausíveis. |
+| `q.fil.lustre-scratch` | 4.1 | Reescrita | — | Empresa fictícia nomeada; explicação de quando usar o persistente. |
+| `q.fil.lustre-durability` | 2.2 | Reescrita | — | Distrator "mount targets são do EFS" trocado por snapshots do EBS. |
+| `q.fil.ontap` | 3.1 | Reescrita | — | Distratores com o motivo de cada um. |
+| `q.fil.ontap-tiering` | 4.1 | Reescrita | — | Requisito de não mudar o acesso explícito. |
+| `q.fil.openzfs` | 3.1 | Reescrita | — | Distrator de S3 trocado pelo Lustre persistente. |
+| `q.fil.choose` | 3.1 | Reescrita | — | Texto padronizado (Escolha TRÊS.). |
+| `q.fil.transfer` | 2.1 | Reescrita | — | Distrator do DataSync explicado pelo servidor que continuaria existindo. |
+| `q.fil.transfer-endpoint` | 1.2 | Reescrita | — | Fato do endpoint público conferido e registrado. |
+| `q.fil.backup-central` | 2.2 | Reescrita | — | Distrator de versionamento do S3 trocado pelo Data Lifecycle Manager. |
+| `q.fil.backup-cold` | 4.1 | Reescrita | — | Explicação da regra dos 90 dias. |
+| `q.fil.backup-continuous` | 2.2 | Reescrita | — | Explicação de como passar dos 35 dias. |
+| `q.fil.backup-ransomware` | 1.3 | Reescrita | — | Explicação das duas fronteiras numa só cópia. |
+| `q.fil.backup-lock` | 1.3 | Reescrita | — | WORM explicado; distrator da SCP reescrito. |
+| `q.fil.restore-testing` | 2.2 | Reescrita | — | Explicação de RPO e RTO no teste. |
+
+Métricas das 28 questões do módulo, antes e depois:
+- Correta 1,6 vez mais longa: de 11 para 0.
+- Correta mais longa que todos os distratores: de 15 para 9 das 23 de resposta única.
+- Explicação curta: de 24 para 0.
+- Tamanho médio da explicação: de 82 para 439 caracteres.
+
 ## Como retomar
 
 O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seguem esta ordem, um módulo por lote (Computação, Governança e IAM em dois lotes cada):
@@ -130,7 +170,7 @@ O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seg
 | Ordem | Módulo | Arquivo(s) | Situação |
 |---|---|---|---|
 | 1 | Arquitetura | `architecture/questions.ts` | feito |
-| 2 | Arquivos | `files/questions.ts` | pendente |
+| 2 | Arquivos | `files/questions.ts` | feito |
 | 3 | Análise | `analytics/questions.ts` | pendente |
 | 4 | Integração | `integration/questions.ts` | pendente |
 | 5 | Segurança | `security/questions.ts` | pendente |
