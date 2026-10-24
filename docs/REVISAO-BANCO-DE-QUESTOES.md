@@ -47,6 +47,7 @@ Distribuição por dificuldade: 131 fáceis, 240 médias, 112 difíceis.
 | Lote 9, Bancos de dados (24/10/2026) | 47 | 23 | 24 | 0 |
 | Lote 10a, Computação até opções de compra (24/10/2026) | 31 | 14 | 17 | 0 |
 | Lote 10b, Computação de Elastic Load Balancing em diante (24/10/2026) | 32 | 13 | 19 | 0 |
+| Lote 11, Governança (24/10/2026) | 62 | 29 | 33 | 0 |
 
 ### Piloto
 
@@ -481,6 +482,52 @@ Métricas das 65 questões do módulo, antes e depois:
 - Explicação curta: de 1 para 0.
 - Tamanho médio da explicação: de 188 para 286 caracteres.
 
+### Lote 11: Governança
+
+As duas questões do piloto (`q.gov.config-proactive` e `q.gov.config-recording-cost`) não entraram de novo. As outras 29 foram preservadas sem mudança. Nenhuma mudança de classificação.
+
+| Questão | Tarefa do guia | Situação | Mudança de classificação | Observação |
+|---|---|---|---|---|
+| `q.gov.composite` | 2.2 | Reescrita | — | Distrator de um tópico por alarme trocado por AND com ações nos alarmes de baixo. |
+| `q.gov.alarm-actions` | 2.2 | Reescrita | — | Distratores sem relação (mover de Região, apagar volume) trocados por ações do EC2 que não existem ou não bastam. |
+| `q.gov.metric-filter` | 2.2 | Reescrita | — | Distrator do monitoramento detalhado de grupo de logs (recurso que não existe) trocado por métrica publicada pelo código. |
+| `q.gov.ia-metric-filter` | 4.1 | Reescrita | — | Distrator do Live Tail trocado por filtro de métrica no S3. |
+| `q.gov.subscription` | 3.5 | Reescrita | — | Distrator de retenção trocado por exportação ao S3. |
+| `q.gov.trail-history` | 1.2 | Reescrita | — | Distrator das métricas do IAM trocado pelo relatório de credenciais. |
+| `q.gov.trail-alert` | 1.2 | Reescrita | — | Distrator do monitoramento detalhado trocado por alarme direto sobre arquivos no S3; explicação cita a alternativa com EventBridge. |
+| `q.gov.trail-cost` | 4.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.gov.config-autoremediate` | 1.2 | Reescrita | — | Distrator do histórico do CloudTrail trocado por regra com aviso pelo SNS. |
+| `q.gov.config-aggregator` | 1.2 | Reescrita | — | Alternativas equilibradas. |
+| `q.gov.config-remediation-multi` | 1.2 | Reescrita | — | Era memorização ("Quais afirmações estão corretas?"); virou cenário com um caso seguro e um arriscado. |
+| `q.gov.ssm-managed-multi` | 1.2 | Reescrita | — | Distrator do monitoramento detalhado trocado por endpoint de gateway. |
+| `q.gov.ssm-runcommand` | 2.1 | Reescrita | — | Distratores de Parameter Store, Config e CloudTrail trocados por Session Manager, State Manager e Automation. |
+| `q.gov.ssm-patch` | 1.2 | Reescrita | — | Distrator do Parameter Store trocado por AMIs novas. |
+| `q.gov.ssm-secret` | 1.3 | Reescrita | — | Distratores de String e variável de ambiente trocados por script mensal e camada avançada. |
+| `q.gov.ssm-automation` | 2.1 | Reescrita | — | Distrator do parâmetro "aprovado" trocado por Maintenance Window. |
+| `q.gov.cfn-replacement` | 2.2 | Reescrita | — | Alternativas equilibradas. |
+| `q.gov.cfn-retain` | 2.2 | Reescrita | — | `why` curtos completados; distrator do horário trocado por proteção contra término. |
+| `q.gov.cfn-stacksets` | 2.2 | Reescrita | — | Distrator do agregador trocado por pacote de conformidade. |
+| `q.gov.service-catalog` | 1.2 | Reescrita | — | Distrator do Parameter Store trocado por templates num bucket. |
+| `q.gov.ct-mgmt` | 1.2 | Reescrita | — | Distrator de recriar a conta de gerenciamento trocado por RCP. |
+| `q.gov.tag-policy` | 4.1 | Reescrita | — | Distrator da SCP trocado por política só para recursos antigos; explicação cita a SCP com condição de tags. |
+| `q.gov.sharing-restricted` | 4.1 | Reescrita | — | Distrator da carência de 30 dias trocado por divisão igual. |
+| `q.gov.tags-activate` | 4.1 | Reescrita | — | Distrator de reiniciar instâncias trocado por ativação nas contas membro. |
+| `q.gov.budget-forecast` | 4.1 | Reescrita | — | `why` curtos completados. |
+| `q.gov.anomaly` | 4.1 | Reescrita | — | Distratores de Savings Plans e Config trocados por orçamento diário e relatórios semanais. |
+| `q.gov.cost-explorer-multi` | 4.1 | Reescrita | — | Era memorização ("Quais afirmações estão corretas?"); virou avaliação dos planos de um time. |
+| `q.gov.ta-basic` | 4.1 | Reescrita | — | `why` curtos completados. |
+| `q.gov.health-auto` | 2.2 | Reescrita | — | `why` curtos completados. |
+| `q.gov.quota-region` | 2.2 | Reescrita | — | Distratores de regra inexistente e faturamento consolidado trocados por confusões sobre o escopo das cotas. |
+| `q.gov.quota-multi` | 2.2 | Reescrita | — | Texto padronizado (Escolha DUAS.); distrator do faturamento consolidado trocado por aumento só na conta de gerenciamento. |
+| `q.gov.ops-who` | 1.2 | Reescrita | — | A correta tinha três vezes o tamanho dos distratores. |
+| `q.gov.ops-mix` | 2.2 | Reescrita | — | Texto padronizado (Escolha TRÊS.). |
+
+Métricas das 64 questões do módulo, antes e depois:
+- Correta 1,6 vez mais longa: de 26 para 0.
+- Correta mais longa que todos os distratores: de 38 para 34 das 55 de resposta única.
+- Duas ou mais `why` curtas: de 6 para 0.
+- Tamanho médio da explicação: de 207 para 296 caracteres.
+
 ## Como retomar
 
 O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seguem esta ordem, um módulo por lote (Computação, Governança e IAM em dois lotes cada):
@@ -497,7 +544,7 @@ O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seg
 | 8 | Redes | `network/questions.ts`, `network/questions-f06-f09.ts` | feito |
 | 9 | Bancos de dados | `database/questions.ts` | feito |
 | 10 | Computação | `compute/questions.ts` | feito |
-| 11 | Governança | `governance/questions*.ts` | pendente |
+| 11 | Governança | `governance/questions*.ts` | feito |
 | 12 | IAM | `identity/questions.ts` | pendente |
 
 Cada lote termina com: comparação com o retrato inicial (ids, conceito, domínio, dificuldade, número de opções e de corretas), `npm run typecheck`, `npm run lint`, `npx vitest run src/content src/engine`, atualização desta tabela e um commit local do arquivo do módulo e deste documento. Nada vai para o remoto sem pedido.
