@@ -41,6 +41,7 @@ Distribuição por dificuldade: 131 fáceis, 240 médias, 112 difíceis.
 | Lote 3, Análise (24/10/2026) | 37 | 0 | 37 | 0 |
 | Lote 4, Integração (24/10/2026) | 22 | 0 | 22 | 0 |
 | Lote 5, Segurança (24/10/2026) | 30 | 0 | 30 | 0 |
+| Lote 6, S3 (24/10/2026) | 32 | 14 | 18 | 0 |
 
 ### Piloto
 
@@ -294,6 +295,37 @@ Métricas das 32 questões do módulo, antes e depois:
 - Explicação curta: de 21 para 0.
 - Tamanho médio da explicação: de 98 para 395 caracteres.
 
+### Lote 6: S3
+
+As duas questões do piloto (`q.s3x.expedited` e `q.s3x.versioning`) não entraram de novo. O banco do S3 já tinha explicações médias de 223 caracteres; as 14 que ensinavam bem foram preservadas sem mudança: `q.s3x.standard-ia`, `q.s3x.glacier-ir`, `q.s3x.deep-archive`, `q.s3x.intelligent-tiering`, `q.s3x.onezone`, `q.s3x.object-lock`, `q.s3x.bucket-keys`, `q.s3x.https`, `q.s3x.presigned`, `q.s3x.block-public`, `q.s3x.batch-replication`, `q.s3x.rtc`, `q.s3x.file-gateway`, `q.s3x.transfer-acceleration`. Nenhuma mudança de classificação neste lote.
+
+| Questão | Tarefa do guia | Situação | Mudança de classificação | Observação |
+|---|---|---|---|---|
+| `q.s3x.delete-marker` | 2.2 | Reescrita | — | Distratores "Não há como" e chamado no suporte trocados por backup e restauração Expedited. |
+| `q.s3x.mfa-delete` | 1.3 | Reescrita | — | Era memorização ("Quais afirmações estão corretas?") sem "(Escolha DUAS.)"; virou pergunta sobre o que é preciso para habilitar. |
+| `q.s3x.versioned-expiration` | 4.1 | Reescrita | — | Alternativas equilibradas; explicação do sinal listagem × conta. |
+| `q.s3x.multipart-cleanup` | 4.1 | Reescrita | — | Distrator de versionamento trocado por script agendado. |
+| `q.s3x.multipart` | 3.1 | Reescrita | — | `why` curtos completados; distrator "Não é possível" virou a confusão entre limite do PUT e do objeto. |
+| `q.s3x.sse-kms` | 1.3 | Reescrita | — | Distrator de HTTPS trocado pela chave aws/s3. |
+| `q.s3x.kms-cross-account` | 1.3 | Reescrita | — | Faltava "(Escolha DUAS.)". |
+| `q.s3x.acl-disabled` | 1.3 | Reescrita parcial | — | Distrator de versionamento trocado por Bucket owner preferred. |
+| `q.s3x.replication-req` | 2.2 | Reescrita parcial | — | Faltava "(Escolha DUAS.)"; distrator de Requester Pays trocado pela bucket policy de destino (exigida só entre contas). |
+| `q.s3x.versioning-not-backup` | 2.2 | Reescrita | — | Distrator de classe Standard trocado por replicação na mesma conta. |
+| `q.s3x.fanout` | 3.4 | Reescrita | — | Distrator de listagem trocado por Lambda chamando os três sistemas. |
+| `q.s3x.fifo` | 3.4 | Reescrita parcial | — | Distrator "Não é possível" trocado por tópico FIFO do SNS (fato conferido e registrado). |
+| `q.s3x.recursion` | 2.2 | Reescrita | — | Distrator de memória trocado por concorrência reservada. |
+| `q.s3x.requester-pays` | 4.1 | Reescrita | — | Distrator do Transfer Acceleration trocado por CloudFront com URLs assinadas. |
+| `q.s3x.tape-gateway` | 2.2 | Reescrita | — | Distrator de reescrever o backup trocado por Tape Gateway com Standard-IA. |
+| `q.s3x.stored-volumes` | 2.2 | Reescrita | — | Explicação de onde ficam os dados primários. |
+| `q.s3x.datasync` | 3.1 | Reescrita parcial | — | Distrator do Tape Gateway trocado por aws s3 sync. |
+| `q.s3x.consistency` | 3.1 | Reescrita | — | `why` curtos completados; explicação da origem da ideia de consistência eventual. |
+
+Métricas das 34 questões do módulo, antes e depois:
+- Correta 1,6 vez mais longa: de 11 para 0.
+- Correta mais longa que todos os distratores: de 14 para 13 das 31 de resposta única.
+- Duas ou mais `why` curtas: de 3 para 0.
+- Tamanho médio da explicação: de 223 para 311 caracteres.
+
 ## Como retomar
 
 O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seguem esta ordem, um módulo por lote (Computação, Governança e IAM em dois lotes cada):
@@ -305,7 +337,7 @@ O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seg
 | 3 | Análise | `analytics/questions.ts` | feito |
 | 4 | Integração | `integration/questions.ts` | feito |
 | 5 | Segurança | `security/questions.ts` | feito |
-| 6 | S3 | `storage/questions.ts` | pendente |
+| 6 | S3 | `storage/questions.ts` | feito |
 | 7 | Foundations | `foundations/questions.ts` | pendente |
 | 8 | Redes | `network/questions.ts`, `network/questions-f06-f09.ts` | pendente |
 | 9 | Bancos de dados | `database/questions.ts` | pendente |
