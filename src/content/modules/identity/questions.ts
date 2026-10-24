@@ -65,15 +65,18 @@ export const IDENTITY_QUESTIONS: ExamQuestion[] = [
     related: ['iam.users', 'iam.access-keys'],
     difficulty: 2,
     domain: 'd1',
-    stem: ['Um usuário IAM da Ápice Seguros tem **uma** chave de acesso usada por três aplicações. A política interna exige rotação sem deixar nenhuma aplicação parada.'],
+    stem: ['Um usuário IAM da Ápice Seguros tem **uma** chave de acesso usada por três aplicações fora da AWS. A política interna exige rotação da chave **sem deixar nenhuma aplicação parada**.'],
     question: 'Qual sequência atende ao requisito?',
     options: [
-      { id: 'a', text: 'Criar a segunda chave, trocar nas aplicações, conferir o último uso da antiga, desativá-la, confirmar que tudo funciona e só então excluí-la', correct: true, why: 'As duas chaves convivem durante a troca, e desativar antes de excluir permite voltar atrás.' },
-      { id: 'b', text: 'Excluir a chave atual e criar uma nova logo em seguida', correct: false, why: 'As três aplicações param entre a exclusão e a troca.' },
-      { id: 'c', text: 'Desativar a chave atual, criar a nova e então atualizar as aplicações', correct: false, why: 'As aplicações ficam paradas desde a desativação até receberem a nova chave.' },
-      { id: 'd', text: 'Criar uma chave para cada aplicação, somando quatro chaves no usuário, e excluir a antiga depois', correct: false, why: 'Cada usuário IAM tem no máximo duas chaves de acesso.' },
+      { id: 'a', text: 'Criar a segunda chave, atualizar as aplicações, desativar a chave antiga e excluí-la depois de confirmar que nada parou', correct: true, why: 'As duas chaves convivem durante a troca, e desativar antes de excluir permite reativar a antiga se alguma aplicação tiver ficado para trás.' },
+      { id: 'b', text: 'Excluir a chave atual, criar uma nova e atualizar as três aplicações logo em seguida', correct: false, why: 'As três aplicações param entre a exclusão e a atualização, e uma chave excluída não pode ser recuperada.' },
+      { id: 'c', text: 'Desativar a chave atual, criar uma nova e atualizar as três aplicações logo em seguida', correct: false, why: 'Desativar permite voltar atrás, mas na ordem errada: as aplicações ficam paradas desde a desativação até receberem a nova chave.' },
+      { id: 'd', text: 'Criar uma chave nova para cada aplicação no mesmo usuário e excluir a chave compartilhada depois da troca', correct: false, why: 'Separar uma credencial por aplicação é uma boa ideia, mas cada usuário IAM tem no máximo duas chaves de acesso; seria preciso um usuário por aplicação.' },
     ],
-    explanation: ['O limite de **duas chaves por usuário** existe justamente para permitir a rotação. A ordem segura é criar, trocar, conferir o último uso, **desativar** e só depois **excluir**: se algo parar, você reativa a chave antiga.'],
+    explanation: [
+      'O limite de **duas chaves por usuário** existe justamente para permitir a rotação sem parada. A ordem segura é criar, trocar nas aplicações, conferir o último uso da antiga, **desativar** e só depois **excluir**: se algo parar, você reativa a chave antiga.',
+      'Chaves de acesso são credenciais de longo prazo. Para aplicações que rodam na AWS, o caminho preferido é uma role, com credenciais temporárias renovadas automaticamente.',
+    ],
   },
   {
     id: 'q.iax.user-no-permission',
@@ -103,7 +106,7 @@ export const IDENTITY_QUESTIONS: ExamQuestion[] = [
       { id: 'a', text: 'Grupos não podem ser principal; anexe ao grupo uma política de identidade que permita a leitura do bucket', correct: true, why: 'Grupo serve para organizar permissões dos usuários, não para autenticar requisições.' },
       { id: 'b', text: 'Funciona, porque o grupo e o bucket estão na mesma conta', correct: false, why: 'A conta não muda a regra: grupo não aparece no Principal.' },
       { id: 'c', text: 'Funciona se o grupo estiver dentro de outro grupo com permissão de leitura', correct: false, why: 'Grupos não podem conter outros grupos.' },
-      { id: 'd', text: 'Funciona se cada analista também tiver MFA habilitado', correct: false, why: 'MFA não transforma o grupo em principal.' },
+      { id: 'd', text: 'Grupos só podem ser principal em trust policies; crie uma role que o grupo possa assumir e cite a role na bucket policy', correct: false, why: 'Grupos também não podem ser principal em trust policies. Uma role até resolveria o acesso, mas com etapas a mais e partindo de uma regra falsa.' },
     ],
     explanation: [
       'Podem ser principal: contas, usuários IAM, roles, sessões de role, usuários federados, serviços da AWS e `*`. **Grupos não**, porque se referem a permissões, não a autenticação.',
