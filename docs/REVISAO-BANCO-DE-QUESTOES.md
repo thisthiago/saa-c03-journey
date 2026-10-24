@@ -38,6 +38,7 @@ Distribuição por dificuldade: 131 fáceis, 240 médias, 112 difíceis.
 | Piloto (24/10/2026) | 24 | 4 | 20 | 0 |
 | Lote 1, Arquitetura (24/10/2026) | 38 | 0 | 38 | 0 |
 | Lote 2, Arquivos (24/10/2026) | 26 | 0 | 26 | 0 |
+| Lote 3, Análise (24/10/2026) | 37 | 0 | 37 | 0 |
 
 ### Piloto
 
@@ -163,6 +164,56 @@ Métricas das 28 questões do módulo, antes e depois:
 - Explicação curta: de 24 para 0.
 - Tamanho médio da explicação: de 82 para 439 caracteres.
 
+### Lote 3: Análise
+
+As duas questões do piloto (`q.ana.partition-key` e `q.ana.lake-practices`) não entraram de novo. Nenhuma mudança de classificação.
+
+| Questão | Tarefa do guia | Situação | Mudança de classificação | Observação |
+|---|---|---|---|---|
+| `q.ana.lake-vs-warehouse` | 3.5 | Reescrita | — | Explicação de schema-on-read e schema-on-write. |
+| `q.ana.layers` | 4.1 | Reescrita | — | Explicação das camadas e da sugestão de ciclo de vida. |
+| `q.ana.columnar` | 4.1 | Reescrita | — | Distrator de CSV ganhou compressão, para ficar plausível. |
+| `q.ana.athena-gzip` | 4.1 | Reescrita | — | Explicação com o exemplo da página de preços. |
+| `q.ana.small-files` | 3.5 | Reescrita | — | Explicação de por que pouco volume ainda fica lento. |
+| `q.ana.data-catalog` | 3.5 | Reescrita | — | Distratores com o motivo de cada um. |
+| `q.ana.crawler` | 3.5 | Reescrita | — | Papéis de crawler, job e DataBrew explicados. |
+| `q.ana.csv-parquet-job` | 3.5 | Reescrita | — | Distrator do crawler explicado pelo que ele faz. |
+| `q.ana.glue-cost` | 4.1 | Reescrita | — | Explicação com a conta e a cobrança por segundo. |
+| `q.ana.bookmarks` | 4.1 | Reescrita | — | Explicação da causa comum dos dois sintomas. |
+| `q.ana.trigger` | 2.1 | Reescrita | — | Explicação de encadear pelo resultado, não pelo relógio. |
+| `q.ana.flex` | 4.1 | Reescrita | — | Explicação de quando a execução Flex combina. |
+| `q.ana.databrew` | 3.5 | Reescrita | — | Distrator do Redshift trocado por job do Glue em Python. |
+| `q.ana.ctas` | 4.1 | Reescrita | — | Distrator da "compressão padrão do bucket" (recurso que não existe) trocado por um job do Glue agendado. |
+| `q.ana.athena-adhoc` | 3.5 | Reescrita | — | Distrator da planilha trocado pelo OpenSearch. |
+| `q.ana.athena-billing` | 4.1 | Reescrita | — | Explicação de DDL e do mínimo de 10 MB. |
+| `q.ana.workgroup-limit` | 4.1 | Reescrita | — | Explicação dos dois tipos de limite. |
+| `q.ana.federated` | 3.5 | Reescrita | — | Explicação de quando copiar passa a compensar. |
+| `q.ana.lf-columns` | 1.3 | Reescrita | — | Explicação da camada de permissão certa. |
+| `q.ana.lf-rows` | 1.3 | Reescrita | — | Distrator de tags do IAM nas linhas trocado por views no Athena. |
+| `q.ana.lf-default` | 1.3 | Reescrita | — | Explicação do IAMAllowedPrincipals e do modo híbrido. |
+| `q.ana.lf-share` | 1.3 | Reescrita | — | Distrator de tags do IAM trocado pela concessão manual a cada tabela. |
+| `q.ana.emr-spot` | 4.2 | Reescrita | — | Explicação dos papéis dos nós. |
+| `q.ana.emr-transient` | 4.2 | Reescrita | — | Distrator de saída no HDFS trocado por Reserved Instances. |
+| `q.ana.emr-choice` | 3.5 | Reescrita | — | Regra prática entre Glue, Athena e EMR. |
+| `q.ana.firehose-parquet` | 3.5 | Reescrita | — | Explicação da conversão de formato. |
+| `q.ana.kds-replay` | 3.5 | Reescrita | — | Distrator do Glue trocado pelo SNS. |
+| `q.ana.ingest-saas` | 3.5 | Reescrita | — | Explicação do Data Exchange e do DataSync. |
+| `q.ana.opensearch-search` | 3.5 | Reescrita | — | Distrator do Redshift trocado pelo DynamoDB. |
+| `q.ana.opensearch-ha` | 2.2 | Reescrita | — | Explicação de backup e redundância. |
+| `q.ana.spice` | 4.1 | Reescrita | — | Distratores do OpenSearch e de permissão de edição trocados por Parquet e atualização a cada minuto. |
+| `q.ana.quick-rls` | 1.3 | Reescrita | — | Explicação de filtro de painel e segurança. |
+| `q.ana.ai-docs` | 3.5 | Reescrita | — | Explicação da combinação Textract e Comprehend. |
+| `q.ana.ai-voice` | 3.5 | Reescrita | — | Explicação dos caminhos opostos. |
+| `q.ana.transcoder` | 3.5 | Reescrita | — | Data do encerramento movida para o why, para equilibrar as alternativas. |
+| `q.ana.streaming` | 3.5 | Reescrita | — | Distrator do Glue por hora trocado por uma aplicação própria no lugar do Firehose. |
+| `q.ana.choose` | 3.5 | Reescrita | — | Distrator do OpenSearch trocado por crawler com Redshift provisionado. |
+
+Métricas das 39 questões do módulo, antes e depois:
+- Correta 1,6 vez mais longa: de 17 para 0.
+- Correta mais longa que todos os distratores: de 24 para 16 das 35 de resposta única.
+- Explicação curta: de 21 para 0.
+- Tamanho médio da explicação: de 111 para 387 caracteres.
+
 ## Como retomar
 
 O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seguem esta ordem, um módulo por lote (Computação, Governança e IAM em dois lotes cada):
@@ -171,7 +222,7 @@ O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seg
 |---|---|---|---|
 | 1 | Arquitetura | `architecture/questions.ts` | feito |
 | 2 | Arquivos | `files/questions.ts` | feito |
-| 3 | Análise | `analytics/questions.ts` | pendente |
+| 3 | Análise | `analytics/questions.ts` | feito |
 | 4 | Integração | `integration/questions.ts` | pendente |
 | 5 | Segurança | `security/questions.ts` | pendente |
 | 6 | S3 | `storage/questions.ts` | pendente |
