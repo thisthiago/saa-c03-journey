@@ -45,6 +45,7 @@ Distribuição por dificuldade: 131 fáceis, 240 médias, 112 difíceis.
 | Lote 7, Foundations (24/10/2026) | 15 | 5 | 10 | 0 |
 | Lote 8, Redes (24/10/2026) | 34 | 13 | 21 | 0 |
 | Lote 9, Bancos de dados (24/10/2026) | 47 | 23 | 24 | 0 |
+| Lote 10a, Computação até opções de compra (24/10/2026) | 31 | 18 | 13 | 0 |
 
 ### Piloto
 
@@ -423,6 +424,26 @@ Métricas das 49 questões do módulo, antes e depois:
 - Duas ou mais `why` curtas: de 2 para 0.
 - Tamanho médio da explicação: de 194 para 284 caracteres.
 
+### Lote 10a: Computação, até opções de compra
+
+As duas questões do piloto (`q.cmp.burst-low` e `q.cmp.sg-facts`) não entraram de novo. Preservadas sem mudança: `q.cmp.instance-store-db`, `q.cmp.eip-failover`, `q.cmp.hibernate`, `q.cmp.app-creds`, `q.cmp.imdsv2`, `q.cmp.sg-db`, `q.cmp.burst-high`, `q.cmp.graviton`, `q.cmp.memory-family`, `q.cmp.cluster-pg`, `q.cmp.inferentia`, `q.cmp.compute-optimizer`, `q.cmp.terminate-volumes`, `q.cmp.gp2-to-gp3`, `q.cmp.encrypt-existing`, `q.cmp.compute-sp-fargate`, `q.cmp.spot-batch`, `q.cmp.dedicated-host`. Nenhuma mudança de classificação.
+
+| Questão | Tarefa do guia | Situação | Mudança de classificação | Observação |
+|---|---|---|---|---|
+| `q.cmp.ssm` | 1.2 | Reescrita | — | Distrator de chave compartilhada trocado pelo EC2 Instance Connect, que ainda exige a porta 22. |
+| `q.cmp.golden-ami` | 3.1 | Reescrita | — | Distratores de user data a cada reboot e de limite de tamanho trocados por instância maior e pacotes vindos do S3. |
+| `q.cmp.ami-region` | 2.2 | Reescrita | — | Distrator "Nada" virou uma confusão plausível; explicação completada. |
+| `q.cmp.spread` | 2.2 | Reescrita | — | Texto padronizado (Escolha DUAS.); explicação dos três tipos de placement group. |
+| `q.cmp.eip-cost` | 4.1 | Reescrita | — | Explicação curta (105 caracteres) completada; distrator de parar instâncias trocado por associar a instâncias paradas. |
+| `q.cmp.io2-critical` | 3.1 | Reescrita | — | A correta tinha quase seis vezes o tamanho dos distratores; distrator st1 trocado por io1. |
+| `q.cmp.st1` | 4.1 | Reescrita | — | Alternativas com o nome do tipo explicado. |
+| `q.cmp.multi-attach` | 2.2 | Reescrita | — | Distrator de instance store trocado pelo EFS. |
+| `q.cmp.snapshot-az` | 2.2 | Reescrita | — | `why` curtos completados. |
+| `q.cmp.gp2-burst` | 3.1 | Reescrita | — | Distrator st1 trocado por io2, que resolve mas custa mais. |
+| `q.cmp.ec2-sp-stable` | 4.2 | Reescrita | — | Distratores de Spot e Capacity Reservation reorganizados; entrou o mesmo plano com prazo de 1 ano. |
+| `q.cmp.odcr` | 4.2 | Reescrita | — | Explicação da diferença entre reservar capacidade e ter desconto. |
+| `q.cmp.commit-sizing` | 4.2 | Reescrita | — | Texto padronizado (Escolha DUAS.). |
+
 ## Como retomar
 
 O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seguem esta ordem, um módulo por lote (Computação, Governança e IAM em dois lotes cada):
@@ -438,7 +459,7 @@ O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seg
 | 7 | Foundations | `foundations/questions.ts` | feito |
 | 8 | Redes | `network/questions.ts`, `network/questions-f06-f09.ts` | feito |
 | 9 | Bancos de dados | `database/questions.ts` | feito |
-| 10 | Computação | `compute/questions.ts` | pendente |
+| 10 | Computação | `compute/questions.ts` | primeira metade feita (até opções de compra); falta de Elastic Load Balancing em diante |
 | 11 | Governança | `governance/questions*.ts` | pendente |
 | 12 | IAM | `identity/questions.ts` | pendente |
 
