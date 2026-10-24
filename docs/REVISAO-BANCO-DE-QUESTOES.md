@@ -44,6 +44,7 @@ Distribuição por dificuldade: 131 fáceis, 240 médias, 112 difíceis.
 | Lote 6, S3 (24/10/2026) | 32 | 14 | 18 | 0 |
 | Lote 7, Foundations (24/10/2026) | 15 | 5 | 10 | 0 |
 | Lote 8, Redes (24/10/2026) | 34 | 13 | 21 | 0 |
+| Lote 9, Bancos de dados (24/10/2026) | 47 | 23 | 24 | 0 |
 
 ### Piloto
 
@@ -385,6 +386,43 @@ Métricas das 36 questões do módulo, antes e depois:
 - Duas ou mais `why` curtas: de 7 para 0.
 - Tamanho médio da explicação: de 144 para 296 caracteres.
 
+### Lote 9: Bancos de dados
+
+As duas questões do piloto (`q.db.standby-reads` e `q.db.cluster`) não entraram de novo. Preservadas sem mudança: `q.db.rds-managed`, `q.db.gp3-400`, `q.db.param-group`, `q.db.multi-az`, `q.db.snapshots-long`, `q.db.proxy`, `q.db.failover-endpoint`, `q.db.ha-multi`, `q.db.aurora-failover`, `q.db.aurora-global`, `q.db.aurora-clone`, `q.db.aurora-endpoints`, `q.db.ddb-units`, `q.db.ddb-mode`, `q.db.dax`, `q.db.ddb-tx`, `q.db.specialized`, `q.db.redshift-serverless`, `q.db.spectrum`, `q.db.zero-etl`, `q.db.redshift-dr`, `q.db.gateway-endpoint`, `q.db.choose-mixed`. Nenhuma mudança de classificação.
+
+| Questão | Tarefa do guia | Situação | Mudança de classificação | Observação |
+|---|---|---|---|---|
+| `q.db.autoscaling` | 2.2 | Reescrita | — | Alternativas com o mesmo nível de detalhe. |
+| `q.db.private` | 1.2 | Reescrita | — | A correta tinha o dobro do tamanho dos distratores. |
+| `q.db.burstable` | 4.2 | Reescrita | — | Explicação de quando os créditos acabam. |
+| `q.db.region-dr` | 2.2 | Reescrita | — | Distrator de retenção de 35 dias trocado por snapshots copiados entre Regiões. |
+| `q.db.pitr` | 2.2 | Reescrita | — | Explicação do que fazer com a instância restaurada. |
+| `q.db.share-snapshot` | 1.3 | Reescrita | — | Distrator de snapshot público trocado por editar a key policy da chave padrão. |
+| `q.db.aurora-serverless` | 4.1 | Reescrita | — | Distratores de Multi-AZ e Global Database trocados por burstable e réplicas no dia. |
+| `q.db.ddb-hot` | 3.3 | Reescrita | — | Distrator de leitura eventual trocado por modo sob demanda (que também respeita o limite por partição). |
+| `q.db.ddb-gsi` | 3.3 | Reescrita | — | Explicação de índice global e local. |
+| `q.db.ddb-streams` | 3.3 | Reescrita | — | Distrator do TTL trocado por mudar a aplicação para o SNS. |
+| `q.db.ddb-ttl` | 4.1 | Reescrita | — | A correta tinha três vezes o tamanho dos distratores. |
+| `q.db.global-tables` | 2.2 | Reescrita | — | `why` curtos completados. |
+| `q.db.cache-strategy` | 3.3 | Reescrita | — | Explicação das duas estratégias. |
+| `q.db.cache-engine` | 3.3 | Reescrita | — | A correta tinha três vezes o tamanho dos distratores. |
+| `q.db.redshift-olap` | 3.3 | Reescrita | — | Distrator do Multi-AZ trocado por réplica de leitura. |
+| `q.db.encrypt-existing` | 1.3 | Reescrita | — | Distrator do rds.force_ssl (parâmetro do PostgreSQL) trocado por require_secure_transport, do MySQL do cenário. |
+| `q.db.iam-auth` | 1.3 | Reescrita | — | Distrator de criptografar o arquivo trocado pelo Secrets Manager. |
+| `q.db.secrets-rotation` | 1.3 | Reescrita | — | Distrator da mesma senha em todos os bancos trocado por rotação com Lambda própria. |
+| `q.db.deletion` | 2.2 | Reescrita | — | Distratores de Multi-AZ e snapshot público trocados por política IAM e Vault Lock em governance. |
+| `q.db.dms-cdc` | 2.2 | Reescrita | — | Explicação de quando usar só CDC. |
+| `q.db.sct` | 2.2 | Reescrita | — | Distrator do AWS Backup trocado pelo DMS sozinho. |
+| `q.db.dms-preloaded` | 2.2 | Reescrita | — | Explicação do backup nativo como carga inicial. |
+| `q.db.choose-graph` | 3.3 | Reescrita | — | Distrator do Memcached trocado pelo DynamoDB. |
+| `q.db.aurora-vs-rds-oracle` | 3.3 | Reescrita | — | Distratores de DynamoDB e Redshift trocados por Oracle em EC2 e RDS for PostgreSQL. |
+
+Métricas das 49 questões do módulo, antes e depois:
+- Correta 1,6 vez mais longa: de 19 para 0.
+- Correta mais longa que todos os distratores: de 28 para 23 das 44 de resposta única.
+- Duas ou mais `why` curtas: de 2 para 0.
+- Tamanho médio da explicação: de 194 para 284 caracteres.
+
 ## Como retomar
 
 O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seguem esta ordem, um módulo por lote (Computação, Governança e IAM em dois lotes cada):
@@ -399,7 +437,7 @@ O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seg
 | 6 | S3 | `storage/questions.ts` | feito |
 | 7 | Foundations | `foundations/questions.ts` | feito |
 | 8 | Redes | `network/questions.ts`, `network/questions-f06-f09.ts` | feito |
-| 9 | Bancos de dados | `database/questions.ts` | pendente |
+| 9 | Bancos de dados | `database/questions.ts` | feito |
 | 10 | Computação | `compute/questions.ts` | pendente |
 | 11 | Governança | `governance/questions*.ts` | pendente |
 | 12 | IAM | `identity/questions.ts` | pendente |
