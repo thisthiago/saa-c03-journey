@@ -36,6 +36,7 @@ Distribuição por dificuldade: 131 fáceis, 240 médias, 112 difíceis.
 | Lote | Questões | Preservadas | Reescritas | Sinalizadas |
 |---|---|---|---|---|
 | Piloto (24/10/2026) | 24 | 4 | 20 | 0 |
+| Lote 1, Arquitetura (24/10/2026) | 38 | 0 | 38 | 0 |
 
 ### Piloto
 
@@ -71,13 +72,64 @@ Métricas das 24 questões, antes e depois:
 - Explicação curta: de 6 para 0.
 - Tamanho médio da explicação: de 166 para cerca de 400 caracteres.
 
+### Lote 1: Arquitetura
+
+As duas questões do piloto (`q.arq.sec-accounts` e `q.arq.opt-rightsizing`) não entraram de novo. O "—" na tarefa indica questão sobre o framework ou o exame, sem tarefa própria no guia.
+
+| Questão | Tarefa do guia | Situação | Mudança de classificação | Observação |
+|---|---|---|---|---|
+| `q.arq.wa-pillars` | — | Reescrita | — | Distratores viraram listas de seis itens plausíveis (escalabilidade, conformidade, domínios do exame). |
+| `q.arq.wa-milestone` | — | Reescrita | — | Requisito de comparar explícito; explicação completa. |
+| `q.arq.wa-lens` | — | Reescrita | — | Distrator "remover a lente do framework" saiu (ela fica em toda carga); entrou a lente personalizada como opção de mais esforço. |
+| `q.arq.wa-tradeoff` | 4.4 | Reescrita | — | Explicação do trade-off entre pilares. |
+| `q.arq.wa-principles` | 2.2 | Reescrita | — | Texto padronizado (Escolha DUAS.). |
+| `q.arq.res-legacy` | 2.2 | Reescrita | — | Distrator de instância maior ganhou snapshots, para ficar plausível. |
+| `q.arq.res-static` | 2.2 | Reescrita | — | Explicação com a conta e o conceito de plano de controle. |
+| `q.arq.res-degrade` | 2.2 | Reescrita | — | Explicação de dependência forte e fraca e backoff. |
+| `q.arq.res-spof` | 2.2 | Reescrita | — | Distrator "Nada muda" virou uma confusão plausível. |
+| `q.arq.dr-pilot` | 2.2 | Reescrita | — | Alternativas com o mesmo nível de detalhe; explicação pelo RPO e pelo RTO. |
+| `q.arq.dr-warm` | 2.2 | Reescrita | — | Diferença entre pilot light e warm standby explicada. |
+| `q.arq.dr-backup` | 4.4 | Reescrita | — | A correta era 10 vezes mais longa que os distratores. |
+| `q.arq.dr-corruption` | 2.2 | Reescrita | — | Distrator de capacidade de escrita trocado pelo DynamoDB Streams. |
+| `q.arq.dr-hadr` | 2.2 | Reescrita | — | Distrator "Não fazer nada" virou uma confusão plausível. |
+| `q.arq.perf-cache` | 3.4 | Reescrita | — | Explicação de cache de borda e cache de dados. |
+| `q.arq.perf-replica` | 3.3 | Reescrita | — | Distrator de CloudFront trocado por aumentar a instância; Multi-AZ especificado com um standby (o cluster Multi-AZ tem standbys legíveis). |
+| `q.arq.perf-udp` | 3.4 | Reescrita | — | Distrator de instâncias maiores trocado por Elastic IPs. |
+| `q.arq.perf-purpose` | 3.3 | Reescrita | — | Distrator "tudo no S3" trocado por fotos no DynamoDB (limite de 400 KB por item). |
+| `q.arq.sec-role` | 1.1 | Reescrita | — | Distrator do usuário raiz trocado pelo Secrets Manager. |
+| `q.arq.sec-layers` | 1.2 | Reescrita | — | Distrator sem relação com segurança trocado pela criptografia em repouso. |
+| `q.arq.sec-people` | 1.1 | Reescrita | — | Explicação do princípio e do Session Manager. |
+| `q.arq.opt-pricing` | 4.2 | Reescrita | — | Explicação por carga. |
+| `q.arq.opt-schedule` | 4.2 | Reescrita | — | Distrator de mudar de Região trocado por Spot. |
+| `q.arq.opt-nat` | 4.4 | Reescrita | — | Distrator de sub-rede pública trocado pelo endpoint de interface, que tem custo. |
+| `q.arq.opt-transfer` | 4.4 | Reescrita | dificuldade 3 → 2 | Lembrar regras de cobrança não pesa várias restrições. |
+| `q.arq.opt-serverless` | 4.2 | Reescrita | — | Distrator de instâncias maiores trocado por reduzir a uma instância. |
+| `q.arq.mig-rehost` | 2.2 | Reescrita | — | Alternativas com o mesmo nível de detalhe. |
+| `q.arq.mig-strategy` | 4.1 | Reescrita | — | Distrator "replatform para os dois" trocado por um que acerta metade. |
+| `q.arq.mig-replatform` | 2.2 | Reescrita | — | Explicação do replatform. |
+| `q.arq.mig-relocate` | 2.2 | Reescrita | — | Distrator "Não existe SaaS" trocado por repurchase de 300 aplicações. |
+| `q.arq.mig-snow` | 3.1 | Reescrita | — | Explicação cita o Data Transfer Terminal e a restrição ao Enterprise Support. |
+| `q.arq.pat-strangler` | 2.1 | Reescrita | — | Explicação do padrão e da disponibilidade do proxy. |
+| `q.arq.pat-bluegreen` | 2.1 | Reescrita | — | Distrator de SSH trocado pelo canário. |
+| `q.arq.pat-canary` | 2.1 | Reescrita | dificuldade 3 → 2 | Identificar a estratégia não pesa várias restrições. |
+| `q.arq.pat-events` | 2.1 | Reescrita | domínio d3 → d2 | Acrescentar consumidores sem mudar o emissor é desacoplamento (tarefa 2.1). Distrator de servidor único trocado por fila SQS única. |
+| `q.arq.pat-multiregion` | 2.2 | Reescrita | — | Aurora Global Database descrito com o write forwarding. |
+| `q.arq.exam-format` | — | Reescrita | — | Explicação com a escala de 100 a 1.000. |
+| `q.arq.exam-decisive` | — | Reescrita | — | Distrator do script na estação trocado por ECS agendado. |
+
+Métricas das 40 questões do módulo, antes e depois:
+- Correta 1,6 vez mais longa: de 30 para 0.
+- Correta mais longa que todos os distratores: de 31 para 19 das 34 de resposta única (as que sobraram ficam até 25% acima do maior distrator).
+- Explicação curta: de 34 para 0.
+- Tamanho médio da explicação: de 91 para 472 caracteres.
+
 ## Como retomar
 
 O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seguem esta ordem, um módulo por lote (Computação, Governança e IAM em dois lotes cada):
 
 | Ordem | Módulo | Arquivo(s) | Situação |
 |---|---|---|---|
-| 1 | Arquitetura | `architecture/questions.ts` | pendente |
+| 1 | Arquitetura | `architecture/questions.ts` | feito |
 | 2 | Arquivos | `files/questions.ts` | pendente |
 | 3 | Análise | `analytics/questions.ts` | pendente |
 | 4 | Integração | `integration/questions.ts` | pendente |
