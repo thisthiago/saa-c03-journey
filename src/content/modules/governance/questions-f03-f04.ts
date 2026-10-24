@@ -185,17 +185,20 @@ export const F03_F04_QUESTIONS: ExamQuestion[] = [
   {
     id: 'q.gov.config-proactive',
     concept: 'cfg.triggers',
-    difficulty: 3,
+    difficulty: 2,
     domain: 'd1',
-    stem: ['A equipe de plataforma da Gráfica Luz Nova quer avaliar, **antes de implantar** um modelo de infraestrutura, se os buckets que ele cria estariam em conformidade com as regras do Config. Alguém afirma que isso também **impede** a criação de recursos fora do padrão.'],
-    question: 'Qual afirmação está correta?',
+    stem: ['A equipe de plataforma da Gráfica Luz Nova usa a regra gerenciada **subnet-auto-assign-public-ip-disabled** do AWS Config, que aceita os modos detectivo e proativo. Antes de implantar um modelo novo do CloudFormation, a equipe quer saber se as sub-redes descritas nele ficariam **NON_COMPLIANT**, **sem criar nenhum recurso** para testar.'],
+    question: 'Qual abordagem atende ao requisito?',
     options: [
-      { id: 'a', text: 'A avaliação proativa informa se as propriedades seriam COMPLIANT ou NON_COMPLIANT, mas não impede a criação nem corrige o recurso', correct: true, why: 'Regras no modo proativo avaliam antes da implantação e só informam o resultado.' },
-      { id: 'b', text: 'A avaliação proativa bloqueia automaticamente a criação de qualquer recurso NON_COMPLIANT', correct: false, why: 'As regras proativas não impedem a criação dos recursos.' },
-      { id: 'c', text: 'Só o modo detectivo permite avaliar propriedades antes da criação', correct: false, why: 'O modo detectivo avalia recursos que já foram implantados.' },
-      { id: 'd', text: 'A avaliação proativa corrige os recursos NON_COMPLIANT usando documentos de automação', correct: false, why: 'As regras proativas não corrigem recursos.' },
+      { id: 'a', text: 'Pedir ao Config uma avaliação proativa com as propriedades das sub-redes do modelo', correct: true, why: 'O modo proativo avalia um conjunto de propriedades antes de o recurso existir e responde se ele seria COMPLIANT ou NON_COMPLIANT.' },
+      { id: 'b', text: 'Implantar o modelo numa conta de testes e consultar a avaliação detectiva da regra', correct: false, why: 'Mostraria a conformidade, mas criando as sub-redes, o que o requisito proíbe. O modo detectivo só avalia recursos que já existem.' },
+      { id: 'c', text: 'Ligar a remediação automática da regra, para corrigir as sub-redes logo depois de criadas', correct: false, why: 'A remediação age depois da criação e não informa nada antes da implantação. Ela resolve outro problema: corrigir o que já está fora do padrão.' },
+      { id: 'd', text: 'Consultar no Config o histórico de configuração das sub-redes do modelo', correct: false, why: 'O histórico registra mudanças de recursos gravados. Sub-redes que ainda não existem não têm histórico.' },
     ],
-    explanation: ['O modo **proativo** avalia propriedades **antes** de o recurso existir; o **detectivo**, recursos já implantados. As regras proativas **não corrigem nem impedem** a criação: só dão o resultado.'],
+    explanation: [
+      'O requisito decisivo é avaliar **antes** de o recurso existir. As regras do Config têm dois modos: o **detectivo** avalia recursos já implantados, e o **proativo** avalia um conjunto de propriedades, dizendo se o recurso seria COMPLIANT ou NON_COMPLIANT.',
+      'O modo proativo só informa: ele **não corrige nem impede** a implantação. E nem toda regra o aceita: a lista de regras gerenciadas com modo proativo é curta, e a regra precisa declarar esse modo.',
+    ],
   },
   {
     id: 'q.gov.config-recording-cost',
