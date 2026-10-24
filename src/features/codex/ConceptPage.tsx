@@ -1,6 +1,6 @@
 import { ArrowLeft, ExternalLink, Lock } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useLocation, useParams } from 'react-router'
 import { registry } from '../../content'
 import { masteryTier, TIER_LABEL } from '../../engine/mastery'
 import { useGame } from '../../store/gameStore'
@@ -34,6 +34,10 @@ function List({ title, items, tone }: { title: string; items?: string[]; tone?: 
 
 export function ConceptPage() {
   const { conceptId = '' } = useParams()
+  // Filtros do Codex de onde a pessoa veio (busca, trilha), para o link de volta restaurar a lista.
+  const from = (useLocation().state as { codex?: unknown } | null)?.codex
+  const codexSearch = typeof from === 'string' && from.startsWith('?') ? from : ''
+  const linkState = { codex: codexSearch }
   const concept = registry.concepts.get(conceptId)
   useDocumentTitle(concept?.title ?? 'Conceito')
   const progress = useGame((st) => st.progress)
@@ -74,7 +78,7 @@ export function ConceptPage() {
 
   return (
     <div className="page">
-      <Link to="/codex" className={s.back}>
+      <Link to={`/codex${codexSearch}`} className={s.back}>
         <ArrowLeft size={16} aria-hidden="true" /> Codex
       </Link>
       <header className={s.head}>
@@ -115,7 +119,7 @@ export function ConceptPage() {
                   const other = registry.concepts.get(cmp.with)
                   return (
                     <li key={cmp.with}>
-                      <b>{other && progress.discovered[cmp.with] ? <Link to={`/codex/${cmp.with}`}>{other.title}</Link> : (other?.title ?? cmp.with)}:</b> {renderInline(cmp.text)}
+                      <b>{other && progress.discovered[cmp.with] ? <Link to={`/codex/${cmp.with}`} state={linkState}>{other.title}</Link> : (other?.title ?? cmp.with)}:</b> {renderInline(cmp.text)}
                     </li>
                   )
                 })}
