@@ -38,6 +38,45 @@ for (const vp of VIEWPORTS) {
       }
     })
 
+    test('codex: busca, estados vazios, teclado e volta do conceito', async ({ page }) => {
+      await seedProgress(page, progressWithFirstMission())
+      const noOverflow = async (what: string) => {
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+        expect(overflow, `rolagem horizontal em ${what}`).toBeLessThanOrEqual(0)
+      }
+      await page.goto('/#/codex')
+      const before = await page.evaluate(() => localStorage.getItem('aws-quest/progress'))
+      const search = page.getByRole('searchbox', { name: 'Buscar conceito' })
+      const cards = page.locator('main a[href^="#/codex/"]')
+      await expect(cards).toHaveCount(4)
+      await expect(page.getByText('Não descoberto', { exact: true })).toHaveCount(0)
+
+      // Teclado: do campo de busca, o Tab passa pelos filtros e chega ao primeiro cartão.
+      await search.focus()
+      for (let i = 0; i < 6 && !(await cards.first().evaluate((el) => el === document.activeElement)); i++) await page.keyboard.press('Tab')
+      await expect(cards.first()).toBeFocused()
+
+      await search.fill('zzz')
+      await expect(page.getByRole('heading', { name: 'Nenhum conceito descoberto corresponde a “zzz”' })).toBeVisible()
+      await noOverflow('codex sem resultado')
+      await page.screenshot({ path: `screenshots/${vp.name}-codex-sem-resultado.png`, fullPage: true })
+      await search.press('Escape')
+      await expect(cards).toHaveCount(4)
+
+      await page.getByRole('checkbox', { name: 'Mostrar os não descobertos' }).check()
+      await expect(page.getByRole('link', { name: /Ver a fase/ }).first()).toBeVisible()
+      await noOverflow('codex com não descobertos')
+      await page.getByRole('checkbox', { name: 'Mostrar os não descobertos' }).uncheck()
+
+      await search.fill('blocos')
+      await page.getByRole('link', { name: /Armazenamento em blocos/ }).click()
+      await expect(page.getByRole('heading', { level: 1, name: 'Armazenamento em blocos' })).toBeVisible()
+      await page.getByRole('link', { name: 'Codex', exact: true }).click()
+      await expect(search).toHaveValue('blocos')
+      await expect(cards).toHaveCount(1)
+      expect(await page.evaluate(() => localStorage.getItem('aws-quest/progress'))).toBe(before)
+    })
+
     test('missão: intel, laboratório e feedback', async ({ page }) => {
       await seedProgress(page, progressWithFirstMission())
       await page.goto('/#/missao/s3x.f01.m2')
