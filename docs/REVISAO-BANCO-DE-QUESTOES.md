@@ -48,6 +48,7 @@ Distribuição por dificuldade: 131 fáceis, 240 médias, 112 difíceis.
 | Lote 10a, Computação até opções de compra (24/10/2026) | 31 | 14 | 17 | 0 |
 | Lote 10b, Computação de Elastic Load Balancing em diante (24/10/2026) | 32 | 13 | 19 | 0 |
 | Lote 11, Governança (24/10/2026) | 62 | 29 | 33 | 0 |
+| Lote 12, IAM (24/10/2026) | 53 | 16 | 37 | 0 |
 
 ### Piloto
 
@@ -528,6 +529,56 @@ Métricas das 64 questões do módulo, antes e depois:
 - Duas ou mais `why` curtas: de 6 para 0.
 - Tamanho médio da explicação: de 207 para 296 caracteres.
 
+### Lote 12: IAM
+
+As duas questões do piloto (`q.iax.key-rotation` e `q.iax.group-principal`) não entraram de novo. As outras 16 foram preservadas sem mudança. Nenhuma mudança de classificação. "Reescrita completa" indica questão refeita do enunciado à explicação; "Reescrita" indica ajuste das alternativas e das `why`.
+
+| Questão | Tarefa do guia | Situação | Mudança de classificação | Observação |
+|---|---|---|---|---|
+| `q.iax.root-key` | 1.1 | Reescrita | — | Alternativas equilibradas; a correta não carrega mais a justificativa. |
+| `q.iax.root-tasks` | 1.1 | Reescrita completa | — | Cenário de redução do uso do root; texto padronizado (Escolha DUAS.). |
+| `q.iax.user-no-permission` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.when-iam-user` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.mfa-cli` | 1.1 | Reescrita | — | Distrator c trocado por outro plausível, com nova `why`. |
+| `q.iax.ec2-role` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.ec2-trust` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.roles-facts` | 1.1 | Reescrita completa | — | Era memorização; virou desenho de uma role entre contas (Escolha DUAS.). |
+| `q.iax.cross-account-copy` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.pass-role` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.service-linked` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.roles-anywhere` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.confused-deputy` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.trust-what` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.trust-wildcard` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.sts-duration` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.sts-chaining` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.sts-saml` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.temp-creds` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.assume-role-mfa` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.list-and-read` | 1.1 | Reescrita completa | — | ARNs de bucket e de objeto como alternativas comparáveis; texto padronizado (Escolha DUAS.). |
+| `q.iax.not-action` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.policy-types-grant` | 1.1 | Reescrita completa | — | Cenário de uma role sem permissões; cada distrator é um tipo de política que só limita (Escolha DUAS.). |
+| `q.iax.policy-variable` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.boundary` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.boundary-delegation` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.access-analyzer` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.policy-generation` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.identity-center` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.permission-sets` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.cognito-pools` | 1.1 | Reescrita completa | — | Cenário de aplicativo móvel com envio direto ao S3 (Escolha DUAS.). |
+| `q.iax.cognito-guest` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.abac` | 1.1 | Reescrita | — | A correta tinha quatro vezes o tamanho dos distratores; `why` cita a tag de sessão. |
+| `q.iax.scp-no-grant` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.scp-region` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.rcp` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.iax.root-central` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+
+Métricas das 55 questões do módulo, antes e depois:
+- Correta 1,6 vez mais longa: de 34 para 0.
+- Correta mais longa que todos os distratores: de 38 para 32 das 50 de resposta única.
+- Duas ou mais `why` curtas: 0 antes e depois.
+- Tamanho médio da explicação: de 230 para 251 caracteres.
+
 ## Como retomar
 
 O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seguem esta ordem, um módulo por lote (Computação, Governança e IAM em dois lotes cada):
@@ -545,7 +596,7 @@ O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seg
 | 9 | Bancos de dados | `database/questions.ts` | feito |
 | 10 | Computação | `compute/questions.ts` | feito |
 | 11 | Governança | `governance/questions*.ts` | feito |
-| 12 | IAM | `identity/questions.ts` | pendente |
+| 12 | IAM | `identity/questions.ts` | feito |
 
 Cada lote termina com: comparação com o retrato inicial (ids, conceito, domínio, dificuldade, número de opções e de corretas), `npm run typecheck`, `npm run lint`, `npx vitest run src/content src/engine`, atualização desta tabela e um commit local do arquivo do módulo e deste documento. Nada vai para o remoto sem pedido.
 
