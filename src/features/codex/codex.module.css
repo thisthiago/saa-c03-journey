@@ -1,9 +1,9 @@
 .toolbar {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   gap: var(--space-3);
-  margin: var(--space-4) 0;
+  margin: var(--space-4) 0 var(--space-2);
 }
 .search {
   position: relative;
@@ -20,11 +20,91 @@
 .search input {
   padding-left: 40px;
 }
+.field {
+  display: grid;
+  gap: 4px;
+  width: min(100%, 300px);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+.field select {
+  width: 100%;
+  min-width: 0;
+  font-weight: 400;
+  font-size: 0.92rem;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-s);
+  padding: 10px;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+.check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.status p {
+  margin: 0;
+  color: var(--text-muted);
+}
+.status > :last-child {
+  margin-left: auto;
+}
+.empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  max-width: 760px;
+}
+.empty > svg {
+  color: var(--text-faint);
+}
+.empty h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.empty p {
+  margin: 0 0 var(--space-2);
+}
+.track {
+  margin-top: var(--space-6);
+}
+.trackHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+.trackTitle {
+  margin: 0;
+  font-size: 1.3rem;
+}
+.trackCount {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+}
 .group {
-  margin-top: var(--space-5);
+  margin-top: var(--space-4);
 }
 .groupTitle {
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: var(--text-muted);
 }
 .grid {
@@ -51,16 +131,35 @@
     border-color 0.15s,
     transform 0.15s;
 }
-a.card:hover {
+a.card:hover,
+a.card:focus-visible {
   border-color: var(--accent);
   transform: translateY(-2px);
+}
+a.card:focus-visible {
+  border-radius: var(--radius-m);
 }
 .card[data-tier='dominado'] {
   border-color: var(--mastery);
 }
-.card[data-tier='hidden'] {
-  border-style: dashed;
+.locked {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-m);
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+.locked svg {
+  flex: none;
+  margin-top: 3px;
   color: var(--text-faint);
+}
+.grid + .locked {
+  margin-top: var(--space-3);
 }
 .official {
   font-family: var(--font-mono);
@@ -116,6 +215,9 @@ a.card:hover {
   display: grid;
   gap: 6px;
 }
+.section .list + p {
+  margin-top: var(--space-3);
+}
 .warnList li::marker {
   color: var(--warning);
 }
@@ -123,4 +225,9 @@ a.card:hover {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+@media (max-width: 860px) {
+  .field {
+    width: 100%;
+  }
 }
