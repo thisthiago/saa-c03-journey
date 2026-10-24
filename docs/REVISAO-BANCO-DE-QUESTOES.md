@@ -40,6 +40,7 @@ Distribuição por dificuldade: 131 fáceis, 240 médias, 112 difíceis.
 | Lote 2, Arquivos (24/10/2026) | 26 | 0 | 26 | 0 |
 | Lote 3, Análise (24/10/2026) | 37 | 0 | 37 | 0 |
 | Lote 4, Integração (24/10/2026) | 22 | 0 | 22 | 0 |
+| Lote 5, Segurança (24/10/2026) | 30 | 0 | 30 | 0 |
 
 ### Piloto
 
@@ -250,6 +251,49 @@ Métricas das 24 questões do módulo, antes e depois:
 - Explicação curta: de 20 para 0.
 - Tamanho médio da explicação: de 91 para 417 caracteres.
 
+### Lote 5: Segurança
+
+As duas questões do piloto (`q.sec.kms-admin-decrypt` e `q.sec.kms-envelope`) não entraram de novo. Nenhuma mudança de classificação.
+
+| Questão | Tarefa do guia | Situação | Mudança de classificação | Observação |
+|---|---|---|---|---|
+| `q.sec.kms-key-types` | 1.3 | Reescrita | — | A correta passou a descrever a ação concreta (copiar com chave do cliente); distratores "desligar a criptografia" e "chave AWS owned" trocados por editar a key policy da aws/rds e restaurar sem criptografia. |
+| `q.sec.kms-rotation` | 1.3 | Reescrita | — | Explicação de que a rotação não recifra dados antigos. |
+| `q.sec.kms-multi-region` | 1.3 | Reescrita | — | Distrator de chaves independentes ganhou o mesmo alias, para ficar plausível. |
+| `q.sec.kms-quota` | 3.1 | Reescrita | — | Distrator "desligar a criptografia" trocado por novas tentativas com espera crescente. |
+| `q.sec.cloudhsm` | 1.3 | Reescrita | — | Distratores de Secrets Manager e ACM trocados por KMS com material importado. |
+| `q.sec.kms-grants` | 1.3 | Reescrita | — | Explicação das três fontes de acesso a uma chave. |
+| `q.sec.secrets-rds` | 1.3 | Reescrita | — | Distrator do cron trocado por rotação com Lambda própria. |
+| `q.sec.secrets-vs-ps` | 4.1 | Reescrita | — | Distratores de código e bucket público trocados pelo AppConfig e um bucket público explicado. |
+| `q.sec.secrets-alternating` | 1.3 | Reescrita | — | Distrator "desligar a rotação" trocado por rotação menos frequente. |
+| `q.sec.secrets-replica` | 2.2 | Reescrita | — | Distrator da senha no código trocado por rotação independente em cada Região. |
+| `q.sec.secret-role` | 1.1 | Reescrita | — | Distrator do bucket público trocado por criptografia do disco. |
+| `q.sec.acm-cloudfront` | 1.3 | Reescrita | — | Explicação da regra para recursos regionais. O distrator não depende de exportação de certificados, que o ACM passou a oferecer para certificados públicos. |
+| `q.sec.acm-imported` | 1.3 | Reescrita | — | Distrator de reimportar o vencido trocado por importar um novo. |
+| `q.sec.acm-cname` | 1.3 | Reescrita | — | Explicação de por que o CNAME precisa ficar no DNS. |
+| `q.sec.tls-end-to-end` | 1.3 | Reescrita | — | Distrator "Nada" virou uma confusão plausível sobre onde o TLS termina. |
+| `q.sec.guardduty` | 1.2 | Reescrita | — | Explicação das perguntas que cada serviço responde. |
+| `q.sec.inspector` | 1.2 | Reescrita | — | Distrator do Artifact trocado pelo Patch Manager. |
+| `q.sec.detective` | 1.2 | Reescrita | — | Distratores de Macie e ACM trocados por Athena e Security Hub CSPM. |
+| `q.sec.detect-multi` | 1.2 | Reescrita | — | Distratores de Artifact e ACM trocados por Detective e Config; texto padronizado (Escolha DOIS.). |
+| `q.sec.macie` | 1.3 | Reescrita | — | Distratores com o motivo de cada um. |
+| `q.sec.macie-custom` | 1.3 | Reescrita | — | Distrator "esperar a AWS" trocado por ativar mais identificadores gerenciados. |
+| `q.sec.vault-lock` | 1.3 | Reescrita | — | Distrator de tags trocado por política de acesso do cofre. |
+| `q.sec.security-hub` | 1.3 | Reescrita | — | Explicação da dependência do AWS Config. |
+| `q.sec.artifact` | 1.3 | Reescrita | — | Distrator do chamado no suporte trocado pelo Audit Manager. |
+| `q.sec.evidence-multi` | 1.3 | Reescrita | — | Distrator do ACM trocado pelo Security Hub CSPM para o relatório da AWS. |
+| `q.sec.waf-sqli` | 1.2 | Reescrita | — | Explicação de por que filtros de rede não barram esses ataques. |
+| `q.sec.auto-response` | 1.3 | Reescrita | — | Distrator "Ligar o Inspector" trocado por exportar para o S3 e consultar com o Athena. |
+| `q.sec.containment` | 1.3 | Reescrita | — | Explicação da ordem da resposta a incidentes. |
+| `q.sec.config-vs-trail` | 1.3 | Reescrita | — | Distrator do Artifact trocado pelo Macie; texto padronizado (Escolha DOIS.). |
+| `q.sec.which-protection` | 1.3 | Reescrita | — | Explicação por necessidade. |
+
+Métricas das 32 questões do módulo, antes e depois:
+- Correta 1,6 vez mais longa: de 16 para 0.
+- Correta mais longa que todos os distratores: de 21 para 15 das 29 de resposta única.
+- Explicação curta: de 21 para 0.
+- Tamanho médio da explicação: de 98 para 395 caracteres.
+
 ## Como retomar
 
 O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seguem esta ordem, um módulo por lote (Computação, Governança e IAM em dois lotes cada):
@@ -260,7 +304,7 @@ O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seg
 | 2 | Arquivos | `files/questions.ts` | feito |
 | 3 | Análise | `analytics/questions.ts` | feito |
 | 4 | Integração | `integration/questions.ts` | feito |
-| 5 | Segurança | `security/questions.ts` | pendente |
+| 5 | Segurança | `security/questions.ts` | feito |
 | 6 | S3 | `storage/questions.ts` | pendente |
 | 7 | Foundations | `foundations/questions.ts` | pendente |
 | 8 | Redes | `network/questions.ts`, `network/questions-f06-f09.ts` | pendente |
