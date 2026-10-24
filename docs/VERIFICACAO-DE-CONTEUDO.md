@@ -1178,3 +1178,13 @@ O site da documentação da AWS devolve 200 para páginas que não existem; as U
 - **Dimensionamento:** cada tamanho abaixo tem metade das vCPUs e da memória e dobra o pico, que precisa ficar abaixo de 80%; Spot com o desconto premissa da trilha de Computação.
 - **Transferência:** primeira faixa, sem os 100 GB gratuitos; NAT já existente; endpoint de interface novo cobrado por hora em duas AZs.
 - **Leitura de questões:** enunciados do AWS Quest; quais restrições cada alternativa cumpre e a ordem no requisito decisivo são julgamento de arquitetura.
+
+# Revisão do banco de questões — conferido em 24/10/2026
+
+Fatos novos usados na revisão editorial do banco de questões (ver `docs/REVISAO-BANCO-DE-QUESTOES.md`).
+
+| Fato | Fonte | Efeito no conteúdo |
+|---|---|---|
+| Separar cargas e ambientes (produção, desenvolvimento, teste) em contas; a conta é uma fronteira forte de isolamento para segurança, cobrança e acesso; Organizations e Control Tower; risco alto. | [SEC01-BP01](https://docs.aws.amazon.com/wellarchitected/latest/framework/sec_securely_operate_multi_accounts.html) | `q.arq.sec-accounts` |
+| Modo proativo do Config avalia propriedades antes da implantação e não corrige nem impede a criação. Só duas regras gerenciadas aceitam o modo proativo hoje: `eip-attached` e `subnet-auto-assign-public-ip-disabled` (tipos AWS::EC2::EIP e AWS::EC2::Subnet). Todas aceitam o modo detectivo. | [Components of a rule](https://docs.aws.amazon.com/config/latest/developerguide/evaluate-config-rules.html), [Managed rules by evaluation mode](https://docs.aws.amazon.com/config/latest/developerguide/managed-rules-by-evaluation-mode.html) | `q.gov.config-proactive` passou a usar sub-redes em vez de buckets S3. |
+| t3.micro: 2 vCPUs e 1 GiB; t3.large: 2 vCPUs e 8 GiB; m5.large: 2 vCPUs e 8 GiB; c5.large: 2 vCPUs e 4 GiB. | [General purpose](https://docs.aws.amazon.com/ec2/latest/instancetypes/gp.html), [Compute optimized](https://docs.aws.amazon.com/ec2/latest/instancetypes/co.html) | `q.cmp.burst-low` |
