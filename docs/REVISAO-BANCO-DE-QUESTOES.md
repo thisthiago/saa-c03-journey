@@ -49,6 +49,7 @@ Distribuição por dificuldade: 131 fáceis, 240 médias, 112 difíceis.
 | Lote 10b, Computação de Elastic Load Balancing em diante (24/10/2026) | 32 | 13 | 19 | 0 |
 | Lote 11, Governança (24/10/2026) | 62 | 29 | 33 | 0 |
 | Lote 12, IAM (24/10/2026) | 53 | 16 | 37 | 0 |
+| **Total** | **483** | **131** | **352** | **0** |
 
 ### Piloto
 
@@ -578,6 +579,31 @@ Métricas das 55 questões do módulo, antes e depois:
 - Correta mais longa que todos os distratores: de 38 para 32 das 50 de resposta única.
 - Duas ou mais `why` curtas: 0 antes e depois.
 - Tamanho médio da explicação: de 230 para 251 caracteres.
+
+## Validação final (24/10/2026)
+
+Todas as 483 questões foram analisadas. Os ids, o número de alternativas e o número de corretas são os mesmos do início. Sete questões mudaram de classificação, todas listadas nos lotes:
+- `q.ana.lake-practices`: dificuldade 3 para 2.
+- `q.arq.opt-rightsizing`: dificuldade 1 para 2.
+- `q.arq.opt-transfer`: dificuldade 3 para 2.
+- `q.arq.pat-canary`: dificuldade 3 para 2.
+- `q.arq.pat-events`: domínio d3 para d2.
+- `q.gov.config-proactive`: dificuldade 3 para 2.
+- `q.s3x.expedited`: domínio d2 para d3.
+
+Métricas do banco inteiro, antes e depois:
+- Correta 1,6 vez mais longa que a média dos distratores: de 222 para 0.
+- Correta mais longa que todos os distratores: de 292 para 230 das 430 de resposta única.
+- Explicação com menos de 110 caracteres: de 128 para 0.
+- Duas ou mais `why` com menos de 40 caracteres: de 72 para 0.
+
+Testes rodados sobre o resultado final:
+- `npm run typecheck` e `npm run lint`: sem erros.
+- `npm test`: 591 testes passaram.
+- `npm run build`: concluído.
+- `npx playwright test tests/e2e/screens.spec.ts -g "banco de questões"`: 3 testes passaram (celular, tablet e desktop).
+
+A leitura das questões na tela (`npm run dev`) não foi feita nesta revisão.
 
 ## Como retomar
 
