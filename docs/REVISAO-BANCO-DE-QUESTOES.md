@@ -42,6 +42,7 @@ Distribuição por dificuldade: 131 fáceis, 240 médias, 112 difíceis.
 | Lote 4, Integração (24/10/2026) | 22 | 0 | 22 | 0 |
 | Lote 5, Segurança (24/10/2026) | 30 | 0 | 30 | 0 |
 | Lote 6, S3 (24/10/2026) | 32 | 14 | 18 | 0 |
+| Lote 7, Foundations (24/10/2026) | 15 | 5 | 10 | 0 |
 
 ### Piloto
 
@@ -326,6 +327,29 @@ Métricas das 34 questões do módulo, antes e depois:
 - Duas ou mais `why` curtas: de 3 para 0.
 - Tamanho médio da explicação: de 223 para 311 caracteres.
 
+### Lote 7: Foundations
+
+As duas questões do piloto (`q.fnd.region-selection` e `q.fnd.ha-vs-dr`) não entraram de novo. Preservadas sem mudança: `q.fnd.data-residency`, `q.fnd.static-stability`, `q.fnd.outposts`, `q.fnd.cloudfront`, `q.fnd.global-accelerator`. Nenhuma mudança de classificação.
+
+| Questão | Tarefa do guia | Situação | Mudança de classificação | Observação |
+|---|---|---|---|---|
+| `q.fnd.multi-az` | 2.2 | Reescrita | — | Distrator da Local Zone trocado por aplicação em duas AZs com banco numa só. |
+| `q.fnd.rds-multi-az` | 2.2 | Reescrita | — | O enunciado passou a dizer "Multi-AZ com um standby", porque o cluster Multi-AZ tem standbys que atendem leituras. |
+| `q.fnd.nat-zonal` | 2.2 | Reescrita | — | Distrator do NAT maior trocado por dois NAT na mesma AZ. |
+| `q.fnd.local-zones` | 3.4 | Reescrita | — | A correta tinha quase três vezes o tamanho dos distratores. |
+| `q.fnd.wavelength` | 3.4 | Reescrita | — | Explicação do sinal de usuários móveis em rede de operadora. |
+| `q.fnd.srm-ec2` | 1.1 | Reescrita | — | Distrator "De ninguém" trocado por AMI fornecida pela AWS. |
+| `q.fnd.srm-s3` | 1.1 | Reescrita | — | Distrator "Dividida igualmente" trocado pelo Block Public Access padrão. |
+| `q.fnd.srm-rds` | 1.1 | Reescrita | — | Distrator de segurança física trocado pela replicação do Multi-AZ. |
+| `q.fnd.sla-vs-support` | 2.2 | Reescrita | — | Explicação da diferença entre SLA e plano de suporte. |
+| `q.fnd.srm-aws` | 1.1 | Reescrita parcial | — | Faltava "(Escolha DOIS.)"; alternativas e explicação mantidas. |
+
+Métricas das 17 questões do módulo, antes e depois:
+- Correta 1,6 vez mais longa: de 11 para 0.
+- Correta mais longa que todos os distratores: de 11 para 8 das 16 de resposta única.
+- Duas ou mais `why` curtas: de 2 para 0.
+- Tamanho médio da explicação: de 239 para 368 caracteres.
+
 ## Como retomar
 
 O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seguem esta ordem, um módulo por lote (Computação, Governança e IAM em dois lotes cada):
@@ -338,7 +362,7 @@ O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seg
 | 4 | Integração | `integration/questions.ts` | feito |
 | 5 | Segurança | `security/questions.ts` | feito |
 | 6 | S3 | `storage/questions.ts` | feito |
-| 7 | Foundations | `foundations/questions.ts` | pendente |
+| 7 | Foundations | `foundations/questions.ts` | feito |
 | 8 | Redes | `network/questions.ts`, `network/questions-f06-f09.ts` | pendente |
 | 9 | Bancos de dados | `database/questions.ts` | pendente |
 | 10 | Computação | `compute/questions.ts` | pendente |
