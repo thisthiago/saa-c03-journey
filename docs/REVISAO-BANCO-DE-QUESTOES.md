@@ -45,7 +45,8 @@ Distribuição por dificuldade: 131 fáceis, 240 médias, 112 difíceis.
 | Lote 7, Foundations (24/10/2026) | 15 | 5 | 10 | 0 |
 | Lote 8, Redes (24/10/2026) | 34 | 13 | 21 | 0 |
 | Lote 9, Bancos de dados (24/10/2026) | 47 | 23 | 24 | 0 |
-| Lote 10a, Computação até opções de compra (24/10/2026) | 31 | 18 | 13 | 0 |
+| Lote 10a, Computação até opções de compra (24/10/2026) | 31 | 14 | 17 | 0 |
+| Lote 10b, Computação de Elastic Load Balancing em diante (24/10/2026) | 32 | 13 | 19 | 0 |
 
 ### Piloto
 
@@ -426,7 +427,7 @@ Métricas das 49 questões do módulo, antes e depois:
 
 ### Lote 10a: Computação, até opções de compra
 
-As duas questões do piloto (`q.cmp.burst-low` e `q.cmp.sg-facts`) não entraram de novo. Preservadas sem mudança: `q.cmp.instance-store-db`, `q.cmp.eip-failover`, `q.cmp.hibernate`, `q.cmp.app-creds`, `q.cmp.imdsv2`, `q.cmp.sg-db`, `q.cmp.burst-high`, `q.cmp.graviton`, `q.cmp.memory-family`, `q.cmp.cluster-pg`, `q.cmp.inferentia`, `q.cmp.compute-optimizer`, `q.cmp.terminate-volumes`, `q.cmp.gp2-to-gp3`, `q.cmp.encrypt-existing`, `q.cmp.compute-sp-fargate`, `q.cmp.spot-batch`, `q.cmp.dedicated-host`. Nenhuma mudança de classificação.
+As duas questões do piloto (`q.cmp.burst-low` e `q.cmp.sg-facts`) não entraram de novo. Preservadas sem mudança: `q.cmp.instance-store-db`, `q.cmp.eip-failover`, `q.cmp.hibernate`, `q.cmp.imdsv2`, `q.cmp.sg-db`, `q.cmp.memory-family`, `q.cmp.cluster-pg`, `q.cmp.inferentia`, `q.cmp.compute-optimizer`, `q.cmp.gp2-to-gp3`, `q.cmp.encrypt-existing`, `q.cmp.compute-sp-fargate`, `q.cmp.spot-batch`, `q.cmp.dedicated-host`. Nenhuma mudança de classificação.
 
 | Questão | Tarefa do guia | Situação | Mudança de classificação | Observação |
 |---|---|---|---|---|
@@ -443,6 +444,42 @@ As duas questões do piloto (`q.cmp.burst-low` e `q.cmp.sg-facts`) não entraram
 | `q.cmp.ec2-sp-stable` | 4.2 | Reescrita | — | Distratores de Spot e Capacity Reservation reorganizados; entrou o mesmo plano com prazo de 1 ano. |
 | `q.cmp.odcr` | 4.2 | Reescrita | — | Explicação da diferença entre reservar capacidade e ter desconto. |
 | `q.cmp.commit-sizing` | 4.2 | Reescrita | — | Texto padronizado (Escolha DUAS.). |
+| `q.cmp.app-creds` | 1.1 | Reescrita parcial | — | Alternativas equilibradas (a correta tinha quase o dobro do tamanho médio). |
+| `q.cmp.burst-high` | 4.2 | Reescrita parcial | — | Alternativas equilibradas. |
+| `q.cmp.graviton` | 4.2 | Reescrita parcial | — | Alternativas equilibradas. |
+| `q.cmp.terminate-volumes` | 2.2 | Reescrita parcial | — | Alternativas equilibradas, cada uma com a consequência para os resultados. |
+
+### Lote 10b: Computação, de Elastic Load Balancing em diante
+
+Preservadas sem mudança: `q.cmp.cross-zone`, `q.cmp.asg-elb-health`, `q.cmp.lambda-reserved`, `q.cmp.lambda-vpc`, `q.cmp.fargate-ops`, `q.cmp.eks-choice`, `q.cmp.ecr`, `q.cmp.spectrum-timeout`, `q.cmp.batch-queue`, `q.cmp.beanstalk-immutable`, `q.cmp.eks-anywhere`, `q.cmp.evs`, `q.cmp.final-sp-fargate`. Nenhuma mudança de classificação.
+
+| Questão | Tarefa do guia | Situação | Mudança de classificação | Observação |
+|---|---|---|---|---|
+| `q.cmp.alb-path` | 3.4 | Reescrita | — | Distrator de Elastic IPs trocado por dois ALBs. |
+| `q.cmp.nlb-static` | 1.3 | Reescrita parcial | — | Alternativas equilibradas. |
+| `q.cmp.gwlb` | 1.3 | Reescrita | — | Distrator de Elastic IP por firewall trocado pelo AWS WAF. |
+| `q.cmp.dereg` | 2.2 | Reescrita | — | A correta tinha 2,4 vezes o tamanho dos distratores; distratores de health check e cross-zone trocados por sticky sessions e intervalo menor. |
+| `q.cmp.asg-tt` | 2.1 | Reescrita | — | Distrator de capacidade fixa trocado por step scaling. |
+| `q.cmp.asg-scheduled` | 2.1 | Reescrita | — | Distrator de simple scaling trocado por step scaling. |
+| `q.cmp.asg-termination` | 2.1 | Reescrita parcial | — | Alternativas equilibradas. |
+| `q.cmp.asg-hooks` | 2.1 | Reescrita | — | Texto padronizado (Escolha DOIS.); distrator de placement group trocado por grace period. |
+| `q.cmp.lambda-timeout` | 3.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.cmp.lambda-provisioned` | 3.1 | Reescrita | — | Distrator de DLQ trocado por mais memória; explicação do SnapStart atualizada. |
+| `q.cmp.lambda-async` | 2.1 | Reescrita | — | Distrator de concorrência provisionada trocado pela DLQ padrão, que guarda o evento sem o erro. |
+| `q.cmp.lambda-sources` | 2.1 | Reescrita | — | Enunciado sem cenário ganhou um requisito concreto (tamanho do lote); texto padronizado (Escolha DUAS.). |
+| `q.cmp.ecs-roles` | 1.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.cmp.beanstalk` | 3.1 | Reescrita | — | Explicação curta completada. |
+| `q.cmp.beanstalk-bluegreen` | 2.2 | Reescrita parcial | — | Alternativas equilibradas. |
+| `q.cmp.sar` | 3.1 | Reescrita | — | A correta tinha três vezes o tamanho dos distratores; distrator do bucket público trocado por bucket compartilhado. |
+| `q.cmp.anywhere` | 3.1 | Reescrita | — | Alternativas equilibradas. |
+| `q.cmp.hybrid-multi` | 3.1 | Reescrita | — | Era memorização ("Quais afirmações estão corretas?"); virou cenário com duas fábricas, mantendo duas corretas. |
+| `q.cmp.final-alb-az` | 2.2 | Reescrita | — | Alternativas equilibradas. |
+
+Métricas das 65 questões do módulo, antes e depois:
+- Correta 1,6 vez mais longa: de 23 para 0.
+- Correta mais longa que todos os distratores: de 34 para 28 das 59 de resposta única.
+- Explicação curta: de 1 para 0.
+- Tamanho médio da explicação: de 188 para 286 caracteres.
 
 ## Como retomar
 
@@ -459,7 +496,7 @@ O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seg
 | 7 | Foundations | `foundations/questions.ts` | feito |
 | 8 | Redes | `network/questions.ts`, `network/questions-f06-f09.ts` | feito |
 | 9 | Bancos de dados | `database/questions.ts` | feito |
-| 10 | Computação | `compute/questions.ts` | primeira metade feita (até opções de compra); falta de Elastic Load Balancing em diante |
+| 10 | Computação | `compute/questions.ts` | feito |
 | 11 | Governança | `governance/questions*.ts` | pendente |
 | 12 | IAM | `identity/questions.ts` | pendente |
 
