@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createInitialProgress } from '../../engine/progress'
-import { useGame } from '../../store/gameStore'
+import { flushSave, useGame } from '../../store/gameStore'
 import { CodexPage } from './CodexPage'
 import { ConceptPage } from './ConceptPage'
 
@@ -17,6 +17,8 @@ function seed(discovered: string[]) {
   const progress = createInitialProgress(NOW)
   progress.discovered = Object.fromEntries(discovered.map((id) => [id, NOW.toISOString()]))
   useGame.setState({ progress })
+  // Grava agora: o salvamento com atraso dispararia depois que o ambiente do teste já foi desmontado.
+  flushSave()
 }
 
 function renderCodex(path = '/codex') {
