@@ -631,5 +631,5 @@ As questões do piloto já revisadas são puladas nos lotes.
 ## Observações fora do escopo
 
 - O simulado sorteia sem os pesos dos domínios (`src/engine/exam.ts`, `simuladoSample`).
-- A atividade `gov.f04.m2.a6` (fase 4 da Governança) pergunta sobre a avaliação proativa das propriedades de um bucket. Nenhuma regra gerenciada de S3 aceita o modo proativo hoje; só uma regra personalizada faria isso. Vale revisar numa tarefa das fases.
+- A atividade `gov.f04.m2.a6` (fase 4 da Governança) perguntava sobre a avaliação proativa das propriedades de um bucket, mas nenhuma regra gerenciada de S3 aceita o modo proativo. Corrigida em 24/10/2026: agora usa uma sub-rede e a regra `subnet-auto-assign-public-ip-disabled`, e a explicação diz que buckets precisariam de uma regra personalizada.
 - `docs/ARQUITETURA.md` descreve os testes do banco de forma desatualizada.
