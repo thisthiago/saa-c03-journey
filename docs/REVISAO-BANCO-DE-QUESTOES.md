@@ -39,6 +39,7 @@ Distribuição por dificuldade: 131 fáceis, 240 médias, 112 difíceis.
 | Lote 1, Arquitetura (24/10/2026) | 38 | 0 | 38 | 0 |
 | Lote 2, Arquivos (24/10/2026) | 26 | 0 | 26 | 0 |
 | Lote 3, Análise (24/10/2026) | 37 | 0 | 37 | 0 |
+| Lote 4, Integração (24/10/2026) | 22 | 0 | 22 | 0 |
 
 ### Piloto
 
@@ -214,6 +215,41 @@ Métricas das 39 questões do módulo, antes e depois:
 - Explicação curta: de 21 para 0.
 - Tamanho médio da explicação: de 111 para 387 caracteres.
 
+### Lote 4: Integração
+
+As duas questões do piloto (`q.int.decouple` e `q.int.visibility`) não entraram de novo. Nenhuma mudança de classificação.
+
+| Questão | Tarefa do guia | Situação | Mudança de classificação | Observação |
+|---|---|---|---|---|
+| `q.int.dlq` | 2.1 | Reescrita | — | Distrator do SNS trocado por visibilidade de 12 horas; explicação de mensagem venenosa e redrive. |
+| `q.int.large-message` | 2.1 | Reescrita | — | Explicação do padrão de referência. |
+| `q.int.long-polling` | 4.1 | Reescrita | — | Distrator FIFO trocado por espera no próprio código. |
+| `q.int.fifo` | 2.1 | Reescrita | — | Explicação do grupo de mensagens. |
+| `q.int.lambda-sqs` | 2.1 | Reescrita | — | Distrator "desligar a DLQ" trocado por lote menor; texto padronizado (Escolha DUAS.). |
+| `q.int.fanout` | 2.1 | Reescrita | — | Explicação de distribuição e armazenamento. |
+| `q.int.sns-filter` | 2.1 | Reescrita | — | Distrator FIFO trocado por uma função Lambda filtrando. |
+| `q.int.sns-retries` | 2.1 | Reescrita | — | Distrator "Nada" virou uma confusão plausível sobre os 23 dias. |
+| `q.int.eb-aws-events` | 2.1 | Reescrita | — | Distratores da fila assinada pela instância e do barramento sem regra trocados por barramento personalizado e alarme de CPU. |
+| `q.int.eb-replay` | 2.1 | Reescrita | — | Explicação de arquivo, replay e DLQ. |
+| `q.int.scheduler` | 2.1 | Reescrita | — | Explicação do Scheduler frente às regras agendadas. |
+| `q.int.sfn-type` | 2.1 | Reescrita | — | Explicação do callback com token de tarefa. |
+| `q.int.sfn-errors` | 2.1 | Reescrita | — | Explicação de Retry, Catch e saga. |
+| `q.int.apigw-usage-plans` | 2.1 | Reescrita | — | Explicação de chave de API como identificação, não autorização. |
+| `q.int.apigw-cache` | 3.4 | Reescrita | — | Explicação de como escolher o TTL. |
+| `q.int.apigw-private` | 1.2 | Reescrita | — | Distrator "API HTTP com endpoint privado" trocado por API regional com WAF. |
+| `q.int.queue-vs-stream` | 2.1 | Reescrita | — | Distrator FIFO trocado por fan-out SNS com SQS (resolve os leitores, não a releitura). |
+| `q.int.hot-shard` | 3.5 | Reescrita | — | Explicação com o limite de 1 MB/s por shard. |
+| `q.int.mq` | 2.1 | Reescrita | — | Explicação dos protocolos e da implantação ativa e em espera. |
+| `q.int.idempotency` | 2.1 | Reescrita | — | Explicação da técnica de idempotência. |
+| `q.int.write-buffer` | 2.1 | Reescrita | — | Distrator do banco assinando tópico trocado por SNS com Lambda assinante. |
+| `q.int.choose-multi` | 2.1 | Reescrita | — | Distratores de MQ e Kinesis trocados por SNS com filtro e SQS FIFO. |
+
+Métricas das 24 questões do módulo, antes e depois:
+- Correta 1,6 vez mais longa: de 15 para 0.
+- Correta mais longa que todos os distratores: de 19 para 14 das 22 de resposta única.
+- Explicação curta: de 20 para 0.
+- Tamanho médio da explicação: de 91 para 417 caracteres.
+
 ## Como retomar
 
 O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seguem esta ordem, um módulo por lote (Computação, Governança e IAM em dois lotes cada):
@@ -223,7 +259,7 @@ O padrão editorial do piloto foi aprovado em 24/10/2026. Os próximos lotes seg
 | 1 | Arquitetura | `architecture/questions.ts` | feito |
 | 2 | Arquivos | `files/questions.ts` | feito |
 | 3 | Análise | `analytics/questions.ts` | feito |
-| 4 | Integração | `integration/questions.ts` | pendente |
+| 4 | Integração | `integration/questions.ts` | feito |
 | 5 | Segurança | `security/questions.ts` | pendente |
 | 6 | S3 | `storage/questions.ts` | pendente |
 | 7 | Foundations | `foundations/questions.ts` | pendente |
