@@ -65,6 +65,11 @@
 .chip > svg {
   flex: none;
 }
+/* Identificadores longos (ARN, nomes de achados) quebram dentro do item. */
+.chip > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .chipSelected {
   border-color: var(--accent);
   background: var(--accent-soft);
@@ -293,6 +298,34 @@
 .orderText {
   flex: 1;
   min-width: 0;
+  overflow-wrap: anywhere;
+}
+/* Celular: o texto usa a largura toda na primeira linha; a alça e as setas vão para a segunda. */
+@media (max-width: 480px) {
+  .orderItem {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    grid-template-areas:
+      'index text text text'
+      'grip . up down';
+    gap: var(--space-2) var(--space-3);
+  }
+  .orderItem > :nth-child(1) {
+    grid-area: grip;
+  }
+  .orderIndex {
+    grid-area: index;
+  }
+  .orderText {
+    grid-area: text;
+    align-self: center;
+  }
+  .orderItem > :nth-child(4) {
+    grid-area: up;
+  }
+  .orderItem > :nth-child(5) {
+    grid-area: down;
+  }
 }
 .iconBtn {
   display: grid;
