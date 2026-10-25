@@ -7,7 +7,7 @@
 }
 .missionHead {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(200px, 300px);
+  grid-template-columns: auto minmax(0, 1fr) minmax(200px, 340px);
   gap: var(--space-4);
   align-items: center;
   margin-bottom: var(--space-4);
@@ -49,8 +49,35 @@
   font-size: 0.82rem;
   color: var(--text-muted);
 }
+.stepperList {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 10px;
+  margin: 0;
+  padding: 0;
+  font-size: 0.82rem;
+}
+.stepperLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.stepperLink:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+.stepperLink[aria-current='step'] {
+  color: var(--text);
+  font-weight: 600;
+}
 .sessionXp {
   color: var(--xp);
+  font-weight: 600;
 }
 .briefing {
   border-top: 4px solid var(--phase);
@@ -148,6 +175,176 @@
 }
 .activityCard {
   padding: var(--space-5);
+}
+/* Desafio à esquerda e painel de contexto à direita (desktop). */
+.activityLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: var(--space-4);
+  align-items: start;
+}
+.activityLayout[data-panel='closed'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (max-width: 1000px) {
+  .activityLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.activityMain {
+  min-width: 0;
+}
+.panelBar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-2);
+}
+.panel {
+  position: sticky;
+  top: calc(var(--topbar-h) + var(--space-3));
+  max-height: calc(100vh - var(--topbar-h) - var(--space-5));
+  overflow-y: auto;
+  border-radius: var(--radius-l);
+}
+@media (max-width: 1000px) {
+  .panel {
+    position: static;
+    max-height: none;
+  }
+}
+.panelCard {
+  padding: var(--space-4);
+  border-top: 3px solid var(--phase);
+}
+.panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.panelHead :global(.eyebrow) {
+  margin: 0;
+}
+.panelClose {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-s);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.panelClose:hover {
+  color: var(--text);
+  border-color: var(--border);
+}
+.panelCompany {
+  font-size: 1.05rem;
+  margin: var(--space-2) 0 2px;
+}
+.panelTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: var(--space-3) 0 4px;
+}
+.panelText {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 0;
+}
+.panelCriteria {
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+.panelCriteria li {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-size: 0.88rem;
+}
+.panelCriteria svg {
+  flex: none;
+  margin-top: 3px;
+  color: var(--phase);
+}
+.panelSteps {
+  list-style: none;
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+}
+.panelStep {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 6px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: none;
+  font: inherit;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  text-align: left;
+  cursor: pointer;
+}
+.panelStep:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.panelStep[aria-current='step'] {
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 600;
+}
+.panelStepMark {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  font-size: 0.72rem;
+}
+.panelStepMark[data-passed='true'] {
+  border-color: var(--success);
+  background: var(--success-soft);
+  color: var(--success);
+}
+.panelDetails {
+  margin-top: var(--space-3);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-3);
+}
+.panelDetails summary {
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.panelDetails[open] summary {
+  margin-bottom: var(--space-2);
+}
+.panelConcept {
+  font-size: 0.86rem;
+  margin-bottom: var(--space-3);
+}
+.panelConcept h4 {
+  font-size: 0.9rem;
+  margin: 0 0 4px;
+}
+.panelConcept p {
+  margin: 0 0 4px;
 }
 @media (max-width: 640px) {
   .activityCard {
