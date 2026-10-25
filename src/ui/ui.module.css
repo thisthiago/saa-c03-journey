@@ -21,6 +21,14 @@
     box-shadow 0.15s;
   white-space: nowrap;
 }
+/* No celular e no tablet, rótulos longos (como "Próxima missão: título") quebram a linha em vez de passar da tela. */
+@media (max-width: 760px) {
+  .btn {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+}
 .btn:active:not(:disabled) {
   transform: translateY(1px) scale(0.98);
 }
