@@ -5,11 +5,15 @@ import { ATTEMPT_FACTORS, HINT_PENALTY, REVIEW_XP } from '../../engine/xp'
 import { LEITNER_DAYS } from '../../engine/mastery'
 import { useDocumentTitle } from '../../app/hooks'
 import { Callout, Card } from '../../ui/kit'
-import { phaseRef } from '../../app/format'
+import { phaseLabel, plural } from '../../app/format'
+import s from './about.module.css'
 
 export function AboutPage() {
   useDocumentTitle('Sobre')
-  const phases = [...registry.tracks.values()].flatMap(trackPhases).filter((p) => p.availability === 'available' && p.simplifications?.length)
+  // Simplificações agrupadas por trilha, cada uma num bloco que abre com um toque (são 113 fases).
+  const groups = [...registry.tracks.values()]
+    .map((track) => ({ track, phases: trackPhases(track).filter((p) => p.availability === 'available' && p.simplifications?.length) }))
+    .filter((g) => g.phases.length > 0)
   // Os conceitos com status descrevem os produtos e recursos com disponibilidade restrita (e suas alternativas).
   const unavailable = [...registry.concepts.values()]
     .filter((c) => c.availability && c.availability.kind !== 'current')
@@ -39,19 +43,29 @@ export function AboutPage() {
       </Card>
 
       <h2 style={{ marginTop: 32 }}>Simplificações</h2>
-      <p className="muted">Toda simulação simplifica a AWS real. As simplificações de cada fase liberada:</p>
-      {phases.map((p) => (
-        <Card key={p.id} style={{ marginBottom: 12 }}>
-          <h3>
-            {phaseRef(p)} — {p.title}
-          </h3>
-          <ul>
-            {p.simplifications!.map((t) => (
-              <li key={t}>{t}</li>
+      <p className="muted">Toda simulação simplifica a AWS real. Abra uma trilha para ver as simplificações de cada fase liberada.</p>
+      <div className={s.tracks}>
+        {groups.map(({ track, phases }) => (
+          <details key={track.id} className={s.track}>
+            <summary>
+              <span>{track.title}</span>
+              <span className={s.count}>{plural(phases.length, 'fase', 'fases')}</span>
+            </summary>
+            {phases.map((p) => (
+              <section key={p.id} className={s.phase}>
+                <h3>
+                  {phaseLabel(p)}: {p.title}
+                </h3>
+                <ul>
+                  {p.simplifications!.map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              </section>
             ))}
-          </ul>
-        </Card>
-      ))}
+          </details>
+        ))}
+      </div>
 
       {unavailable.length > 0 && (
         <>

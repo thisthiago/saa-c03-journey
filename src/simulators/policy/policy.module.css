@@ -188,14 +188,14 @@
   font-weight: 500;
 }
 .code {
+  composes: scroll-x from global;
   margin: 0;
   font-family: var(--font-mono);
   font-size: 0.76rem;
   line-height: 1.45;
-  background: var(--surface-2);
+  --scroll-bg: var(--surface-2);
   border-radius: var(--radius-s);
   padding: var(--space-2) var(--space-3);
-  overflow-x: auto;
   max-height: 420px;
 }
 .tests {
@@ -351,10 +351,10 @@
   width: fit-content;
 }
 .tableWrap {
-  overflow-x: auto;
+  composes: scroll-x from global;
+  --scroll-bg: var(--surface);
   border-radius: var(--radius-m);
   border: 1px solid var(--border);
-  background: var(--surface);
 }
 .matrix {
   width: 100%;

@@ -16,6 +16,7 @@
 .title {
   margin: 0;
   font-size: 1rem;
+  overflow-wrap: anywhere;
 }
 .desc {
   margin: 0;

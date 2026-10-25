@@ -12,6 +12,15 @@
   align-items: center;
   margin-bottom: var(--space-4);
 }
+/* Tablet: as etapas ganham linha própria em vez de quebrar em duas. */
+@media (max-width: 1000px) {
+  .missionHead {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .stepper {
+    grid-column: 1 / -1;
+  }
+}
 @media (max-width: 760px) {
   .missionHead {
     grid-template-columns: 1fr;
@@ -21,6 +30,7 @@
 .back {
   display: inline-flex;
   align-items: center;
+  min-height: 24px;
   gap: 4px;
   color: var(--text-muted);
   text-decoration: none;
@@ -60,6 +70,7 @@
   font-size: 0.82rem;
 }
 .stepperLink {
+  min-height: 24px;
   padding: 0;
   border: 0;
   background: none;
@@ -166,6 +177,14 @@
   gap: var(--space-2);
   margin-bottom: var(--space-2);
 }
+/* Nome oficial longo (em inglês): quebra a linha em vez de alargar o cartão. */
+.intelHead > span {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  border-radius: 12px;
+}
 .intelTitle {
   font-size: 1.15rem;
   margin: 0;
@@ -215,6 +234,37 @@
 .panelCard {
   padding: var(--space-4);
   border-top: 3px solid var(--phase);
+}
+/* Telas estreitas: bloco recolhido acima do desafio; um toque abre. */
+.panelCompact {
+  margin-bottom: var(--space-3);
+}
+.panelCompact .panelCard {
+  padding: 0 var(--space-4);
+}
+.panelSummary {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  font-family: var(--font-display);
+  gap: var(--space-2);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.panelSummary::-webkit-details-marker {
+  display: none;
+}
+.panelSummaryIcon {
+  flex: none;
+  color: var(--text-muted);
+  transition: transform 0.15s var(--ease-out);
+}
+.panelCompact details[open] {
+  padding-bottom: var(--space-4);
+}
+.panelCompact details[open] .panelSummaryIcon {
+  transform: rotate(90deg);
 }
 .panelHead {
   display: flex;
@@ -389,7 +439,7 @@
   font-family: var(--font-mono);
   font-size: 0.78rem;
   line-height: 1.45;
-  overflow-x: auto;
+  --scroll-bg: var(--surface-2);
   max-height: 340px;
 }
 .hints {

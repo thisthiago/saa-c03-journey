@@ -204,6 +204,10 @@ summary[data-ok='false'] .listIcon {
   .list li {
     flex-wrap: wrap;
   }
+  /* O texto usa a linha toda ao lado do ícone; o botão desce para baixo dele. */
+  .list li .listBody {
+    flex-basis: calc(100% - 38px);
+  }
   .list li > button {
     margin-left: 38px;
   }
@@ -357,7 +361,7 @@ summary[data-ok='false'] .listIcon {
   font-family: var(--font-mono);
   font-size: 0.78rem;
   line-height: 1.45;
-  overflow-x: auto;
+  --scroll-bg: var(--surface-2);
   max-height: 340px;
 }
 .ask {

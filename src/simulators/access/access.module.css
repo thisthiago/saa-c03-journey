@@ -116,14 +116,14 @@
   color: var(--text-muted);
 }
 .code {
+  composes: scroll-x from global;
   margin: 6px 0 0;
   padding: 8px 10px;
   border-radius: 6px;
-  background: var(--bg);
+  --scroll-bg: var(--bg);
   border: 1px solid var(--border);
   font-size: 0.74rem;
   line-height: 1.45;
-  overflow-x: auto;
   max-width: 100%;
 }
 .summary {
@@ -221,10 +221,10 @@
   color: var(--danger);
 }
 .tableWrap {
-  overflow-x: auto;
+  composes: scroll-x from global;
+  --scroll-bg: var(--surface);
   border-radius: var(--radius-m);
   border: 1px solid var(--border);
-  background: var(--surface);
 }
 .matrix {
   width: 100%;

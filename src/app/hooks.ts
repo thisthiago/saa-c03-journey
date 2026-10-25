@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import { registry } from '../content'
 import { levelProgress, levelTitle } from '../engine/levels'
 import { dueCount } from '../engine/review'
@@ -33,4 +33,16 @@ export function useThemeSettings() {
     if (settings.reducedMotion) root.setAttribute('data-motion', 'reduced')
     else root.removeAttribute('data-motion')
   }, [settings.theme, settings.reducedMotion])
+}
+
+/** Acompanha uma media query do CSS (por exemplo, a largura em que o layout muda). */
+export function useMediaQuery(query: string) {
+  return useSyncExternalStore(
+    (onChange) => {
+      const mq = window.matchMedia(query)
+      mq.addEventListener('change', onChange)
+      return () => mq.removeEventListener('change', onChange)
+    },
+    () => window.matchMedia(query).matches,
+  )
 }

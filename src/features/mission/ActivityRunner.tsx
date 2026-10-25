@@ -130,7 +130,7 @@ export function ActivityRunner({ activity, onSubmit, onContinue, continueLabel, 
             {activity.exhibits.map((x) => (
               <figure key={x.title} className={s.exhibit}>
                 <figcaption>{x.title}</figcaption>
-                <pre tabIndex={0}>{x.code}</pre>
+                <pre className="scroll-x" tabIndex={0}>{x.code}</pre>
               </figure>
             ))}
           </div>

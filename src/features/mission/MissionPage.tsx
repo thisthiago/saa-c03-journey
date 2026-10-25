@@ -7,7 +7,7 @@ import { isMissionPassed, missionScore, missionStatus, passThreshold } from '../
 import { ACTIVITY_PASS_SCORE } from '../../engine/xp'
 import type { MissionDef } from '../../engine/types'
 import { useGame } from '../../store/gameStore'
-import { useDocumentTitle } from '../../app/hooks'
+import { useDocumentTitle, useMediaQuery } from '../../app/hooks'
 import { Badge, Button, ButtonLink, Callout, Card, IconTile, ProgressBar } from '../../ui/kit'
 import { Paragraphs } from '../../ui/RichText'
 import { renderInline } from '../../ui/inline'
@@ -47,6 +47,8 @@ function MissionRunner({ missionId }: { missionId: string }) {
   const submitActivity = useGame((st) => st.submitActivity)
   const discover = useGame((st) => st.discover)
   const showPanel = useGame((st) => st.progress.settings.contextPanel)
+  // Abaixo de 1000 px o painel lateral vira um bloco recolhido acima do desafio.
+  const narrow = useMediaQuery('(max-width: 1000px)')
   const setSettings = useGame((st) => st.setSettings)
   const steps = useMemo(() => buildSteps(mission), [mission])
   const status = missionStatus(progress, registry, missionId)
@@ -205,9 +207,10 @@ function MissionRunner({ missionId }: { missionId: string }) {
       )}
 
       {step.kind === 'activity' && (
-        <div className={s.activityLayout} data-panel={showPanel ? 'open' : 'closed'}>
+        <div className={s.activityLayout} data-panel={showPanel && !narrow ? 'open' : 'closed'}>
+          {narrow && <ContextPanel mission={mission} phase={phase} current={step.index} onJump={goActivity} compact />}
           <div className={s.activityMain}>
-            {!showPanel && (
+            {!showPanel && !narrow && (
               <div className={s.panelBar}>
                 <Button variant="ghost" size="small" onClick={() => setSettings({ contextPanel: true })}>
                   <PanelRightOpen size={16} aria-hidden="true" /> Mostrar o contexto da missão
@@ -231,7 +234,7 @@ function MissionRunner({ missionId }: { missionId: string }) {
               />
             </Card>
           </div>
-          {showPanel && <ContextPanel mission={mission} phase={phase} current={step.index} onJump={goActivity} onClose={() => setSettings({ contextPanel: false })} />}
+          {showPanel && !narrow && <ContextPanel mission={mission} phase={phase} current={step.index} onJump={goActivity} onClose={() => setSettings({ contextPanel: false })} />}
         </div>
       )}
 

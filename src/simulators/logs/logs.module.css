@@ -1,12 +1,12 @@
 /* Linhas de exemplo do laboratório de logs. */
 .lines {
+  composes: scroll-x from global;
   display: grid;
   gap: 2px;
   border-radius: var(--radius-s);
-  background: var(--surface-2);
+  --scroll-bg: var(--surface-2);
   padding: 6px 8px;
   max-width: 100%;
-  overflow-x: auto;
 }
 .line {
   display: grid;

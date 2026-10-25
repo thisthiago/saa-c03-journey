@@ -159,8 +159,6 @@ Módulo `src/content/modules/network/`, território `redes`. Reaproveita, sem re
 
 **Escolhas.** Os labs `hybrid`, `dns-policy` e `net-chooser` usam o motor genérico `simulators/shared/chooser.ts` e a interface `shared/ChoiceLab.tsx`: cada cartão tem um requisito que decide, a melhor opção vale 1, uma que atende com mais trabalho vale 0,5 e uma que deixa um requisito de fora vale 0. Os testes falham se duas opções empatarem como melhor.
 
-**Desktop primeiro.** As capturas de tela desta trilha (`tests/e2e/screens.spec.ts`) cobrem só o desktop; tablet e celular ficam para uma etapa própria.
-
 ## Trilha Análise de dados e serviços de IA na AWS
 
 Módulo `src/content/modules/analytics/`, território novo `analise` ("Análise de dados e IA", glifo `chart`). Reaproveita, sem redeclarar, `lc.rules` (Fase 1), `rs.vs-athena` (Fases 3 e 9) e `rs.what` (comparações). Declara o básico de Kinesis Data Streams (`kds.streams`) e Data Firehose (`fh.delivery`, `fh.parquet`), com os prefixos do plano de Integração e mensageria, que deve reaproveitá-los.
@@ -185,8 +183,6 @@ Módulo `src/content/modules/analytics/`, território novo `analise` ("Análise 
 **Previsões calculadas.** As previsões `datalake`, `lakeperm` e `emr` usam os simuladores de mesmo nome.
 
 **Escolhas.** Os labs `ingest`, `ai-chooser` e `ana-chooser` usam o motor genérico `simulators/shared/chooser.ts`. No `ai-chooser`, o Elastic Transcoder aparece como opção que não atende a nada, porque foi encerrado.
-
-**Desktop primeiro.** As capturas de tela desta trilha cobrem só o desktop.
 
 ## Trilha Segurança e proteção de dados na AWS
 
@@ -215,8 +211,6 @@ Módulo `src/content/modules/security/`, no território `seguranca`, que passa a
 
 **Preços.** A Fase 2 estima o custo mensal de um cluster do CloudHSM com a tabela de `simulators/security-prices.ts`.
 
-**Desktop primeiro.** As capturas de tela desta trilha cobrem só o desktop.
-
 ## Trilha Integração e mensageria na AWS
 
 Módulo `src/content/modules/integration/`, no território `integracao`, que passa a ser ativo. Reaproveita, sem redeclarar, `ev.fanout`, `ev.eventbridge` e `ev.at-least-once` (S3 Expedition) e `kds.streams`, `fh.delivery`, `fh.parquet`, `msk.kafka` e `ingest.third-party` (Análise de dados). Acrescenta conceitos `sqs.*`, `sns.*`, `eb.*`, `sfn.*`, `apigw.*`, `kds.partition-key`, `kds.enhanced-fanout`, `mq.*` e `int.*`. Step Functions, API Gateway e Amazon MQ entram no catálogo de serviços.
@@ -242,8 +236,6 @@ Módulo `src/content/modules/integration/`, no território `integracao`, que pas
 
 **Previsões calculadas.** As previsões `queue`, `fifo`, `eventbus`, `workflow`, `apigw` e `stream` usam os simuladores de mesmo nome.
 
-**Desktop primeiro.** As capturas de tela desta trilha cobrem só o desktop.
-
 ## Trilha Arquivos e backup na AWS
 
 Módulo `src/content/modules/files/`, no território `armazenamento`, que passa a ter duas trilhas (S3 Expedition e esta). Reaproveita, sem redeclarar, `storage.file`, `sgw.s3-file`, `sgw.fsx-file`, `mig.datasync`, `backup.independent-copy` e `dr.rpo-rto` (S3 Expedition), `fed.directory-service` (IAM), `ebs.snapshots` (Computação), `bkp.aws-backup` (Bancos de dados), `gov.org-policies` (Monitoramento e governança) e `bkp.vault-lock` (Segurança). Fica no fim de `MODULES` para que o Codex mostre esses conceitos nas trilhas que os declaram.
@@ -266,8 +258,6 @@ Módulo `src/content/modules/files/`, no território `armazenamento`, que passa 
 **Laboratórios.** `filesystem` e `backup` usam o motor em grade (`simulators/shared/grid.ts`); `fs-chooser` usa o motor de escolha (`simulators/shared/chooser.ts`). O custo do `filesystem` escolhe a combinação válida mais barata entre os três modos de vazão e os três ciclos de vida, e o modelo recusa empates (diferença menor que 1%).
 
 **Previsões calculadas.** `efs-access` e `efs-cost` usam `simulators/filesystem/`; `fsx-failure` usa `simulators/fsx/`; `backup` usa `simulators/backup/`.
-
-**Desktop primeiro.** As capturas de tela desta trilha cobrem só o desktop.
 
 ## Trilha Arquitetura e otimização na AWS
 
@@ -293,8 +283,6 @@ Módulo `src/content/modules/architecture/`, no território `arquitetura`, que p
 **Dependências.** A Fase 2, a 4, a 5 e a 6 exigem a 1; a 3 exige a 2; a 7 exige a 3; a 8 exige a 2 e a 4; a 9 exige a 3, a 5, a 6 e a 8; o desafio final exige as nove. O mapa usa cinco colunas e altura 800.
 
 **Laboratórios.** `wa-review`, `dr`, `transfer-cost`, `rightsizing`, `migration-plan` e `exam-reader` usam o motor em grade (`simulators/shared/grid.ts`); `perf-chooser` usa o motor de escolha. O `dr` escolhe a estratégia mais barata que cumpre o RPO e o RTO (pior caso de cada faixa do REL13-BP02, como premissa) e mostra o custo mensal da Região de recuperação. O `rightsizing` reduz um tamanho a cada vez que o pico de CPU e memória dobrado continua abaixo de 80% e escolhe a compra válida mais barata. O `transfer-cost` calcula o custo mensal de cada caminho e recusa empates. O `migplan` foi chamado assim para não se confundir com o `migration` (DMS) da trilha de Bancos de dados.
-
-**Desktop primeiro.** As capturas de tela desta trilha cobrem só o desktop.
 
 ## Princípios de escrita
 

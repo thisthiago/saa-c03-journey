@@ -20,7 +20,8 @@
   margin: 6px 0;
 }
 .scroll {
-  overflow-x: auto;
+  composes: scroll-x from global;
+  --scroll-bg: var(--surface);
   max-width: 100%;
 }
 .table {
@@ -44,6 +45,26 @@
   font-family: var(--font-mono);
   font-weight: 700;
   white-space: nowrap;
+}
+/* A primeira coluna fica parada enquanto a tabela rola para o lado. */
+.table tr > :first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--scroll-bg, var(--surface));
+}
+@media (max-width: 760px) {
+  .table tr > :first-child {
+    box-shadow: 6px 0 6px -6px var(--scroll-shadow);
+  }
+  /* Colunas de texto não ficam com uma palavra por linha: a tabela já rola para o lado. */
+  .table td:not(.num, .mono) {
+    min-width: 9em;
+  }
+  /* AZ, CIDR e tipos de instância não quebram no hífen. */
+  .table td.mono {
+    white-space: nowrap;
+  }
 }
 .num {
   text-align: right !important;
