@@ -194,6 +194,8 @@ test('revisão: escolher quantos itens entram na rodada', async ({ page }) => {
 })
 
 test('arrastar com o mouse: o bloco fica colado no cursor e cai no destino', async ({ page }) => {
+  // Item e destino precisam caber juntos na tela, ao lado do painel de contexto.
+  await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/#/missao/s3x.f01.m1')
   await page.getByRole('button', { name: 'Ver conceitos-chave' }).click()
   await page.getByRole('button', { name: 'Entendi, ir para o desafio' }).click()
