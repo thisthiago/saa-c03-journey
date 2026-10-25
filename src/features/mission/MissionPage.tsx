@@ -1,9 +1,10 @@
-import { ArrowLeft, ArrowRight, Check, CircleCheck, ClipboardList, Compass, Lock, Play, RotateCcw, Target, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, CircleCheck, ClipboardList, Compass, Lock, PanelRightOpen, Play, RotateCcw, Target, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { registry } from '../../content'
 import { masteryTier, TIER_LABEL } from '../../engine/mastery'
 import { isMissionPassed, missionScore, missionStatus, passThreshold } from '../../engine/selectors'
+import { ACTIVITY_PASS_SCORE } from '../../engine/xp'
 import type { MissionDef } from '../../engine/types'
 import { useGame } from '../../store/gameStore'
 import { useDocumentTitle } from '../../app/hooks'
@@ -12,6 +13,7 @@ import { Paragraphs } from '../../ui/RichText'
 import { renderInline } from '../../ui/inline'
 import { NotFound } from '../NotFound'
 import { ActivityRunner, type SubmitResult } from './ActivityRunner'
+import { ContextPanel } from './ContextPanel'
 import { Visual } from './visuals'
 import s from './mission.module.css'
 import { phaseLabel } from '../../app/format'
@@ -44,6 +46,8 @@ function MissionRunner({ missionId }: { missionId: string }) {
   const clearResume = useGame((st) => st.clearResume)
   const submitActivity = useGame((st) => st.submitActivity)
   const discover = useGame((st) => st.discover)
+  const showPanel = useGame((st) => st.progress.settings.contextPanel)
+  const setSettings = useGame((st) => st.setSettings)
   const steps = useMemo(() => buildSteps(mission), [mission])
   const status = missionStatus(progress, registry, missionId)
   const [stepIndex, setStepIndex] = useState(() => {
@@ -80,6 +84,15 @@ function MissionRunner({ missionId }: { missionId: string }) {
   const activityCount = mission.activities.length
   const doneActivities = steps.slice(0, stepIndex).filter((x) => x.kind === 'activity').length
   const isBoss = mission.type !== 'mission'
+  const goActivity = (i: number) => go(steps.findIndex((x) => x.kind === 'activity' && x.index === i))
+  // "Desafios" leva ao primeiro desafio ainda não aprovado (ou ao primeiro, se todos foram).
+  const firstPending = Math.max(0, mission.activities.findIndex((a) => (progress.activities[a.id]?.bestScore ?? 0) < ACTIVITY_PASS_SCORE))
+  const navItems = [
+    { label: 'Contexto', active: step.kind === 'briefing', onClick: () => go(0) },
+    ...(mission.intel.length > 0 ? [{ label: 'Conceitos-chave', active: step.kind === 'intel', onClick: () => go(1) }] : []),
+    { label: step.kind === 'activity' ? `Desafio ${step.index + 1} de ${activityCount}` : 'Desafios', active: step.kind === 'activity', onClick: () => goActivity(step.kind === 'activity' ? step.index : firstPending) },
+    { label: 'Resultado', active: step.kind === 'debrief', onClick: () => go(steps.length - 1) },
+  ]
 
   return (
     <div className={s.page} style={{ ['--phase' as string]: phase.color }} ref={topRef}>
@@ -93,13 +106,19 @@ function MissionRunner({ missionId }: { missionId: string }) {
           </span>
           <h1 className={s.missionTitle}>{mission.title}</h1>
         </div>
-        <div className={s.stepper} aria-label="Etapas da missão">
+        <nav className={s.stepper} aria-label="Etapas da missão">
           <ProgressBar value={stepIndex / (steps.length - 1)} color={phase.color} label="Progresso na missão" />
-          <span className={s.stepperText}>
-            {step.kind === 'activity' ? `Desafio ${step.index + 1} de ${activityCount}` : step.kind === 'briefing' ? 'Contexto' : step.kind === 'intel' ? 'Conceitos-chave' : 'Resultado'}
-            {sessionXp > 0 && <b className={s.sessionXp}> · +{sessionXp} XP</b>}
-          </span>
-        </div>
+          <ol className={s.stepperList}>
+            {navItems.map((item) => (
+              <li key={item.label}>
+                <button type="button" className={s.stepperLink} aria-current={item.active ? 'step' : undefined} onClick={item.onClick}>
+                  {item.label}
+                </button>
+              </li>
+            ))}
+            {sessionXp > 0 && <li className={s.sessionXp}>+{sessionXp} XP</li>}
+          </ol>
+        </nav>
       </header>
 
       {step.kind === 'briefing' && (
@@ -186,25 +205,37 @@ function MissionRunner({ missionId }: { missionId: string }) {
       )}
 
       {step.kind === 'activity' && (
-        <Card className={s.activityCard}>
-          <ActivityRunner
-            key={mission.activities[step.index].id}
-            activity={mission.activities[step.index]}
-            draftKey={mission.activities[step.index].kind === 'lab' ? `draft:${mission.activities[step.index].id}` : undefined}
-            onSubmit={(evaluation, hints, solution): SubmitResult => {
-              const events = submitActivity(mission.activities[step.index].id, evaluation, hints, solution)
-              const xp = events.filter((e) => e.type === 'xp').reduce((sum, e) => sum + (e.type === 'xp' ? e.amount : 0), 0)
-              setSessionXp((v) => v + xp)
-              const activityXp = events.find((e) => e.type === 'xp' && e.source === 'activity')
-              return { xp: activityXp?.type === 'xp' ? activityXp.amount : 0, events }
-            }}
-            onContinue={() => go(stepIndex + 1)}
-            continueLabel={step.index === activityCount - 1 ? 'Ver resultado' : 'Próximo desafio'}
-          />
-        </Card>
+        <div className={s.activityLayout} data-panel={showPanel ? 'open' : 'closed'}>
+          <div className={s.activityMain}>
+            {!showPanel && (
+              <div className={s.panelBar}>
+                <Button variant="ghost" size="small" onClick={() => setSettings({ contextPanel: true })}>
+                  <PanelRightOpen size={16} aria-hidden="true" /> Mostrar o contexto da missão
+                </Button>
+              </div>
+            )}
+            <Card className={s.activityCard}>
+              <ActivityRunner
+                key={mission.activities[step.index].id}
+                activity={mission.activities[step.index]}
+                draftKey={mission.activities[step.index].kind === 'lab' ? `draft:${mission.activities[step.index].id}` : undefined}
+                onSubmit={(evaluation, hints, solution): SubmitResult => {
+                  const events = submitActivity(mission.activities[step.index].id, evaluation, hints, solution)
+                  const xp = events.filter((e) => e.type === 'xp').reduce((sum, e) => sum + (e.type === 'xp' ? e.amount : 0), 0)
+                  setSessionXp((v) => v + xp)
+                  const activityXp = events.find((e) => e.type === 'xp' && e.source === 'activity')
+                  return { xp: activityXp?.type === 'xp' ? activityXp.amount : 0, events }
+                }}
+                onContinue={() => go(stepIndex + 1)}
+                continueLabel={step.index === activityCount - 1 ? 'Ver resultado' : 'Próximo desafio'}
+              />
+            </Card>
+          </div>
+          {showPanel && <ContextPanel mission={mission} phase={phase} current={step.index} onJump={goActivity} onClose={() => setSettings({ contextPanel: false })} />}
+        </div>
       )}
 
-      {step.kind === 'debrief' && <Debrief mission={mission} sessionXp={sessionXp} onJump={(i) => go(steps.findIndex((x) => x.kind === 'activity' && x.index === i))} onRestart={() => go(0)} navigate={navigate} doneActivities={doneActivities} />}
+      {step.kind === 'debrief' && <Debrief mission={mission} sessionXp={sessionXp} onJump={goActivity} onRestart={() => go(0)} navigate={navigate} doneActivities={doneActivities} />}
     </div>
   )
 }

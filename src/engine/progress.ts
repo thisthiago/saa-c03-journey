@@ -33,7 +33,7 @@ export function createInitialProgress(now: Date): ProgressState {
     stats: { comebacks: 0, perfectFirstTries: 0, activeDays: [] },
     exam: { questions: {}, simulados: [] },
     drafts: {},
-    settings: { theme: 'system', reducedMotion: false },
+    settings: { theme: 'system', reducedMotion: false, contextPanel: true },
   }
 }
 
