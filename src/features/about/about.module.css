@@ -1,0 +1,36 @@
+/* Simplificações agrupadas por trilha. */
+.tracks {
+  display: grid;
+  gap: var(--space-2);
+}
+.track {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-m);
+  background: var(--surface-glass);
+}
+.track > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  font-weight: 600;
+}
+.count {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.phase {
+  padding: 0 var(--space-4) var(--space-3);
+}
+.phase h3 {
+  font-size: 1rem;
+  margin: var(--space-3) 0 var(--space-1);
+}
+.phase ul {
+  margin: 0;
+}
