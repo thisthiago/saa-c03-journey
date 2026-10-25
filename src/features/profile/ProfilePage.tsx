@@ -14,7 +14,7 @@ import { isMissionPassed, streakDays, trackProgress } from '../../engine/selecto
 import { recommendedTrackOrder } from '../../engine/track-order'
 import type { AchievementDef, ProgressState } from '../../engine/types'
 import { clock, flushSave, useGame } from '../../store/gameStore'
-import { useDocumentTitle, useDueCount, usePlayer } from '../../app/hooks'
+import { useDocumentTitle, useDueCount, useMediaQuery, usePlayer } from '../../app/hooks'
 import { phaseLabel, plural } from '../../app/format'
 import { Badge, Button, ButtonLink, Callout, Card, Modal, ProgressBar, ProgressRing } from '../../ui/kit'
 import { DomainTag } from '../../ui/DomainTag'
@@ -448,27 +448,28 @@ function Achievements({ progress, focusTrackId }: { progress: ProgressState; foc
       )}
 
       <div className={s.block}>
-        <h3 className={s.groupTitle}>Todas as conquistas, por trilha</h3>
-        <div className={s.groups}>
-          {GROUPS.map((g) => {
-            const got = g.achievements.filter((a) => progress.achievements[a.id]).length
-            return (
-              <details key={g.id} className={s.group}>
-                <summary>
-                  <span>{g.title}</span>
-                  <span className={s.small}>
-                    {got} de {g.achievements.length}
-                  </span>
-                </summary>
-                <ul className={s.achGrid}>
-                  {g.achievements.map((a) => (
-                    <AchievementItem key={a.id} a={a} unlockedAt={progress.achievements[a.id]?.unlockedAt} />
-                  ))}
-                </ul>
-              </details>
-            )
-          })}
-        </div>
+        <PhoneCollapsible heading={<h3 className={s.groupTitle}>Todas as conquistas, por trilha</h3>}>
+          <div className={s.groups}>
+            {GROUPS.map((g) => {
+              const got = g.achievements.filter((a) => progress.achievements[a.id]).length
+              return (
+                <details key={g.id} className={s.group}>
+                  <summary>
+                    <span>{g.title}</span>
+                    <span className={s.small}>
+                      {got} de {g.achievements.length}
+                    </span>
+                  </summary>
+                  <ul className={s.achGrid}>
+                    {g.achievements.map((a) => (
+                      <AchievementItem key={a.id} a={a} unlockedAt={progress.achievements[a.id]?.unlockedAt} />
+                    ))}
+                  </ul>
+                </details>
+              )
+            })}
+          </div>
+        </PhoneCollapsible>
       </div>
     </section>
   )
@@ -523,68 +524,91 @@ function RecentActivity({ progress }: { progress: ProgressState }) {
   }
   return (
     <section className={s.section} aria-labelledby="recent-title">
-      <h2 id="recent-title">Atividade recente</h2>
-      <div className={s.activityGrid}>
-        <Card aria-labelledby="days-title">
-          <h3 id="days-title" className={s.groupTitle}>
-            Dias com estudo
-          </h3>
-          <p className={s.cardText}>
-            Você estudou em <b>{activeCount}</b> dos últimos 28 dias. Sequência atual: {plural(streak, 'dia', 'dias')}.
-          </p>
-          <div className={s.calendar} role="img" aria-label={`Dias com estudo nas últimas quatro semanas: ${activeCount} de 28`}>
-            {calendar.map((d) => (
-              <span key={d.day} className={s.calDay} data-active={d.active} title={`${d.day.slice(8, 10)}/${d.day.slice(5, 7)}: ${d.active ? 'com estudo' : 'sem estudo'}`} />
-            ))}
-          </div>
-          <p className={s.small}>Cada quadrado é um dia, do mais antigo (no alto, à esquerda) até hoje. Conta o dia em que houve ao menos uma resposta avaliada.</p>
-        </Card>
-        <Card aria-labelledby="log-title">
-          <h3 id="log-title" className={s.groupTitle}>
-            Últimas ações
-          </h3>
-          {items.length === 0 ? (
-            <p className="muted">Nenhuma ação registrada ainda. Aqui aparecem as atividades, missões, revisões, conquistas e simulados, do mais recente ao mais antigo.</p>
-          ) : (
-            <>
-              {days.map((d) => (
-                <div key={d.day} className={s.logDay}>
-                  <h4 className={s.logDate}>{dayLabel(d.day, now)}</h4>
-                  <ul className={s.log}>
-                    {d.items.map((it, i) => {
-                      const t = activityText(it)
-                      return (
-                        <li key={`${it.at}-${i}`}>
-                          <span className={s.logTime}>{new Date(it.at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
-                          <span className={s.logText}>
-                            {t.title}
-                            {t.detail && <span className={s.small}>{t.detail}</span>}
-                          </span>
-                          {it.xp > 0 && <span className={s.logXp}>+{it.xp} XP</span>}
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
+      <PhoneCollapsible heading={<h2 id="recent-title">Atividade recente</h2>}>
+        <div className={s.activityGrid}>
+          <Card aria-labelledby="days-title">
+            <h3 id="days-title" className={s.groupTitle}>
+              Dias com estudo
+            </h3>
+            <p className={s.cardText}>
+              Você estudou em <b>{activeCount}</b> dos últimos 28 dias. Sequência atual: {plural(streak, 'dia', 'dias')}.
+            </p>
+            <div className={s.calendar} role="img" aria-label={`Dias com estudo nas últimas quatro semanas: ${activeCount} de 28`}>
+              {calendar.map((d) => (
+                <span key={d.day} className={s.calDay} data-active={d.active} title={`${d.day.slice(8, 10)}/${d.day.slice(5, 7)}: ${d.active ? 'com estudo' : 'sem estudo'}`} />
               ))}
-              <div className="row">
-                {limit < items.length && (
-                  <Button variant="ghost" size="small" onClick={() => setLimit(limit + 20)}>
-                    Mostrar mais ações
-                  </Button>
-                )}
-                {limit > 10 && (
-                  <Button variant="ghost" size="small" onClick={() => setLimit(10)}>
-                    Mostrar menos
-                  </Button>
-                )}
-              </div>
-              <p className={s.small}>O histórico guarda as últimas {LEDGER_LIMIT} ações que renderam XP, além de todos os simulados.</p>
-            </>
-          )}
-        </Card>
-      </div>
+            </div>
+            <p className={s.small}>Cada quadrado é um dia, do mais antigo (no alto, à esquerda) até hoje. Conta o dia em que houve ao menos uma resposta avaliada.</p>
+          </Card>
+          <Card aria-labelledby="log-title">
+            <h3 id="log-title" className={s.groupTitle}>
+              Últimas ações
+            </h3>
+            {items.length === 0 ? (
+              <p className="muted">Nenhuma ação registrada ainda. Aqui aparecem as atividades, missões, revisões, conquistas e simulados, do mais recente ao mais antigo.</p>
+            ) : (
+              <>
+                {days.map((d) => (
+                  <div key={d.day} className={s.logDay}>
+                    <h4 className={s.logDate}>{dayLabel(d.day, now)}</h4>
+                    <ul className={s.log}>
+                      {d.items.map((it, i) => {
+                        const t = activityText(it)
+                        return (
+                          <li key={`${it.at}-${i}`}>
+                            <span className={s.logTime}>{new Date(it.at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span className={s.logText}>
+                              {t.title}
+                              {t.detail && <span className={s.small}>{t.detail}</span>}
+                            </span>
+                            {it.xp > 0 && <span className={s.logXp}>+{it.xp} XP</span>}
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                ))}
+                <div className="row">
+                  {limit < items.length && (
+                    <Button variant="ghost" size="small" onClick={() => setLimit(limit + 20)}>
+                      Mostrar mais ações
+                    </Button>
+                  )}
+                  {limit > 10 && (
+                    <Button variant="ghost" size="small" onClick={() => setLimit(10)}>
+                      Mostrar menos
+                    </Button>
+                  )}
+                </div>
+                <p className={s.small}>O histórico guarda as últimas {LEDGER_LIMIT} ações que renderam XP, além de todos os simulados.</p>
+              </>
+            )}
+          </Card>
+        </div>
+      </PhoneCollapsible>
     </section>
+  )
+}
+
+/** No celular, um bloco longo fica recolhido e abre com um toque; nas telas maiores, aparece aberto. */
+function PhoneCollapsible({ heading, children }: { heading: ReactNode; children: ReactNode }) {
+  const narrow = useMediaQuery('(max-width: 640px)')
+  if (!narrow) {
+    return (
+      <>
+        {heading}
+        {children}
+      </>
+    )
+  }
+  return (
+    <details className={s.collapse}>
+      <summary>
+        <ChevronRight size={18} aria-hidden="true" className={s.collapseIcon} />
+        {heading}
+      </summary>
+      {children}
+    </details>
   )
 }
 
