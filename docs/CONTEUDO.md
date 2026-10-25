@@ -305,6 +305,27 @@ Módulo `src/content/modules/architecture/`, no território `arquitetura`, que p
 - **Simplificações declaradas.** Toda fase lista as suas, e cada simulador tem um painel "Simplificações".
 - **Linguagem.** PT-BR, nomes oficiais em inglês, títulos neutros em gênero, sem copiar textos da AWS.
 
+## Como escrever um conceito do Codex
+
+A revisão didática de 24/10/2026 ([docs/revisao-codex/](revisao-codex/)) fixou o padrão abaixo. A página do conceito não muda: cada parte vai para um campo que ela já mostra.
+
+| Parte | Campo | Como escrever |
+|---|---|---|
+| A ideia central | `summary` | Uma ou duas frases que se entendem sozinhas. Aparece também nos cartões de Conceitos-chave sem `body`. |
+| Imagem mental, mecanismo, exemplo e regra prática | `explanation[]` | Um parágrafo por parte, nessa ordem. A analogia é opcional e termina com "O limite da comparação: …" quando pode enganar. O exemplo começa com "Exemplo:", e o último parágrafo, com "**Regra prática:**". |
+| Quando usar e quando não serve | `useCases`, `limitations` | Requisitos que favorecem ou eliminam a escolha. |
+| Não confunda com | `comparisons` | `with` é sempre o id de outro conceito; o texto diz a diferença que muda a decisão. |
+| Armadilhas | `commonMistakes`, `consequences` | O erro concreto e, se ensinar, o custo dele. |
+| Fatos e julgamento | `facts`, `recommendations` | Comportamento documentado em `facts`; julgamento de arquitetura em `recommendations`. |
+| Como aparece na SAA-C03 | `exam.notes` | Os sinais do enunciado entre aspas, o raciocínio esperado e o distrator típico. **Texto puro**: a tela não interpreta negrito, código nem links nesse campo. |
+
+Regras que valem para todos:
+
+- A profundidade acompanha o conceito: um conceito fundamental pede resumo e mecanismo; um comparativo, também comparação e armadilhas; um arquitetural, exemplo com raciocínio e notas da prova. Texto mais longo não é sinônimo de texto melhor.
+- Nada de dizer que o assunto "cai" ou "sempre aparece" na prova.
+- A marcação não aninha: código ou link dentro de negrito aparecem crus na tela.
+- Links para outros conceitos usam `[[id|rótulo]]` (fora de `exam.notes`), e o alvo precisa existir.
+
 ## Como escrever uma fase
 
 1. Verifique os fatos na documentação oficial e registre-os em [VERIFICACAO-DE-CONTEUDO.md](VERIFICACAO-DE-CONTEUDO.md).

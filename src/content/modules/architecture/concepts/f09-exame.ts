@@ -25,9 +25,12 @@ export const F09_ARQ_CONCEPTS: ConceptDef[] = [
     officialName: 'The deciding requirement',
     serviceIds: [],
     summary: 'Quase sempre, **mais de uma alternativa funciona**. O que escolhe a certa é o requisito que o enunciado põe em destaque: **menor custo**, **menos esforço operacional**, **maior disponibilidade**, **menor latência**, **mais seguro**. Ache-o antes de ler as alternativas.',
+    explanation: [
+      'Exemplo: três alternativas resolvem a falta de espaço de um banco RDS, e o enunciado pede "menor esforço operacional". A que liga o autoscaling de armazenamento vence a que cria scripts de monitoramento para aumentar o disco, mesmo que as duas funcionem.',
+    ],
+    commonMistakes: ['Escolher a primeira alternativa que funciona, sem comparar no requisito decisivo'],
     facts: ['O guia do exame descreve os distratores como respostas plausíveis, escolhidas por quem tem conhecimento incompleto.'],
     recommendations: ['"Menos esforço operacional" costuma apontar para o serviço gerenciado ou serverless; "menor custo", para a opção que atende sem sobra.'],
-    commonMistakes: ['Escolher a primeira alternativa que funciona, sem comparar no requisito decisivo'],
     exam: { domains: ['d1', 'd2', 'd3', 'd4'], relevance: 'alta' },
     references: [R.examGuide],
     tags: ['fundamentos'],
