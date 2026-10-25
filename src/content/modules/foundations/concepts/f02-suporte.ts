@@ -25,7 +25,17 @@ export const F02_FOUNDATIONS_CONCEPTS: ConceptDef[] = [
     officialName: 'AWS Support Plans',
     serviceIds: ['aws.support'],
     summary: 'Em 18/10/2026, os planos vigentes eram **Basic**, **Business Support+**, **Enterprise Support** e **Unified Operations**. Eles diferem em casos técnicos, tempos de primeira resposta, orientação especializada e preço — o adequado é o que cobre as necessidades do negócio, não o mais caro.',
-    recommendations: ['Escolha pela criticidade e pelo tipo de ajuda necessária; revise quando a carga de produção mudar.'],
+    explanation: [
+      'Os planos se diferenciam pelo tipo de ajuda e pela rapidez. O Basic cobre conta, cobrança e cotas, sem casos técnicos. O Business Support+ abre casos técnicos a qualquer hora, com engajamento em menos de 30 minutos para sistema crítico fora do ar. O Enterprise Support acrescenta um TAM designado e resposta em até 15 minutos. O Unified Operations coloca especialistas da AWS acompanhando a operação, com resposta de 5 minutos.',
+      'Exemplo: uma startup com um ambiente de testes não precisa de suporte técnico 24/7, e o Basic basta. Quando a mesma empresa coloca em produção um sistema que gera receita, um plano pago passa a valer pelo tempo de resposta em incidentes.',
+      '**Regra prática:** escolha pela criticidade da carga e pelo tipo de ajuda necessária, não pelo plano mais completo.',
+    ],
+    comparisons: [
+      { with: 'support.sla-vs-support', text: 'O plano de suporte muda como a AWS responde aos seus casos; ele não muda o SLA de disponibilidade dos serviços.' },
+    ],
+    recommendations: [
+      'Revise o plano quando uma carga entrar em produção ou ficar mais crítica.',
+    ],
     exam,
     references: [PLANS, COMPARE, CLF],
     tags: ['fundamentos'],
@@ -36,6 +46,9 @@ export const F02_FOUNDATIONS_CONCEPTS: ConceptDef[] = [
     officialName: 'AWS Basic Support',
     serviceIds: ['aws.support', 'aws.health'],
     summary: 'Incluído para todos os clientes: atendimento 24/7 de **conta e cobrança**, pedidos de **aumento de cota**, documentação, AWS re:Post e o AWS Health Dashboard. **Não permite abrir casos técnicos.**',
+    commonMistakes: [
+      'Achar que é preciso um plano pago para resolver questões de cobrança ou pedir aumento de cota.',
+    ],
     facts: ['No Basic, o Trusted Advisor oferece todos os checks de Service Limits e alguns de Security e Fault tolerance, com atualização manual dos checks de segurança.'],
     exam,
     references: [PLANS, CASES, TA],
@@ -151,8 +164,23 @@ export const F02_FOUNDATIONS_CONCEPTS: ConceptDef[] = [
     officialName: 'Service Level Agreements vs. AWS Support',
     serviceIds: ['aws.support', 'aws.ec2'],
     summary: 'O **SLA de cada serviço** define o compromisso de disponibilidade e os **créditos** se ele não for cumprido (exemplo: EC2 com 99,99% por Região para instâncias em duas ou mais AZs). O **plano de suporte** define como e em quanto tempo a AWS responde aos seus casos. Contratar um plano maior não aumenta a disponibilidade do serviço.',
+    explanation: [
+      'O SLA é o compromisso de disponibilidade de cada serviço, medido mês a mês. Se a AWS não o cumpre, o cliente pede créditos que abatem cobranças futuras; o SLA não impede a falha nem cobre o prejuízo do negócio. O plano de suporte é outra coisa: define quem atende seus casos e em quanto tempo.',
+      'A disponibilidade que importa é a da sua arquitetura. O próprio SLA do EC2 mostra isso: 99,5% por instância, mas 99,99% por Região quando há instâncias em duas ou mais AZs. Quem sobe a disponibilidade é o desenho com redundância, não o contrato de suporte.',
+      '**Regra prática:** para aumentar a disponibilidade, mude a arquitetura; para ter ajuda mais rápida num incidente, mude o plano de suporte.',
+    ],
+    comparisons: [
+      { with: 'infra.multi-az', text: 'O SLA regional do EC2 só vale para instâncias em duas ou mais AZs: é a implantação em várias AZs que leva à disponibilidade maior.' },
+    ],
+    commonMistakes: [
+      'Contratar um plano de suporte maior esperando que o serviço fique mais disponível.',
+    ],
     facts: ['Créditos de SLA não são reembolso em dinheiro: abatem cobranças futuras e precisam ser pedidos por um caso no Support Center.'],
-    exam: { domains: ['d2'], relevance: 'media' },
+    exam: {
+      domains: ['d2'],
+      relevance: 'media',
+      notes: 'Se uma alternativa propõe melhorar a disponibilidade contratando um plano de suporte, ela é um distrator: a resposta esperada é uma mudança de arquitetura, como várias AZs, failover ou réplicas.',
+    },
     references: [EC2_SLA, CASES],
     tags: ['fundamentos', 'disponibilidade'],
   },
