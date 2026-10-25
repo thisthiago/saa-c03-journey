@@ -43,7 +43,8 @@ function Chart({ target, daily, alerts, day }: { target: BudgetTarget; daily: nu
       <polyline className={a.line} points={line(forecast)} style={{ strokeDasharray: '4 3', opacity: 0.6 }} />
       <polyline className={a.line} points={line(cum)} />
       {day && <circle className={a.alarmDot} cx={x(day)} cy={y(cum[day - 1])} r={4} />}
-      <text className={a.label} x={PAD.l - 4} y={y(max) + 8} textAnchor="end">
+      {/* Dentro do gráfico: valores de quatro dígitos não cabem na margem quando a fonte cresce no celular. */}
+      <text className={a.label} x={PAD.l + 4} y={y(max) + 8}>
         {Math.round(max)}
       </text>
       {[1, Math.round(daily.length / 2), daily.length].map((d) => (
