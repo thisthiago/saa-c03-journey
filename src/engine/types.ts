@@ -490,7 +490,8 @@ export interface ProgressState {
   }
   resume?: { missionId: string; step: number; at: string }
   drafts: Record<string, unknown>
-  settings: { theme: 'dark' | 'light' | 'system'; reducedMotion: boolean }
+  /** contextPanel: painel com o contexto da missão ao lado dos desafios (desktop). */
+  settings: { theme: 'dark' | 'light' | 'system'; reducedMotion: boolean; contextPanel: boolean }
 }
 
 // ---------------------------------------------------------------------------
