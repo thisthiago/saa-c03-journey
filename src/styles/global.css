@@ -205,3 +205,16 @@ button.pick-card[aria-checked='true']::after {
   background: var(--accent-ink);
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
 }
+
+/* Área que rola para o lado: a borda que ainda esconde conteúdo ganha uma sombra.
+   As camadas "local" cobrem a sombra quando a rolagem chega naquela borda;
+   --scroll-bg precisa ser a cor de fundo da própria área. */
+.scroll-x {
+  overflow-x: auto;
+  background:
+    linear-gradient(to right, var(--scroll-bg, var(--surface)) 30%, transparent) left center / 32px 100% no-repeat local,
+    linear-gradient(to left, var(--scroll-bg, var(--surface)) 30%, transparent) right center / 32px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, var(--scroll-shadow), transparent) left center / 14px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, var(--scroll-shadow), transparent) right center / 14px 100% no-repeat scroll,
+    var(--scroll-bg, var(--surface));
+}
