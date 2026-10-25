@@ -31,7 +31,7 @@ export function KmsLab({ config, value, onChange, disabled, evaluation }: Props)
           {config.palette.map((p) => (
             <li key={p.id}>
               <label>
-                <input type="checkbox" checked={picked.includes(p.id)} disabled={disabled} onChange={(e) => toggle(p.id, e.target.checked)} /> {renderInline(p.label)}
+                <input type="checkbox" checked={picked.includes(p.id)} disabled={disabled} onChange={(e) => toggle(p.id, e.target.checked)} /> <span>{renderInline(p.label)}</span>
               </label>
             </li>
           ))}
