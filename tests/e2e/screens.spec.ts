@@ -19,6 +19,8 @@ const SCREENS = [
   { name: 'conceito', path: '/#/codex/storage.object' },
   { name: 'dossie', path: '/#/dossie' },
   { name: 'revisao', path: '/#/revisao' },
+  { name: 'trilhas', path: '/#/mapa' },
+  { name: 'sobre', path: '/#/sobre' },
 ]
 
 for (const vp of VIEWPORTS) {
@@ -693,7 +695,6 @@ const NET_MISSIONS = [
   'net.final.projeto',
 ]
 
-// Módulo novo: por enquanto, só o desktop (tablet e celular ficam para uma etapa própria).
 test.describe('trilha Redes na AWS', () => {
   const CASES: { name: string; mission?: string; step?: number; path?: string }[] = [
     { name: 'net-f1-plano', mission: 'net.f01.boss', step: 2 },
@@ -708,22 +709,23 @@ test.describe('trilha Redes na AWS', () => {
     { name: 'net-final', mission: 'net.final.projeto', step: 2 },
     { name: 'net-mapa', path: '/#/trilha/network.aws-network' },
   ]
-  const vp = VIEWPORTS.find((v) => v.name === 'desktop')!
-  for (const c of CASES) {
-    test(`${c.name} — ${vp.name}`, async ({ page }) => {
-      await page.setViewportSize({ width: vp.width, height: vp.height })
-      await page.emulateMedia({ colorScheme: 'dark' })
-      const before = c.mission ? NET_MISSIONS.slice(0, NET_MISSIONS.indexOf(c.mission)) : []
-      const base = progressWithPhase1(new Date(), { missions: before })
-      const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
-      await seedProgress(page, seeded)
-      await page.goto(c.path ?? `/#/missao/${c.mission}`)
-      await page.waitForLoadState('networkidle')
-      await page.waitForTimeout(250)
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
-      expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
-      await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
-    })
+  for (const vp of VIEWPORTS) {
+    for (const c of CASES) {
+      test(`${c.name} — ${vp.name}`, async ({ page }) => {
+        await page.setViewportSize({ width: vp.width, height: vp.height })
+        await page.emulateMedia({ colorScheme: 'dark' })
+        const before = c.mission ? NET_MISSIONS.slice(0, NET_MISSIONS.indexOf(c.mission)) : []
+        const base = progressWithPhase1(new Date(), { missions: before })
+        const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+        await seedProgress(page, seeded)
+        await page.goto(c.path ?? `/#/missao/${c.mission}`)
+        await page.waitForLoadState('networkidle')
+        await page.waitForTimeout(250)
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+        expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+        await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+      })
+    }
   }
 })
 
@@ -734,7 +736,6 @@ const ANA_MISSIONS = [
   'ana.final.plataforma',
 ]
 
-// Módulo novo: por enquanto, só o desktop (tablet e celular ficam para uma etapa própria).
 test.describe('trilha Análise de dados', () => {
   const CASES: { name: string; mission?: string; step?: number; path?: string }[] = [
     { name: 'ana-f1-lago', mission: 'ana.f01.boss', step: 2 },
@@ -749,22 +750,23 @@ test.describe('trilha Análise de dados', () => {
     { name: 'ana-final', mission: 'ana.final.plataforma', step: 2 },
     { name: 'ana-mapa', path: '/#/trilha/analytics.aws-analytics' },
   ]
-  const vp = VIEWPORTS.find((v) => v.name === 'desktop')!
-  for (const c of CASES) {
-    test(`${c.name} — ${vp.name}`, async ({ page }) => {
-      await page.setViewportSize({ width: vp.width, height: vp.height })
-      await page.emulateMedia({ colorScheme: 'dark' })
-      const before = c.mission ? ANA_MISSIONS.slice(0, ANA_MISSIONS.indexOf(c.mission)) : []
-      const base = progressWithPhase1(new Date(), { missions: before })
-      const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
-      await seedProgress(page, seeded)
-      await page.goto(c.path ?? `/#/missao/${c.mission}`)
-      await page.waitForLoadState('networkidle')
-      await page.waitForTimeout(250)
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
-      expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
-      await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
-    })
+  for (const vp of VIEWPORTS) {
+    for (const c of CASES) {
+      test(`${c.name} — ${vp.name}`, async ({ page }) => {
+        await page.setViewportSize({ width: vp.width, height: vp.height })
+        await page.emulateMedia({ colorScheme: 'dark' })
+        const before = c.mission ? ANA_MISSIONS.slice(0, ANA_MISSIONS.indexOf(c.mission)) : []
+        const base = progressWithPhase1(new Date(), { missions: before })
+        const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+        await seedProgress(page, seeded)
+        await page.goto(c.path ?? `/#/missao/${c.mission}`)
+        await page.waitForLoadState('networkidle')
+        await page.waitForTimeout(250)
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+        expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+        await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+      })
+    }
   }
 })
 
@@ -775,7 +777,6 @@ const SEC_MISSIONS = [
   'sec.final.auditoria',
 ]
 
-// Módulo novo: por enquanto, só o desktop (tablet e celular ficam para uma etapa própria).
 test.describe('trilha Segurança', () => {
   const CASES: { name: string; mission?: string; step?: number; path?: string }[] = [
     { name: 'sec-f1-chave', mission: 'sec.f01.boss', step: 2 },
@@ -790,22 +791,23 @@ test.describe('trilha Segurança', () => {
     { name: 'sec-final', mission: 'sec.final.auditoria', step: 2 },
     { name: 'sec-mapa', path: '/#/trilha/security.aws-security' },
   ]
-  const vp = VIEWPORTS.find((v) => v.name === 'desktop')!
-  for (const c of CASES) {
-    test(`${c.name} — ${vp.name}`, async ({ page }) => {
-      await page.setViewportSize({ width: vp.width, height: vp.height })
-      await page.emulateMedia({ colorScheme: 'dark' })
-      const before = c.mission ? SEC_MISSIONS.slice(0, SEC_MISSIONS.indexOf(c.mission)) : []
-      const base = progressWithPhase1(new Date(), { missions: before })
-      const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
-      await seedProgress(page, seeded)
-      await page.goto(c.path ?? `/#/missao/${c.mission}`)
-      await page.waitForLoadState('networkidle')
-      await page.waitForTimeout(250)
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
-      expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
-      await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
-    })
+  for (const vp of VIEWPORTS) {
+    for (const c of CASES) {
+      test(`${c.name} — ${vp.name}`, async ({ page }) => {
+        await page.setViewportSize({ width: vp.width, height: vp.height })
+        await page.emulateMedia({ colorScheme: 'dark' })
+        const before = c.mission ? SEC_MISSIONS.slice(0, SEC_MISSIONS.indexOf(c.mission)) : []
+        const base = progressWithPhase1(new Date(), { missions: before })
+        const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+        await seedProgress(page, seeded)
+        await page.goto(c.path ?? `/#/missao/${c.mission}`)
+        await page.waitForLoadState('networkidle')
+        await page.waitForTimeout(250)
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+        expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+        await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+      })
+    }
   }
 })
 
@@ -827,7 +829,6 @@ const INT_MISSIONS = [
   'int.final.vitrine',
 ]
 
-// Módulo novo: por enquanto, só o desktop (tablet e celular ficam para uma etapa própria).
 test.describe('trilha Integração', () => {
   const CASES: { name: string; mission?: string; step?: number; path?: string }[] = [
     { name: 'int-f1-filas', mission: 'int.f01.boss', step: 2 },
@@ -842,22 +843,23 @@ test.describe('trilha Integração', () => {
     { name: 'int-final', mission: 'int.final.vitrine', step: 2 },
     { name: 'int-mapa', path: '/#/trilha/integration.aws-integration' },
   ]
-  const vp = VIEWPORTS.find((v) => v.name === 'desktop')!
-  for (const c of CASES) {
-    test(`${c.name} — ${vp.name}`, async ({ page }) => {
-      await page.setViewportSize({ width: vp.width, height: vp.height })
-      await page.emulateMedia({ colorScheme: 'dark' })
-      const before = c.mission ? INT_MISSIONS.slice(0, INT_MISSIONS.indexOf(c.mission)) : []
-      const base = progressWithPhase1(new Date(), { missions: before })
-      const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
-      await seedProgress(page, seeded)
-      await page.goto(c.path ?? `/#/missao/${c.mission}`)
-      await page.waitForLoadState('networkidle')
-      await page.waitForTimeout(250)
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
-      expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
-      await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
-    })
+  for (const vp of VIEWPORTS) {
+    for (const c of CASES) {
+      test(`${c.name} — ${vp.name}`, async ({ page }) => {
+        await page.setViewportSize({ width: vp.width, height: vp.height })
+        await page.emulateMedia({ colorScheme: 'dark' })
+        const before = c.mission ? INT_MISSIONS.slice(0, INT_MISSIONS.indexOf(c.mission)) : []
+        const base = progressWithPhase1(new Date(), { missions: before })
+        const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+        await seedProgress(page, seeded)
+        await page.goto(c.path ?? `/#/missao/${c.mission}`)
+        await page.waitForLoadState('networkidle')
+        await page.waitForTimeout(250)
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+        expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+        await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+      })
+    }
   }
 })
 
@@ -877,7 +879,6 @@ const FIL_MISSIONS = [
   'fil.final.mudanca',
 ]
 
-// Módulo novo: por enquanto, só o desktop (tablet e celular ficam para uma etapa própria).
 test.describe('trilha Arquivos e backup', () => {
   const CASES: { name: string; mission?: string; step?: number; path?: string }[] = [
     { name: 'fil-f1-efs', mission: 'fil.f01.boss', step: 2 },
@@ -889,22 +890,23 @@ test.describe('trilha Arquivos e backup', () => {
     { name: 'fil-final', mission: 'fil.final.mudanca', step: 2 },
     { name: 'fil-mapa', path: '/#/trilha/files.aws-files' },
   ]
-  const vp = VIEWPORTS.find((v) => v.name === 'desktop')!
-  for (const c of CASES) {
-    test(`${c.name} — ${vp.name}`, async ({ page }) => {
-      await page.setViewportSize({ width: vp.width, height: vp.height })
-      await page.emulateMedia({ colorScheme: 'dark' })
-      const before = c.mission ? FIL_MISSIONS.slice(0, FIL_MISSIONS.indexOf(c.mission)) : []
-      const base = progressWithPhase1(new Date(), { missions: before })
-      const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
-      await seedProgress(page, seeded)
-      await page.goto(c.path ?? `/#/missao/${c.mission}`)
-      await page.waitForLoadState('networkidle')
-      await page.waitForTimeout(250)
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
-      expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
-      await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
-    })
+  for (const vp of VIEWPORTS) {
+    for (const c of CASES) {
+      test(`${c.name} — ${vp.name}`, async ({ page }) => {
+        await page.setViewportSize({ width: vp.width, height: vp.height })
+        await page.emulateMedia({ colorScheme: 'dark' })
+        const before = c.mission ? FIL_MISSIONS.slice(0, FIL_MISSIONS.indexOf(c.mission)) : []
+        const base = progressWithPhase1(new Date(), { missions: before })
+        const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+        await seedProgress(page, seeded)
+        await page.goto(c.path ?? `/#/missao/${c.mission}`)
+        await page.waitForLoadState('networkidle')
+        await page.waitForTimeout(250)
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+        expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+        await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+      })
+    }
   }
 })
 
@@ -926,7 +928,6 @@ const ARQ_MISSIONS = [
   'arq.final.revisao',
 ]
 
-// Módulo novo: por enquanto, só o desktop (tablet e celular ficam para uma etapa própria).
 test.describe('trilha Arquitetura e otimização', () => {
   const CASES: { name: string; mission?: string; step?: number; path?: string }[] = [
     { name: 'arq-f1-revisao', mission: 'arq.f01.boss', step: 2 },
@@ -941,22 +942,23 @@ test.describe('trilha Arquitetura e otimização', () => {
     { name: 'arq-final', mission: 'arq.final.revisao', step: 2 },
     { name: 'arq-mapa', path: '/#/trilha/architecture.well-architected' },
   ]
-  const vp = VIEWPORTS.find((v) => v.name === 'desktop')!
-  for (const c of CASES) {
-    test(`${c.name} — ${vp.name}`, async ({ page }) => {
-      await page.setViewportSize({ width: vp.width, height: vp.height })
-      await page.emulateMedia({ colorScheme: 'dark' })
-      const before = c.mission ? ARQ_MISSIONS.slice(0, ARQ_MISSIONS.indexOf(c.mission)) : []
-      const base = progressWithPhase1(new Date(), { missions: before })
-      const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
-      await seedProgress(page, seeded)
-      await page.goto(c.path ?? `/#/missao/${c.mission}`)
-      await page.waitForLoadState('networkidle')
-      await page.waitForTimeout(250)
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
-      expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
-      await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
-    })
+  for (const vp of VIEWPORTS) {
+    for (const c of CASES) {
+      test(`${c.name} — ${vp.name}`, async ({ page }) => {
+        await page.setViewportSize({ width: vp.width, height: vp.height })
+        await page.emulateMedia({ colorScheme: 'dark' })
+        const before = c.mission ? ARQ_MISSIONS.slice(0, ARQ_MISSIONS.indexOf(c.mission)) : []
+        const base = progressWithPhase1(new Date(), { missions: before })
+        const seeded = c.mission ? { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } } : base
+        await seedProgress(page, seeded)
+        await page.goto(c.path ?? `/#/missao/${c.mission}`)
+        await page.waitForLoadState('networkidle')
+        await page.waitForTimeout(250)
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+        expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+        await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+      })
+    }
   }
 })
 
@@ -1015,6 +1017,66 @@ test.describe('banco de questões', () => {
       await expect(page.getByRole('heading', { name: 'Correção comentada' })).toBeVisible()
       await noOverflow('resultado do simulado')
       await page.screenshot({ path: `screenshots/${vp.name}-questoes-resultado.png`, fullPage: true })
+    })
+  }
+})
+
+// Textos longos sem ponto de quebra (nome oficial, ARN, nomes de achados) não podem alargar a página.
+test.describe('quebra de linha em textos longos', () => {
+  const CASES: { name: string; missions?: string[]; mission?: string; step?: number; path?: string; heading: string }[] = [
+    { name: 'quebra-selo-nome-oficial', missions: ARQ_MISSIONS, mission: 'arq.f04.m3', step: 1, heading: '(PERF04-BP06)' },
+    { name: 'quebra-sequencia-achados', missions: SEC_MISSIONS, mission: 'sec.f08.m3', step: 2, heading: 'Desafio 1 de' },
+    { name: 'quebra-codex-sem-progresso', path: '/#/codex', heading: 'Nenhum conceito descoberto ainda' },
+  ]
+  for (const vp of VIEWPORTS) {
+    for (const c of CASES) {
+      test(`${c.name} — ${vp.name}`, async ({ page }) => {
+        await page.setViewportSize({ width: vp.width, height: vp.height })
+        await page.emulateMedia({ colorScheme: 'dark' })
+        if (c.mission && c.missions) {
+          const base = progressWithPhase1(new Date(), { missions: c.missions.slice(0, c.missions.indexOf(c.mission)) })
+          await seedProgress(page, { ...base, resume: { missionId: c.mission, step: c.step, at: new Date().toISOString() } })
+        }
+        await page.goto(c.path ?? `/#/missao/${c.mission}`)
+        await page.waitForLoadState('networkidle')
+        await expect(page.getByText(c.heading).first()).toBeVisible()
+        await page.waitForTimeout(250)
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+        expect(overflow, `rolagem horizontal em ${c.name}`).toBeLessThanOrEqual(0)
+        await page.screenshot({ path: `screenshots/${vp.name}-${c.name}.png`, fullPage: true })
+      })
+    }
+  }
+})
+
+// Abaixo de 1000 px o contexto da missão fica recolhido acima do desafio; no desktop, ao lado.
+test.describe('contexto da missão nos três tamanhos', () => {
+  for (const vp of VIEWPORTS) {
+    test(`painel de contexto — ${vp.name}`, async ({ page }) => {
+      await page.setViewportSize({ width: vp.width, height: vp.height })
+      await page.emulateMedia({ colorScheme: 'dark' })
+      const mission = 'sec.f08.m3'
+      const base = progressWithPhase1(new Date(), { missions: SEC_MISSIONS.slice(0, SEC_MISSIONS.indexOf(mission)) })
+      await seedProgress(page, { ...base, resume: { missionId: mission, step: 2, at: new Date().toISOString() } })
+      await page.goto(`/#/missao/${mission}`)
+      await page.waitForLoadState('networkidle')
+      const panel = page.getByRole('complementary', { name: 'Contexto da missão' })
+      const challenge = page.getByRole('button', { name: 'Verificar' })
+      await expect(challenge).toBeVisible()
+      const p = (await panel.boundingBox())!
+      const c = (await challenge.boundingBox())!
+      if (vp.name === 'desktop') {
+        expect(p.x, 'painel à direita do desafio').toBeGreaterThan(c.x)
+        await expect(panel.getByText('Critérios de sucesso')).toBeVisible()
+      } else {
+        expect(p.y, 'contexto antes do desafio').toBeLessThan(c.y)
+        await expect(panel.getByText('Critérios de sucesso')).toBeHidden()
+        await panel.getByText('Contexto da missão', { exact: true }).click()
+        await expect(panel.getByText('Critérios de sucesso')).toBeVisible()
+      }
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+      expect(overflow).toBeLessThanOrEqual(0)
+      await page.screenshot({ path: `screenshots/${vp.name}-contexto-da-missao.png`, fullPage: true })
     })
   }
 })
