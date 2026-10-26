@@ -191,7 +191,7 @@ export const F01_ANA: PhaseDef = {
           id: 'ana.f01.m2.a2',
           kind: 'predict',
           title: 'Comprimir o CSV',
-          prompt: 'Sem mudar o formato, a equipe comprime o CSV com GZIP. A mesma consulta lê menos?',
+          prompt: 'O painel de atrasos da Rota Sul consulta no Athena os eventos de entrega da última semana, guardados em CSV sem compressão e sem partição. Sem mudar o formato, a equipe comprime o CSV com GZIP. A mesma consulta passa a ler menos?',
           concepts: [{ id: 'lake.compression' }],
           xp: 40,
           difficulty: 2,
