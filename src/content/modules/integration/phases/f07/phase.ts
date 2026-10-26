@@ -179,7 +179,7 @@ export const F07_INT: PhaseDef = {
           id: 'int.f07.m3.a2',
           kind: 'predict',
           title: 'Com enhanced fan-out',
-          prompt: 'O mesmo stream, agora com enhanced fan-out para os seis leitores. Quantos shards são precisos?',
+          prompt: 'Um stream do Kinesis recebe 1 MB/s em 800 registros por segundo, e seis aplicações leem tudo, cada uma com **enhanced fan-out**. Quantos shards são precisos?',
           concepts: [{ id: 'kds.enhanced-fanout' }],
           xp: 50,
           difficulty: 2,
