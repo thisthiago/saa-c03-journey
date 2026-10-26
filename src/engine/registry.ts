@@ -135,9 +135,11 @@ export function createRegistry(input: RegistryInput): Registry {
 /**
  * Gera desafios curtos de revisão a partir de uma atividade já estudada.
  * Itens longos (ordenação, investigação, laboratórios) não são derivados.
+ * Os itens mantêm o enunciado e as figuras da atividade original, porque a
+ * revisão os mostra fora da missão.
  */
 export function deriveReviewItems(a: ActivityDef): ActivityDef[] {
-  const base = { difficulty: a.difficulty, xp: 5, hints: undefined }
+  const base = { difficulty: a.difficulty, xp: 5, hints: undefined, exhibits: a.exhibits }
   switch (a.kind) {
     case 'classify':
       return a.items.map((item) => ({
@@ -145,7 +147,7 @@ export function deriveReviewItems(a: ActivityDef): ActivityDef[] {
         kind: 'classify' as const,
         id: `rv:${a.id}:${item.id}`,
         title: a.title,
-        prompt: 'Classifique o item na categoria correta.',
+        prompt: a.prompt,
         concepts: item.concepts ? item.concepts.map((id) => ({ id })) : a.concepts,
         bins: a.bins,
         items: [item],
