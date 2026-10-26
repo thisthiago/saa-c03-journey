@@ -398,7 +398,7 @@ export const F04_IAM: PhaseDef = {
           id: 'iax.f04.m3.a4',
           kind: 'predict',
           title: 'Concessão ao ARN da sessão',
-          prompt: 'Mesma sessão, mesma session policy. Agora a bucket policy concede `s3:GetObject` ao **ARN da sessão** (`arn:aws:sts::111111111111:assumed-role/analista/bia`). O que acontece?',
+          prompt: 'A sessão `bia` da role **analista** foi criada com uma session policy que só permite `ec2:Describe*`. A bucket policy concede `s3:GetObject` ao **ARN da sessão** (`arn:aws:sts::111111111111:assumed-role/analista/bia`), na mesma conta. A sessão tenta ler a apólice. O que acontece?',
           concepts: [{ id: 'iam.grant-principal-type' }],
           xp: 40,
           difficulty: 3,
