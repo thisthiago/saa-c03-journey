@@ -412,7 +412,7 @@ export const F05_GOV: PhaseDef = {
           id: 'gov.f05.boss.a3',
           kind: 'decision',
           title: 'O plano de acesso',
-          prompt: 'Qual plano entrega o que a auditoria pediu sobre acesso aos servidores?',
+          prompt: 'A auditoria da rede Bom Preço quer as portas de administração (22 e 3389) fechadas em todos os servidores EC2, sem perder o acesso da equipe, e um registro de quem abriu sessões e do que foi feito nelas. Qual plano entrega isso?',
           concepts: [{ id: 'ssm.session-manager' }, { id: 'ssm.managed-node', weight: 0.5 }],
           xp: 50,
           difficulty: 3,
