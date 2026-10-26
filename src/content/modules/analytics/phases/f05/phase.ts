@@ -55,6 +55,8 @@ export const VOLT_NORTE_EMR: EmrLabConfig = { jobs: [FATURAMENTO, PERDAS, OUVIDO
 
 const OD = (count: number) => ({ count, spot: false })
 const SPOT = (count: number) => ({ count, spot: true })
+/** Contexto das previsões do faturamento, para que se expliquem fora da missão. */
+const FATURAMENTO_CONTEXTO = 'O faturamento da Volt Norte roda toda madrugada num cluster do Amazon EMR: são 96 lotes, cada nó core ou task processa um lote por hora, o prazo é de 6 horas e o Spark guarda dados intermediários no HDFS. Depois de 1 hora, a AWS retoma metade das instâncias Spot de cada grupo.'
 
 export const F05_ANA: PhaseDef = {
   ...META.f05,
@@ -145,10 +147,11 @@ export const F05_ANA: PhaseDef = {
           id: 'ana.f05.m2.a1',
           kind: 'predict',
           title: 'O primário em Spot',
-          prompt: 'O faturamento roda com 1 primário em Spot, 4 core On-Demand e 8 task On-Demand. O que acontece na retomada?',
+          prompt: 'O cluster do faturamento tem 1 nó primário em Spot, 4 core On-Demand e 8 task On-Demand. O que acontece quando a AWS retoma as instâncias Spot?',
           concepts: [{ id: 'emr.node-types' }, { id: 'emr.spot', weight: 0.5 }],
           xp: 40,
           difficulty: 2,
+          scenario: [FATURAMENTO_CONTEXTO],
           explanation: ['O nó primário coordena o cluster. Quando ele é retomado, o cluster termina, e o job inteiro se perde.'],
           spec: { sim: 'emr', job: FATURAMENTO, cluster: { primary: SPOT(1), core: OD(4), task: OD(8) } },
           options: [
@@ -161,10 +164,11 @@ export const F05_ANA: PhaseDef = {
           id: 'ana.f05.m2.a2',
           kind: 'predict',
           title: 'O core em Spot',
-          prompt: 'Agora: 1 primário On-Demand, 4 core em Spot e 8 task On-Demand. O faturamento guarda dados no HDFS. O que acontece na retomada?',
+          prompt: 'O cluster do faturamento tem 1 nó primário On-Demand, 4 core em Spot e 8 task On-Demand. O que acontece quando a AWS retoma as instâncias Spot?',
           concepts: [{ id: 'emr.node-types' }],
           xp: 40,
           difficulty: 2,
+          scenario: [FATURAMENTO_CONTEXTO],
           explanation: ['Os nós core guardam o HDFS. Com metade deles retomada, parte dos dados intermediários some, e o job falha.'],
           spec: { sim: 'emr', job: FATURAMENTO, cluster: { primary: OD(1), core: SPOT(4), task: OD(8) } },
           options: [
@@ -177,10 +181,11 @@ export const F05_ANA: PhaseDef = {
           id: 'ana.f05.m2.a3',
           kind: 'predict',
           title: 'O task em Spot',
-          prompt: 'Por fim: 1 primário e 4 core On-Demand, mais 16 task em Spot. São 96 lotes e prazo de 6 horas. O que acontece?',
+          prompt: 'O cluster do faturamento tem 1 nó primário e 4 core On-Demand, mais 16 task em Spot. O que acontece com o job?',
           concepts: [{ id: 'emr.spot' }, { id: 'emr.node-types', weight: 0.5 }],
           xp: 40,
           difficulty: 3,
+          scenario: [FATURAMENTO_CONTEXTO],
           explanation: ['Na primeira hora, 20 nós processam 20 lotes. Depois da retomada, sobram 12 nós para 76 lotes: mais 6,3 horas. O job termina sem perder dados, mas depois do prazo; faltam nós task.'],
           spec: { sim: 'emr', job: FATURAMENTO, cluster: { primary: OD(1), core: OD(4), task: SPOT(16) } },
           options: [
