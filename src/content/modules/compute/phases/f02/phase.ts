@@ -4,6 +4,7 @@
  */
 import type { PhaseDef } from '../../../../../engine/types'
 import type { InstancePickerLabConfig } from '../../../../../simulators/instances/lab'
+import { computePrices, instancePrice, usd } from '../../../../../simulators/compute-prices'
 import { breakeven } from '../../../../../simulators/instances/model'
 import { META } from '../meta'
 import { BURST_OPTIONS } from '../shared'
@@ -161,7 +162,7 @@ export const F02_CMP: PhaseDef = {
           id: 'cmp.f02.m2.a3',
           kind: 'estimate',
           title: 'Onde fica o empate',
-          prompt: 'Com os preços da tabela da trilha, a partir de que **CPU média** o m7i.large passa a custar menos que o t3.large em unlimited?',
+          prompt: `Em us-east-1, o t3.large (2 vCPU, baseline de 30% por vCPU) custa ${usd(instancePrice('t3.large').onDemandHour)} por hora, e o m7i.large (2 vCPU, sem créditos) custa ${usd(instancePrice('m7i.large').onDemandHour)}. No modo unlimited, o excedente acima da baseline custa ${usd(computePrices().cpuCreditsPerVcpuHour.t3)} por vCPU-hora. A partir de que **CPU média** o m7i.large passa a custar menos que o t3.large?`,
           concepts: [{ id: 'ec2.unlimited' }],
           xp: 50,
           difficulty: 3,
