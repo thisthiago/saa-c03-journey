@@ -449,7 +449,7 @@ export const F03_IAM: PhaseDef = {
           id: 'iax.f03.m4.a2',
           kind: 'predict',
           title: 'Duas Regiões na mesma chave',
-          prompt: 'O usuário gui tem a política abaixo e grava um item numa tabela chamando o endpoint de **us-east-1**. O que acontece?',
+          prompt: 'Na editora Mapa Literário, o usuário IAM **gui** tem só a política abaixo. Ele grava um item (`dynamodb:PutItem`) na tabela do catálogo chamando o endpoint de **us-east-1**. O que acontece?',
           concepts: [{ id: 'iam.conditions' }],
           xp: 40,
           difficulty: 2,
