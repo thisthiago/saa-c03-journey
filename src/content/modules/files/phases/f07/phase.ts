@@ -228,7 +228,7 @@ export const F07_FIL: PhaseDef = {
           id: 'fil.f07.m3.a2',
           kind: 'predict',
           title: 'Conformidade contra o administrador',
-          prompt: 'Agora o cofre tem Vault Lock em conformidade, já passada a carência. Um administrador da conta tenta apagar os backups antes do fim da retenção. Eles sobrevivem?',
+          prompt: 'O cofre do AWS Backup com os prontuários tem Vault Lock em modo **conformidade**, e o período de carência já passou. Um administrador da conta tenta apagar os backups antes do fim da retenção. Eles sobrevivem?',
           concepts: [{ id: 'bkp.vault-lock' }],
           xp: 40,
           difficulty: 2,
