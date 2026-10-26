@@ -86,10 +86,10 @@ const FIXED_TRUST: PolicyScenario = {
 
 const STS_OPTIONS = [
   { id: 'ok', text: 'Sessão criada', outcome: 'ok' },
-  { id: 'trust', text: 'Negado pela trust policy', outcome: 'trust-denied' },
-  { id: 'caller', text: 'Negado: quem chama não tem permissão', outcome: 'caller-denied' },
+  { id: 'trust', text: 'Negado: a trust policy não inclui quem chama', outcome: 'trust-denied' },
+  { id: 'caller', text: 'Negado: a política de quem chama não permite sts:AssumeRole', outcome: 'caller-denied' },
   { id: 'dur', text: 'Falha pela duração pedida', outcome: 'duration-invalid' },
-  { id: 'mfa', text: 'Negado por falta de MFA', outcome: 'mfa-missing' },
+  { id: 'mfa', text: 'Negado: a trust policy inclui quem chama, mas exige MFA', outcome: 'mfa-missing' },
 ]
 
 // ---------------------------------------------------------------------------
@@ -229,7 +229,7 @@ export const F05_IAM: PhaseDef = {
           id: 'iax.f05.m2.a2',
           kind: 'predict',
           title: 'O pipeline pede mais tempo',
-          prompt: 'Com a trust policy abaixo e a duração máxima de 4 h na role, o pipeline (que roda como sessão da role ci-build) pede **2 horas** de sessão na deploy-producao. O que acontece?',
+          prompt: 'Na Pixel Jogos, o pipeline de CI roda como uma **sessão da role ci-build**, na mesma conta da role deploy-producao, e a política dele permite `sts:AssumeRole` nas roles `deploy-*`. A deploy-producao tem a trust policy abaixo e duração máxima de 4 h. O pipeline chama o AssumeRole pedindo **2 horas** de sessão. O que acontece?',
           concepts: [{ id: 'sts.role-chaining' }],
           xp: 40,
           difficulty: 3,
@@ -242,12 +242,12 @@ export const F05_IAM: PhaseDef = {
           id: 'iax.f05.m2.a3',
           kind: 'predict',
           title: 'Sem o código',
-          prompt: 'A ana chama o AssumeRole na deploy-producao **sem** SerialNumber e TokenCode, usando a chave de acesso dela. O que acontece?',
+          prompt: 'A Ana é de DevOps na Pixel Jogos e entra como a usuária IAM **ana**, na mesma conta da role deploy-producao. A política dela permite `sts:AssumeRole` nas roles `deploy-*`. No terminal, ela roda `aws sts assume-role` para a deploy-producao, assinando com a **chave de acesso** dela, **sem** passar o dispositivo MFA e o código (`--serial-number` e `--token-code`). A trust policy da role está abaixo. O que acontece?',
           concepts: [{ id: 'sts.assume-role' }, { id: 'iam.trust-policy', weight: 0.5 }],
           xp: 40,
           difficulty: 2,
           exhibits: [exhibit('Trust policy da deploy-producao', FIXED_TRUST.resources[0].policy!.statements)],
-          explanation: ['O statement das pessoas exige aws:MultiFactorAuthPresent = true. Com chave de acesso e sem código MFA, a condição não é atendida.'],
+          explanation: ['A ana está no statement **Pessoas**, mas ele exige `aws:MultiFactorAuthPresent` = true. Uma chamada assinada só com a chave de acesso, sem `--serial-number` e `--token-code`, não leva MFA. Por isso a condição falha e a trust policy nega. Com o código, a mesma chamada funcionaria.'],
           spec: { sim: 'sts', scenario: FIXED_TRUST, role: { maxSessionHours: 4, permissions: [DEPLOY_PERMS] }, attempt: { callerId: 'ana', roleId: 'deploy', sessionName: 'ana' } },
           options: STS_OPTIONS,
         },
@@ -462,7 +462,7 @@ export const F05_IAM: PhaseDef = {
           id: 'iax.f05.boss.a2',
           kind: 'decision',
           title: 'E se a pessoa assumir direto?',
-          prompt: 'Para um teste manual, a engenheira (usuária IAM, com chave e MFA) assume a render-farm **diretamente**, pedindo 3 horas. Isso é encadeamento?',
+          prompt: 'Na Pixel Jogos, um job de renderização roda numa instância com a role ci-build e, de lá, assume a role **render-farm**, que aceita sessões de até 8 horas. Para um teste manual, uma engenheira (usuária IAM, com chave de acesso e MFA) assume a render-farm **diretamente**, pedindo 3 horas. Isso é encadeamento?',
           concepts: [{ id: 'sts.role-chaining' }, { id: 'sts.assume-role', weight: 0.5 }],
           xp: 30,
           difficulty: 2,
