@@ -226,7 +226,7 @@ export const F04_NET: PhaseDef = {
           id: 'net.f04.m2.a2',
           kind: 'predict',
           title: 'Desenvolvimento e serviços compartilhados',
-          prompt: 'Com as mesmas tabelas, a VPC de desenvolvimento alcança a de serviços compartilhados?',
+          prompt: 'As VPCs de produção e de desenvolvimento usam tabelas do Transit Gateway que só recebem as rotas da VPC de serviços compartilhados. A tabela da VPC de serviços compartilhados recebe as rotas de produção e de desenvolvimento. A VPC de desenvolvimento alcança a de serviços compartilhados?',
           concepts: [{ id: 'tgw.route-tables' }, { id: 'tgw.transit-gateway', weight: 0.5 }],
           xp: 40,
           difficulty: 2,
