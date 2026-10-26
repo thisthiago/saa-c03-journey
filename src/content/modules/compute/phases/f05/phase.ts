@@ -238,7 +238,7 @@ export const F05_CMP: PhaseDef = {
           id: 'cmp.f05.m3.a2',
           kind: 'predict',
           title: 'Ligando o cross-zone',
-          prompt: 'Com o cross-zone **ligado** no mesmo NLB, que parte do tráfego total cada servidor da AZ a recebe?',
+          prompt: 'O NLB tem **2 servidores na AZ a e 8 na AZ b**, com cross-zone **ligado**. Que parte do tráfego total cada servidor da AZ a recebe?',
           concepts: [{ id: 'elb.cross-zone' }],
           xp: 40,
           difficulty: 2,
