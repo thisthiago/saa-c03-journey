@@ -114,7 +114,7 @@ export const F09: PhaseDef = {
           id: 's3x.f09.m1.a2',
           kind: 'predict',
           title: 'Papel de outra conta',
-          prompt: `Uma pesquisadora (conta ${UNI}) assume o papel \`leitor-geodados\`, da conta do laboratório (${LAB_ACC}), e baixa uma cena com o cabeçalho. Quem paga a requisição?`,
+          prompt: `Uma pesquisadora (conta ${UNI}) assume o papel \`leitor-geodados\`, da conta do laboratório (${LAB_ACC}). Com esse papel, ela baixa uma cena do bucket do Instituto Geodados, que tem **Requester Pays**, enviando o cabeçalho \`x-amz-request-payer: requester\`. Quem paga a requisição?`,
           concepts: [{ id: 'rp.assumed-role' }],
           xp: 30,
           difficulty: 2,
