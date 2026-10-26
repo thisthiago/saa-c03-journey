@@ -42,7 +42,7 @@ export type StsOutcome = 'ok' | 'trust-denied' | 'caller-denied' | 'duration-inv
 
 export const STS_OUTCOME_LABEL: Record<StsOutcome, string> = {
   ok: 'Sessão criada',
-  'trust-denied': 'Negado: a trust policy não permite quem chama',
+  'trust-denied': 'Negado: a trust policy não inclui quem chama',
   'caller-denied': 'Negado: quem chama não tem permissão para sts:AssumeRole',
   'duration-invalid': 'Falha: duração fora do permitido',
   'mfa-missing': 'Negado: a trust policy exige MFA',
