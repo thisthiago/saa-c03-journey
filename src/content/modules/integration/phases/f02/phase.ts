@@ -130,7 +130,7 @@ export const F02_INT: PhaseDef = {
           id: 'int.f02.m2.a2',
           kind: 'predict',
           title: 'Dez minutos depois',
-          prompt: 'O mesmo cliente volta 10 minutos depois e o app reenvia o pedido 42 com o mesmo ID de deduplicação. Quais mensagens do grupo entram na fila?',
+          prompt: 'Numa fila FIFO, o app envia o pedido 42 do grupo "cliente-9" com ID de deduplicação "pedido-42". O cliente volta **10 minutos depois**, e o app reenvia o pedido 42 com o mesmo ID de deduplicação. Quais mensagens do grupo entram na fila?',
           concepts: [{ id: 'sqs.dedup' }],
           xp: 50,
           difficulty: 2,
