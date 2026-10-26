@@ -117,7 +117,7 @@ export const F01_FIL: PhaseDef = {
           id: 'fil.f01.m2.a2',
           kind: 'predict',
           title: 'Um mount target por AZ',
-          prompt: 'A equipe criou mount targets nas AZs a, b e c. A AZ a cai de novo. E o servidor da AZ b?',
+          prompt: 'Um EFS Regional tem mount targets nas AZs a, b e c, e cada servidor monta o sistema de arquivos pelo mount target da própria AZ. A AZ a fica fora. O que acontece com um servidor da AZ b?',
           concepts: [{ id: 'efs.mount-targets' }, { id: 'efs.file-system-types', weight: 0.5 }],
           xp: 40,
           difficulty: 1,
