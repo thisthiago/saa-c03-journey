@@ -358,7 +358,7 @@ export const F11: PhaseDef = {
           id: 's3x.f11.boss.a3',
           kind: 'decision',
           title: 'A janela da virada',
-          prompt: 'Como reduzir ao mínimo o tempo em que os editores ficam sem acesso durante a virada da onda 2?',
+          prompt: 'A Cine Memória vai migrar 60 TB de projetos ativos para a AWS pela rede. Os editores continuam alterando esses arquivos até o último dia, e a virada acontece num fim de semana. Como reduzir ao mínimo o tempo em que os editores ficam sem acesso durante a virada?',
           concepts: [{ id: 'mig.datasync' }],
           xp: 40,
           difficulty: 2,
