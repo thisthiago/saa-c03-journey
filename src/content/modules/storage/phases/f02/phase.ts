@@ -349,7 +349,7 @@ export const F02: PhaseDef = {
           id: 's3x.f02.m3.a4',
           kind: 'predict',
           title: 'A melhor para os exames antigos',
-          prompt: 'Entre as classes que permitem **leitura imediata**, qual é a mais barata para os **exames de 1 a 12 meses**?',
+          prompt: 'A VitaImagem guarda cerca de 6 milhões de **exames de 1 a 12 meses**, com 8 MB em média. Eles são abertos poucas vezes por trimestre, quando o paciente volta (cerca de 20 mil leituras e 150 GB recuperados por mês), mas precisam aparecer na hora. Entre as classes que permitem **leitura imediata**, qual é a mais barata para eles?',
           concepts: [{ id: 'sc.glacier-ir' }, { id: 'sc.standard-ia' }, { id: 'sc.intelligent-tiering' }],
           xp: 30,
           difficulty: 2,
