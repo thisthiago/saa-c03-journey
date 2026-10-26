@@ -4,6 +4,8 @@ import { LUMEN_BUCKET } from './bucket-lumen'
 
 const COMPANY = 'Estúdio Lumen'
 const ROLE = 'Você é a pessoa responsável pela arquitetura de nuvem do estúdio.'
+/** Lista das keys do bucket, para as previsões de listagem se explicarem sozinhas. */
+const LUMEN_KEYS = `As ${LUMEN_BUCKET.objects.length} keys do bucket \`${LUMEN_BUCKET.name}\`: ${LUMEN_BUCKET.objects.map((obj) => `\`${obj.key}\``).join(', ')}.`
 
 export const F01: PhaseDef = {
   id: 's3x.f01',
@@ -270,11 +272,11 @@ export const F01: PhaseDef = {
           id: 's3x.f01.m2.a2',
           kind: 'predict',
           title: 'O que a listagem retorna?',
-          prompt: 'Um script chama **ListObjectsV2** na raiz do bucket com `Delimiter="/"`. Quantos prefixos (CommonPrefixes) virão na resposta?',
+          prompt: 'O Estúdio Lumen guarda fotos, contratos, backups e arquivos de processamento no bucket `lumen-acervo-prod`. Um script chama **ListObjectsV2** na raiz desse bucket com `Delimiter="/"`. Quantos prefixos (CommonPrefixes) virão na resposta?',
           concepts: [{ id: 's3.object-key' }],
           xp: 30,
           difficulty: 2,
-          scenario: ['O script não informa Prefix (raiz) e usa a barra como delimitador, como o console faz.'],
+          scenario: [LUMEN_KEYS, 'O script não informa Prefix (raiz) e usa a barra como delimitador, como o console faz.'],
           explanation: ['Com delimitador, cada primeiro trecho distinto antes de uma barra vira um CommonPrefix; keys sem barra (como leia-me.txt) vêm em Contents.'],
           spec: { sim: 'bucket-list', bucket: LUMEN_BUCKET, prefix: '', delimiter: '/', measure: 'prefixes' },
           options: [
@@ -523,10 +525,11 @@ export const F01: PhaseDef = {
           id: 's3x.f01.boss.a4',
           kind: 'predict',
           title: 'Organização do processamento',
-          prompt: 'Uma ferramenta lista `processamento/` com `Delimiter="/"`. Quantos **objetos** (Contents) aparecem diretamente nesse nível?',
+          prompt: 'Uma ferramenta lista o prefixo `processamento/` do bucket `lumen-acervo-prod`, do Estúdio Lumen, com `Delimiter="/"`. Quantos **objetos** (Contents) aparecem diretamente nesse nível?',
           concepts: [{ id: 's3.object-key' }],
           xp: 30,
           difficulty: 2,
+          scenario: [LUMEN_KEYS],
           explanation: ['Os arquivos estão em processamento/entrada/ e processamento/saida/; nesse nível só aparecem os dois prefixos.'],
           spec: { sim: 'bucket-list', bucket: LUMEN_BUCKET, prefix: 'processamento/', delimiter: '/', measure: 'contents' },
           options: [
