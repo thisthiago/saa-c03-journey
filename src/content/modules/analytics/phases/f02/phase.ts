@@ -287,7 +287,7 @@ export const F02_ANA: PhaseDef = {
           id: 'ana.f02.boss.a2',
           kind: 'decision',
           title: 'E o reprocessamento',
-          prompt: 'Depois da correção, alguém sugere rodar o job de novo, sem bookmark, sobre a pasta inteira, "por garantia". O que acontece?',
+          prompt: 'Na Rota Sul, um job do Glue com bookmark converte todo dia os eventos novos para Parquet, e um crawler registra as partições no catálogo. Ontem o crawler rodou antes de o job terminar, e o dia de ontem, já gravado no S3, ficou fora do catálogo. Alguém sugere rodar o job de novo, **sem bookmark**, sobre a pasta inteira da camada bruta, "por garantia". O que acontece?',
           concepts: [{ id: 'glue.bookmarks' }, { id: 'glue.etl-job', weight: 0.5 }],
           xp: 60,
           difficulty: 2,
