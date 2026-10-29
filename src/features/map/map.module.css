@@ -468,3 +468,31 @@
   border-style: dashed;
   color: var(--text-faint);
 }
+
+/* Formas de ver o mapa: ordem das trilhas ou mapa de serviços. */
+.views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: var(--space-5);
+  border-bottom: 1px solid var(--border);
+}
+.views a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  margin-bottom: -1px;
+  border-bottom: 3px solid transparent;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+.views a:hover {
+  color: var(--text);
+}
+.views a[aria-current='page'] {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}

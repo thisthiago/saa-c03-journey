@@ -124,6 +124,20 @@ O campo `map` de cada fase é o centro do hexágono num canvas de 900 de largura
 - **`content.test.ts`** roda no CI e falha se houver nós sobrepostos, nós fora do mapa, linhas por cima de um nó (ou do selo e do rótulo das fases que a linha liga), linhas sem fase em comum correndo juntas ou uma dependência à direita da fase que depende dela.
 - **`tests/e2e/map-layout.spec.ts`** mede a tela real em 680, 1000, 1100 e 1440 px. Ele também confere se o número de linhas estimado para cada rótulo cobre o número de linhas que o navegador de fato desenha.
 
+## Mapa de serviços
+
+A página Trilhas (`#/mapa`) tem duas abas: a ordem sugerida das trilhas e o mapa de serviços (`?vista=servicos`), carregado sob demanda.
+
+- **Dados** (`engine/service-graph.ts`, puro): cada serviço do catálogo que alguma fase disponível ensina vira um nó. As fases de ensino de um serviço são a primeira fase de cada conceito dele (`registry.conceptPhase`, a regra do Codex).
+- **Tamanho:** número de questões do banco que citam o serviço pelo conceito principal ou por um relacionado. Cada questão conta uma vez por serviço. Raio em escala logarítmica, entre 7 e 22 unidades.
+- **Relações:** dois serviços se ligam quando pelo menos um conceito cita os dois; a força da linha é o número de conceitos em comum.
+- **Estado:** derivado de `phaseStatus` nas fases de ensino. Concluído quando todas estão concluídas; em andamento quando alguma está em andamento ou concluída; desbloqueado quando alguma está disponível; bloqueado no resto. Nada é gravado, e a tela não chama ações da store.
+- **Cores:** `--territory-<id>` e `--node-locked` em `styles/tokens.css`, nos três escopos de tema. O nome do território aparece no desenho, nos filtros, no painel e na lista, então a cor nunca é o único sinal.
+- **Layout** (`features/map/service-map.ts`): d3-force rodado uma vez, com semente fixa, puxando cada nó para o centro do seu território numa elipse. A ordem dos territórios aproxima os mais ligados. Sem simulação contínua.
+- **Interação** (`ServiceMap.tsx`, `ServiceGraph.tsx`, `ServicePanel.tsx`): busca, filtros por situação e território, lista equivalente ao desenho, arraste, Ctrl ou ⌘ com a roda, pinça, botões de zoom e teclado (setas, Enter, Esc, + e −, 0). O painel só mostra títulos de conceitos já descobertos e não oferece missão de serviço bloqueado.
+- **Testes:** `service-graph.test.ts` (regras), `service-map.test.ts` (layout sem sobreposição, coesão dos grupos, nomes de território, vista, busca, filtros e tokens) e `ServiceMap.test.tsx` (componente). O e2e cobre a aba no desktop e no celular.
+- **Pacote:** o d3 fica em `vendor-grafo`, baixado só com a aba.
+
 ## Build
 
-O pacote é dividido em bibliotecas (`vendor`), conteúdo comum (`content`), um pacote por módulo de conteúdo (`content-foundations`, `content-storage`, `content-identity`, `content-compute`, `content-database`, `content-governance`, `content-network`, `content-analytics`, `content-security`, `content-integration`, `content-files`, `content-architecture`) e aplicação. As telas além da Base são carregadas sob demanda.
+O pacote é dividido em bibliotecas (`vendor`), conteúdo comum (`content`), um pacote por módulo de conteúdo (`content-foundations`, `content-storage`, `content-identity`, `content-compute`, `content-database`, `content-governance`, `content-network`, `content-analytics`, `content-security`, `content-integration`, `content-files`, `content-architecture`) e aplicação. As telas além da Base são carregadas sob demanda; o d3 do mapa de serviços fica em `vendor-grafo`.
