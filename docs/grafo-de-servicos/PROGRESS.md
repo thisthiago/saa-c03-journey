@@ -1,6 +1,6 @@
 # Progresso
 
-Branch `feat/mapa-de-servicos`, saída da `main` em 29/10/2026. Nenhum commit feito (aguarda pedido).
+Branch `feat/mapa-de-servicos`, saída da `main` em 29/10/2026, publicada no PR #14.
 
 ## Etapas
 
@@ -27,7 +27,7 @@ Alterados: `MapPage.tsx`, `map.module.css`, `status.ts`, `styles/tokens.css`, `v
 - `npm test`: 622 de 622 na segunda rodada. Na primeira, `content.test.ts` estourou o limite de 5 s numa atividade longa por causa da carga da máquina; sozinho ele passa (teste antigo, não tocado aqui).
 - `npm run build`: passou. `vendor-grafo` tem 5,4 KB comprimido e não é citado no `dist/index.html`.
 - `npx playwright test smoke`: 17 de 17, incluindo os dois testes novos (desktop e 390 × 844).
-- Suíte e2e completa: EM ANDAMENTO no momento desta anotação.
+- `npx playwright test` (suíte completa): 468 de 468 em 13,6 min, incluindo as capturas `mapa-servicos` nas três larguras.
 - Verificação visual com capturas em 1440 px (escuro) e 390 px (claro): sem rolagem horizontal, sem erros de página.
 
 ## Medidas
@@ -42,8 +42,8 @@ Alterados: `MapPage.tsx`, `map.module.css`, `status.ts`, `styles/tokens.css`, `v
 
 ## Próxima ação
 
-Conferir o resultado da suíte e2e completa e revisar as capturas `screenshots/*-mapa-servicos.png`. Depois, se o usuário pedir, commits pela skill alisar-o-pelo.
+Revisão e merge do PR #14.
 
 ## Último ponto validado
 
-Testes unitários, de componente e smoke e2e passando; build conferido.
+Suíte completa passando (tipos, lint, 622 unitários, build e 468 e2e).
