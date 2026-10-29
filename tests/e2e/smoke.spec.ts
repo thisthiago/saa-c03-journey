@@ -32,6 +32,34 @@ test('o mapa e a Base sugerem a mesma trilha e a mesma missão', async ({ page }
   await expect(suggested.getByRole('link', { name: 'S3 Expedition' })).toBeVisible()
 })
 
+test('o mapa de serviços abre pela aba, encontra um serviço e mostra os detalhes', async ({ page }) => {
+  await page.goto('/#/mapa')
+  await page.getByRole('link', { name: 'Mapa de serviços' }).click()
+  await expect(page.locator('[data-service]')).toHaveCount(118)
+  await page.getByRole('combobox', { name: 'Buscar serviço' }).fill('Lambda')
+  await page.getByRole('option', { name: /AWS Lambda/ }).click()
+  await expect(page.getByRole('heading', { level: 2, name: 'AWS Lambda' })).toBeVisible()
+  await expect(page).toHaveURL(/servico=aws\.lambda/)
+  // Voltar para a ordem das trilhas mantém a lista de sempre.
+  await page.getByRole('link', { name: 'Ordem das trilhas' }).click()
+  await expect(page.locator('main a[href^="#/trilha/"]')).toHaveCount(12)
+})
+
+test('no celular, o mapa de serviços mantém busca, filtros, zoom e painel ao alcance', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/#/mapa?vista=servicos')
+  await expect(page.locator('[data-service]').first()).toBeAttached()
+  await expect(page.getByRole('combobox', { name: 'Buscar serviço' })).toBeVisible()
+  await expect(page.getByRole('radio', { name: /^Bloqueados/ })).toBeAttached()
+  await expect(page.getByRole('button', { name: 'Aproximar' })).toBeVisible()
+  await page.getByRole('button', { name: 'Aproximar' }).click()
+  await page.getByRole('combobox', { name: 'Buscar serviço' }).fill('s3')
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('heading', { level: 2, name: 'Amazon S3' })).toBeInViewport()
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+  expect(overflow).toBeLessThanOrEqual(0)
+})
+
 test('dossiê: primeiro acesso explica o que vai aparecer e sugere a primeira missão', async ({ page }) => {
   await page.goto('/#/dossie')
   await expect(page.getByRole('heading', { name: 'Sua jornada ainda não começou' })).toBeVisible()
