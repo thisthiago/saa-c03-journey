@@ -1,6 +1,7 @@
 import type { Tone } from '../../ui/kit'
 import type { TrackState } from '../../engine/guide'
 import type { MissionStatus, PhaseStatus } from '../../engine/selectors'
+import type { ServiceStatus } from '../../engine/service-graph'
 import type { PhaseDef } from '../../engine/types'
 
 export const PHASE_STATUS: Record<PhaseStatus, { label: string; tone: Tone }> = {
@@ -9,6 +10,13 @@ export const PHASE_STATUS: Record<PhaseStatus, { label: string; tone: Tone }> = 
   available: { label: 'Disponível', tone: 'accent' },
   'in-progress': { label: 'Em andamento', tone: 'info' },
   completed: { label: 'Concluída', tone: 'success' },
+}
+
+export const SERVICE_STATUS: Record<ServiceStatus, { label: string; tone: Tone }> = {
+  locked: { label: 'Bloqueado', tone: 'neutral' },
+  available: { label: 'Desbloqueado', tone: 'accent' },
+  'in-progress': { label: 'Em andamento', tone: 'info' },
+  completed: { label: 'Concluído', tone: 'success' },
 }
 
 export const MISSION_STATUS: Record<MissionStatus, { label: string; tone: Tone }> = {
