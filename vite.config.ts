@@ -12,6 +12,8 @@ export default defineConfig({
         // Conteúdo e bibliotecas em pacotes separados: mudanças de conteúdo não invalidam o cache do resto.
         advancedChunks: {
           groups: [
+            // O d3 só é usado pelo mapa de serviços, carregado sob demanda.
+            { name: 'vendor-grafo', test: /node_modules[\\/]d3-/ },
             { name: 'vendor', test: /node_modules/ },
             { name: 'content-foundations', test: /src[\\/]content[\\/]modules[\\/]foundations[\\/]/ },
             { name: 'content-storage', test: /src[\\/]content[\\/]modules[\\/]storage[\\/]/ },
