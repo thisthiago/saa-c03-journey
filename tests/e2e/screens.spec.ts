@@ -20,6 +20,7 @@ const SCREENS = [
   { name: 'dossie', path: '/#/dossie' },
   { name: 'revisao', path: '/#/revisao' },
   { name: 'trilhas', path: '/#/mapa' },
+  { name: 'mapa-servicos', path: '/#/mapa?vista=servicos&servico=aws.s3' },
   { name: 'sobre', path: '/#/sobre' },
 ]
 
