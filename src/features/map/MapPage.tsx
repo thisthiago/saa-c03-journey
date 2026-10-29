@@ -1,6 +1,6 @@
-import { ListChecks, Play, RotateCcw } from 'lucide-react'
-import { useMemo } from 'react'
-import { Link } from 'react-router'
+import { ListChecks, ListOrdered, Network, Play, RotateCcw } from 'lucide-react'
+import { lazy, Suspense, useMemo } from 'react'
+import { Link, useSearchParams } from 'react-router'
 import { registry } from '../../content'
 import { studyRecommendation, suggestedTrackId, trackState, type StudyRecommendation } from '../../engine/guide'
 import { trackPhases, trackTerritory } from '../../engine/registry'
@@ -15,6 +15,9 @@ import { TRACK_STATUS } from './status'
 import s from './map.module.css'
 
 const ORDER = recommendedTrackOrder(registry)
+
+// O mapa de serviços (e o d3) só é baixado quando a aba é aberta.
+const ServiceMap = lazy(() => import('./ServiceMap').then((m) => ({ default: m.ServiceMap })))
 
 const TIERS: Record<TrackTier, { title: string; lead: string }> = {
   start: { title: 'Comece por aqui', lead: 'Apresenta a nuvem e os conceitos que todas as outras trilhas usam.' },
@@ -91,7 +94,9 @@ function ContinueStrip({ rec }: { rec: StudyRecommendation }) {
 }
 
 export function MapPage() {
-  useDocumentTitle('Trilhas')
+  const [params] = useSearchParams()
+  const services = params.get('vista') === 'servicos'
+  useDocumentTitle(services ? 'Mapa de serviços' : 'Trilhas')
   const progress = useGame((st) => st.progress)
   const rec = useMemo(() => studyRecommendation(progress, registry, clock.now(), ORDER), [progress])
   const suggested = suggestedTrackId(rec, registry)
@@ -99,9 +104,33 @@ export function MapPage() {
     <div className="page">
       <h1>Trilhas</h1>
       <p className="muted" style={{ maxWidth: 680 }}>
-        As {registry.tracks.size} trilhas na ordem que evita encontrar um conceito antes de aprendê-lo. Nenhuma fica bloqueada: a ordem é uma recomendação.
+        {services
+          ? `Os ${registry.services.size} serviços AWS que as trilhas ensinam, agrupados por território. A cor mostra o território, o tamanho mostra quantas questões citam o serviço e o cinza marca o que ainda está bloqueado.`
+          : `As ${registry.tracks.size} trilhas na ordem que evita encontrar um conceito antes de aprendê-lo. Nenhuma fica bloqueada: a ordem é uma recomendação.`}
       </p>
       <ContinueStrip rec={rec} />
+      <nav className={s.views} aria-label="Formas de ver o mapa">
+        <Link to="/mapa" replace aria-current={services ? undefined : 'page'}>
+          <ListOrdered size={18} aria-hidden="true" /> Ordem das trilhas
+        </Link>
+        <Link to="/mapa?vista=servicos" replace aria-current={services ? 'page' : undefined}>
+          <Network size={18} aria-hidden="true" /> Mapa de serviços
+        </Link>
+      </nav>
+      {services ? (
+        <Suspense fallback={<div className="muted" aria-busy="true">Carregando…</div>}>
+          <ServiceMap />
+        </Suspense>
+      ) : (
+        <TrackOrder progress={progress} suggested={suggested} />
+      )}
+    </div>
+  )
+}
+
+function TrackOrder({ progress, suggested }: { progress: ReturnType<typeof useGame.getState>['progress']; suggested: string | undefined }) {
+  return (
+    <>
       {GROUPS.map((g, gi) => (
         <section key={g.tier} className={s.level} aria-labelledby={`tier-${g.tier}`}>
           <h2 id={`tier-${g.tier}`} className={s.levelTitle}>
@@ -162,6 +191,6 @@ export function MapPage() {
           </ol>
         </section>
       ))}
-    </div>
+    </>
   )
 }
