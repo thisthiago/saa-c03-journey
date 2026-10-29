@@ -58,6 +58,18 @@
   --shadow-2: 0 12px 40px rgba(0, 0, 0, 0.45);
   --scroll-shadow: rgba(0, 0, 0, 0.7);
   --focus: 0 0 0 3px rgba(52, 224, 200, 0.55);
+  /* Territórios no mapa de serviços (validados com a skill dataviz em 29/10/2026). */
+  --territory-fundamentos: #bf6506;
+  --territory-armazenamento: #748bef;
+  --territory-computacao: #d26aaa;
+  --territory-redes: #669014;
+  --territory-bancos-de-dados: #9964c4;
+  --territory-analise: #0f976c;
+  --territory-integracao: #9a7d0b;
+  --territory-seguranca: #ca545a;
+  --territory-monitoramento: #15a8ae;
+  --territory-arquitetura: #128ac0;
+  --node-locked: #56627f;
 }
 
 @media (prefers-color-scheme: light) {
@@ -96,6 +108,18 @@
     --shadow-2: 0 12px 40px rgba(15, 30, 70, 0.16);
     --scroll-shadow: rgba(15, 30, 70, 0.28);
     --focus: 0 0 0 3px rgba(11, 143, 127, 0.45);
+    /* Territórios no mapa de serviços (validados com a skill dataviz em 29/10/2026). */
+    --territory-fundamentos: #c86906;
+    --territory-armazenamento: #4253b1;
+    --territory-computacao: #943272;
+    --territory-redes: #59800b;
+    --territory-bancos-de-dados: #75409d;
+    --territory-analise: #0c9e71;
+    --territory-integracao: #a18308;
+    --territory-seguranca: #a12e39;
+    --territory-monitoramento: #03999f;
+    --territory-arquitetura: #0a658e;
+    --node-locked: #b3bccd;
   }
 }
 
@@ -134,4 +158,16 @@
   --shadow-2: 0 12px 40px rgba(15, 30, 70, 0.16);
   --scroll-shadow: rgba(15, 30, 70, 0.28);
   --focus: 0 0 0 3px rgba(11, 143, 127, 0.45);
+  /* Territórios no mapa de serviços (validados com a skill dataviz em 29/10/2026). */
+  --territory-fundamentos: #c86906;
+  --territory-armazenamento: #4253b1;
+  --territory-computacao: #943272;
+  --territory-redes: #59800b;
+  --territory-bancos-de-dados: #75409d;
+  --territory-analise: #0c9e71;
+  --territory-integracao: #a18308;
+  --territory-seguranca: #a12e39;
+  --territory-monitoramento: #03999f;
+  --territory-arquitetura: #0a658e;
+  --node-locked: #b3bccd;
 }
