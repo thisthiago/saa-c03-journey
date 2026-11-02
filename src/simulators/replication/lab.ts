@@ -51,42 +51,52 @@ export function applyReplication(c: ReplicationLabConfig, r: ReplicationLabRespo
 
 const STATUS_LABEL: Record<ReplStatus, string> = { COMPLETED: 'COMPLETED', FAILED: 'FAILED', NOT_REPLICATED: 'não replicado' }
 
+/** Texto da meta, exibido antes da verificação e no resultado. */
+export function goalLabel(c: ReplicationLabConfig, g: ReplGoal): string {
+  const ev = (id: string) => c.events.find((e) => e.id === id)!
+  switch (g.type) {
+    case 'valid':
+      return 'O S3 aceita a configuração de replicação'
+    case 'event':
+      return `${ev(g.event).label} → ${g.destination}: ${STATUS_LABEL[g.expect]}`
+    case 'rtc':
+      return `S3 Replication Time Control para ${g.destination}`
+    case 'replica-class':
+      return `Classe da réplica em ${g.destination}: ${g.allowed.map((x) => STORAGE_CLASSES[x].shortName).join(' ou ')}`
+  }
+}
+
 export function evaluateReplicationLab(c: ReplicationLabConfig, r: ReplicationLabResponse) {
   const setup = applyReplication(c, r)
   const issues = validateReplication(setup)
   const items = c.goals.map((g, i) => {
     let ok = false
-    let label = ''
     let actual = ''
     switch (g.type) {
       case 'valid':
         ok = issues.length === 0
-        label = 'O S3 aceita a configuração de replicação'
         actual = issues.map((x) => x.message).join(' ')
         break
       case 'event': {
         const ev = c.events.find((e) => e.id === g.event)!
         const res = replicate(setup, ev, g.destination)
         ok = res.status === g.expect
-        label = `${ev.label} → ${g.destination}: ${STATUS_LABEL[g.expect]}`
         actual = `Resultado: ${STATUS_LABEL[res.status]} — ${res.reason}`
         break
       }
       case 'rtc': {
         ok = setup.rules.some((x) => x.enabled && x.destination === g.destination && x.rtc)
-        label = `S3 Replication Time Control para ${g.destination}`
         break
       }
       case 'replica-class': {
         const ev = c.events.find((e) => e.id === g.event)!
         const res = replicate(setup, ev, g.destination)
         ok = res.status === 'COMPLETED' && Boolean(res.replicaClass && g.allowed.includes(res.replicaClass))
-        label = `Classe da réplica em ${g.destination}: ${g.allowed.map((x) => STORAGE_CLASSES[x].shortName).join(' ou ')}`
         actual = res.replicaClass ? `Réplica em ${STORAGE_CLASSES[res.replicaClass].shortName}.` : 'Sem réplica.'
         break
       }
     }
-    return { concepts: g.concepts, score: ok ? 1 : 0, fb: { id: `goal-${i}`, label, status: ok ? 'correct' : 'wrong', message: ok ? g.why : `${actual} ${g.why}`.trim() } as ItemFeedback }
+    return { concepts: g.concepts, score: ok ? 1 : 0, fb: { id: `goal-${i}`, label: goalLabel(c, g), status: ok ? 'correct' : 'wrong', message: ok ? g.why : `${actual} ${g.why}`.trim() } as ItemFeedback }
   })
   return { score: items.reduce((s, x) => s + x.score, 0) / Math.max(1, items.length), items }
 }
