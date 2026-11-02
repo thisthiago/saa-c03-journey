@@ -14,6 +14,7 @@ import type {
   ExamQuestion,
   MissionDef,
   PhaseDef,
+  ReviewQuestion,
   ServiceDef,
   TerritoryDef,
   TrackDef,
@@ -63,7 +64,7 @@ export interface Registry {
   missions: Map<string, MissionRef>
   activities: Map<string, ActivityRef>
   achievements: Map<string, AchievementDef>
-  /** Itens de revisão por conceito (escritos à mão + derivados das atividades). */
+  /** Itens de revisão por conceito: questões próprias da Revisão e, nas fases ainda sem elas, cópias das atividades. */
   reviewItems: Map<string, ActivityDef[]>
   /** Primeira fase que ensina o conceito (para intercalar a revisão e mostrar no Codex). */
   conceptPhase: Map<string, string>
@@ -104,6 +105,9 @@ export function createRegistry(input: RegistryInput): Registry {
     if (!list.some((i) => i.id === item.id)) list.push(item)
     reg.reviewItems.set(conceptId, list)
   }
+  // Uma fase com questões próprias da Revisão deixa de ter as atividades copiadas.
+  const reviewSets = new Map<string, ReviewQuestion[]>()
+  for (const mod of input.modules) for (const set of mod.review ?? []) reviewSets.set(set.phaseId, set.questions)
   for (const mod of input.modules) {
     for (const s of mod.services) reg.services.set(s.id, s)
     for (const c of mod.concepts) {
@@ -117,11 +121,13 @@ export function createRegistry(input: RegistryInput): Registry {
       for (const p of trackPhases(t)) {
         reg.phases.set(p.id, { phase: p, track: t, isFinal: p === t.final })
         for (const cid of p.concepts) if (!reg.conceptPhase.has(cid)) reg.conceptPhase.set(cid, p.id)
+        const own = reviewSets.get(p.id)
+        if (own && p.availability === 'available') for (const q of own) for (const c of q.concepts) addReview(c.id, q)
         p.missions.forEach((m, index) => {
           reg.missions.set(m.id, { mission: m, phase: p, track: t, index })
           for (const a of m.activities) {
             reg.activities.set(a.id, { activity: a, mission: m, phase: p, track: t })
-            if (p.availability === 'available') {
+            if (p.availability === 'available' && !own) {
               for (const item of deriveReviewItems(a)) for (const c of item.concepts) addReview(c.id, item)
             }
           }
@@ -242,11 +248,39 @@ export function validateRegistry(reg: Registry): string[] {
     unique('questão', q.id)
     validateQuestion(reg, q, errors)
   }
+  for (const mod of reg.modules) for (const set of mod.review ?? []) {
+    if (!reg.phases.has(set.phaseId)) errors.push(`Revisão da fase ${set.phaseId}: fase inexistente`)
+    for (const q of set.questions) {
+      unique('questão da revisão', q.id)
+      validateReviewQuestion(reg, set.phaseId, q, errors)
+    }
+  }
   errors.push(...findCycles(reg))
+  const reviewById = new Map<string, ActivityDef>()
   for (const [cid, items] of reg.reviewItems) {
-    for (const item of items) validateActivity(reg, item, `Revisão ${item.id} (${cid})`, errors)
+    for (const item of items) {
+      validateActivity(reg, item, `Revisão ${item.id} (${cid})`, errors)
+      const other = reviewById.get(item.id)
+      if (other && other !== item) errors.push(`Revisão ${item.id}: id usado por dois itens diferentes`)
+      reviewById.set(item.id, item)
+    }
   }
   return errors
+}
+
+/** Formato do exame, domínio do guia e conceitos da própria fase (a Revisão não cobra o que vem depois). */
+function validateReviewQuestion(reg: Registry, phaseId: string, q: ReviewQuestion, errors: string[]) {
+  const label = `Revisão ${q.id}`
+  if (q.kind !== 'decision') errors.push(`${label}: precisa ser uma decisão`)
+  if (!reg.examDomains.some((d) => d.id === q.domain)) errors.push(`${label}: domínio inexistente ${q.domain}`)
+  const correct = q.options.filter((o) => o.correct).length
+  if (!q.multiple && q.options.length !== 4) errors.push(`${label}: resposta única precisa de 4 opções`)
+  if (q.multiple && (correct < 2 || q.options.length < 5)) errors.push(`${label}: resposta múltipla precisa de 2 ou mais corretas entre 5 ou mais opções`)
+  if (new Set(q.options.map((o) => o.id)).size !== q.options.length) errors.push(`${label}: opções com id repetido`)
+  for (const o of q.options) if (!o.consequence.trim()) errors.push(`${label}: opção ${o.id} sem explicação`)
+  for (const c of q.concepts) {
+    if (reg.conceptPhase.get(c.id) !== phaseId) errors.push(`${label}: o conceito ${c.id} não é ensinado pela primeira vez na fase ${phaseId}`)
+  }
 }
 
 function validateQuestion(reg: Registry, q: ExamQuestion, errors: string[]) {
