@@ -13,6 +13,7 @@ import { F03_FOUNDATIONS } from './phases/f03/phase'
 import { FINAL_FOUNDATIONS } from './phases/final/phase'
 import { FOUNDATIONS_ACHIEVEMENTS } from './achievements'
 import { FOUNDATIONS_QUESTIONS } from './questions'
+import { FOUNDATIONS_REVIEW } from './review'
 
 export const AWS_FOUNDATIONS: TrackDef = {
   id: 'foundations.aws-foundations',
@@ -35,4 +36,5 @@ export const foundationsModule: ContentModule = {
   tracks: [AWS_FOUNDATIONS],
   achievements: FOUNDATIONS_ACHIEVEMENTS,
   questions: FOUNDATIONS_QUESTIONS,
+  review: FOUNDATIONS_REVIEW,
 }
