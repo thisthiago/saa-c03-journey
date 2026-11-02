@@ -125,6 +125,33 @@ describe('integridade do conteúdo', () => {
     expect(problems).toEqual([])
   })
 
+  it('as questões próprias da Revisão seguem o padrão e cobrem os conceitos da fase', () => {
+    // Todo conceito ensinado na fase aparece em ao menos uma questão; os de relevância alta, em duas.
+    const problems: string[] = []
+    for (const mod of registry.modules) {
+      for (const set of mod.review ?? []) {
+        const own = [...registry.conceptPhase].filter(([, phaseId]) => phaseId === set.phaseId).map(([id]) => id)
+        for (const id of own) {
+          const n = set.questions.filter((q) => q.concepts.some((c) => c.id === id)).length
+          const min = registry.concepts.get(id)?.exam.relevance === 'alta' ? 2 : 1
+          if (n < min) problems.push(`${set.phaseId}: ${id} em ${n} questão(ões), mínimo ${min}`)
+        }
+        for (const q of set.questions) {
+          const tag = q.options.filter((o) => o.correct).length === 3 ? '(Escolha TRÊS.)' : '(Escolha DUAS.)'
+          if (q.multiple && !q.prompt.trim().endsWith(tag)) problems.push(`${q.id}: a pergunta precisa terminar com ${tag}`)
+          if (!q.multiple && q.prompt.includes('(Escolha')) problems.push(`${q.id}: resposta única com "(Escolha"`)
+          if (q.concepts.length > 3) problems.push(`${q.id}: mais de 3 conceitos`)
+          if (new Set(q.options.map((o) => o.text)).size !== q.options.length) problems.push(`${q.id}: alternativas repetidas`)
+          if (q.explanation.length < 3 || !q.explanation.at(-1)?.startsWith('**Regra prática:**')) problems.push(`${q.id}: explicação sem três parágrafos terminando na regra prática`)
+          const text = [q.title, q.prompt, ...q.explanation, ...q.options.flatMap((o) => [o.text, o.consequence])].join(' ')
+          if (/→|->|⇒|=>/.test(text)) problems.push(`${q.id}: seta no texto`)
+          if (/todas as anteriores|nenhuma das anteriores/i.test(text)) problems.push(`${q.id}: alternativa genérica`)
+        }
+      }
+    }
+    expect(problems).toEqual([])
+  })
+
   it('a trilha IAM cobre usuário, role, policy, trust policy, STS e SCP em atividades, revisão e questões', () => {
     // Pedido explícito: cada tema tem conceito na trilha, atividades, itens de revisão e questões de simulado.
     const THEMES: Record<string, string[]> = {
