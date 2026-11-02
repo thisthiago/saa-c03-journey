@@ -4,11 +4,11 @@ import { evalFor, fixtureRegistry, moduleA, moduleB } from './fixtures'
 import { levelForXp, levelProgress, xpForLevel } from './levels'
 import { addDays, masteryTier, updateConcept } from './mastery'
 import { completeReviewSession, createInitialProgress, submitActivity, submitReview } from './progress'
-import { buildReviewSession, dueCount } from './review'
+import { buildPracticeSession, buildReviewSession, dueCount } from './review'
 import { missionStatus, nextMission, phaseMedal, phaseStatus } from './selectors'
 import { attemptFactor, earnedXp, hintFactor, xpAward } from './xp'
 import { createRegistry, validateRegistry } from './registry'
-import type { ProgressState } from './types'
+import type { ContentModule, ProgressState, ReviewQuestion } from './types'
 
 const T0 = new Date('2026-10-01T12:00:00Z')
 const reg = fixtureRegistry()
@@ -195,6 +195,85 @@ describe('revisão espaçada', () => {
     const s = completeReviewSession(createInitialProgress(T0), reg, T0).state
     expect(s.reviews.sessions).toBe(1)
     expect(checkCondition({ type: 'reviews-completed', count: 1 }, s, reg)).toBe(true)
+  })
+})
+
+/** Questão da Revisão no formato do exame: 4 opções e 1 correta, ou 5 e 2 corretas. */
+function reviewQuestion(id: string, concepts: string[], multiple = false): ReviewQuestion {
+  const n = multiple ? 5 : 4
+  return {
+    id,
+    kind: 'decision',
+    title: `Questão ${id}`,
+    prompt: 'Qual opção atende?',
+    concepts: concepts.map((c) => ({ id: c })),
+    xp: 5,
+    difficulty: 2,
+    domain: 'd1',
+    multiple,
+    explanation: ['Porque atende ao requisito.'],
+    options: Array.from({ length: n }, (_, i) => ({ id: `o${i}`, text: `Opção ${i}`, correct: i < (multiple ? 2 : 1), consequence: `Efeito ${i}.` })),
+  }
+}
+
+/** Conteúdo fictício com a fase a1 ensinando c1 e c2, a2 ensinando c3 e questões próprias da Revisão em a1. */
+function registryWithReview(questions: ReviewQuestion[]) {
+  const mod: ContentModule = structuredClone(moduleA)
+  mod.concepts.push({ ...mod.concepts[1], id: 'c3', title: 'C3' })
+  mod.tracks[0].phases[0].concepts = ['c1', 'c2']
+  mod.tracks[0].phases[1].concepts = ['c3']
+  mod.review = [{ phaseId: 'a1', questions }]
+  return createRegistry({
+    modules: [mod, moduleB],
+    territories: [{ id: 'ter', title: 'Território', summary: '', glyph: 'bucket', status: 'active' }],
+    examDomains: [{ id: 'd1', officialName: 'Domínio 1', title: 'Seguras', weight: 0.3 }],
+    levelTitles: ['Aprendiz'],
+  })
+}
+
+describe('questões próprias da Revisão', () => {
+  it('substituem as cópias das atividades da fase, e as outras fases continuam copiadas', () => {
+    const r = registryWithReview([reviewQuestion('rv:a1.q1', ['c1', 'c2'])])
+    const ids = (c: string) => r.reviewItems.get(c)?.map((i) => i.id)
+    expect(ids('c1')).toEqual(['rv:a1.q1', 'rv:actb1'])
+    expect(ids('c2')).toEqual(['rv:a1.q1', 'rv:act4'])
+    expect(validateRegistry(r)).toEqual([])
+  })
+
+  it('recusam formato fora do exame, domínio inexistente, conceito de outra fase e id repetido', () => {
+    const short = reviewQuestion('rv:a1.curta', ['c1'])
+    short.options = short.options.slice(0, 3)
+    const multi = reviewQuestion('rv:a1.multipla', ['c1'], true)
+    multi.options = multi.options.slice(0, 4)
+    const errors = validateRegistry(
+      registryWithReview([
+        short,
+        multi,
+        { ...reviewQuestion('rv:a1.dominio', ['c1']), domain: 'd9' as ReviewQuestion['domain'] },
+        reviewQuestion('rv:a1.outra-fase', ['c3']),
+        reviewQuestion('rv:act4', ['c1']),
+      ]),
+    )
+    expect(errors).toEqual([
+      'Revisão rv:a1.curta: resposta única precisa de 4 opções',
+      'Revisão rv:a1.multipla: resposta múltipla precisa de 2 ou mais corretas entre 5 ou mais opções',
+      'Revisão rv:a1.dominio: domínio inexistente d9',
+      'Revisão rv:a1.outra-fase: o conceito c3 não é ensinado pela primeira vez na fase a1',
+      'Revisão rv:act4: id usado por dois itens diferentes',
+    ])
+  })
+
+  it('entram uma vez só na rodada; o conceito usa outra questão sua se a escolhida já entrou', () => {
+    const r = registryWithReview([reviewQuestion('rv:a1.q1', ['c1', 'c2']), reviewQuestion('rv:a1.q2', ['c2'])])
+    let s = submit(createInitialProgress(T0), 'act1', 0).state
+    s = submit(s, 'act2', 0).state
+    const review = buildReviewSession(s, r, T0, Infinity).map((e) => [e.conceptId, e.item.id])
+    expect(review).toEqual([
+      ['c1', 'rv:a1.q1'],
+      ['c2', 'rv:a1.q2'],
+    ])
+    const practice = buildPracticeSession(s, r, Infinity).map((e) => e.item.id)
+    expect(practice).toEqual(['rv:a1.q1', 'rv:a1.q2'])
   })
 })
 
