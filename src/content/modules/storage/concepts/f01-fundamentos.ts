@@ -230,38 +230,6 @@ export const F01_CONCEPTS: ConceptDef[] = [
     exam: { domains: ['d1', 'd4'], relevance: 'media' },
     references: [METADATA, TAGGING],
     tags: ['fundamentos'],
-    reviewItems: [
-      {
-        id: 'rv:s3.metadata:alterar',
-        kind: 'decision',
-        title: 'Corrigir um metadado',
-        prompt: 'Um objeto foi enviado com `x-amz-meta-cliente: aurora`, mas o certo era `boreal`. Como corrigir?',
-        concepts: [{ id: 's3.metadata' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['Metadados definidos pelo usuário não mudam depois do upload: é preciso copiar o objeto (pode ser sobre ele mesmo) definindo os novos metadados.'],
-        options: [
-          { id: 'a', text: 'Copiar o objeto definindo os novos metadados.', correct: true, consequence: 'A cópia grava o objeto com os metadados corretos.' },
-          { id: 'b', text: 'Editar só o cabeçalho do objeto existente, sem regravá-lo.', correct: false, consequence: 'Não há edição de metadados in-place no S3; a mudança exige uma cópia.' },
-          { id: 'c', text: 'Não há como: será preciso excluir o bucket.', correct: false, consequence: 'Exagero: basta copiar o objeto com novos metadados.' },
-        ],
-      },
-      {
-        id: 'rv:s3.metadata:tags',
-        kind: 'decision',
-        title: 'Marcar documentos confidenciais',
-        prompt: 'Uma política de acesso e uma regra de ciclo de vida precisam selecionar os documentos confidenciais. O que usar para marcá-los?',
-        concepts: [{ id: 's3.metadata' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['Tags de objeto podem ser usadas em políticas IAM e de bucket, regras de lifecycle e relatórios de custo.'],
-        options: [
-          { id: 'a', text: 'Tags de objeto, como confidencial=sim.', correct: true, consequence: 'Políticas e regras de lifecycle conseguem filtrar por tags.' },
-          { id: 'b', text: 'Metadados definidos pelo usuário (x-amz-meta-).', correct: false, consequence: 'Metadados do usuário servem à aplicação, mas não são o mecanismo usado por políticas e lifecycle para selecionar objetos.' },
-          { id: 'c', text: 'O Content-Type do objeto.', correct: false, consequence: 'O Content-Type descreve o formato do conteúdo, não sua classificação.' },
-        ],
-      },
-    ],
   },
   {
     id: 's3.region',
