@@ -113,23 +113,6 @@ export const F08_IAM_CONCEPTS: ConceptDef[] = [
     exam: { domains: ['d1'], relevance: 'media' },
     references: [R.boundaries],
     tags: ['seguranca'],
-    reviewItems: [
-      {
-        id: 'rv:iam.boundary-delegation:condicao',
-        kind: 'decision',
-        title: 'Criar usuários só com limite',
-        prompt: 'Que condição garante que uma líder só consiga criar usuários que já nasçam com o boundary LimiteDosTimes?',
-        concepts: [{ id: 'iam.boundary-delegation' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['A chave iam:PermissionsBoundary traz o ARN do boundary informado na chamada; sem boundary, ela não existe e a condição falha.'],
-        options: [
-          { id: 'a', text: '`StringEquals iam:PermissionsBoundary` igual ao ARN de LimiteDosTimes, no Allow de iam:CreateUser', correct: true, consequence: 'Criar sem o limite (ou com outro) fica sem Allow.' },
-          { id: 'b', text: 'Anexar o LimiteDosTimes como boundary da líder e nada mais', correct: false, consequence: 'Isso limita a líder, não os usuários que ela cria.' },
-          { id: 'c', text: '`aws:PrincipalTag/time` igual a pagamentos', correct: false, consequence: 'Confere quem cria, não o limite de quem é criado.' },
-        ],
-      },
-    ],
   },
   {
     id: 'org.control-tower',
