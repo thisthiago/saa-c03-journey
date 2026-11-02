@@ -87,21 +87,5 @@ export const F04_IAM_CONCEPTS: ConceptDef[] = [
     },
     references: [R.evalDenyAllow, { title: 'Key policies in AWS KMS', url: 'https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html' }],
     tags: ['seguranca'],
-    reviewItems: [
-      {
-        id: 'rv:iam.explicit-resource-required:trust',
-        kind: 'decision',
-        title: 'Assumir a role da mesma conta',
-        prompt: 'Uma usuária tem política de identidade que permite `sts:AssumeRole` em todas as roles. A trust policy da role Admin cita só outro usuário. Ela consegue assumir a role?',
-        concepts: [{ id: 'iam.explicit-resource-required' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['Trust policies precisam permitir o principal (diretamente ou pela conta). Identidade sozinha não basta.'],
-        options: [
-          { id: 'a', text: 'Não: a trust policy precisa permitir quem assume', correct: true, consequence: 'Sem a trust policy permitir, a política de identidade não basta.' },
-          { id: 'b', text: 'Sim: na mesma conta, identidade ou recurso basta', correct: false, consequence: 'Essa regra tem exceções: trust policies e key policies do KMS.' },
-        ],
-      },
-    ],
   },
 ]
