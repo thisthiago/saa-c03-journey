@@ -45,24 +45,40 @@ export function costFirstMonths(costs: { total: number }[][], months: number): n
   return costs.reduce((s, list) => s + list.slice(0, months).reduce((a, m) => a + m.total, 0), 0)
 }
 
+/** Texto da meta, exibido antes da verificação e no resultado. */
+export function goalLabel(c: LifecycleLabConfig, g: LifecycleGoal): string {
+  const name = (id: string) => c.datasets.find((d) => d.id === id)!.name
+  switch (g.type) {
+    case 'valid':
+      return 'O S3 aceita a configuração'
+    case 'state-at':
+      return `${name(g.dataset)} no dia ${g.day}: ${g.allowed.map(label).join(' ou ')}`
+    case 'kept-until':
+      return `${name(g.dataset)} guardado por ${g.day} dias`
+    case 'gone-by':
+      return `${name(g.dataset)} removido até o dia ${g.day}`
+    case 'requirements':
+      return `${name(g.dataset)}: requisitos de acesso e resiliência respeitados`
+    case 'cost-max':
+      return `Custo dos primeiros ${g.months} meses até ${formatUSD(g.maxUSD)}`
+  }
+}
+
 export function evaluateLifecycleLab(c: LifecycleLabConfig, r: LifecycleLabResponse) {
   const run = runLifecycleLab(c, r)
   const simOf = (id: string) => run.sims[c.datasets.findIndex((d) => d.id === id)]
   const ds = (id: string) => c.datasets.find((d) => d.id === id)!
   const items = c.goals.map((g, i) => {
     let ok = false
-    let label_ = ''
     let actual = ''
     switch (g.type) {
       case 'valid':
         ok = run.accepted
-        label_ = 'O S3 aceita a configuração'
         actual = run.accepted ? '' : run.issues.filter((x) => x.severity === 'error').map((x) => `${x.ruleId}: ${x.message}`).join(' ')
         break
       case 'state-at': {
         const st = stateAt(simOf(g.dataset), g.day)
         ok = g.allowed.includes(st)
-        label_ = `${ds(g.dataset).name} no dia ${g.day}: ${g.allowed.map(label).join(' ou ')}`
         actual = `Está em: ${label(st)}.`
         break
       }
@@ -70,7 +86,6 @@ export function evaluateLifecycleLab(c: LifecycleLabConfig, r: LifecycleLabRespo
         const sim = simOf(g.dataset)
         const goneAt = sim.segments.find((s) => s.state === 'gone')?.from
         ok = goneAt === undefined || goneAt >= g.day
-        label_ = `${ds(g.dataset).name} guardado por ${g.day} dias`
         actual = goneAt !== undefined ? `Excluído no dia ${goneAt}.` : ''
         break
       }
@@ -78,7 +93,6 @@ export function evaluateLifecycleLab(c: LifecycleLabConfig, r: LifecycleLabRespo
         const sim = simOf(g.dataset)
         const goneAt = sim.segments.find((s) => s.state === 'gone')?.from
         ok = goneAt !== undefined && goneAt <= g.day
-        label_ = `${ds(g.dataset).name} removido até o dia ${g.day}`
         actual = goneAt === undefined ? 'Nunca é removido.' : `Removido no dia ${goneAt}.`
         break
       }
@@ -87,14 +101,12 @@ export function evaluateLifecycleLab(c: LifecycleLabConfig, r: LifecycleLabRespo
         const sim = simOf(g.dataset)
         const bad = sim.segments.filter((s) => s.state !== 'gone' && !s.noncurrent).flatMap((s) => requirementViolations(s.state as Exclude<SegmentState, 'gone'>, d.profile.requirements))
         ok = bad.length === 0
-        label_ = `${d.name}: requisitos de acesso e resiliência respeitados`
         actual = bad[0] ?? ''
         break
       }
       case 'cost-max': {
         const total = costFirstMonths(run.costs, g.months)
         ok = total <= g.maxUSD
-        label_ = `Custo dos primeiros ${g.months} meses até ${formatUSD(g.maxUSD)}`
         actual = `Simulado: ${formatUSD(total)}.`
         break
       }
@@ -102,7 +114,7 @@ export function evaluateLifecycleLab(c: LifecycleLabConfig, r: LifecycleLabRespo
     return {
       concepts: g.concepts,
       score: ok ? 1 : 0,
-      fb: { id: `goal-${i}`, label: label_, status: ok ? 'correct' : 'wrong', message: ok ? g.why : `${actual} ${g.why}`.trim() } as ItemFeedback,
+      fb: { id: `goal-${i}`, label: goalLabel(c, g), status: ok ? 'correct' : 'wrong', message: ok ? g.why : `${actual} ${g.why}`.trim() } as ItemFeedback,
     }
   })
   return { score: items.reduce((s, i) => s + i.score, 0) / Math.max(1, items.length), items }
