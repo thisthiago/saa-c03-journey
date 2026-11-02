@@ -49,6 +49,8 @@ export function ReviewPage() {
   const [session, setSession] = useState<{ entries: ReviewEntry[]; practice: boolean } | null>(null)
   const [index, setIndex] = useState(0)
   const [answers, setAnswers] = useState<Answer[]>([])
+  // O conceito só aparece depois da resposta: antes, ele entregaria a resposta de "qual serviço atende".
+  const [answeredIndex, setAnsweredIndex] = useState(-1)
   const [finished, setFinished] = useState(false)
   const now = clock.now()
   const [reviewSize, setReviewSize] = useState(REVIEW_SESSION_SIZE)
@@ -64,6 +66,7 @@ export function ReviewPage() {
     setSession({ entries, practice })
     setIndex(0)
     setAnswers([])
+    setAnsweredIndex(-1)
     setFinished(false)
   }
 
@@ -187,6 +190,7 @@ export function ReviewPage() {
   const concept = registry.concepts.get(entry.conceptId)
   const cp = progress.concepts[entry.conceptId]
   const worthXp = Boolean(cp && isDue(cp, now))
+  const revealed = answeredIndex === index
   const finish = () => {
     if (!practice) completeSession()
     setFinished(true)
@@ -198,14 +202,18 @@ export function ReviewPage() {
           <p className="eyebrow">
             {practice ? 'Treino livre' : 'Revisão'} · item {index + 1} de {entries.length}
           </p>
-          <h1 className={s.concept}>
-            <Brain size={22} aria-hidden="true" /> {concept?.title}
-          </h1>
+          {revealed ? (
+            <h1 className={s.concept}>
+              <Brain size={22} aria-hidden="true" /> {concept?.title}
+            </h1>
+          ) : (
+            <h1 className="sr-only">Questão de revisão</h1>
+          )}
           <div className="row">
             <Badge tone={worthXp ? 'xp' : 'warning'} icon={<Sparkles size={13} aria-hidden="true" />}>
               {worthXp ? 'vencido · vale XP' : practice ? 'treino · sem XP' : 'domínio baixo · sem XP'}
             </Badge>
-            <Badge>{concept?.officialName}</Badge>
+            {revealed && <Badge>{concept?.officialName}</Badge>}
           </div>
         </div>
         <div className={s.progress}>
@@ -219,6 +227,7 @@ export function ReviewPage() {
           mode="review"
           onSubmit={(evaluation) => {
             const before = progress.concepts[entry.conceptId]?.mastery ?? 0
+            setAnsweredIndex(index)
             const events = submitReview(entry.conceptId, entry.item.id, evaluation)
             const xp = events.filter((e) => e.type === 'xp' && e.source === 'review').reduce((acc, e) => acc + (e.type === 'xp' ? e.amount : 0), 0)
             setAnswers((list) => [...list, { conceptId: entry.conceptId, score: evaluation.score, xp, before }])
