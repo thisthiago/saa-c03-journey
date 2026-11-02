@@ -27,6 +27,7 @@ import { F10 } from './phases/f10/phase'
 import { F11 } from './phases/f11/phase'
 import { FINAL } from './phases/final/phase'
 import { STORAGE_QUESTIONS } from './questions'
+import { STORAGE_REVIEW } from './review'
 
 export const S3_EXPEDITION: TrackDef = {
   id: 'storage.s3-expedition',
@@ -53,4 +54,5 @@ export const storageModule: ContentModule = {
   tracks: [S3_EXPEDITION],
   achievements: STORAGE_ACHIEVEMENTS,
   questions: STORAGE_QUESTIONS,
+  review: STORAGE_REVIEW,
 }
