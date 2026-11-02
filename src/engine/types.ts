@@ -4,7 +4,7 @@
  * Este módulo não depende de React. O conteúdo educacional (src/content) é
  * descrito com estes tipos e a lógica de jogo (src/engine) opera sobre eles.
  */
-import type { ActivityDef } from '../activities/types'
+import type { ActivityDef, DecisionActivity } from '../activities/types'
 
 // ---------------------------------------------------------------------------
 // Catálogo
@@ -340,6 +340,8 @@ export interface ContentModule {
   achievements: AchievementDef[]
   /** Banco de questões no estilo do exame (usado pela Revisão). */
   questions?: ExamQuestion[]
+  /** Questões próprias da Revisão, uma lista por fase. */
+  review?: ReviewSet[]
 }
 
 // ---------------------------------------------------------------------------
@@ -376,6 +378,25 @@ export interface ExamQuestion {
   explanation: string[]
   /** Material de apoio exibido no enunciado (ex.: políticas em JSON). */
   exhibits?: { title: string; code: string }[]
+}
+
+// ---------------------------------------------------------------------------
+// Questões da Revisão
+// ---------------------------------------------------------------------------
+
+/**
+ * Questão da Revisão no formato do exame: decisão com 1 correta entre 4, ou
+ * 2 ou mais corretas entre 5 ou mais (`multiple`), com o domínio do guia.
+ */
+export type ReviewQuestion = DecisionActivity & { domain: ExamDomainId }
+
+/**
+ * Questões da Revisão de uma fase. Elas avaliam só conceitos ensinados pela
+ * primeira vez na fase, e a fase com conjunto não tem as atividades copiadas.
+ */
+export interface ReviewSet {
+  phaseId: string
+  questions: ReviewQuestion[]
 }
 
 // ---------------------------------------------------------------------------
