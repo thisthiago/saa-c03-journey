@@ -52,23 +52,6 @@ export const F07_CONCEPTS: ConceptDef[] = [
     },
     references: [REQ],
     tags: ['recuperacao'],
-    reviewItems: [
-      {
-        id: 'rv:repl.requirements:conta',
-        kind: 'decision',
-        title: 'Replicar para outra conta',
-        prompt: 'A origem e o destino têm versionamento e o papel de replicação está correto. O destino é de **outra conta**, e as réplicas ficam com status FAILED. O que falta?',
-        concepts: [{ id: 'repl.requirements' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['Entre contas, o dono do bucket de destino precisa conceder, numa bucket policy, permissão para a conta de origem replicar.'],
-        options: [
-          { id: 'a', text: 'Uma bucket policy no destino autorizando a conta de origem a replicar', correct: true, consequence: 'Com a autorização do lado do destino, as réplicas passam a COMPLETED.' },
-          { id: 'b', text: 'Habilitar o S3 RTC', correct: false, consequence: 'RTC define o SLA de tempo; não concede permissões.' },
-          { id: 'c', text: 'Desabilitar o versionamento do destino', correct: false, consequence: 'O versionamento é obrigatório nos dois lados: sem ele, a replicação falha.' },
-        ],
-      },
-    ],
   },
   {
     id: 'repl.what-not',
