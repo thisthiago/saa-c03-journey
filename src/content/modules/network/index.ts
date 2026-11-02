@@ -27,6 +27,7 @@ import { F08_NET } from './phases/f08/phase'
 import { F09_NET } from './phases/f09/phase'
 import { FINAL_NET } from './phases/final/phase'
 import { NETWORK_QUESTIONS } from './questions'
+import { NETWORK_REVIEW } from './review'
 
 export const AWS_NETWORK: TrackDef = {
   id: 'network.aws-network',
@@ -66,4 +67,5 @@ export const networkModule: ContentModule = {
   tracks: [AWS_NETWORK],
   achievements: NETWORK_ACHIEVEMENTS,
   questions: NETWORK_QUESTIONS,
+  review: NETWORK_REVIEW,
 }
