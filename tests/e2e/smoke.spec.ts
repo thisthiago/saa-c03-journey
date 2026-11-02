@@ -178,6 +178,20 @@ test('revisão aparece para conceitos fracos e concede domínio', async ({ page 
   await expect(page.getByText(/item 1 de/)).toBeVisible()
 })
 
+test('revisão: o conceito só aparece depois da resposta', async ({ page }) => {
+  // Antes da resposta, o nome do conceito entregaria a resposta de questões do tipo "qual classe atende".
+  const old = new Date(Date.now() - 3 * 86_400_000).toISOString()
+  await seedProgress(page, { ...progressWithFirstMission(), concepts: { 'sc.standard-ia': { mastery: 0.4, evidence: 1, box: 1, nextReviewAt: old, lastSeenAt: old, recentErrors: 0 } } })
+  await page.goto('/#/revisao')
+  await page.getByRole('button', { name: 'Começar revisão' }).click()
+  await expect(page.getByText('item 1 de 1')).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Questão de revisão' })).toBeAttached()
+  await expect(page.getByRole('heading', { level: 1, name: 'S3 Standard-IA' })).toHaveCount(0)
+  await page.getByRole('radio').first().click()
+  await page.getByRole('button', { name: 'Verificar' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'S3 Standard-IA' })).toBeVisible()
+})
+
 test('revisão: escolher quantos itens entram na rodada', async ({ page }) => {
   const p = progressWithFirstMission()
   const old = new Date(Date.now() - 3 * 86_400_000).toISOString()
