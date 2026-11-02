@@ -194,22 +194,5 @@ export const F02_FOUNDATIONS_CONCEPTS: ConceptDef[] = [
     exam: { domains: ['d4'], relevance: 'baixa', notes: EXAM_NOTE },
     references: [PRICING],
     tags: ['fundamentos', 'custos'],
-    reviewItems: [
-      {
-        id: 'rv:support.pricing:minimo',
-        kind: 'decision',
-        title: 'Mínimo ou percentual?',
-        prompt: 'Uma empresa gasta US$ 10 mil por mês com a AWS e contrata o **Enterprise Support** (mínimo de US$ 5 mil ou 10% até US$ 150 mil). Quanto paga de suporte?',
-        concepts: [{ id: 'support.pricing' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['10% de US$ 10 mil = US$ 1 mil, abaixo do mínimo. Vale o maior: US$ 5 mil por mês.'],
-        options: [
-          { id: 'a', text: 'US$ 5 mil (o mínimo, que é maior que 10% do gasto)', correct: true, consequence: 'Para esse gasto, o suporte custa metade da conta da AWS: precisa haver necessidade real de TAM e resposta em 15 minutos.' },
-          { id: 'b', text: 'US$ 1 mil (10% do gasto)', correct: false, consequence: 'O percentual fica abaixo do mínimo mensal; vale o maior dos dois.' },
-          { id: 'c', text: 'US$ 15 mil', correct: false, consequence: 'Esse era o mínimo anterior; em 18/10/2026 o mínimo era US$ 5 mil.' },
-        ],
-      },
-    ],
   },
 ]
