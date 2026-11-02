@@ -3,7 +3,8 @@ import { Copy, Eye, FilePlus2, History, ListTree, Lock, RotateCcw, Trash2, Undo2
 import { useMemo, useState } from 'react'
 import type { Evaluation } from '../../engine/types'
 import { Badge, Button } from '../../ui/kit'
-import { initialBucket, runLab, type VersioningLabConfig, type VersioningLabResponse } from './lab'
+import { GoalsPanel } from '../shared/GoalsPanel'
+import { goalLabel, initialBucket, runLab, type VersioningLabConfig, type VersioningLabResponse } from './lab'
 import { getObject, listCurrent, STATE_LABEL, type VOp } from './model'
 import s from './versioning.module.css'
 
@@ -54,6 +55,8 @@ export function VersioningLab({ config, value, onChange, disabled }: Props) {
         <Badge tone={bucket.state === 'Enabled' ? 'success' : bucket.state === 'Suspended' ? 'warning' : undefined}>Versionamento: {STATE_LABEL[bucket.state]}</Badge>
         {bucket.mfaDelete && <Badge tone="info">MFA delete habilitado</Badge>}
       </div>
+
+      <GoalsPanel goals={config.goals.map((g) => ({ label: goalLabel(g), why: g.why }))} />
 
       <div className={s.columns}>
         <div className={s.col}>
