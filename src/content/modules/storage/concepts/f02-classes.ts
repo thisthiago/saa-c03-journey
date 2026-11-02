@@ -275,23 +275,6 @@ export const F02_CONCEPTS: ConceptDef[] = [
     exam: { domains: ['d4'], relevance: 'baixa' },
     references: [ANALYSIS],
     tags: ['custos'],
-    reviewItems: [
-      {
-        id: 'rv:s3.storage-class-analysis:quando',
-        kind: 'decision',
-        title: 'Quando os dados esfriam?',
-        prompt: 'Antes de criar uma regra que move objetos do Standard para o Standard-IA, a equipe quer saber **depois de quantos dias** os dados deixam de ser acessados. O que usar?',
-        concepts: [{ id: 's3.storage-class-analysis' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['O Storage Class Analysis observa o padrão de acesso de um bucket, prefixo ou tag e indica quando a transição para Standard-IA compensa.'],
-        options: [
-          { id: 'a', text: 'Amazon S3 Storage Class Analysis', correct: true, consequence: 'A regra passa a usar dados reais de acesso, não suposições.' },
-          { id: 'b', text: 'Chutar 30 dias, porque é a duração mínima do Standard-IA', correct: false, consequence: 'A duração mínima é uma regra de cobrança, não uma medida do acesso real.' },
-          { id: 'c', text: 'Mover tudo para o Glacier Deep Archive e ver o que acontece', correct: false, consequence: 'Dados ainda acessados ficariam indisponíveis por horas e pagariam restauração.' },
-        ],
-      },
-    ],
   },
   {
     id: 'glacier.vault-service',
