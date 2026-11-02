@@ -448,7 +448,7 @@ export const F05: PhaseDef = {
             keys: ['projeto.dwg', 'orcamento.xlsx'],
             goals: [
               { type: 'current', key: 'projeto.dwg', content: 'projeto rev B', why: 'A rev B é a revisão mais recente que sobreviveu.', concepts: ['s3.versioning-suspended'] },
-              { type: 'current', key: 'orcamento.xlsx', content: 'orçamento final', why: 'O orçamento ainda está guardado sob o delete marker.', concepts: ['s3.restore-version'] },
+              { type: 'current', key: 'orcamento.xlsx', content: 'orçamento final', why: 'O cliente precisa do orçamento final de volta.', concepts: ['s3.restore-version'] },
               { type: 'preserved', key: 'projeto.dwg', content: 'projeto rev A', why: 'Revisões antigas continuam sendo histórico do projeto.', concepts: ['s3.permanent-delete'] },
               { type: 'state', state: 'Enabled', why: 'Com o versionamento suspenso, a próxima sobrescrita volta a destruir dados.', concepts: ['s3.versioning'] },
             ],
