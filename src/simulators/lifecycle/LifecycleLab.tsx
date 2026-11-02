@@ -6,8 +6,9 @@ import { Badge, Button } from '../../ui/kit'
 import { formatUSD } from '../cost/model'
 import { regionPrices } from '../cost/prices'
 import { STORAGE_CLASSES } from '../shared/storageClasses'
-import { costFirstMonths, runLifecycleLab, type LifecycleLabConfig, type LifecycleLabResponse } from './lab'
+import { costFirstMonths, goalLabel, runLifecycleLab, type LifecycleLabConfig, type LifecycleLabResponse } from './lab'
 import { CLASS_COLOR, datasetMonthlyCosts, emptyRule, simulateAll, TRANSITION_TARGETS, type LifecycleRule, type SegmentState, type Transition } from './model'
+import { GoalsPanel } from '../shared/GoalsPanel'
 import { lifecycleJson } from './json'
 import s from './lifecycle.module.css'
 
@@ -212,6 +213,8 @@ export function LifecycleLab({ config, value, onChange, disabled }: Props) {
         <Badge>{regionPrices(config.region).label}</Badge>
         <Badge tone="info">{rules.length} regra(s)</Badge>
       </div>
+
+      <GoalsPanel goals={config.goals.map((g) => ({ label: goalLabel(config, g), why: g.why }))} />
 
       <div className={s.columns}>
         <div className={s.col}>
