@@ -498,6 +498,8 @@ export interface ProgressState {
     itemsAnswered: number
     /** conceptId → nextReviewAt do ciclo em que o XP de revisão já foi concedido. */
     awardedCycles: Record<string, string>
+    /** Itens da Revisão do dia respondidos no dia (dayKey), para o limite diário. */
+    today?: { day: string; answered: number }
   }
   stats: {
     comebacks: number
