@@ -1,9 +1,19 @@
 import { Brain, Check, Clock, Dumbbell, Library, RotateCcw, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { registry } from '../../content'
-import { isDue, masteryTier, TIER_LABEL } from '../../engine/mastery'
+import { isDue, masteryTier, TIER_LABEL, type Confidence } from '../../engine/mastery'
 import { bankStats } from '../../engine/exam'
-import { buildPracticeSession, buildReviewSession, nextReviewDate, REVIEW_SESSION_SIZE, sessionSizeOptions, type ReviewEntry } from '../../engine/review'
+import {
+  buildPracticeSession,
+  buildReviewSession,
+  DAILY_REVIEW_LIMIT,
+  dailyReviewLeft,
+  nextReviewDate,
+  REVIEW_SESSION_SIZE,
+  reviewCandidates,
+  sessionSizeOptions,
+  type ReviewEntry,
+} from '../../engine/review'
 import { clock, useGame } from '../../store/gameStore'
 import { useDocumentTitle } from '../../app/hooks'
 import { Badge, Button, ButtonLink, Card, ProgressBar } from '../../ui/kit'
@@ -12,8 +22,8 @@ import { ActivityRunner } from '../mission/ActivityRunner'
 import s from './review.module.css'
 
 /** Escolha de quantos itens entram na rodada; some quando só há uma opção. */
-function SizePicker({ name, available, value, onChange }: { name: string; available: number; value: number; onChange: (n: number) => void }) {
-  const options = sessionSizeOptions(available)
+function SizePicker({ name, available, max, value, onChange }: { name: string; available: number; max?: number; value: number; onChange: (n: number) => void }) {
+  const options = sessionSizeOptions(available, max)
   if (options.length < 2) return null
   return (
     <fieldset className={s.sizes}>
@@ -29,8 +39,8 @@ function SizePicker({ name, available, value, onChange }: { name: string; availa
 }
 
 /** Tamanho efetivo: o escolhido, limitado ao que há para revisar. */
-function fit(choice: number, available: number) {
-  const options = sessionSizeOptions(available)
+function fit(choice: number, available: number, max?: number) {
+  const options = sessionSizeOptions(available, max)
   return options.includes(choice) ? choice : (options.filter((n) => n <= choice).at(-1) ?? options[0] ?? 0)
 }
 
@@ -39,7 +49,10 @@ interface Answer {
   score: number
   xp: number
   before: number
+  confidence?: Confidence
 }
+
+const CONFIDENCE_BADGE: Record<Confidence, string> = { chute: 'chutei', duvida: 'com dúvida', certeza: 'com certeza' }
 
 export function ReviewPage() {
   useDocumentTitle('Revisão')
@@ -55,10 +68,12 @@ export function ReviewPage() {
   const now = clock.now()
   const [reviewSize, setReviewSize] = useState(REVIEW_SESSION_SIZE)
   const [practiceSize, setPracticeSize] = useState(REVIEW_SESSION_SIZE)
-  const due = buildReviewSession(progress, registry, now, Infinity)
+  const left = dailyReviewLeft(progress, now)
+  const due = buildReviewSession(progress, registry, now, left)
+  const waiting = reviewCandidates(progress, registry, now).length
   const practicePool = buildPracticeSession(progress, registry, Infinity).length
   const studied = Object.values(progress.concepts).filter((c) => c.evidence > 0).length
-  const reviewChoice = fit(reviewSize, due.length)
+  const reviewChoice = fit(reviewSize, due.length, DAILY_REVIEW_LIMIT)
   const practiceChoice = fit(practiceSize, practicePool)
 
   const start = (practice: boolean) => {
@@ -81,6 +96,10 @@ export function ReviewPage() {
           A revisão traz de volta conceitos vencidos (repetição espaçada) e conceitos em que você teve dificuldade. Cada acerto no prazo vale XP e aumenta o intervalo até a próxima revisão; um erro traz o conceito de volta
           amanhã.
         </p>
+        <p className="muted" style={{ maxWidth: 680 }}>
+          Antes de verificar cada resposta, diga se chutou, se tem dúvida ou se tem certeza. Só o acerto com certeza aumenta o intervalo; o acerto no chute volta amanhã para confirmar. A Revisão do dia tem no máximo{' '}
+          {DAILY_REVIEW_LIMIT} itens por dia, começando pelos mais atrasados.
+        </p>
         <div className={s.introGrid}>
           <Card>
             <h2 className={s.cardTitle}>
@@ -89,7 +108,8 @@ export function ReviewPage() {
             {due.length > 0 ? (
               <>
                 <p>
-                  <b>{due.length}</b> {due.length === 1 ? 'item pronto' : 'itens prontos'}, intercalando fases diferentes.
+                  <b>{due.length}</b> {due.length === 1 ? 'item para hoje' : 'itens para hoje'}, intercalando fases diferentes.
+                  {waiting > due.length && ` ${waiting - due.length === 1 ? 'O outro fica' : `Os outros ${waiting - due.length} ficam`} para os próximos dias.`}
                 </p>
                 <ul className={s.preview}>
                   {due.slice(0, 5).map((e) => (
@@ -99,13 +119,13 @@ export function ReviewPage() {
                     </li>
                   ))}
                 </ul>
-                <SizePicker name="review-size" available={due.length} value={reviewChoice} onChange={setReviewSize} />
+                <SizePicker name="review-size" available={due.length} max={DAILY_REVIEW_LIMIT} value={reviewChoice} onChange={setReviewSize} />
                 <Button onClick={() => start(false)}>
                   <RotateCcw size={18} aria-hidden="true" /> Começar revisão
                 </Button>
               </>
             ) : (
-              <p className="muted">{studied === 0 ? 'Você ainda não estudou conceitos. Faça uma missão para alimentar a revisão.' : next ? `Nada vencido agora. A próxima revisão vence ${relativeDays(next, now)}.` : 'Nada vencido agora.'}</p>
+              <p className="muted">{waiting > 0 && left === 0 ? `Você fez as ${DAILY_REVIEW_LIMIT} revisões de hoje. As próximas ficam para amanhã; para continuar agora, use o Treino livre.` : studied === 0 ? 'Você ainda não estudou conceitos. Faça uma missão para alimentar a revisão.' : next ? `Nada vencido agora. A próxima revisão vence ${relativeDays(next, now)}.` : 'Nada vencido agora.'}</p>
             )}
           </Card>
           <Card>
@@ -151,6 +171,8 @@ export function ReviewPage() {
   if (finished || entries.length === 0) {
     const correct = answers.filter((a) => a.score >= 0.7).length
     const xp = answers.reduce((sum, a) => sum + a.xp, 0)
+    const sure = answers.filter((a) => a.score >= 0.7 && a.confidence === 'certeza').length
+    const guessed = answers.filter((a) => a.score >= 0.7 && a.confidence !== 'certeza').length
     return (
       <div className="page">
         <Card className={s.summary}>
@@ -158,6 +180,11 @@ export function ReviewPage() {
           <h1>
             {correct} de {answers.length} acertos
           </h1>
+          {answers.length > 0 && (
+            <p>
+              {sure} {sure === 1 ? 'acerto' : 'acertos'} com certeza e {guessed} no chute ou com dúvida. Os acertos sem certeza voltam antes, para confirmar.
+            </p>
+          )}
           <p className="muted">{xp > 0 ? `+${xp} XP por itens revisados no prazo.` : practice ? 'Treino livre não gera XP, mas fortalece o domínio.' : 'Sem XP nesta sessão.'}</p>
           <ul className={s.results}>
             {answers.map((a, i) => {
@@ -167,6 +194,7 @@ export function ReviewPage() {
                 <li key={i} data-ok={a.score >= 0.7}>
                   <Check size={16} aria-hidden="true" />
                   <span className={s.resultName}>{registry.concepts.get(a.conceptId)?.title}</span>
+                  {a.confidence && <Badge>{CONFIDENCE_BADGE[a.confidence]}</Badge>}
                   <Badge tone={tier === 'dominado' ? 'mastery' : 'neutral'}>{TIER_LABEL[tier]}</Badge>
                   <span className={s.delta}>
                     domínio {Math.round(a.before * 100)} → {Math.round((after?.mastery ?? a.before) * 100)}
@@ -225,12 +253,14 @@ export function ReviewPage() {
           key={`${entry.item.id}:${index}`}
           activity={entry.item}
           mode="review"
-          onSubmit={(evaluation) => {
+          onSubmit={(evaluation, _hints, _solution, confidence) => {
             const before = progress.concepts[entry.conceptId]?.mastery ?? 0
+            // Tentar de novo o mesmo item não gasta outra vaga do limite diário.
+            const daily = !practice && answeredIndex !== index
             setAnsweredIndex(index)
-            const events = submitReview(entry.conceptId, entry.item.id, evaluation)
+            const events = submitReview(entry.conceptId, entry.item.id, evaluation, { confidence, daily })
             const xp = events.filter((e) => e.type === 'xp' && e.source === 'review').reduce((acc, e) => acc + (e.type === 'xp' ? e.amount : 0), 0)
-            setAnswers((list) => [...list, { conceptId: entry.conceptId, score: evaluation.score, xp, before }])
+            setAnswers((list) => [...list, { conceptId: entry.conceptId, score: evaluation.score, xp, before, confidence }])
             return { xp, events }
           }}
           onContinue={() => (index + 1 >= entries.length ? finish() : setIndex(index + 1))}
