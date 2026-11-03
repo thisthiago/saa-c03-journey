@@ -86,6 +86,71 @@ describe('domínio e Leitner', () => {
   })
 })
 
+describe('confiança na revisão', () => {
+  // Conceito na caixa 2 (intervalo de 3 dias), revisado no dia seguinte.
+  const base = () => {
+    let c = updateConcept(undefined, 1, 1, T0)
+    c = updateConcept(c, 1, 1, addDays(T0, 1))
+    return c
+  }
+  const day = addDays(T0, 4)
+  const daysUntilNext = (c: { nextReviewAt: string }) => (new Date(c.nextReviewAt).getTime() - day.getTime()) / 86_400_000
+
+  it('acerto com certeza sobe a caixa como antes', () => {
+    const c = updateConcept(base(), 1, 1, day, 'certeza')
+    expect(c).toEqual(updateConcept(base(), 1, 1, day))
+    expect(c.box).toBe(3)
+  })
+  it('acerto no chute não sobe a caixa, volta amanhã e mexe menos no domínio', () => {
+    const prev = { ...base(), recentErrors: 2 }
+    const c = updateConcept(prev, 1, 1, day, 'chute')
+    expect(c.box).toBe(2)
+    expect(daysUntilNext(c)).toBe(1)
+    expect(c.recentErrors).toBe(2)
+    expect(c.mastery).toBeLessThan(updateConcept(prev, 1, 1, day).mastery)
+    expect(c.lastPromotionDay).toBe(prev.lastPromotionDay)
+  })
+  it('acerto com dúvida repete o intervalo da caixa atual', () => {
+    const c = updateConcept({ ...base(), recentErrors: 1 }, 1, 1, day, 'duvida')
+    expect(c.box).toBe(2)
+    expect(daysUntilNext(c)).toBe(3)
+    expect(c.recentErrors).toBe(0)
+  })
+  it('erro com certeza pesa mais que erro comum', () => {
+    const sure = updateConcept(base(), 0, 1, day, 'certeza')
+    const plain = updateConcept(base(), 0, 1, day, 'duvida')
+    expect(sure.box).toBe(1)
+    expect(sure.recentErrors).toBe(2)
+    expect(plain.recentErrors).toBe(1)
+    expect(sure.mastery).toBeLessThan(plain.mastery)
+  })
+  it('só o acerto com certeza leva a "dominado"', () => {
+    let c = updateConcept(undefined, 1, 1, T0, 'duvida')
+    for (let d = 1; d < 30; d++) c = updateConcept(c, 1, 1, addDays(T0, d), d % 2 ? 'chute' : 'duvida')
+    expect(masteryTier(c)).not.toBe('dominado')
+  })
+  it('a confiança não muda o XP da revisão', () => {
+    const s = submit(createInitialProgress(T0), 'act1', 1).state
+    const later = addDays(T0, 1)
+    const item = buildReviewSession(s, reg, later)[0].item
+    const r = submitReview(s, reg, { conceptId: 'c1', itemId: item.id, evaluation: evalFor(item, 1), now: later, confidence: 'chute' })
+    expect(r.state.xp - s.xp).toBe(5)
+  })
+  it('conta no limite diário só com daily, zerando no dia seguinte', () => {
+    const s = submit(createInitialProgress(T0), 'act1', 1).state
+    const later = addDays(T0, 1)
+    const item = buildReviewSession(s, reg, later)[0].item
+    const review = (st: ProgressState, now: Date, daily: boolean) => submitReview(st, reg, { conceptId: 'c1', itemId: item.id, evaluation: evalFor(item, 1), now, daily }).state
+    let st = review(s, later, true)
+    st = review(st, later, false)
+    expect(st.reviews.today).toEqual({ day: '2026-10-02', answered: 1 })
+    st = review(st, later, true)
+    expect(st.reviews.today?.answered).toBe(2)
+    st = review(st, addDays(T0, 2), true)
+    expect(st.reviews.today).toEqual({ day: '2026-10-03', answered: 1 })
+  })
+})
+
 describe('progresso de atividades e missões', () => {
   it('não concede XP ao repetir com o mesmo resultado', () => {
     const r1 = submit(createInitialProgress(T0), 'act1', 1)

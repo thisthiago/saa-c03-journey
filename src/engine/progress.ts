@@ -6,7 +6,7 @@
 import { newlyUnlocked } from './achievements'
 import { isQuestionCorrect } from './exam'
 import { levelForXp, levelTitle } from './levels'
-import { dayKey, EVIDENCE_WEIGHT, isDue, masteryTier, SUCCESS_OUTCOME, updateConcept } from './mastery'
+import { dayKey, EVIDENCE_WEIGHT, isDue, masteryTier, SUCCESS_OUTCOME, updateConcept, type Confidence } from './mastery'
 import type { Registry } from './registry'
 import { isMissionPassed, isPhaseCompleted } from './selectors'
 import type { Evaluation, GameEvent, ProgressState, XpEntry } from './types'
@@ -62,10 +62,10 @@ function markActiveDay(s: ProgressState, now: Date) {
   }
 }
 
-function applyConceptOutcomes(s: ProgressState, reg: Registry, events: GameEvent[], outcomes: Record<string, number>, weight: number, now: Date) {
+function applyConceptOutcomes(s: ProgressState, reg: Registry, events: GameEvent[], outcomes: Record<string, number>, weight: number, now: Date, confidence?: Confidence) {
   for (const [conceptId, outcome] of Object.entries(outcomes)) {
     const before = masteryTier(s.concepts[conceptId])
-    s.concepts[conceptId] = updateConcept(s.concepts[conceptId], outcome, weight, now)
+    s.concepts[conceptId] = updateConcept(s.concepts[conceptId], outcome, weight, now, confidence)
     s.discovered[conceptId] ??= now.toISOString()
     if (before !== 'dominado' && masteryTier(s.concepts[conceptId]) === 'dominado') {
       events.push({ type: 'concept-mastered', conceptId, title: reg.concepts.get(conceptId)?.title ?? conceptId })
@@ -176,6 +176,10 @@ export interface ReviewSubmission {
   itemId: string
   evaluation: Evaluation
   now: Date
+  /** Confiança declarada antes de verificar; muda a agenda, não o XP. */
+  confidence?: Confidence
+  /** Conta no limite diário da Revisão do dia (o Treino livre não conta). */
+  daily?: boolean
 }
 
 /**
@@ -191,9 +195,13 @@ export function submitReview(prev: ProgressState, reg: Registry, sub: ReviewSubm
   const cycleKey = cp?.nextReviewAt
   const eligible = Boolean(cp && isDue(cp, sub.now) && s.reviews.awardedCycles[sub.conceptId] !== cycleKey)
   const outcomes = Object.keys(sub.evaluation.conceptOutcomes).length > 0 ? sub.evaluation.conceptOutcomes : { [sub.conceptId]: sub.evaluation.score }
-  applyConceptOutcomes(s, reg, events, outcomes, EVIDENCE_WEIGHT.review, sub.now)
+  applyConceptOutcomes(s, reg, events, outcomes, EVIDENCE_WEIGHT.review, sub.now, sub.confidence)
   if (s.concepts[sub.conceptId]) s.concepts[sub.conceptId].lastReviewItemId = sub.itemId
   s.reviews.itemsAnswered += 1
+  if (sub.daily) {
+    const today = dayKey(sub.now)
+    s.reviews.today = { day: today, answered: (s.reviews.today?.day === today ? s.reviews.today.answered : 0) + 1 }
+  }
   if (eligible && sub.evaluation.score >= ACTIVITY_PASS_SCORE && cycleKey) {
     s.reviews.awardedCycles[sub.conceptId] = cycleKey
     addXp(s, events, REVIEW_XP, 'review', sub.conceptId, `Revisão: ${reg.concepts.get(sub.conceptId)?.title ?? sub.conceptId}`, at)

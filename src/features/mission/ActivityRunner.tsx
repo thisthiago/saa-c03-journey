@@ -10,6 +10,7 @@ import { ActivityView } from '../../activities/registry'
 import { incompleteHint, initialResponse, isComplete, KIND_LABEL } from '../../activities/ui-logic'
 import type { ActivityDef } from '../../activities/types'
 import { registry } from '../../content'
+import { FAILURE_OUTCOME, type Confidence } from '../../engine/mastery'
 import { ACTIVITY_PASS_SCORE, hintFactor } from '../../engine/xp'
 import type { Evaluation, GameEvent, ImpactDimension } from '../../engine/types'
 import { useGame } from '../../store/gameStore'
@@ -26,13 +27,27 @@ export interface SubmitResult {
 interface Props {
   activity: ActivityDef
   /** Registra o resultado no progresso e devolve o XP concedido. */
-  onSubmit: (evaluation: Evaluation, hintsUsed: number, solutionViewed: boolean) => SubmitResult
+  onSubmit: (evaluation: Evaluation, hintsUsed: number, solutionViewed: boolean, confidence?: Confidence) => SubmitResult
   onContinue: () => void
   continueLabel: string
-  /** Na revisão não há dicas nem solução guiada (o item já é curto). */
+  /** Na revisão não há dicas nem solução guiada (o item já é curto), e a confiança é pedida antes de verificar. */
   mode?: 'mission' | 'review'
   /** Salva rascunho da resposta (laboratórios). */
   draftKey?: string
+}
+
+const CONFIDENCE_OPTIONS: { value: Confidence; label: string }[] = [
+  { value: 'chute', label: 'Chutei' },
+  { value: 'duvida', label: 'Tenho dúvida' },
+  { value: 'certeza', label: 'Tenho certeza' },
+]
+
+/** O que a confiança declarada muda na agenda; sem frase quando o efeito é o de sempre. */
+function confidenceNote(confidence: Confidence | null, score: number): string | null {
+  if (score >= ACTIVITY_PASS_SCORE && confidence === 'chute') return 'Você acertou, mas marcou que chutou. Este conceito volta amanhã para confirmar.'
+  if (score >= ACTIVITY_PASS_SCORE && confidence === 'duvida') return 'Você acertou com dúvida. O intervalo até a próxima revisão fica o mesmo até você acertar com certeza.'
+  if (score < FAILURE_OUTCOME && confidence === 'certeza') return 'Você tinha certeza e errou. Vale ler a explicação com atenção: este conceito volta amanhã, na frente dos outros.'
+  return null
 }
 
 const IMPACT_LABEL: Record<ImpactDimension, string> = {
@@ -64,9 +79,12 @@ export function ActivityRunner({ activity, onSubmit, onContinue, continueLabel, 
   const [solutionViewed, setSolutionViewed] = useState(Boolean(prior?.solutionViewed))
   const [failures, setFailures] = useState(0)
   const [showIncomplete, setShowIncomplete] = useState(false)
+  const [confidence, setConfidence] = useState<Confidence | null>(null)
+  const [showNoConfidence, setShowNoConfidence] = useState(false)
   const feedbackRef = useRef<HTMLDivElement>(null)
 
   const complete = isComplete(activity, response)
+  const askConfidence = mode === 'review'
   const hints = mode === 'mission' ? (activity.hints ?? []) : []
 
   useEffect(() => {
@@ -84,11 +102,15 @@ export function ActivityRunner({ activity, onSubmit, onContinue, continueLabel, 
       setShowIncomplete(true)
       return
     }
+    if (askConfidence && !confidence) {
+      setShowNoConfidence(true)
+      return
+    }
     const ev = evaluateActivity(activity, response)
     const before: Record<string, number> = {}
     for (const c of Object.keys(ev.conceptOutcomes)) before[c] = progress.concepts[c]?.mastery ?? 0
     setMasteryBefore(before)
-    const r = onSubmit(ev, hintsUsed, solutionViewed)
+    const r = onSubmit(ev, hintsUsed, solutionViewed, confidence ?? undefined)
     if (draftKey) clearDraft(draftKey)
     setEvaluation(ev)
     setResult(r)
@@ -103,6 +125,7 @@ export function ActivityRunner({ activity, onSubmit, onContinue, continueLabel, 
     setResult(null)
     setHintsUsed(0)
     setGuided(false)
+    setConfidence(null)
   }
 
   const showSolution = () => {
@@ -167,8 +190,28 @@ export function ActivityRunner({ activity, onSubmit, onContinue, continueLabel, 
                   ))}
                 </div>
               )}
+              {askConfidence && (
+                <fieldset className={s.confidence}>
+                  <legend>Qual a sua confiança nesta resposta?</legend>
+                  {CONFIDENCE_OPTIONS.map((o) => (
+                    <label key={o.value}>
+                      <input
+                        type="radio"
+                        name={`${activity.id}-confidence`}
+                        value={o.value}
+                        checked={confidence === o.value}
+                        onChange={() => {
+                          setConfidence(o.value)
+                          setShowNoConfidence(false)
+                        }}
+                      />
+                      <span>{o.label}</span>
+                    </label>
+                  ))}
+                </fieldset>
+              )}
               <div className={s.actions}>
-                <Button onClick={submit} aria-describedby={showIncomplete ? `${activity.id}-incomplete` : undefined}>
+                <Button onClick={submit} aria-describedby={showIncomplete ? `${activity.id}-incomplete` : showNoConfidence ? `${activity.id}-confidence` : undefined}>
                   <Check size={18} aria-hidden="true" /> Verificar
                 </Button>
                 {hintsUsed < hints.length && (
@@ -179,6 +222,11 @@ export function ActivityRunner({ activity, onSubmit, onContinue, continueLabel, 
                 {showIncomplete && (
                   <span id={`${activity.id}-incomplete`} className={s.incomplete} role="alert">
                     <CircleAlert size={16} aria-hidden="true" /> {incompleteHint(activity)}
+                  </span>
+                )}
+                {showNoConfidence && !showIncomplete && (
+                  <span id={`${activity.id}-confidence`} className={s.incomplete} role="alert">
+                    <CircleAlert size={16} aria-hidden="true" /> Escolha o seu nível de confiança antes de verificar.
                   </span>
                 )}
                 {!complete && !showIncomplete && <span className={s.incompleteSoft}>{incompleteHint(activity)}</span>}
@@ -209,6 +257,7 @@ export function ActivityRunner({ activity, onSubmit, onContinue, continueLabel, 
               </div>
 
               {evaluation.summary && <p className={s.summary}>{evaluation.summary}</p>}
+              {askConfidence && confidenceNote(confidence, evaluation.score) && <p className={s.confidenceNote}>{confidenceNote(confidence, evaluation.score)}</p>}
 
               {evaluation.consequences && evaluation.consequences.length > 0 && (
                 <div className={s.consequences}>
