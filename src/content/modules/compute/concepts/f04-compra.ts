@@ -105,38 +105,6 @@ export const F04_CMP_CONCEPTS: ConceptDef[] = [
     title: 'Interrupção do Spot',
     officialName: 'Spot Instance interruptions',
     serviceIds: ['aws.ec2'],
-    reviewItems: [
-      {
-        id: 'rv:ec2.spot-interruption.notice',
-        kind: 'decision',
-        title: 'O aviso do Spot',
-        prompt: 'Uma instância Spot com comportamento **terminate** vai ser interrompida. Quanto tempo de aviso a aplicação recebe, e por onde?',
-        concepts: [{ id: 'ec2.spot-interruption' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['O aviso chega 2 minutos antes, como evento no EventBridge e no item spot/instance-action dos metadados. Com hibernação, não há os 2 minutos.'],
-        options: [
-          { id: 'a', text: '2 minutos, pelo EventBridge e pelos metadados da instância', correct: true, consequence: 'É o tempo para salvar o progresso e devolver o trabalho em andamento.' },
-          { id: 'b', text: '1 hora, por e-mail', correct: false, consequence: 'O aviso é de 2 minutos e chega por evento e metadados.' },
-          { id: 'c', text: 'Nenhum: a instância some sem aviso', correct: false, consequence: 'Há o aviso de 2 minutos, emitido no melhor esforço.' },
-        ],
-      },
-      {
-        id: 'rv:ec2.spot-interruption.rebalance',
-        kind: 'decision',
-        title: 'Antes do aviso',
-        prompt: 'Que sinal a AWS pode emitir **antes** do aviso de 2 minutos, quando o risco de interrupção de uma instância Spot aumenta?',
-        concepts: [{ id: 'ec2.spot-interruption' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['A recomendação de rebalanceamento avisa que o risco subiu, dando chance de mover o trabalho antes do aviso de interrupção.'],
-        options: [
-          { id: 'a', text: 'Uma recomendação de rebalanceamento da instância', correct: true, consequence: 'Dá tempo de rebalancear antes do aviso de 2 minutos.' },
-          { id: 'b', text: 'Uma mudança no preço On-Demand', correct: false, consequence: 'O preço On-Demand é fixo e não sinaliza interrupções.' },
-          { id: 'c', text: 'Um alarme de CPU no CloudWatch', correct: false, consequence: 'CPU não tem relação com a capacidade sobrando do EC2.' },
-        ],
-      },
-    ],
     summary: 'Antes de interromper, a AWS emite um **aviso de 2 minutos** (evento no EventBridge e item `spot/instance-action` nos metadados). Antes ainda, pode emitir uma **recomendação de rebalanceamento**, quando o risco de interrupção sobe. A instância é encerrada, parada ou hibernada.',
     facts: [
       'Motivos: a AWS precisa da capacidade, o preço passou do máximo definido ou uma restrição do pedido deixou de ser atendida.',
