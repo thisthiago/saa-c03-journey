@@ -81,38 +81,6 @@ export const F09_DB_CONCEPTS: ConceptDef[] = [
     exam: { domains: ['d2'], relevance: 'media' },
     references: [R.dmsValidation],
     tags: ['migracao'],
-    reviewItems: [
-      {
-        id: 'rv:dms.validation.proof',
-        kind: 'decision',
-        title: 'A prova da auditoria',
-        prompt: 'Depois da migração com o DMS, a auditoria quer a comprovação de que origem e destino têm os mesmos dados. O que usar?',
-        concepts: [{ id: 'dms.validation' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['A validação do DMS compara origem e destino e aponta o que não bate, inclusive nas mudanças replicadas por uma tarefa com CDC.'],
-        options: [
-          { id: 'a', text: 'Ligar a validação de dados na tarefa do DMS', correct: true, consequence: 'O DMS compara as tabelas e registra as diferenças.' },
-          { id: 'b', text: 'Contar as linhas das tabelas à mão', correct: false, consequence: 'O número de linhas pode bater com valores diferentes.' },
-          { id: 'c', text: 'Confiar que a tarefa terminou sem erro', correct: false, consequence: 'Terminar sem erro não comprova que os valores chegaram iguais.' },
-        ],
-      },
-      {
-        id: 'rv:dms.validation.cdc',
-        kind: 'decision',
-        title: 'Validação com CDC',
-        prompt: 'Numa tarefa de carga completa com captura de mudanças, a validação do DMS compara só a carga inicial ou também as mudanças replicadas depois?',
-        concepts: [{ id: 'dms.validation' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['A validação compara as mudanças incrementais de uma tarefa com CDC à medida que acontecem.'],
-        options: [
-          { id: 'a', text: 'Também as mudanças replicadas, à medida que acontecem', correct: true, consequence: 'O destino continua sendo conferido até a virada.' },
-          { id: 'b', text: 'Só a carga inicial', correct: false, consequence: 'A validação acompanha também as mudanças da CDC.' },
-          { id: 'c', text: 'Nenhuma das duas: a validação só existe no SCT', correct: false, consequence: 'A validação é um recurso da tarefa do DMS.' },
-        ],
-      },
-    ],
   },
   {
     id: 'db.choosing',
