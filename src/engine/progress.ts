@@ -6,10 +6,10 @@
 import { newlyUnlocked } from './achievements'
 import { isQuestionCorrect } from './exam'
 import { levelForXp, levelTitle } from './levels'
-import { dayKey, EVIDENCE_WEIGHT, isDue, masteryTier, SUCCESS_OUTCOME, updateConcept, type Confidence } from './mastery'
+import { dayKey, EVIDENCE_WEIGHT, INITIAL_MASTERY, isDue, masteryTier, SUCCESS_OUTCOME, updateConcept, type Confidence } from './mastery'
 import type { Registry } from './registry'
 import { isMissionPassed, isPhaseCompleted } from './selectors'
-import type { Evaluation, GameEvent, ProgressState, XpEntry } from './types'
+import type { Evaluation, GameEvent, MissionDef, PhaseDef, ProgressState, XpEntry } from './types'
 import { ACTIVITY_PASS_SCORE, earnedXp, REVIEW_XP, xpAward } from './xp'
 
 export const LEDGER_LIMIT = 500
@@ -168,6 +168,48 @@ export function submitActivity(prev: ProgressState, reg: Registry, sub: Activity
   }
   markActiveDay(s, sub.now)
   settle(s, reg, events, levelBefore, sub.now)
+  return { state: s, events }
+}
+
+/**
+ * Marca missões como concluídas sem jogar (por exemplo, depois de perder o
+ * progresso salvo). Não concede XP nem bônus de missão; conquistas que
+ * dependem só da conclusão são liberadas normalmente. Os conceitos avaliados
+ * nas missões (e os da fase, quando ela fica concluída) que ainda não têm
+ * evidência entram na Revisão como "aprendendo", vencidos agora.
+ */
+export function markMissionsCompleted(prev: ProgressState, reg: Registry, missionIds: string[], now: Date): Transition {
+  const s = cloneState(prev)
+  const events: GameEvent[] = []
+  const at = now.toISOString()
+  const levelBefore = levelForXp(s.xp)
+  const phases = new Map<string, PhaseDef>()
+  const marked: MissionDef[] = []
+  const concepts = new Set<string>()
+  for (const id of missionIds) {
+    const ref = reg.missions.get(id)
+    if (!ref) throw new Error(`Missão desconhecida: ${id}`)
+    const { mission, phase } = ref
+    if (isMissionPassed(s, mission)) continue
+    const mp = (s.missions[mission.id] ??= { startedAt: at, bonusAwarded: false })
+    mp.passedAt = at
+    mp.manual = true
+    marked.push(mission)
+    phases.set(phase.id, phase)
+    for (const a of mission.activities) for (const c of a.concepts) concepts.add(c.id)
+  }
+  const completedPhases = [...phases.values()].filter((p) => !isPhaseCompleted(prev, p) && isPhaseCompleted(s, p))
+  for (const p of completedPhases) {
+    for (const c of p.concepts) concepts.add(c)
+    events.push({ type: 'phase-completed', phaseId: p.id, title: p.title })
+  }
+  if (completedPhases.length === 0) for (const m of marked) events.push({ type: 'mission-passed', missionId: m.id, title: m.title })
+  for (const c of concepts) {
+    if (!reg.concepts.has(c) || (s.concepts[c]?.evidence ?? 0) > 0) continue
+    s.concepts[c] = { mastery: INITIAL_MASTERY, evidence: 1, box: 0, nextReviewAt: at, lastSeenAt: at, recentErrors: 0 }
+    s.discovered[c] ??= at
+  }
+  if (marked.length > 0) settle(s, reg, events, levelBefore, now)
   return { state: s, events }
 }
 
