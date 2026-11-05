@@ -23,6 +23,7 @@ import { F06_FIL } from './phases/f06/phase'
 import { F07_FIL } from './phases/f07/phase'
 import { FINAL_FIL } from './phases/final/phase'
 import { FILES_QUESTIONS } from './questions'
+import { FILES_REVIEW } from './review'
 
 export const AWS_FILES: TrackDef = {
   id: 'files.aws-files',
@@ -47,4 +48,5 @@ export const filesModule: ContentModule = {
   tracks: [AWS_FILES],
   achievements: FILES_ACHIEVEMENTS,
   questions: FILES_QUESTIONS,
+  review: FILES_REVIEW,
 }
