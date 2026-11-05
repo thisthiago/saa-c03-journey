@@ -72,6 +72,16 @@ describe('studyRecommendation', () => {
     expect(rec.missionId).toBeTruthy()
   })
 
+  it('com o limite diário da Revisão atingido, segue para a próxima missão', () => {
+    const [m1] = missionsOf(FOUNDATIONS)
+    const s = pass(createInitialProgress(NOW), [m1])
+    s.concepts[reviewable] = concept(0.9, '2026-10-21T20:00:00Z')
+    s.reviews.today = { day: '2026-10-22', answered: 30 }
+    const rec = studyRecommendation(s, registry, NOW, order)
+    expect(rec.kind).toBe('next')
+    expect(rec.overdue).toBe(0)
+  })
+
   it('conceito fraco ou vencido hoje não interrompe a próxima missão', () => {
     const [m1] = missionsOf(FOUNDATIONS)
     const s = pass(createInitialProgress(NOW), [m1])

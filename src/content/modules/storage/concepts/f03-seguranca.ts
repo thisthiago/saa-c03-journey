@@ -115,23 +115,6 @@ export const F03_CONCEPTS: ConceptDef[] = [
     },
     references: [IAM_BP],
     tags: ['seguranca'],
-    reviewItems: [
-      {
-        id: 'rv:iam.least-privilege:gravacao',
-        kind: 'decision',
-        title: 'Só gravar relatórios',
-        prompt: 'Uma função Lambda só precisa **gravar** arquivos no prefixo `relatorios/` de um bucket. Qual política conceder?',
-        concepts: [{ id: 'iam.least-privilege' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['Menor privilégio: só a ação usada (`s3:PutObject`) e só o recurso necessário (`arn:aws:s3:::bucket/relatorios/*`).'],
-        options: [
-          { id: 'a', text: 'Allow s3:PutObject em arn:aws:s3:::bucket/relatorios/*', correct: true, consequence: 'Se a função for comprometida, o estrago fica limitado a gravar em relatorios/.' },
-          { id: 'b', text: 'Allow s3:* em arn:aws:s3:::bucket/*', correct: false, consequence: 'A função também poderia ler e apagar qualquer objeto do bucket.' },
-          { id: 'c', text: 'Allow s3:* em *', correct: false, consequence: 'Acesso total a todos os buckets da conta — muito além da tarefa.' },
-        ],
-      },
-    ],
   },
   {
     id: 's3.bucket-policy',

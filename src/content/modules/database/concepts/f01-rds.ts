@@ -121,38 +121,6 @@ export const F01_DB_CONCEPTS: ConceptDef[] = [
     exam: { domains: ['d3'], relevance: 'media' },
     references: [R.rdsParamGroups],
     tags: ['fundamentos'],
-    reviewItems: [
-      {
-        id: 'rv:rds.parameter-group.default',
-        kind: 'decision',
-        title: 'O grupo padrão',
-        prompt: 'Uma equipe quer aumentar o **max_connections** de uma instância que usa o **parameter group padrão**. O console não deixa editar o valor. Por quê?',
-        concepts: [{ id: 'rds.parameter-group' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['O parameter group padrão não pode ser alterado. Crie um grupo próprio, ajuste o parâmetro e associe o grupo à instância.'],
-        options: [
-          { id: 'a', text: 'O grupo padrão não aceita alterações: é preciso criar um grupo próprio e associá-lo', correct: true, consequence: 'A instância passa a usar o grupo com o valor novo.' },
-          { id: 'b', text: 'O parâmetro só pode ser mudado pelo suporte da AWS', correct: false, consequence: 'A equipe pode mudá-lo num grupo próprio.' },
-          { id: 'c', text: 'O RDS não permite mudar parâmetros do motor', correct: false, consequence: 'Parameter groups existem justamente para isso.' },
-        ],
-      },
-      {
-        id: 'rv:rds.parameter-group.static',
-        kind: 'decision',
-        title: 'Parâmetro estático',
-        prompt: 'A equipe mudou um parâmetro **estático** num parameter group próprio. A instância mostra **pending-reboot** há uma semana, e a janela de manutenção já passou. O parâmetro novo está valendo?',
-        concepts: [{ id: 'rds.parameter-group' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['Parâmetros estáticos só valem depois de um reboot manual. O status pending-reboot não reinicia a instância sozinho na janela de manutenção.'],
-        options: [
-          { id: 'a', text: 'Não: só depois que alguém reiniciar a instância', correct: true, consequence: 'A equipe agenda o reboot num horário combinado.' },
-          { id: 'b', text: 'Sim: a janela de manutenção reiniciou a instância', correct: false, consequence: 'O pending-reboot não gera reboot automático na janela.' },
-          { id: 'c', text: 'Sim: parâmetros valem assim que o grupo é salvo', correct: false, consequence: 'Isso vale só para parâmetros dinâmicos.' },
-        ],
-      },
-    ],
   },
   {
     id: 'rds.subnet-group',

@@ -26,6 +26,7 @@ import { F08_CMP } from './phases/f08/phase'
 import { F09_CMP } from './phases/f09/phase'
 import { FINAL_CMP } from './phases/final/phase'
 import { COMPUTE_QUESTIONS } from './questions'
+import { COMPUTE_REVIEW } from './review'
 
 export const AWS_COMPUTE: TrackDef = {
   id: 'compute.aws-compute',
@@ -52,4 +53,5 @@ export const computeModule: ContentModule = {
   tracks: [AWS_COMPUTE],
   achievements: COMPUTE_ACHIEVEMENTS,
   questions: COMPUTE_QUESTIONS,
+  review: COMPUTE_REVIEW,
 }

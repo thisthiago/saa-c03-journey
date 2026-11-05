@@ -31,6 +31,7 @@ import { F03_F04_QUESTIONS } from './questions-f03-f04'
 import { F05_F06_QUESTIONS } from './questions-f05-f06'
 import { F07_F08_QUESTIONS } from './questions-f07-f08'
 import { F09_QUESTIONS } from './questions-f09'
+import { GOVERNANCE_REVIEW } from './review'
 
 export const AWS_GOVERNANCE: TrackDef = {
   id: 'governance.aws-governance',
@@ -74,4 +75,5 @@ export const governanceModule: ContentModule = {
   tracks: [AWS_GOVERNANCE],
   achievements: GOVERNANCE_ACHIEVEMENTS,
   questions: [...GOVERNANCE_QUESTIONS, ...F03_F04_QUESTIONS, ...F05_F06_QUESTIONS, ...F07_F08_QUESTIONS, ...F09_QUESTIONS],
+  review: GOVERNANCE_REVIEW,
 }

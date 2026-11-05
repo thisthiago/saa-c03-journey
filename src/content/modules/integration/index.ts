@@ -27,6 +27,7 @@ import { F08_INT } from './phases/f08/phase'
 import { F09_INT } from './phases/f09/phase'
 import { FINAL_INT } from './phases/final/phase'
 import { INTEGRATION_QUESTIONS } from './questions'
+import { INTEGRATION_REVIEW } from './review'
 
 export const AWS_INTEGRATION: TrackDef = {
   id: 'integration.aws-integration',
@@ -52,4 +53,5 @@ export const integrationModule: ContentModule = {
   tracks: [AWS_INTEGRATION],
   achievements: INTEGRATION_ACHIEVEMENTS,
   questions: INTEGRATION_QUESTIONS,
+  review: INTEGRATION_REVIEW,
 }

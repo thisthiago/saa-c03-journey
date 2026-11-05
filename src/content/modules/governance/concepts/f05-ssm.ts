@@ -25,38 +25,6 @@ export const F05_GOV_CONCEPTS: ConceptDef[] = [
     },
     references: [R.ssmWhat],
     tags: ['fundamentos'],
-    reviewItems: [
-      {
-        id: 'rv:ssm.what.nodes',
-        kind: 'decision',
-        title: 'Quais máquinas',
-        prompt: 'O Systems Manager gerencia só instâncias EC2 ou também servidores fora da AWS?',
-        concepts: [{ id: 'ssm.what' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['O Systems Manager gerencia nós na AWS, em ambientes locais e em outras nuvens, desde que tenham o SSM Agent e consigam falar com o serviço.'],
-        options: [
-          { id: 'a', text: 'Também servidores locais e de outras nuvens, se tiverem o SSM Agent', correct: true, consequence: 'O agente conecta a máquina ao serviço, onde ela estiver.' },
-          { id: 'b', text: 'Só instâncias EC2', correct: false, consequence: 'Nós locais e multinuvem também podem ser gerenciados.' },
-          { id: 'c', text: 'Só instâncias EC2 com chave SSH cadastrada', correct: false, consequence: 'O Systems Manager não depende de chaves SSH.' },
-        ],
-      },
-      {
-        id: 'rv:ssm.what.tools',
-        kind: 'decision',
-        title: 'Para que serve',
-        prompt: 'Qual destas tarefas o Systems Manager faz, sem abrir portas de entrada nas máquinas?',
-        concepts: [{ id: 'ssm.what' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['As ferramentas do Systems Manager permitem conectar-se aos nós, rodar comandos, aplicar correções e guardar dados de configuração sem abrir portas de entrada.'],
-        options: [
-          { id: 'a', text: 'Rodar comandos e abrir sessões em centenas de instâncias', correct: true, consequence: 'O Run Command e o Session Manager cumprem essas tarefas.' },
-          { id: 'b', text: 'Registrar quem chamou cada API da conta', correct: false, consequence: 'Isso é o CloudTrail.' },
-          { id: 'c', text: 'Medir a CPU de cada instância e disparar alarmes', correct: false, consequence: 'Isso é o CloudWatch.' },
-        ],
-      },
-    ],
   },
   {
     id: 'ssm.managed-node',

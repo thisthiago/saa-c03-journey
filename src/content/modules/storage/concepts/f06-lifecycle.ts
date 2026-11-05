@@ -54,23 +54,6 @@ export const F06_CONCEPTS: ConceptDef[] = [
     },
     references: [MGMT, ELEMENTS],
     tags: ['custos'],
-    reviewItems: [
-      {
-        id: 'rv:lc.rules:filtro',
-        kind: 'decision',
-        title: 'Filtro com AND',
-        prompt: 'Uma regra tem o filtro `Prefix = logs/` **e** a tag `ambiente = teste`. A quais objetos ela se aplica?',
-        concepts: [{ id: 'lc.rules' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['Prefixo, tags e tamanho são combinados com AND: o objeto precisa atender a todos.'],
-        options: [
-          { id: 'a', text: 'Só aos objetos em logs/ que tenham a tag ambiente=teste', correct: true, consequence: 'Isso: os critérios do filtro se somam.' },
-          { id: 'b', text: 'A todos os objetos em logs/ e a todos com a tag, em qualquer prefixo', correct: false, consequence: 'Isso seria um OR; o lifecycle combina os critérios com AND.' },
-          { id: 'c', text: 'A todo o bucket', correct: false, consequence: 'Só um filtro vazio vale para o bucket inteiro.' },
-        ],
-      },
-    ],
   },
   {
     id: 'lc.waterfall',
@@ -199,23 +182,6 @@ export const F06_CONCEPTS: ConceptDef[] = [
     exam: { domains: ['d4'], relevance: 'baixa' },
     references: [EXAMPLES],
     tags: ['custos'],
-    reviewItems: [
-      {
-        id: 'rv:lc.expired-delete-markers:o-que',
-        kind: 'decision',
-        title: 'Marcador sem nada por baixo',
-        prompt: 'Num bucket versionado, todas as versões de `rascunho.xlsx` foram excluídas e sobrou só o delete marker. Como limpar esses marcadores automaticamente?',
-        concepts: [{ id: 'lc.expired-delete-markers' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['Um delete marker sem versões é um expired object delete marker. A ação ExpiredObjectDeleteMarker remove esses marcadores.'],
-        options: [
-          { id: 'a', text: 'Regra de lifecycle com ExpiredObjectDeleteMarker', correct: true, consequence: 'Os marcadores órfãos somem das listagens de versões.' },
-          { id: 'b', text: 'AbortIncompleteMultipartUpload', correct: false, consequence: 'Essa ação trata uploads multipart incompletos, não delete markers.' },
-          { id: 'c', text: 'Uma regra com filtro por tag e ExpiredObjectDeleteMarker', correct: false, consequence: 'ExpiredObjectDeleteMarker não pode ser usado em regra com filtro por tag.' },
-        ],
-      },
-    ],
   },
   {
     id: 'lc.conflicts',

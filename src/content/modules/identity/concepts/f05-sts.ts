@@ -27,23 +27,6 @@ export const F05_IAM_CONCEPTS: ConceptDef[] = [
     },
     references: [R.tempCreds, R.assumeRole],
     tags: ['seguranca'],
-    reviewItems: [
-      {
-        id: 'rv:sts.temporary-credentials:partes',
-        kind: 'decision',
-        title: 'O que o STS entrega',
-        prompt: 'Além do ID da chave e do segredo, o que vem nas credenciais temporárias do STS e precisa acompanhar cada chamada?',
-        concepts: [{ id: 'sts.temporary-credentials' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['Credenciais temporárias têm **três partes**: ID da chave, segredo e **token de sessão**, com data de expiração.'],
-        options: [
-          { id: 'a', text: 'O token de sessão', correct: true, consequence: 'Sem o token, a assinatura com a chave temporária não é aceita.' },
-          { id: 'b', text: 'A senha do usuário que pediu as credenciais', correct: false, consequence: 'A senha nunca acompanha chamadas de API.' },
-          { id: 'c', text: 'O código MFA de seis dígitos', correct: false, consequence: 'O MFA, quando exigido, vai na chamada que cria a sessão, não em cada requisição.' },
-        ],
-      },
-    ],
   },
   {
     id: 'iam.trust-policy',

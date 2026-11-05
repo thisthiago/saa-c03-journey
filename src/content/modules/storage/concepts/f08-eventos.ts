@@ -45,23 +45,6 @@ export const F08_CONCEPTS: ConceptDef[] = [
     exam: { domains: ['d1'], relevance: 'media' },
     references: [TYPES],
     tags: ['integracao', 'seguranca'],
-    reviewItems: [
-      {
-        id: 'rv:ev.destination-permissions:fila',
-        kind: 'decision',
-        title: 'Notificação recusada',
-        prompt: 'Ao salvar uma notificação para uma fila SQS, o S3 responde "Unable to validate the following destination configurations". O que costuma faltar?',
-        concepts: [{ id: 'ev.destination-permissions' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['A política de acesso da fila precisa permitir que o serviço S3 (para aquele bucket) envie mensagens. Para Lambda, é a permissão de invocação da função.'],
-        options: [
-          { id: 'a', text: 'Uma política na fila permitindo que o S3 envie mensagens', correct: true, consequence: 'Com a permissão, o S3 valida o destino e salva a configuração.' },
-          { id: 'b', text: 'Habilitar o versionamento do bucket', correct: false, consequence: 'Notificações não exigem versionamento.' },
-          { id: 'c', text: 'Trocar a fila por uma FIFO', correct: false, consequence: 'Filas FIFO nem são aceitas como destino direto.' },
-        ],
-      },
-    ],
   },
   {
     id: 'ev.filter-overlap',
@@ -73,22 +56,6 @@ export const F08_CONCEPTS: ConceptDef[] = [
     exam: { domains: ['d3'], relevance: 'media' },
     references: [FILTER],
     tags: ['integracao'],
-    reviewItems: [
-      {
-        id: 'rv:ev.filter-overlap:jpg',
-        kind: 'decision',
-        title: 'Dois sufixos',
-        prompt: 'Duas notificações `ObjectCreated:*`: uma com sufixo `jpg`, outra com sufixo `.jpg`, para destinos diferentes. O S3 aceita?',
-        concepts: [{ id: 'ev.filter-overlap' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['Uma mesma key pode terminar com ".jpg" e "jpg": os sufixos se sobrepõem, e a configuração é recusada.'],
-        options: [
-          { id: 'a', text: 'Não: os sufixos se sobrepõem para os mesmos tipos de evento', correct: true, consequence: 'Para dois consumidores do mesmo evento, use fan-out.' },
-          { id: 'b', text: 'Sim: os sufixos são textos diferentes', correct: false, consequence: 'O que conta é se uma key pode terminar com os dois — e pode.' },
-        ],
-      },
-    ],
   },
   {
     id: 'ev.fanout',

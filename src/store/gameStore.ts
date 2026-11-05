@@ -21,7 +21,7 @@ interface GameStore {
   notice: 'corrupted' | null
   queue: QueuedEvent[]
   submitActivity: (activityId: string, evaluation: Evaluation, hintsUsed: number, solutionViewed: boolean) => GameEvent[]
-  submitReview: (conceptId: string, itemId: string, evaluation: Evaluation) => GameEvent[]
+  submitReview: (conceptId: string, itemId: string, evaluation: Evaluation, opts?: Pick<engine.ReviewSubmission, 'confidence' | 'daily'>) => GameEvent[]
   completeReviewSession: () => GameEvent[]
   submitExam: (answers: engine.ExamSubmission['answers'], simulado?: engine.ExamSubmission['simulado']) => GameEvent[]
   discover: (conceptIds: string[]) => void
@@ -60,8 +60,8 @@ export const useGame = create<GameStore>()((set, get) => ({
     set((s) => ({ progress: state, queue: enqueue(s.queue, events) }))
     return events
   },
-  submitReview(conceptId, itemId, evaluation) {
-    const { state, events } = engine.submitReview(get().progress, registry, { conceptId, itemId, evaluation, now: clock.now() })
+  submitReview(conceptId, itemId, evaluation, opts) {
+    const { state, events } = engine.submitReview(get().progress, registry, { conceptId, itemId, evaluation, now: clock.now(), ...opts })
     set((s) => ({ progress: state, queue: enqueue(s.queue, events) }))
     return events
   },

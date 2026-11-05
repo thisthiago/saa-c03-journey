@@ -90,23 +90,6 @@ export const F01_FOUNDATIONS_CONCEPTS: ConceptDef[] = [
     },
     references: [REGIONS, S3X_AZ],
     tags: ['fundamentos', 'custos', 'desempenho'],
-    reviewItems: [
-      {
-        id: 'rv:infra.region-selection:ordem',
-        kind: 'decision',
-        title: 'Por onde começar',
-        prompt: 'Ao escolher a Região de uma aplicação nova, qual critério você verifica **primeiro**?',
-        concepts: [{ id: 'infra.region-selection' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['Requisitos rígidos (onde os dados podem ficar e quais serviços são indispensáveis) eliminam Regiões. Latência e custo desempatam entre as que sobram.'],
-        options: [
-          { id: 'a', text: 'Os requisitos rígidos: localização exigida dos dados e serviços indispensáveis.', correct: true, consequence: 'Só as Regiões viáveis entram na comparação de latência e custo.' },
-          { id: 'b', text: 'A Região geograficamente mais próxima dos usuários.', correct: false, consequence: 'Ela pode não ter o serviço necessário ou ficar fora do país exigido.' },
-          { id: 'c', text: 'A Região com o menor preço.', correct: false, consequence: 'Preço baixo não adianta se a Região viola um requisito obrigatório.' },
-        ],
-      },
-    ],
   },
   {
     id: 'infra.data-residency',
@@ -145,23 +128,6 @@ export const F01_FOUNDATIONS_CONCEPTS: ConceptDef[] = [
     exam: { domains: ['d1'], relevance: 'baixa' },
     references: [REGIONS],
     tags: ['fundamentos'],
-    reviewItems: [
-      {
-        id: 'rv:infra.opt-in-regions:habilitar',
-        kind: 'decision',
-        title: 'A Região não aparece',
-        prompt: 'A equipe quer criar recursos em **Europe (Spain)**, mas a Região não aparece disponível na conta. O que explica?',
-        concepts: [{ id: 'infra.opt-in-regions' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['Europe (Spain) é uma Região opt-in: lançada depois de 20/03/2019, precisa ser habilitada na conta antes do uso.'],
-        options: [
-          { id: 'a', text: 'É uma Região opt-in e precisa ser habilitada na conta.', correct: true, consequence: 'Depois de habilitada, os recursos podem ser criados nela.' },
-          { id: 'b', text: 'A Região só existe para clientes Enterprise Support.', correct: false, consequence: 'Plano de suporte não controla quais Regiões a conta pode usar.' },
-          { id: 'c', text: 'Regiões novas só podem ser usadas por meio de outra Região.', correct: false, consequence: 'Cada Região é independente; basta habilitá-la.' },
-        ],
-      },
-    ],
   },
   {
     id: 'infra.no-auto-replication',
@@ -307,23 +273,6 @@ export const F01_FOUNDATIONS_CONCEPTS: ConceptDef[] = [
     },
     references: [FIB_ZONAL],
     tags: ['disponibilidade'],
-    reviewItems: [
-      {
-        id: 'rv:infra.spof:banco',
-        kind: 'decision',
-        title: 'Onde está o SPOF?',
-        prompt: 'Seis instâncias em três AZs atrás de um ALB, e um banco **RDS Single-AZ** na AZ a. Qual é o ponto único de falha?',
-        concepts: [{ id: 'infra.spof' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['Se a AZ a cair, o banco Single-AZ cai junto e as instâncias das outras AZs não têm com quem falar.'],
-        options: [
-          { id: 'a', text: 'O banco Single-AZ.', correct: true, consequence: 'A solução é o Multi-AZ (standby em outra AZ, com failover automático).' },
-          { id: 'b', text: 'O ALB, porque é um componente só.', correct: false, consequence: 'O ALB tem um nó em cada AZ habilitada; ele não depende de uma única AZ.' },
-          { id: 'c', text: 'Não há SPOF: as instâncias estão em três AZs.', correct: false, consequence: 'As instâncias sobrevivem, mas o banco não.' },
-        ],
-      },
-    ],
   },
   {
     id: 'infra.static-stability',
@@ -397,23 +346,6 @@ export const F01_FOUNDATIONS_CONCEPTS: ConceptDef[] = [
     },
     references: [ALB],
     tags: ['disponibilidade'],
-    reviewItems: [
-      {
-        id: 'rv:infra.alb-zones:zona',
-        kind: 'decision',
-        title: 'Instâncias ociosas',
-        prompt: 'O ALB foi criado com as AZs a e b. Duas instâncias novas foram registradas na AZ c. O que acontece com elas?',
-        concepts: [{ id: 'infra.alb-zones' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['Alvos numa zona que não está habilitada no load balancer não recebem tráfego. É preciso habilitar a AZ c no ALB.'],
-        options: [
-          { id: 'a', text: 'Não recebem tráfego até a AZ c ser habilitada no ALB.', correct: true, consequence: 'Ficam ligadas, gerando custo, sem atender ninguém.' },
-          { id: 'b', text: 'Recebem tráfego normalmente graças ao cross-zone.', correct: false, consequence: 'O cross-zone distribui entre zonas habilitadas, não habilita zonas novas.' },
-          { id: 'c', text: 'O ALB move as instâncias para a AZ a.', correct: false, consequence: 'O ALB não move instâncias.' },
-        ],
-      },
-    ],
   },
   {
     id: 'infra.nat-zonal-regional',
@@ -463,22 +395,6 @@ export const F01_FOUNDATIONS_CONCEPTS: ConceptDef[] = [
     },
     references: [RDS_MAZ],
     tags: ['disponibilidade'],
-    reviewItems: [
-      {
-        id: 'rv:infra.rds-multi-az:leitura',
-        kind: 'decision',
-        title: 'Standby para relatórios?',
-        prompt: 'Alguém sugere apontar os relatórios pesados para o **standby** do RDS Multi-AZ (DB instance), já que ele está parado. Funciona?',
-        concepts: [{ id: 'infra.rds-multi-az' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['No Multi-AZ com um standby, ele não serve leituras. Para leituras, use réplicas de leitura (ou um Multi-AZ DB cluster).'],
-        options: [
-          { id: 'a', text: 'Não: o standby não atende leituras; use uma réplica de leitura.', correct: true, consequence: 'Disponibilidade e escala de leitura são resolvidas por recursos diferentes.' },
-          { id: 'b', text: 'Sim: é para isso que o standby existe.', correct: false, consequence: 'O standby existe para assumir em caso de falha.' },
-        ],
-      },
-    ],
   },
   {
     id: 'infra.local-zones',

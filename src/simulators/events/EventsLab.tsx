@@ -3,7 +3,8 @@ import { CircleAlert, Plus, RefreshCw, Trash2, Zap } from 'lucide-react'
 import { useMemo } from 'react'
 import type { Evaluation } from '../../engine/types'
 import { Badge, Button } from '../../ui/kit'
-import { destinationsWith, type EventsLabConfig, type EventsLabResponse } from './lab'
+import { GoalsPanel } from '../shared/GoalsPanel'
+import { destinationsWith, goalLabel, type EventsLabConfig, type EventsLabResponse } from './lab'
 import { KIND_LABEL, runFlow, validateEvents, type EbRule, type EventTypeSel, type Notification } from './model'
 import s from './events.module.css'
 
@@ -33,6 +34,7 @@ export function EventsLab({ config, value, onChange, disabled }: Props) {
 
   return (
     <div className={s.lab}>
+      <GoalsPanel goals={config.goals.map((g) => ({ label: goalLabel(config, value, g), why: g.why }))} />
       <div className={s.columns}>
         <div className={s.col}>
           <section className={s.panel} aria-label="Destinos">

@@ -5,7 +5,7 @@
  */
 import { dayKey, masteryTier } from './mastery'
 import { trackPhases, type Registry } from './registry'
-import { reviewCandidates, WEAK_MASTERY } from './review'
+import { dailyReviewLeft, reviewCandidates, WEAK_MASTERY } from './review'
 import { isTrackCompleted, missionStatus, nextMission, trackProgress, unmetTrackRecommendations } from './selectors'
 import type { TrackOrderStep } from './track-order'
 import type { ExamDomain, ProgressState, TrackDef } from './types'
@@ -57,11 +57,15 @@ function isMissionStarted(state: ProgressState, missionId: string, reg: Registry
   return Boolean(state.missions[missionId]) || Boolean(ref?.mission.activities.some((a) => state.activities[a.id]))
 }
 
-/** Conceitos cuja revisão venceu antes de hoje (o estudante voltou num novo dia), do mais urgente ao menos. */
+/**
+ * Conceitos cuja revisão venceu antes de hoje (o estudante voltou num novo dia), do mais urgente ao menos.
+ * Corta no que ainda cabe no limite diário: com o limite atingido, a Base não sugere revisão.
+ */
 export function overdueConcepts(state: ProgressState, reg: Registry, now: Date): string[] {
   const today = dayKey(now)
   return reviewCandidates(state, reg, now)
     .filter((c) => c.reason === 'due' && dayKey(new Date(state.concepts[c.conceptId].nextReviewAt)) < today)
+    .slice(0, dailyReviewLeft(state, now))
     .map((c) => c.conceptId)
 }
 

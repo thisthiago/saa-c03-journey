@@ -52,7 +52,7 @@ const M2_LAB: ReplicationLabConfig = {
   editable: { sourceVersioning: true, destVersioning: true, role: true, destPolicy: true, rules: true },
   prefixes: ['apolices/', 'sinistros/', 'financeiro/'],
   goals: [
-    { type: 'valid', why: 'Sem versionamento na origem, o S3 recusa a configuração.', concepts: ['repl.requirements'] },
+    { type: 'valid', why: 'Uma configuração com erro é recusada inteira: nenhuma regra vale.', concepts: ['repl.requirements'] },
     { type: 'event', event: 'put', destination: DR, expect: 'COMPLETED', why: 'Toda apólice nova precisa existir também na Região de DR.', concepts: ['repl.requirements'] },
     { type: 'event', event: 'kms', destination: DR, expect: 'COMPLETED', why: 'Laudos de sinistro (SSE-KMS) também precisam de cópia.', concepts: ['repl.kms'] },
     { type: 'rtc', destination: DR, why: 'O regulador exige RPO previsível, de no máximo 15 minutos para a grande maioria dos objetos.', concepts: ['repl.rtc'] },

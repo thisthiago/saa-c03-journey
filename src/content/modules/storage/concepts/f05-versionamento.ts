@@ -53,23 +53,6 @@ export const F05_CONCEPTS: ConceptDef[] = [
     exam: { domains: ['d2'], relevance: 'media' },
     references: [VERSIONING],
     tags: ['recuperacao'],
-    reviewItems: [
-      {
-        id: 'rv:s3.version-id:antes',
-        kind: 'decision',
-        title: 'O arquivo de antes',
-        prompt: 'Um bucket tinha `relatorio.pdf` antes de o versionamento ser habilitado. Depois de habilitar, alguém grava uma nova versão. Qual é o version ID da versão **antiga**?',
-        concepts: [{ id: 's3.version-id' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['Objetos gravados antes de habilitar o versionamento mantêm o version ID null. A nova gravação recebe um ID único.'],
-        options: [
-          { id: 'a', text: 'null', correct: true, consequence: 'Isso: a versão anterior ao versionamento fica com o ID null, agora como versão não atual.' },
-          { id: 'b', text: 'Um ID único gerado no momento em que o versionamento foi habilitado', correct: false, consequence: 'Habilitar o versionamento não altera objetos existentes.' },
-          { id: 'c', text: 'Nenhum: a versão antiga foi substituída', correct: false, consequence: 'Com o versionamento já habilitado, o PUT cria uma nova versão e preserva a anterior.' },
-        ],
-      },
-    ],
   },
   {
     id: 's3.delete-marker',

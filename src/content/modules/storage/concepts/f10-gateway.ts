@@ -28,23 +28,6 @@ export const F10_CONCEPTS: ConceptDef[] = [
     },
     references: [VGW, S3FILE],
     tags: ['hibrido'],
-    reviewItems: [
-      {
-        id: 'rv:sgw.overview:protocolo',
-        kind: 'decision',
-        title: 'Pelo protocolo',
-        prompt: 'Um servidor local precisa de um **volume em bloco iSCSI** com dados guardados na AWS. Qual família de gateway?',
-        concepts: [{ id: 'sgw.overview' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['Disco em bloco (iSCSI) usa o Volume Gateway; arquivos (NFS/SMB), o S3 File Gateway; fitas virtuais (VTL), o Tape Gateway.'],
-        options: [
-          { id: 'a', text: 'Volume Gateway', correct: true, consequence: 'Cached ou stored, conforme latência e espaço local.' },
-          { id: 'b', text: 'S3 File Gateway', correct: false, consequence: 'Ele oferece compartilhamentos NFS e SMB, não volumes em bloco.' },
-          { id: 'c', text: 'Tape Gateway', correct: false, consequence: 'Ele emula uma biblioteca de fitas para software de backup.' },
-        ],
-      },
-    ],
   },
   {
     id: 'sgw.s3-file',

@@ -26,6 +26,7 @@ import { F08_DB } from './phases/f08/phase'
 import { F09_DB } from './phases/f09/phase'
 import { FINAL_DB } from './phases/final/phase'
 import { DATABASE_QUESTIONS } from './questions'
+import { DATABASE_REVIEW } from './review'
 
 export const AWS_DATABASE: TrackDef = {
   id: 'database.aws-database',
@@ -52,4 +53,5 @@ export const databaseModule: ContentModule = {
   tracks: [AWS_DATABASE],
   achievements: DATABASE_ACHIEVEMENTS,
   questions: DATABASE_QUESTIONS,
+  review: DATABASE_REVIEW,
 }

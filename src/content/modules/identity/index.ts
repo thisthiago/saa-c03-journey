@@ -23,6 +23,7 @@ import { F07_IAM } from './phases/f07/phase'
 import { F08_IAM } from './phases/f08/phase'
 import { FINAL_IAM } from './phases/final/phase'
 import { IDENTITY_QUESTIONS } from './questions'
+import { IDENTITY_REVIEW } from './review'
 
 export const IAM_ACCESS: TrackDef = {
   id: 'identity.iam-access',
@@ -47,4 +48,5 @@ export const identityModule: ContentModule = {
   tracks: [IAM_ACCESS],
   achievements: IDENTITY_ACHIEVEMENTS,
   questions: IDENTITY_QUESTIONS,
+  review: IDENTITY_REVIEW,
 }

@@ -50,36 +50,6 @@ export const F04_ANA_CONCEPTS: ConceptDef[] = [
     facts: ['Esse fornecimento de credenciais temporárias se chama credential vending.', 'O local pode ser registrado no modo híbrido, que aceita também as políticas do IAM.'],
     exam: { domains: ['d1'], relevance: 'media' },
     references: [R.lfRegister, R.lfHow],
-    reviewItems: [
-      {
-        id: 'rv:lf.register:1',
-        kind: 'decision',
-        title: 'Antes das permissões',
-        prompt: 'O que precisa ser feito com o caminho do S3 para que o Lake Formation controle o acesso aos dados das tabelas que apontam para ele?',
-        concepts: [{ id: 'lf.register' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['O caminho precisa ser registrado no Lake Formation, que passa a fornecer credenciais temporárias aos serviços integrados.'],
-        options: [
-          { id: 'a', text: 'Registrar o caminho no Lake Formation', correct: true, consequence: 'O caminho e as pastas abaixo dele passam a ser governados.' },
-          { id: 'b', text: 'Ligar o versionamento do bucket', correct: false, consequence: 'O versionamento guarda versões; não liga o controle do Lake Formation.' },
-        ],
-      },
-      {
-        id: 'rv:lf.register:2',
-        kind: 'decision',
-        title: 'Quem lê o S3',
-        prompt: 'Numa consulta do Athena a uma tabela governada, como o Athena consegue ler os arquivos no S3?',
-        concepts: [{ id: 'lf.register' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['Depois de conferir a permissão, o Lake Formation entrega credenciais temporárias ao serviço integrado, que lê os arquivos e aplica os filtros.'],
-        options: [
-          { id: 'a', text: 'Com credenciais temporárias fornecidas pelo Lake Formation', correct: true, consequence: 'O analista não precisa de acesso direto aos arquivos.' },
-          { id: 'b', text: 'Com o s3:GetObject do analista no bucket inteiro', correct: false, consequence: 'Esse acesso direto contornaria os filtros do Lake Formation.' },
-        ],
-      },
-    ],
     tags: ['seguranca'],
   },
   {

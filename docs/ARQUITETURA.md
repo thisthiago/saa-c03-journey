@@ -44,6 +44,13 @@ O progresso é indexado por IDs estáveis. Estados derivados (fase concluída, d
 
 Atividades com `reviewWeakNow` (o desafio final) colocam os conceitos com resultado fraco na fila de revisão imediatamente.
 
+## Questões da Revisão
+
+- **Origem** (`ReviewSet` em `engine/types.ts`): cada fase não final tem um conjunto de questões próprias em `content/modules/<módulo>/review/fNN.ts`, reunidas em `review/index.ts` e ligadas ao módulo pelo campo `review`. As atividades das fases não são copiadas para a Revisão.
+- **Registro** (`engine/registry.ts`): cada questão entra na revisão de todos os conceitos que marca. `validateRegistry` recusa fase inexistente, formato fora do exame (resposta única com 4 opções; resposta múltipla com 2 ou mais corretas entre 5 ou mais), domínio inexistente, conceito que não é ensinado pela primeira vez na própria fase e id repetido.
+- **Rodada** (`engine/review.ts`): uma rodada nunca repete a mesma questão; se a questão escolhida para um conceito já entrou, o conceito usa outra sua ou fica de fora.
+- **Progresso**: continua por conceito (domínio, caixa de Leitner e próxima revisão). O id do item só serve para não repetir a questão da vez anterior.
+
 ## Banco de questões
 
 - **Formato** (`ExamQuestion` em `engine/types.ts`): conceito principal, conceitos relacionados, dificuldade (1 a 3), domínio do exame, cenário, pergunta, alternativas com o porquê de cada uma e explicação. Segue o guia do exame: múltipla escolha tem uma correta entre quatro; resposta múltipla tem duas ou mais corretas entre cinco ou mais. O registro recusa questões fora desse formato.
@@ -62,12 +69,13 @@ Atividades com `reviewWeakNow` (o desafio final) colocam os conceitos com result
 `src/content/content.test.ts` verifica:
 
 - referências, ciclos e IDs duplicados;
-- toda fase disponível tem missões, e todo conceito ensinado é avaliado e tem item de revisão;
+- toda fase disponível tem missões, e todo conceito ensinado é avaliado e tem questão de revisão;
+- toda fase disponível que não é final tem questões próprias da Revisão, no padrão do exame, com todo conceito da fase em pelo menos uma questão e os de relevância alta em duas;
 - toda predição tem exatamente uma opção correta, **calculada pelo simulador**;
 - em todo laboratório, o estado inicial fica abaixo de 70% e a solução de referência chega a 100%;
 - toda atividade pode chegar a 100% com a resposta de referência;
 - o banco de questões cobre as três trilhas e as três dificuldades, só avalia conceitos de fases disponíveis e não usa setas no texto;
-- na trilha IAM, usuário, role, policy, trust policy, STS e SCP têm conceito ensinado, atividades, itens de revisão e questões de simulado.
+- na trilha IAM, usuário, role, policy, trust policy, STS e SCP têm conceito ensinado, atividades, questões de revisão e questões de simulado.
 
 ## Como estender
 

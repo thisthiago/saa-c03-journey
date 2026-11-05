@@ -4,7 +4,8 @@ import { useMemo } from 'react'
 import type { Evaluation } from '../../engine/types'
 import { Badge, Button } from '../../ui/kit'
 import { STORAGE_CLASSES, type StorageClassId } from '../shared/storageClasses'
-import { applyReplication, type ReplicationLabConfig, type ReplicationLabResponse } from './lab'
+import { GoalsPanel } from '../shared/GoalsPanel'
+import { applyReplication, goalLabel, type ReplicationLabConfig, type ReplicationLabResponse } from './lab'
 import { replicate, replicationType, validateReplication, type BucketVersioning, type ReplicaKey, type ReplRule } from './model'
 import s from './replication.module.css'
 
@@ -109,6 +110,7 @@ export function ReplicationLab({ config, value, onChange, disabled }: Props) {
 
   return (
     <div className={s.lab}>
+      <GoalsPanel goals={config.goals.map((g) => ({ label: goalLabel(config, g), why: g.why }))} />
       <div className={s.diagram} aria-label="Topologia">
         <div className={s.node}>
           <strong>{src.name}</strong>

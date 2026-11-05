@@ -18,7 +18,7 @@ function withCostGoal(c: Omit<LifecycleLabConfig, 'goals'> & { goals: LifecycleL
   const max = Math.ceil(ref * (1 + slack))
   return {
     ...c,
-    goals: [...c.goals, { type: 'cost-max', months, maxUSD: max, why: `A meta do financeiro para os primeiros ${months} meses é ${formatUSD(max)}.`, concepts: ['lc.rules'] }],
+    goals: [...c.goals, { type: 'cost-max', months, maxUSD: max, why: `É o teto de gasto que o financeiro aprovou para os primeiros ${months} meses. A estimativa das suas regras aparece no painel de custo.`, concepts: ['lc.rules'] }],
   }
 }
 
@@ -34,11 +34,11 @@ const M2_LAB = withCostGoal(
     goals: [
       { type: 'valid', why: 'Uma configuração com erro é rejeitada inteira.', concepts: ['lc.rules'] },
       { type: 'state-at', dataset: 'telemetria', day: 15, allowed: ['STANDARD'], why: 'Nos primeiros 30 dias, os painéis leem a telemetria o tempo todo.', concepts: ['lc.rules'] },
-      { type: 'state-at', dataset: 'telemetria', day: 60, allowed: ['STANDARD_IA', 'GLACIER_IR', 'INTELLIGENT_TIERING'], why: 'Do 2º ao 3º mês, a leitura é rara, mas ainda precisa ser imediata.', concepts: ['lc.waterfall'] },
+      { type: 'state-at', dataset: 'telemetria', day: 60, allowed: ['STANDARD_IA', 'GLACIER_IR', 'INTELLIGENT_TIERING'], why: 'Do 2º ao 4º mês, a leitura é rara, mas ainda precisa ser imediata.', concepts: ['lc.waterfall'] },
       { type: 'state-at', dataset: 'telemetria', day: 200, allowed: ['GLACIER', 'DEEP_ARCHIVE'], why: 'Depois de 4 meses, a telemetria só é consultada em perícias — esperar horas é aceitável.', concepts: ['lc.waterfall'] },
       { type: 'kept-until', dataset: 'telemetria', day: 365, why: 'A telemetria precisa ficar guardada por 1 ano.', concepts: ['lc.expiration'] },
       { type: 'gone-by', dataset: 'telemetria', day: 400, why: 'Depois de 1 ano, a telemetria deve ser excluída (política de privacidade).', concepts: ['lc.expiration'] },
-      { type: 'kept-until', dataset: 'notas', day: 730, why: 'Notas fiscais são guardadas por 5 anos por exigência legal.', concepts: ['lc.expiration'] },
+      { type: 'kept-until', dataset: 'notas', day: 730, why: 'Notas fiscais ficam 5 anos por exigência legal; a simulação cobre os 2 primeiros.', concepts: ['lc.expiration'] },
       { type: 'state-at', dataset: 'notas', day: 400, allowed: ['GLACIER_IR', 'GLACIER', 'DEEP_ARCHIVE'], why: 'Notas com mais de 1 ano quase nunca são abertas: guarde-as numa classe de arquivo.', concepts: ['lc.waterfall'] },
       { type: 'kept-until', dataset: 'logs', day: 30, why: 'Os logs servem para depuração no primeiro mês.', concepts: ['lc.expiration'] },
       { type: 'gone-by', dataset: 'logs', day: 90, why: 'Logs com mais de 90 dias não têm uso e só custam.', concepts: ['lc.small-objects'] },
@@ -53,6 +53,9 @@ const M2_LAB = withCostGoal(
   },
   0.1,
 )
+
+/** Teto de custo calculado para o laboratório, para citar no briefing. */
+const budgetOf = (c: LifecycleLabConfig) => formatUSD(c.goals.flatMap((g) => (g.type === 'cost-max' ? [g.maxUSD] : []))[0])
 
 // --- Missão 3 -------------------------------------------------------------------
 const M3_DATASETS: Dataset[] = [RELATORIOS, VERSOES_ANTIGAS, UPLOADS, MARCADORES]
@@ -93,8 +96,8 @@ const BOSS_LAB = withCostGoal(
     goals: [
       { type: 'valid', why: 'Enquanto houver erro, o S3 rejeita a configuração inteira — nenhuma regra vale.', concepts: ['lc.rules'] },
       { type: 'state-at', dataset: 'telemetria', day: 20, allowed: ['STANDARD'], why: 'No primeiro mês, os painéis leem a telemetria o tempo todo.', concepts: ['lc.rules'] },
-      { type: 'state-at', dataset: 'telemetria', day: 200, allowed: ['GLACIER', 'DEEP_ARCHIVE'], why: 'Telemetria antiga só é usada em perícias.', concepts: ['lc.min-duration-rule'] },
-      { type: 'gone-by', dataset: 'logs', day: 90, why: 'Logs pequenos não transicionam: o certo é expirá-los.', concepts: ['lc.small-objects'] },
+      { type: 'state-at', dataset: 'telemetria', day: 200, allowed: ['GLACIER', 'DEEP_ARCHIVE'], why: 'Depois de 4 meses, a telemetria só é consultada em perícias — esperar horas é aceitável.', concepts: ['lc.min-duration-rule'] },
+      { type: 'gone-by', dataset: 'logs', day: 90, why: 'Os logs só servem por poucas semanas; depois disso, apenas custam.', concepts: ['lc.small-objects'] },
       { type: 'kept-until', dataset: 'relatorios', day: 730, why: 'Relatórios atuais não podem sumir.', concepts: ['lc.expiration'] },
       { type: 'gone-by', dataset: 'versoes', day: 60, why: 'Versões antigas dos relatórios precisam ser limpas.', concepts: ['lc.noncurrent'] },
       { type: 'gone-by', dataset: 'uploads', day: 7, why: 'Uploads incompletos precisam ser interrompidos.', concepts: ['lc.mpu-cleanup'] },
@@ -265,9 +268,9 @@ export const F06: PhaseDef = {
       briefing: {
         company: COMPANY,
         role: ROLE,
-        situation: 'Três tipos de dado, três exigências: a telemetria é quente no primeiro mês e some em um ano; as notas fiscais ficam 5 anos; os logs servem por poucas semanas.',
+        situation: `O bucket \`${BUCKET}\` tem três prefixos, cada um com uma exigência. **Telemetria** (\`telemetria/\`): no 1º mês os painéis leem o tempo todo; do 2º ao 4º mês a leitura é rara, mas precisa ser imediata; depois disso só é aberta em perícias, e esperar horas é aceitável; com 1 ano deve ser excluída. **Notas fiscais** (\`notas-fiscais/\`): ficam 5 anos por lei; com mais de 1 ano quase nunca são abertas. **Logs** (\`logs/\`): servem para depuração no 1º mês e devem sumir até o dia 90. O financeiro aprovou até **${budgetOf(M2_LAB)}** para os primeiros 12 meses.`,
         objective: 'Montar regras que atendam aos requisitos com o menor custo.',
-        successCriteria: ['Configuração aceita', 'Requisitos de acesso e retenção atendidos', 'Custo do primeiro ano dentro da meta'],
+        successCriteria: ['Configuração aceita', 'Cada conjunto de dados na classe certa em cada período', 'Retenção e exclusão nos prazos', `Custo dos primeiros 12 meses até ${budgetOf(M2_LAB)}`],
       },
       intel: [
         {

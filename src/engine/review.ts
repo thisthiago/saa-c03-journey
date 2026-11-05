@@ -3,7 +3,7 @@
  * prioriza atraso, fragilidade e erros recentes, e intercala fases.
  */
 import type { ActivityDef } from '../activities/types'
-import { isDue, overdueDays } from './mastery'
+import { dayKey, isDue, overdueDays } from './mastery'
 import type { Registry } from './registry'
 import type { ProgressState } from './types'
 
@@ -11,6 +11,8 @@ export const REVIEW_SESSION_SIZE = 8
 /** Tamanhos de rodada que o estudante pode escolher na Revisão. */
 export const REVIEW_SIZE_OPTIONS = [5, 8, 12, 16] as const
 export const WEAK_MASTERY = 0.5
+/** Teto de itens da Revisão do dia por dia; o restante fica para os próximos dias. */
+export const DAILY_REVIEW_LIMIT = 30
 
 export interface ReviewEntry {
   conceptId: string
@@ -49,22 +51,40 @@ export function buildReviewSession(state: ProgressState, reg: Registry, now: Dat
   while (session.length < size && queues.some((q) => q.length > 0)) {
     for (const q of queues) {
       const next = q.shift()
-      if (!next || usedItems.has(next.item.id)) continue
-      usedItems.add(next.item.id)
-      session.push(next)
+      if (!next) continue
+      const item = pickItem(reg.reviewItems.get(next.conceptId) ?? [], state.concepts[next.conceptId]?.lastReviewItemId, usedItems)
+      if (!item) continue
+      usedItems.add(item.id)
+      session.push({ ...next, item })
       if (session.length >= size) break
     }
   }
   return session
 }
 
-/** Opções de tamanho que cabem no que há para revisar; a última é "todos" quando sobra menos que 16. */
-export function sessionSizeOptions(available: number): number[] {
-  return [...new Set([...REVIEW_SIZE_OPTIONS.filter((n) => n < available), Math.min(available, REVIEW_SIZE_OPTIONS.at(-1)!)])].filter((n) => n > 0)
+/**
+ * Questão do conceito para a rodada: evita a da vez anterior e as que já
+ * entraram. Sem opção livre, o conceito fica de fora; a questão compartilhada
+ * que já entrou atualiza todos os conceitos que ela avalia.
+ */
+function pickItem(items: ActivityDef[], last: string | undefined, used: Set<string>): ActivityDef | undefined {
+  return items.find((i) => i.id !== last && !used.has(i.id)) ?? items.find((i) => !used.has(i.id))
 }
 
+/** Opções de tamanho que cabem no que há para revisar; a última é "todos" quando sobra menos que `max`. */
+export function sessionSizeOptions(available: number, max: number = REVIEW_SIZE_OPTIONS.at(-1)!): number[] {
+  return [...new Set([...REVIEW_SIZE_OPTIONS.filter((n) => n < available && n < max), Math.min(available, max)])].filter((n) => n > 0)
+}
+
+/** Quantos itens da Revisão do dia ainda cabem hoje. */
+export function dailyReviewLeft(state: ProgressState, now: Date): number {
+  const t = state.reviews.today
+  return Math.max(0, DAILY_REVIEW_LIMIT - (t?.day === dayKey(now) ? t.answered : 0))
+}
+
+/** Itens para revisar hoje, já com o limite diário. */
 export function dueCount(state: ProgressState, reg: Registry, now: Date): number {
-  return reviewCandidates(state, reg, now).length
+  return Math.min(reviewCandidates(state, reg, now).length, dailyReviewLeft(state, now))
 }
 
 /** Próxima data em que algum conceito vence (para "próxima revisão em X dias"). */
@@ -83,12 +103,17 @@ export function nextReviewDate(state: ProgressState, reg: Registry): Date | null
  * Não concede XP (os itens não estão vencidos), mas atualiza o domínio.
  */
 export function buildPracticeSession(state: ProgressState, reg: Registry, size = REVIEW_SESSION_SIZE): ReviewEntry[] {
-  return Object.entries(state.concepts)
+  const ordered = Object.entries(state.concepts)
     .filter(([id, cp]) => cp.evidence > 0 && (reg.reviewItems.get(id)?.length ?? 0) > 0)
     .sort((a, b) => a[1].mastery - b[1].mastery || a[0].localeCompare(b[0]))
-    .slice(0, size)
-    .map(([conceptId, cp]) => {
-      const items = reg.reviewItems.get(conceptId)!
-      return { conceptId, item: items.find((i) => i.id !== cp.lastReviewItemId) ?? items[0], reason: 'weak' as const, priority: 0 }
-    })
+  const session: ReviewEntry[] = []
+  const usedItems = new Set<string>()
+  for (const [conceptId, cp] of ordered) {
+    if (session.length >= size) break
+    const item = pickItem(reg.reviewItems.get(conceptId)!, cp.lastReviewItemId, usedItems)
+    if (!item) continue
+    usedItems.add(item.id)
+    session.push({ conceptId, item, reason: 'weak', priority: 0 })
+  }
+  return session
 }

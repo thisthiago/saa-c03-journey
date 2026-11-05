@@ -55,7 +55,7 @@ const M2_LAB: EventsLabConfig = {
     ],
   }),
   goals: [
-    { type: 'valid', why: 'Uma configuração com filtros sobrepostos é recusada inteira.', concepts: ['ev.filter-overlap'] },
+    { type: 'valid', why: 'Uma configuração com erro é recusada inteira: nenhuma notificação vale.', concepts: ['ev.filter-overlap'] },
     { type: 'delivered', event: 'pedido', destination: 'estoque', why: 'O estoque precisa reservar os itens.', concepts: ['ev.fanout'] },
     { type: 'delivered', event: 'pedido', destination: 'fatura', why: 'O faturamento precisa cobrar o pedido.', concepts: ['ev.fanout'] },
     { type: 'delivered', event: 'pedido', destination: 'email', why: 'O cliente recebe a confirmação por e-mail.', concepts: ['ev.fanout'] },
@@ -85,7 +85,7 @@ const BOSS_LAB: EventsLabConfig = {
   goals: [
     { type: 'valid', why: 'A configuração precisa continuar válida.', concepts: ['ev.notifications'] },
     { type: 'delivered', event: 'original', destination: 'thumb', why: 'As miniaturas continuam sendo geradas.', concepts: ['ev.notifications'] },
-    { type: 'no-loop', why: 'A função grava em imagens/thumbnails/: o gatilho não pode cobrir essa pasta.', concepts: ['ev.recursion'] },
+    { type: 'no-loop', why: 'A função grava as miniaturas em imagens/thumbnails/, no mesmo bucket: ela não pode disparar a si mesma.', concepts: ['ev.recursion'] },
     { type: 'delivered', event: 'pedido', destination: 'estoque', why: 'O estoque continua recebendo os pedidos.', concepts: ['ev.fanout'] },
     { type: 'delivered', event: 'pedido', destination: 'fatura', why: 'Na Black Friday, o faturamento ficou sem receber os pedidos.', concepts: ['ev.fanout'] },
     { type: 'delivered', event: 'pedido', destination: 'email', why: 'Clientes ficaram sem confirmação.', concepts: ['ev.fanout'] },

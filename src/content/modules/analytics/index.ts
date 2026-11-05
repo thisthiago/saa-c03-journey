@@ -27,6 +27,7 @@ import { F08_ANA } from './phases/f08/phase'
 import { F09_ANA } from './phases/f09/phase'
 import { FINAL_ANA } from './phases/final/phase'
 import { ANALYTICS_QUESTIONS } from './questions'
+import { ANALYTICS_REVIEW } from './review'
 
 export const AWS_ANALYTICS: TrackDef = {
   id: 'analytics.aws-analytics',
@@ -77,4 +78,5 @@ export const analyticsModule: ContentModule = {
   tracks: [AWS_ANALYTICS],
   achievements: ANALYTICS_ACHIEVEMENTS,
   questions: ANALYTICS_QUESTIONS,
+  review: ANALYTICS_REVIEW,
 }

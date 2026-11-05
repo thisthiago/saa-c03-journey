@@ -54,7 +54,7 @@ O build usa caminhos relativos e rotas com `#`. Por isso, `dist/` pode ser servi
 ## O que tem dentro
 
 - **113 fases** (101 fases e 12 desafios finais), **430 missões** e **1.217 atividades avaliadas**.
-- **769 conceitos**, cada um com referências à documentação oficial, e **2.221 itens de revisão espaçada**.
+- **769 conceitos**, cada um com referências à documentação oficial, e **1.079 questões de revisão espaçada**, no formato do exame.
 - **Banco de 483 questões de simulado** (65 da Computação, 64 do Monitoramento e governança, 55 da IAM, 49 dos Bancos de dados, 40 da Arquitetura e otimização, 39 da Análise de dados, 36 de Redes, 34 da S3, 32 da Segurança, 28 de Arquivos e backup, 24 da Integração e 17 da Foundations), no formato do exame: cada uma mostra a dificuldade, o conceito avaliado e o domínio, e explica todas as alternativas. Dá para treinar com a explicação na hora ou fazer um simulado cronometrado, com resultado por domínio e por conceito.
 - **246 conquistas**.
 - **8 tipos de interação**: decisão com justificativa, classificação, associação, ordenação, predição, estimativa, investigação e laboratório.

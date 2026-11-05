@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { checkCondition } from './achievements'
-import { evalFor, fixtureRegistry, moduleA, moduleB } from './fixtures'
+import { evalFor, fixtureRegistry, moduleA, moduleB, reviewQuestion } from './fixtures'
 import { levelForXp, levelProgress, xpForLevel } from './levels'
 import { addDays, masteryTier, updateConcept } from './mastery'
 import { completeReviewSession, createInitialProgress, submitActivity, submitReview } from './progress'
-import { buildReviewSession, dueCount } from './review'
+import { buildPracticeSession, buildReviewSession, dueCount } from './review'
 import { missionStatus, nextMission, phaseMedal, phaseStatus } from './selectors'
 import { attemptFactor, earnedXp, hintFactor, xpAward } from './xp'
 import { createRegistry, validateRegistry } from './registry'
-import type { ProgressState } from './types'
+import type { ContentModule, ProgressState, ReviewQuestion } from './types'
 
 const T0 = new Date('2026-10-01T12:00:00Z')
 const reg = fixtureRegistry()
@@ -83,6 +83,71 @@ describe('domínio e Leitner', () => {
     expect(c.box).toBe(1)
     expect(c.recentErrors).toBe(1)
     expect(c.nextReviewAt).toBe(addDays(T0, 3).toISOString())
+  })
+})
+
+describe('confiança na revisão', () => {
+  // Conceito na caixa 2 (intervalo de 3 dias), revisado no dia seguinte.
+  const base = () => {
+    let c = updateConcept(undefined, 1, 1, T0)
+    c = updateConcept(c, 1, 1, addDays(T0, 1))
+    return c
+  }
+  const day = addDays(T0, 4)
+  const daysUntilNext = (c: { nextReviewAt: string }) => (new Date(c.nextReviewAt).getTime() - day.getTime()) / 86_400_000
+
+  it('acerto com certeza sobe a caixa como antes', () => {
+    const c = updateConcept(base(), 1, 1, day, 'certeza')
+    expect(c).toEqual(updateConcept(base(), 1, 1, day))
+    expect(c.box).toBe(3)
+  })
+  it('acerto no chute não sobe a caixa, volta amanhã e mexe menos no domínio', () => {
+    const prev = { ...base(), recentErrors: 2 }
+    const c = updateConcept(prev, 1, 1, day, 'chute')
+    expect(c.box).toBe(2)
+    expect(daysUntilNext(c)).toBe(1)
+    expect(c.recentErrors).toBe(2)
+    expect(c.mastery).toBeLessThan(updateConcept(prev, 1, 1, day).mastery)
+    expect(c.lastPromotionDay).toBe(prev.lastPromotionDay)
+  })
+  it('acerto com dúvida repete o intervalo da caixa atual', () => {
+    const c = updateConcept({ ...base(), recentErrors: 1 }, 1, 1, day, 'duvida')
+    expect(c.box).toBe(2)
+    expect(daysUntilNext(c)).toBe(3)
+    expect(c.recentErrors).toBe(0)
+  })
+  it('erro com certeza pesa mais que erro comum', () => {
+    const sure = updateConcept(base(), 0, 1, day, 'certeza')
+    const plain = updateConcept(base(), 0, 1, day, 'duvida')
+    expect(sure.box).toBe(1)
+    expect(sure.recentErrors).toBe(2)
+    expect(plain.recentErrors).toBe(1)
+    expect(sure.mastery).toBeLessThan(plain.mastery)
+  })
+  it('só o acerto com certeza leva a "dominado"', () => {
+    let c = updateConcept(undefined, 1, 1, T0, 'duvida')
+    for (let d = 1; d < 30; d++) c = updateConcept(c, 1, 1, addDays(T0, d), d % 2 ? 'chute' : 'duvida')
+    expect(masteryTier(c)).not.toBe('dominado')
+  })
+  it('a confiança não muda o XP da revisão', () => {
+    const s = submit(createInitialProgress(T0), 'act1', 1).state
+    const later = addDays(T0, 1)
+    const item = buildReviewSession(s, reg, later)[0].item
+    const r = submitReview(s, reg, { conceptId: 'c1', itemId: item.id, evaluation: evalFor(item, 1), now: later, confidence: 'chute' })
+    expect(r.state.xp - s.xp).toBe(5)
+  })
+  it('conta no limite diário só com daily, zerando no dia seguinte', () => {
+    const s = submit(createInitialProgress(T0), 'act1', 1).state
+    const later = addDays(T0, 1)
+    const item = buildReviewSession(s, reg, later)[0].item
+    const review = (st: ProgressState, now: Date, daily: boolean) => submitReview(st, reg, { conceptId: 'c1', itemId: item.id, evaluation: evalFor(item, 1), now, daily }).state
+    let st = review(s, later, true)
+    st = review(st, later, false)
+    expect(st.reviews.today).toEqual({ day: '2026-10-02', answered: 1 })
+    st = review(st, later, true)
+    expect(st.reviews.today?.answered).toBe(2)
+    st = review(st, addDays(T0, 2), true)
+    expect(st.reviews.today).toEqual({ day: '2026-10-03', answered: 1 })
   })
 })
 
@@ -195,6 +260,70 @@ describe('revisão espaçada', () => {
     const s = completeReviewSession(createInitialProgress(T0), reg, T0).state
     expect(s.reviews.sessions).toBe(1)
     expect(checkCondition({ type: 'reviews-completed', count: 1 }, s, reg)).toBe(true)
+  })
+})
+
+/** Conteúdo fictício com a fase a1 ensinando c1 e c2, a2 ensinando c3 e questões próprias da Revisão em a1. */
+function registryWithReview(questions: ReviewQuestion[]) {
+  const mod: ContentModule = structuredClone(moduleA)
+  mod.concepts.push({ ...mod.concepts[1], id: 'c3', title: 'C3' })
+  mod.tracks[0].phases[0].concepts = ['c1', 'c2']
+  mod.tracks[0].phases[1].concepts = ['c3']
+  mod.review = [{ phaseId: 'a1', questions }]
+  return createRegistry({
+    modules: [mod, moduleB],
+    territories: [{ id: 'ter', title: 'Território', summary: '', glyph: 'bucket', status: 'active' }],
+    examDomains: [{ id: 'd1', officialName: 'Domínio 1', title: 'Seguras', weight: 0.3 }],
+    levelTitles: ['Aprendiz'],
+  })
+}
+
+describe('questões próprias da Revisão', () => {
+  it('são os únicos itens da Revisão: as atividades das fases não são copiadas', () => {
+    const r = registryWithReview([reviewQuestion('rv:a1.q1', ['c1', 'c2'])])
+    const ids = (c: string) => r.reviewItems.get(c)?.map((i) => i.id)
+    expect(ids('c1')).toEqual(['rv:a1.q1'])
+    expect(ids('c2')).toEqual(['rv:a1.q1'])
+    expect(ids('c3')).toBeUndefined()
+    expect(validateRegistry(r)).toEqual([])
+  })
+
+  it('recusam formato fora do exame, domínio inexistente, conceito de outra fase e id repetido', () => {
+    const short = reviewQuestion('rv:a1.curta', ['c1'])
+    short.options = short.options.slice(0, 3)
+    const multi = reviewQuestion('rv:a1.multipla', ['c1'], true)
+    multi.options = multi.options.slice(0, 4)
+    const errors = validateRegistry(
+      registryWithReview([
+        short,
+        multi,
+        { ...reviewQuestion('rv:a1.dominio', ['c1']), domain: 'd9' as ReviewQuestion['domain'] },
+        reviewQuestion('rv:a1.outra-fase', ['c3']),
+        reviewQuestion('rv:a1.repetida', ['c1']),
+        reviewQuestion('rv:a1.repetida', ['c2']),
+      ]),
+    )
+    expect(errors).toEqual([
+      'Revisão rv:a1.curta: resposta única precisa de 4 opções',
+      'Revisão rv:a1.multipla: resposta múltipla precisa de 2 ou mais corretas entre 5 ou mais opções',
+      'Revisão rv:a1.dominio: domínio inexistente d9',
+      'Revisão rv:a1.outra-fase: o conceito c3 não é ensinado pela primeira vez na fase a1',
+      'questão da revisão duplicado: rv:a1.repetida',
+      'Revisão rv:a1.repetida: id usado por dois itens diferentes',
+    ])
+  })
+
+  it('entram uma vez só na rodada; o conceito usa outra questão sua se a escolhida já entrou', () => {
+    const r = registryWithReview([reviewQuestion('rv:a1.q1', ['c1', 'c2']), reviewQuestion('rv:a1.q2', ['c2'])])
+    let s = submit(createInitialProgress(T0), 'act1', 0).state
+    s = submit(s, 'act2', 0).state
+    const review = buildReviewSession(s, r, T0, Infinity).map((e) => [e.conceptId, e.item.id])
+    expect(review).toEqual([
+      ['c1', 'rv:a1.q1'],
+      ['c2', 'rv:a1.q2'],
+    ])
+    const practice = buildPracticeSession(s, r, Infinity).map((e) => e.item.id)
+    expect(practice).toEqual(['rv:a1.q1', 'rv:a1.q2'])
   })
 })
 

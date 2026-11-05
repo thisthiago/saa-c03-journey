@@ -28,38 +28,6 @@ export const F04_GOV_CONCEPTS: ConceptDef[] = [
     },
     references: [R.cfgWhat, R.cfgConcepts],
     tags: ['seguranca'],
-    reviewItems: [
-      {
-        id: 'rv:cfg.what.past',
-        kind: 'decision',
-        title: 'Como estava ontem',
-        prompt: 'A auditoria pergunta como estava a configuração de um security group há duas semanas. Qual serviço guarda esse histórico?',
-        concepts: [{ id: 'cfg.what' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['O AWS Config guarda como cada recurso estava configurado ao longo do tempo, em itens de configuração.'],
-        options: [
-          { id: 'a', text: 'AWS Config, pelo histórico de configuração do recurso', correct: true, consequence: 'A linha do tempo mostra o estado do recurso em cada momento gravado.' },
-          { id: 'b', text: 'Amazon CloudWatch, pelas métricas do security group', correct: false, consequence: 'As métricas medem desempenho, não guardam a configuração.' },
-          { id: 'c', text: 'AWS Budgets, pelos relatórios de custo', correct: false, consequence: 'O Budgets acompanha custos, não configurações.' },
-        ],
-      },
-      {
-        id: 'rv:cfg.what.rules',
-        kind: 'decision',
-        title: 'Dentro do padrão?',
-        prompt: 'Como saber, para todos os buckets da conta, se algum viola a política de acesso público?',
-        concepts: [{ id: 'cfg.what' }, { id: 'cfg.rules', weight: 0.5 }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['O Config confere a configuração dos recursos com regras e marca como NON_COMPLIANT o que sai do padrão.'],
-        options: [
-          { id: 'a', text: 'Ligar uma regra do Config para o acesso público de buckets e olhar os resultados', correct: true, consequence: 'Cada bucket recebe COMPLIANT ou NON_COMPLIANT.' },
-          { id: 'b', text: 'Procurar no histórico do CloudTrail a lista de buckets públicos', correct: false, consequence: 'O CloudTrail registra ações, não avalia conformidade.' },
-          { id: 'c', text: 'Criar um alarme do CloudWatch com a métrica de buckets', correct: false, consequence: 'Não existe métrica que diga se um bucket é público.' },
-        ],
-      },
-    ],
   },
   {
     id: 'cfg.recorder',

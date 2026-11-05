@@ -156,38 +156,6 @@ export const F03_IAM_CONCEPTS: ConceptDef[] = [
     },
     references: [R.conditionKeys],
     tags: ['seguranca'],
-    reviewItems: [
-      {
-        id: 'rv:iam.condition-keys:https',
-        kind: 'decision',
-        title: 'Só por HTTPS',
-        prompt: 'Qual chave de condição usar num Deny para recusar requisições sem TLS?',
-        concepts: [{ id: 'iam.condition-keys' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['`aws:SecureTransport` indica se a requisição veio por TLS; ela está sempre presente. O Deny usa `Bool aws:SecureTransport = false`.'],
-        options: [
-          { id: 'a', text: '`aws:SecureTransport`', correct: true, consequence: 'Requisições por HTTP puro caem no Deny.' },
-          { id: 'b', text: '`aws:SourceIp`', correct: false, consequence: 'O IP de origem não diz nada sobre criptografia.' },
-          { id: 'c', text: '`aws:RequestedRegion`', correct: false, consequence: 'Indica a Região chamada, não o protocolo.' },
-        ],
-      },
-      {
-        id: 'rv:iam.condition-keys:vpce',
-        kind: 'decision',
-        title: 'IP pelo VPC endpoint',
-        prompt: 'Uma aplicação passou a chamar o S3 por um VPC endpoint, e uma política com `IpAddress aws:SourceIp` deixou de permitir. Por quê?',
-        concepts: [{ id: 'iam.condition-keys' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['A chave aws:SourceIp não existe quando a requisição chega por um VPC endpoint; sem a chave, a condição é falsa.'],
-        options: [
-          { id: 'a', text: 'Pelo VPC endpoint, aws:SourceIp não existe no contexto, e a condição fica falsa', correct: true, consequence: 'Para esse caminho, use chaves como aws:SourceVpce ou aws:SourceVpc.' },
-          { id: 'b', text: 'O VPC endpoint troca o IP pelo IP público da Região', correct: false, consequence: 'A chave simplesmente deixa de existir.' },
-          { id: 'c', text: 'Políticas de identidade não valem por VPC endpoint', correct: false, consequence: 'Valem; o que muda é o contexto da requisição.' },
-        ],
-      },
-    ],
   },
   {
     id: 'iam.policy-variables',
