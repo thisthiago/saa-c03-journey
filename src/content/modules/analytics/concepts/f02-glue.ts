@@ -115,36 +115,6 @@ export const F02_ANA_CONCEPTS: ConceptDef[] = [
     facts: ['A condição pode exigir que todos os jobs observados terminem ou que qualquer um deles termine.', 'Um gatilho pode iniciar no máximo dois crawlers.'],
     exam: { domains: ['d3'], relevance: 'media' },
     references: [R.triggers, R.workflows],
-    reviewItems: [
-      {
-        id: 'rv:glue.triggers-workflows:1',
-        kind: 'decision',
-        title: 'Esperar o passo anterior',
-        prompt: 'O crawler precisa rodar só depois que o job de conversão terminar com sucesso, qualquer que seja a duração do job. Que gatilho usar?',
-        concepts: [{ id: 'glue.triggers-workflows' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['O gatilho condicional observa o job e dispara quando ele termina no estado escolhido, como SUCCEEDED.'],
-        options: [
-          { id: 'a', text: 'Um gatilho condicional que observa o job', correct: true, consequence: 'O crawler espera o job, dure ele o que durar.' },
-          { id: 'b', text: 'Um gatilho por horário, uma hora depois do job', correct: false, consequence: 'Falha no dia em que o job levar mais de uma hora.' },
-        ],
-      },
-      {
-        id: 'rv:glue.triggers-workflows:2',
-        kind: 'decision',
-        title: 'Vários passos',
-        prompt: 'O fluxo tem quatro jobs e dois crawlers em sequência. O que a documentação do Glue recomenda para organizá-lo?',
-        concepts: [{ id: 'glue.triggers-workflows' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['Os workflows são os recomendados para operações de ETL com vários passos; eles juntam gatilhos, jobs e crawlers.'],
-        options: [
-          { id: 'a', text: 'Um workflow do Glue', correct: true, consequence: 'O fluxo inteiro fica num lugar, com a ordem e o estado de cada passo.' },
-          { id: 'b', text: 'Seis gatilhos por horário, com folga entre eles', correct: false, consequence: 'Qualquer atraso quebra a sequência.' },
-        ],
-      },
-    ],
     tags: ['integracao'],
   },
   {
