@@ -50,36 +50,6 @@ export const F08_SEC_CONCEPTS: ConceptDef[] = [
       notes: 'Sinal: "responder automaticamente a achados de segurança em segundos". A resposta é uma regra do EventBridge que aciona uma Lambda ou uma automação do Systems Manager.',
     },
     references: [R.gdEventBridge, R.shubCspm],
-    reviewItems: [
-      {
-        id: 'rv:sec.auto-response:1',
-        kind: 'decision',
-        title: 'Achado de madrugada',
-        prompt: 'Como fazer um achado do GuardDuty de gravidade alta isolar a instância sozinho, a qualquer hora?',
-        concepts: [{ id: 'sec.auto-response' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['O GuardDuty publica os achados no EventBridge; uma regra filtra a gravidade e aciona a função que isola a instância.'],
-        options: [
-          { id: 'a', text: 'Uma regra do EventBridge que filtra os achados e aciona uma função Lambda', correct: true, consequence: 'A resposta começa em segundos.' },
-          { id: 'b', text: 'Uma pessoa de plantão olhando o console', correct: false, consequence: 'Depende de alguém ver a tempo.' },
-        ],
-      },
-      {
-        id: 'rv:sec.auto-response:2',
-        kind: 'decision',
-        title: 'O evento do achado',
-        prompt: 'Que evento a regra do EventBridge deve esperar para reagir a um achado novo do GuardDuty?',
-        concepts: [{ id: 'sec.auto-response' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['O evento tem source "aws.guardduty" e detail-type "GuardDuty Finding"; achados novos saem quase em tempo real.'],
-        options: [
-          { id: 'a', text: 'source aws.guardduty e detail-type GuardDuty Finding', correct: true, consequence: 'A regra recebe cada achado novo.' },
-          { id: 'b', text: 'Um alarme do CloudWatch de CPU alta', correct: false, consequence: 'CPU alta não é o achado.' },
-        ],
-      },
-    ],
     tags: ['seguranca'],
   },
   {
