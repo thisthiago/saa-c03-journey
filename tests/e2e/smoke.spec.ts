@@ -253,6 +253,21 @@ test('revisão: o conceito só aparece depois da resposta', async ({ page }) => 
   await expect(page.getByRole('heading', { level: 1, name: 'S3 Standard-IA' })).toBeVisible()
 })
 
+test('revisão: o resultado mostra a nota da rodada com acertos, confiança e ritmo', async ({ page }) => {
+  const old = new Date(Date.now() - 3 * 86_400_000).toISOString()
+  await seedProgress(page, { ...progressWithFirstMission(), concepts: { 'sc.standard-ia': { mastery: 0.4, evidence: 1, box: 1, nextReviewAt: old, lastSeenAt: old, recentErrors: 0 } } })
+  await page.goto('/#/revisao')
+  await page.getByRole('button', { name: 'Começar revisão' }).click()
+  await page.getByRole('radio').first().click()
+  await page.getByRole('radio', { name: 'Tenho certeza' }).check()
+  await page.getByRole('button', { name: 'Verificar' }).click()
+  await page.getByRole('button', { name: 'Ver resultado' }).click()
+  await expect(page.getByText(/de 10 · (Excelente|Bom|Regular|Precisa revisar)/)).toBeVisible()
+  await expect(page.getByText(/^Ritmo: \d+ s por questão/)).toBeVisible()
+  await page.getByText('Como a nota é calculada').click()
+  await expect(page.getByText(/acerto com certeza vale 1/)).toBeVisible()
+})
+
 test('revisão: a confiança é pedida antes de verificar', async ({ page }) => {
   const old = new Date(Date.now() - 3 * 86_400_000).toISOString()
   await seedProgress(page, { ...progressWithFirstMission(), concepts: { 'sc.standard-ia': { mastery: 0.4, evidence: 1, box: 1, nextReviewAt: old, lastSeenAt: old, recentErrors: 0 } } })
