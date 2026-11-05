@@ -15,6 +15,8 @@
 - Segurança e proteção de dados na AWS concluída em 04/11/2026 (9 fases, 87 questões). typecheck, lint, `npm test` (620) e os 5 e2e da Revisão verdes. Domínio no total: d1 35%, d2 24%, d3 22% e d4 19%; dificuldade 25/51/24; 12% de resposta múltipla. Itens escritos à mão de `security/concepts/f01-kms.ts` e `f08-resposta.ts` avaliados e retirados. Próxima trilha: Integração (primeira fase do módulo integration). O d1 passou da meta (30%): nas trilhas que faltam (Integração, Arquivos e Arquitetura), priorizar d2, d3 e d4.
 - Integração e mensageria na AWS concluída em 04/11/2026 (9 fases, 76 questões). typecheck, lint, `npm test` (620) e os 5 e2e da Revisão verdes; numa das execuções, o teste "toda atividade pode ser concluída com 100%" falhou uma vez e passou nas duas seguintes, sem mudança (instável sob carga, não relacionado às questões da Revisão). Domínio no total: d1 33%, d2 28%, d3 21% e d4 18%. Próxima trilha: Arquivos e backup (primeira fase do módulo files). Priorizar d3 e d4.
 - Arquivos e backup na AWS concluída em 05/11/2026 (7 fases, 55 questões). typecheck, lint, `npm test` e os e2e da Revisão verdes. Domínio no total: d1 32%, d2 27%, d3 22% e d4 19%; dificuldade 25/51/24; 13% de resposta múltipla. Fatos novos conferidos (EFS, FSx, Transfer Family e AWS Backup) registrados na VERIFICACAO; itens que cobravam Vault Lock e a política de backup do Organizations, conceitos de outras trilhas, foram reconstruídos. Próxima trilha: Arquitetura e otimização (primeira fase do módulo architecture), a última antes do fechamento. Priorizar d3 e d4.
+- Arquitetura e otimização na AWS concluída em 05/11/2026 (9 fases, 91 questões). Com ela, as 101 fases têm questões próprias: 1.079 questões no total, cobrindo os 1.945 itens antigos (740 reformulados e 1.205 reconstruídos). Distribuição final: dificuldade 24/52/24; domínios d1 30%, d2 29%, d3 22% e d4 19%; 13% de resposta múltipla. Itens que cobravam conceitos de outras trilhas (Snow Family, Data Transfer Terminal, Session Manager, Route 53, health checks) foram reconstruídos sobre os conceitos da própria fase.
+- Fechamento em 05/11/2026: `deriveReviewItems`, a cópia automática das atividades e o campo `reviewItems` dos conceitos saíram do motor; o fixture dos testes ganhou um conjunto próprio; novo teste exige questões da Revisão em toda fase disponível que não é final; CONTEUDO, ARQUITETURA, README e EXECUTAR atualizados (1.079 questões de revisão).
 - Antes de retomar:
   - ler o PLAN e o DECISIONS;
   - conferir `git status` na branch `revisao/questoes-da-revisao`;
@@ -36,8 +38,8 @@
 | Segurança e proteção de dados na AWS | 9 de 9 | 87 | 112 | 0 | 67 | 45 |
 | Integração e mensageria na AWS | 9 de 9 | 76 | 115 | 0 | 58 | 57 |
 | Arquivos e backup na AWS | 7 de 7 | 55 | 88 | 0 | 46 | 42 |
-| Arquitetura e otimização na AWS | 0 de 9 | 0 | 159 | 0 | 0 | 0 |
-| **Total** | **92 de 101** | **988** | **1945** | **0** | **665** | **1121** |
+| Arquitetura e otimização na AWS | 9 de 9 | 91 | 159 | 0 | 75 | 84 |
+| **Total** | **101 de 101** | **1079** | **1945** | **0** | **740** | **1205** |
 <!-- andamento:fim -->
 
 ## Piloto (29/10/2026)
