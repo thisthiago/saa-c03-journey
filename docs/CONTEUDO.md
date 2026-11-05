@@ -320,16 +320,29 @@ Regras que valem para todos:
 2. Escreva os conceitos em `content/modules/<módulo>/concepts/fNN-*.ts`, com referências `https://docs.aws.amazon.com/...` ou `https://aws.amazon.com/...`.
 3. Escreva a fase em `phases/fNN/phase.ts`. Cenários reutilizáveis (mundos de acesso, conjuntos de dados) ficam em arquivos ao lado.
 4. Registre os conceitos e a fase no `index.ts` do módulo e acrescente conquistas em `achievements.ts`. Conquistas de aprendizagem geral ficam em `content/catalog/achievements.ts`.
-5. Rode `npm test`. Os testes de integridade apontam:
-   - conceitos sem avaliação ou sem item de revisão;
+5. Escreva as questões da Revisão da fase em `review/fNN.ts` (veja a seção abaixo) e acrescente o conjunto em `review/index.ts`.
+6. Rode `npm test`. Os testes de integridade apontam:
+   - fase sem questões da Revisão, conceito sem questão ou conceito de relevância alta em menos de duas;
+   - conceitos sem avaliação;
    - predições ambíguas;
    - laboratórios cuja solução não chega a 100% ou cujo estado inicial já passa.
 
-## Itens de revisão
+## Questões da Revisão
 
-Os itens de revisão vêm de duas fontes:
-- **derivados automaticamente** das atividades, a partir dos itens de classificação e associação, das decisões e das predições de cada conceito;
-- **escritos à mão**, em `reviewItems` do conceito, quando nenhuma atividade cobre o conceito de forma isolada.
+A Revisão do dia e o Treino livre (`#/revisao`) usam só as questões próprias de cada fase, em `review/fNN.ts`. As atividades das fases não são copiadas. O acompanhamento da reestruturação está em [questoes-da-revisao/](questoes-da-revisao/).
+
+- **Formato:** `kind: 'decision'`, `xp: 5`, `difficulty` de 1 a 3 e `domain` do guia (`d1` a `d4`).
+  - Resposta única: 4 alternativas e 1 correta.
+  - Resposta múltipla (`multiple: true`): 5 alternativas e 2 corretas, com "(Escolha DUAS.)" no fim da pergunta.
+- **Enunciado:** um parágrafo com cenário, requisitos e o critério da decisão em negrito (custo, disponibilidade, latência, esforço operacional, segurança), terminando na pergunta. Números de preço entram como premissa do cenário, nunca como algo a decorar. Não use "O que acontece?" nem perguntas sem critério.
+- **Título:** diz qual é o problema, nunca a resposta.
+- **Alternativas:** soluções reconhecíveis, com o mesmo nível de detalhe. A correta tem no máximo 1,5 vez o tamanho médio dos distratores e não deve ser sempre a mais longa. Os distratores representam confusões típicas; nada de "todas" ou "nenhuma das anteriores".
+- **Consequência:** na correta, o requisito que ela atende; em cada distrator, o requisito que falha.
+- **Explicação:** três parágrafos: o requisito decisivo e por que a correta o atende; por que os distratores falham; e "**Regra prática:** …", para reconhecer situações parecidas na prova.
+- **Conceitos:** de 1 a 3, só os ensinados pela primeira vez na própria fase. O cenário pode usar o que fases anteriores ensinaram, nunca o que vem depois. Todo conceito da fase aparece em pelo menos uma questão; os de relevância alta, em duas.
+- **Ids:** a questão reformulada a partir de um item antigo mantém o id dele (por exemplo, `rv:s3x.f02.m3.a2`); a nova recebe `rv:<fase>.<assunto>`.
+- **Banco de questões:** o cenário não repete o de uma questão do Banco sobre os mesmos conceitos.
+- **Fatos:** conferidos em docs.aws.amazon.com e registrados em [VERIFICACAO-DE-CONTEUDO.md](VERIFICACAO-DE-CONTEUDO.md), na seção "Questões da Revisão".
 
 ## Banco de questões
 
