@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { checkCondition } from './achievements'
-import { evalFor, fixtureRegistry, moduleA, moduleB } from './fixtures'
+import { evalFor, fixtureRegistry, moduleA, moduleB, reviewQuestion } from './fixtures'
 import { levelForXp, levelProgress, xpForLevel } from './levels'
 import { addDays, masteryTier, updateConcept } from './mastery'
 import { completeReviewSession, createInitialProgress, submitActivity, submitReview } from './progress'
@@ -263,24 +263,6 @@ describe('revisão espaçada', () => {
   })
 })
 
-/** Questão da Revisão no formato do exame: 4 opções e 1 correta, ou 5 e 2 corretas. */
-function reviewQuestion(id: string, concepts: string[], multiple = false): ReviewQuestion {
-  const n = multiple ? 5 : 4
-  return {
-    id,
-    kind: 'decision',
-    title: `Questão ${id}`,
-    prompt: 'Qual opção atende?',
-    concepts: concepts.map((c) => ({ id: c })),
-    xp: 5,
-    difficulty: 2,
-    domain: 'd1',
-    multiple,
-    explanation: ['Porque atende ao requisito.'],
-    options: Array.from({ length: n }, (_, i) => ({ id: `o${i}`, text: `Opção ${i}`, correct: i < (multiple ? 2 : 1), consequence: `Efeito ${i}.` })),
-  }
-}
-
 /** Conteúdo fictício com a fase a1 ensinando c1 e c2, a2 ensinando c3 e questões próprias da Revisão em a1. */
 function registryWithReview(questions: ReviewQuestion[]) {
   const mod: ContentModule = structuredClone(moduleA)
@@ -297,11 +279,12 @@ function registryWithReview(questions: ReviewQuestion[]) {
 }
 
 describe('questões próprias da Revisão', () => {
-  it('substituem as cópias das atividades da fase, e as outras fases continuam copiadas', () => {
+  it('são os únicos itens da Revisão: as atividades das fases não são copiadas', () => {
     const r = registryWithReview([reviewQuestion('rv:a1.q1', ['c1', 'c2'])])
     const ids = (c: string) => r.reviewItems.get(c)?.map((i) => i.id)
-    expect(ids('c1')).toEqual(['rv:a1.q1', 'rv:actb1'])
-    expect(ids('c2')).toEqual(['rv:a1.q1', 'rv:act4'])
+    expect(ids('c1')).toEqual(['rv:a1.q1'])
+    expect(ids('c2')).toEqual(['rv:a1.q1'])
+    expect(ids('c3')).toBeUndefined()
     expect(validateRegistry(r)).toEqual([])
   })
 
@@ -316,7 +299,8 @@ describe('questões próprias da Revisão', () => {
         multi,
         { ...reviewQuestion('rv:a1.dominio', ['c1']), domain: 'd9' as ReviewQuestion['domain'] },
         reviewQuestion('rv:a1.outra-fase', ['c3']),
-        reviewQuestion('rv:act4', ['c1']),
+        reviewQuestion('rv:a1.repetida', ['c1']),
+        reviewQuestion('rv:a1.repetida', ['c2']),
       ]),
     )
     expect(errors).toEqual([
@@ -324,7 +308,8 @@ describe('questões próprias da Revisão', () => {
       'Revisão rv:a1.multipla: resposta múltipla precisa de 2 ou mais corretas entre 5 ou mais opções',
       'Revisão rv:a1.dominio: domínio inexistente d9',
       'Revisão rv:a1.outra-fase: o conceito c3 não é ensinado pela primeira vez na fase a1',
-      'Revisão rv:act4: id usado por dois itens diferentes',
+      'questão da revisão duplicado: rv:a1.repetida',
+      'Revisão rv:a1.repetida: id usado por dois itens diferentes',
     ])
   })
 

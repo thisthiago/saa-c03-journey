@@ -5,7 +5,7 @@
  */
 import type { ActivityDef } from '../activities/types'
 import { createRegistry } from './registry'
-import type { ContentModule, MissionDef, PhaseDef } from './types'
+import type { ContentModule, MissionDef, PhaseDef, ReviewQuestion } from './types'
 
 const ref = [{ title: 'Doc', url: 'https://docs.aws.amazon.com/example' }]
 
@@ -23,6 +23,24 @@ export function decision(id: string, concept: string, xp = 40): ActivityDef {
       { id: 'a', text: 'Certa', correct: true, consequence: 'Funciona.' },
       { id: 'b', text: 'Errada', correct: false, consequence: 'Quebra.' },
     ],
+  }
+}
+
+/** Questão da Revisão no formato do exame: 4 opções e 1 correta, ou 5 e 2 corretas. */
+export function reviewQuestion(id: string, concepts: string[], multiple = false): ReviewQuestion {
+  const n = multiple ? 5 : 4
+  return {
+    id,
+    kind: 'decision',
+    title: `Questão ${id}`,
+    prompt: 'Qual opção atende?',
+    concepts: concepts.map((c) => ({ id: c })),
+    xp: 5,
+    difficulty: 2,
+    domain: 'd1',
+    multiple,
+    explanation: ['Porque atende ao requisito.'],
+    options: Array.from({ length: n }, (_, i) => ({ id: `o${i}`, text: `Opção ${i}`, correct: i < (multiple ? 2 : 1), consequence: `Efeito ${i}.` })),
   }
 }
 
@@ -77,12 +95,13 @@ export const moduleA: ContentModule = {
       summary: '',
       serviceIds: ['svc.a'],
       phases: [
-        phase('a1', 1, [], [mission('m1', [decision('act1', 'c1'), decision('act2', 'c2', 60)]), mission('m2', [decision('act3', 'c1')], 'boss')]),
+        { ...phase('a1', 1, [], [mission('m1', [decision('act1', 'c1'), decision('act2', 'c2', 60)]), mission('m2', [decision('act3', 'c1')], 'boss')]), concepts: ['c1', 'c2'] },
         phase('a2', 2, ['a1'], [mission('m3', [decision('act4', 'c2')])]),
         phase('a3', 3, ['a1'], [], 'in-construction'),
       ],
     },
   ],
+  review: [{ phaseId: 'a1', questions: [reviewQuestion('rv:a1.c1', ['c1']), reviewQuestion('rv:a1.c2', ['c2'])] }],
   achievements: [
     { id: 'ach-a1', title: 'Fase A1', description: '', category: 'exploracao', glyph: 'trophy', xp: 25, condition: { type: 'phase-completed', phaseId: 'a1' } },
     { id: 'ach-comeback', title: 'Volta por cima', description: '', category: 'aprendizagem', glyph: 'flag', xp: 10, condition: { type: 'comeback', count: 1 } },
@@ -114,7 +133,7 @@ export function fixtureRegistry() {
   return createRegistry({
     modules: [moduleA, moduleB],
     territories: [{ id: 'ter', title: 'Território', summary: '', glyph: 'bucket', status: 'active' }],
-    examDomains: [],
+    examDomains: [{ id: 'd1', officialName: 'Domínio 1', title: 'Seguras', weight: 0.3 }],
     levelTitles: ['Aprendiz', 'Cadete', 'Analista'],
   })
 }

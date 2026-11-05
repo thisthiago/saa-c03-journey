@@ -5,7 +5,7 @@
  * Novos módulos são adicionados em src/content/index.ts; nada aqui precisa
  * mudar para receber uma nova trilha ou serviço.
  */
-import type { ActivityDef, DecisionActivity } from '../activities/types'
+import type { ActivityDef } from '../activities/types'
 import type {
   AchievementDef,
   ConceptDef,
@@ -105,15 +105,12 @@ export function createRegistry(input: RegistryInput): Registry {
     if (!list.some((i) => i.id === item.id)) list.push(item)
     reg.reviewItems.set(conceptId, list)
   }
-  // Uma fase com questões próprias da Revisão deixa de ter as atividades copiadas.
+  // A Revisão usa só as questões próprias de cada fase; as atividades das fases não são copiadas.
   const reviewSets = new Map<string, ReviewQuestion[]>()
   for (const mod of input.modules) for (const set of mod.review ?? []) reviewSets.set(set.phaseId, set.questions)
   for (const mod of input.modules) {
     for (const s of mod.services) reg.services.set(s.id, s)
-    for (const c of mod.concepts) {
-      reg.concepts.set(c.id, c)
-      for (const item of c.reviewItems ?? []) addReview(c.id, item)
-    }
+    for (const c of mod.concepts) reg.concepts.set(c.id, c)
     for (const a of mod.achievements) reg.achievements.set(a.id, a)
     for (const q of mod.questions ?? []) reg.questions.set(q.id, { question: q, moduleId: mod.id, track: mod.tracks[0] })
     for (const t of mod.tracks) {
@@ -125,67 +122,12 @@ export function createRegistry(input: RegistryInput): Registry {
         if (own && p.availability === 'available') for (const q of own) for (const c of q.concepts) addReview(c.id, q)
         p.missions.forEach((m, index) => {
           reg.missions.set(m.id, { mission: m, phase: p, track: t, index })
-          for (const a of m.activities) {
-            reg.activities.set(a.id, { activity: a, mission: m, phase: p, track: t })
-            if (p.availability === 'available' && !own) {
-              for (const item of deriveReviewItems(a)) for (const c of item.concepts) addReview(c.id, item)
-            }
-          }
+          for (const a of m.activities) reg.activities.set(a.id, { activity: a, mission: m, phase: p, track: t })
         })
       }
     }
   }
   return reg
-}
-
-/**
- * Gera desafios curtos de revisão a partir de uma atividade já estudada.
- * Itens longos (ordenação, investigação, laboratórios) não são derivados.
- * Os itens mantêm o enunciado e as figuras da atividade original, porque a
- * revisão os mostra fora da missão.
- */
-export function deriveReviewItems(a: ActivityDef): ActivityDef[] {
-  const base = { difficulty: a.difficulty, xp: 5, hints: undefined, exhibits: a.exhibits }
-  switch (a.kind) {
-    case 'classify':
-      return a.items.map((item) => ({
-        ...base,
-        kind: 'classify' as const,
-        id: `rv:${a.id}:${item.id}`,
-        title: a.title,
-        prompt: a.prompt,
-        concepts: item.concepts ? item.concepts.map((id) => ({ id })) : a.concepts,
-        bins: a.bins,
-        items: [item],
-        explanation: [item.explanation],
-      }))
-    case 'match':
-      return a.pairs.map((pair) => {
-        const options = a.pairs.map((p) => ({
-          id: p.id,
-          text: p.right,
-          correct: p.id === pair.id,
-          consequence: p.id === pair.id ? pair.explanation : `Essa descrição corresponde a “${p.left}”. ${p.explanation}`,
-        }))
-        const item: DecisionActivity = {
-          ...base,
-          kind: 'decision',
-          id: `rv:${a.id}:${pair.id}`,
-          title: a.title,
-          prompt: `Qual opção de “${a.rightLabel}” corresponde a **${pair.left}**?`,
-          concepts: pair.concepts ? pair.concepts.map((id) => ({ id })) : a.concepts,
-          options,
-          explanation: [pair.explanation],
-        }
-        return item
-      })
-    case 'decision':
-    case 'predict':
-    case 'estimate':
-      return [{ ...a, ...base, id: `rv:${a.id}` }]
-    default:
-      return []
-  }
 }
 
 /** Valida referências e regras estruturais do conteúdo. Retorna a lista de problemas. */
