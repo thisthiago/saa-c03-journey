@@ -198,6 +198,38 @@ test('laboratório do bucket: encontrar objeto, responder e verificar', async ({
   await expect(page.getByRole('alert')).toContainText('Responda a todas as tarefas')
 })
 
+test('fase bloqueada: marcar como concluída também conclui a anterior e libera a Revisão', async ({ page }) => {
+  await page.goto('/#/fase/s3x.f02')
+  await expect(page.getByText('Bloqueada').first()).toBeVisible()
+  await page.getByRole('button', { name: 'Já fiz esta fase: marcar como concluída' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Marcar a fase como concluída?' })
+  await expect(dialog).toContainText('Esta fase está bloqueada')
+  await expect(dialog).toContainText('Fase 1')
+  await dialog.getByRole('button', { name: 'Marcar como concluída' }).click()
+  await expect(dialog).toBeHidden()
+  await expect(page.getByText('Concluída').first()).toBeVisible()
+  await expect(page.getByText('marcada como concluída sem jogar').first()).toBeVisible()
+  // As conquistas de conclusão dão XP e podem subir o nível.
+  await page.getByRole('button', { name: 'Continuar' }).click()
+  await page.goto('/#/revisao')
+  await page.getByRole('button', { name: 'Começar revisão' }).click()
+  await expect(page.getByText(/item 1 de/)).toBeVisible()
+})
+
+test('missão: marcar como concluída pede confirmação e libera a seguinte', async ({ page }) => {
+  await page.goto('/#/fase/s3x.f01')
+  await page.getByRole('button', { name: 'Já fiz: marcar como concluída' }).first().click()
+  const dialog = page.getByRole('dialog', { name: 'Marcar a missão como concluída?' })
+  await dialog.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(dialog).toBeHidden()
+  await expect(page.getByText('marcada como concluída sem jogar')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Já fiz: marcar como concluída' }).first().click()
+  await dialog.getByRole('button', { name: 'Marcar como concluída' }).click()
+  await expect(page.getByText('marcada como concluída sem jogar')).toHaveCount(1)
+  await expect(page.getByRole('link', { name: 'Refazer' })).toHaveCount(1)
+  await expect(page.getByRole('link', { name: 'Jogar' })).toHaveCount(1)
+})
+
 test('revisão aparece para conceitos fracos e concede domínio', async ({ page }) => {
   await seedProgress(page, progressWithFirstMission())
   await page.goto('/#/revisao')
