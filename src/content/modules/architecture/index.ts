@@ -28,6 +28,7 @@ import { F08_ARQ } from './phases/f08/phase'
 import { F09_ARQ } from './phases/f09/phase'
 import { FINAL_ARQ } from './phases/final/phase'
 import { ARCHITECTURE_QUESTIONS } from './questions'
+import { ARCHITECTURE_REVIEW } from './review'
 
 export const ARCHITECTURE_TRACK: TrackDef = {
   id: 'architecture.well-architected',
@@ -53,4 +54,5 @@ export const architectureModule: ContentModule = {
   tracks: [ARCHITECTURE_TRACK],
   achievements: ARCHITECTURE_ACHIEVEMENTS,
   questions: ARCHITECTURE_QUESTIONS,
+  review: ARCHITECTURE_REVIEW,
 }
