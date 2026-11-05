@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { registry } from '../../content'
 import { isDue, masteryTier, TIER_LABEL, type Confidence } from '../../engine/mastery'
 import { bankStats } from '../../engine/exam'
+import { PACE_TARGET_SECONDS, sessionGrade } from '../../engine/review-grade'
 import {
   buildPracticeSession,
   buildReviewSession,
@@ -50,6 +51,15 @@ interface Answer {
   xp: number
   before: number
   confidence?: Confidence
+  /** Primeira resposta do item; "Tentar novamente" não entra na nota. */
+  first: boolean
+  /** Segundos entre o item aparecer e a primeira verificação. */
+  seconds?: number
+}
+
+function formatSeconds(total: number): string {
+  const n = Math.round(total)
+  return n < 60 ? `${n} s` : `${Math.floor(n / 60)} min ${String(n % 60).padStart(2, '0')} s`
 }
 
 const CONFIDENCE_BADGE: Record<Confidence, string> = { chute: 'chutei', duvida: 'com dúvida', certeza: 'com certeza' }
@@ -65,6 +75,7 @@ export function ReviewPage() {
   // O conceito só aparece depois da resposta: antes, ele entregaria a resposta de "qual serviço atende".
   const [answeredIndex, setAnsweredIndex] = useState(-1)
   const [finished, setFinished] = useState(false)
+  const [itemStartedAt, setItemStartedAt] = useState(() => clock.now().getTime())
   const now = clock.now()
   const [reviewSize, setReviewSize] = useState(REVIEW_SESSION_SIZE)
   const [practiceSize, setPracticeSize] = useState(REVIEW_SESSION_SIZE)
@@ -83,6 +94,7 @@ export function ReviewPage() {
     setAnswers([])
     setAnsweredIndex(-1)
     setFinished(false)
+    setItemStartedAt(clock.now().getTime())
   }
 
   if (!session) {
@@ -173,6 +185,7 @@ export function ReviewPage() {
     const xp = answers.reduce((sum, a) => sum + a.xp, 0)
     const sure = answers.filter((a) => a.score >= 0.7 && a.confidence === 'certeza').length
     const guessed = answers.filter((a) => a.score >= 0.7 && a.confidence !== 'certeza').length
+    const g = sessionGrade(answers.filter((a) => a.first))
     return (
       <div className="page">
         <Card className={s.summary}>
@@ -184,6 +197,33 @@ export function ReviewPage() {
             <p>
               {sure} {sure === 1 ? 'acerto' : 'acertos'} com certeza e {guessed} no chute ou com dúvida. Os acertos sem certeza voltam antes, para confirmar.
             </p>
+          )}
+          {answers.length > 0 && (
+            <div className={s.grade} data-band={g.grade >= 7 ? 'good' : g.grade >= 5 ? 'mid' : 'low'}>
+              <p className={s.gradeValue}>
+                <span>Nota</span> <strong>{g.grade.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</strong> <span>de 10 · {g.label}</span>
+              </p>
+              <ul className={s.gradeParts}>
+                <li>
+                  {g.counts.sure} com certeza · {g.counts.doubt} com dúvida · {g.counts.guess} no chute · {g.counts.wrong} {g.counts.wrong === 1 ? 'erro' : 'erros'}
+                  {g.counts.wrongSure > 0 && ` (${g.counts.wrongSure} com certeza)`}
+                </li>
+                {g.averageSeconds !== undefined && (
+                  <li>
+                    Ritmo: {formatSeconds(g.averageSeconds)} por questão, em média; a prova dá cerca de {PACE_TARGET_SECONDS / 60} minutos.
+                    {g.slow > 0 && ` ${g.slow === 1 ? 'Uma passou' : `${g.slow} passaram`} desse tempo e ${g.slow === 1 ? 'valeu' : 'valeram'} menos.`}
+                  </li>
+                )}
+              </ul>
+              <details className={s.gradeHow}>
+                <summary>Como a nota é calculada</summary>
+                <p>
+                  Cada questão vale até 1 ponto: acerto com certeza vale 1; com dúvida, 0,75; no chute, 0,5. Erro no chute vale 0,2, erro com dúvida 0,1 e erro com certeza 0, porque um
+                  engano firme é o que mais derruba na prova. Acima de 2 minutos, a questão perde valor aos poucos, até 70% a partir de 5 minutos. A nota é a média vezes 10 e usa só a
+                  primeira resposta de cada questão.
+                </p>
+              </details>
+            </div>
           )}
           <p className="muted">{xp > 0 ? `+${xp} XP por itens revisados no prazo.` : practice ? 'Treino livre não gera XP, mas fortalece o domínio.' : 'Sem XP nesta sessão.'}</p>
           <ul className={s.results}>
@@ -256,14 +296,20 @@ export function ReviewPage() {
           onSubmit={(evaluation, _hints, _solution, confidence) => {
             const before = progress.concepts[entry.conceptId]?.mastery ?? 0
             // Tentar de novo o mesmo item não gasta outra vaga do limite diário.
-            const daily = !practice && answeredIndex !== index
+            const first = answeredIndex !== index
+            const daily = !practice && first
+            const seconds = first ? (clock.now().getTime() - itemStartedAt) / 1000 : undefined
             setAnsweredIndex(index)
             const events = submitReview(entry.conceptId, entry.item.id, evaluation, { confidence, daily })
             const xp = events.filter((e) => e.type === 'xp' && e.source === 'review').reduce((acc, e) => acc + (e.type === 'xp' ? e.amount : 0), 0)
-            setAnswers((list) => [...list, { conceptId: entry.conceptId, score: evaluation.score, xp, before, confidence }])
+            setAnswers((list) => [...list, { conceptId: entry.conceptId, score: evaluation.score, xp, before, confidence, first, seconds }])
             return { xp, events }
           }}
-          onContinue={() => (index + 1 >= entries.length ? finish() : setIndex(index + 1))}
+          onContinue={() => {
+            if (index + 1 >= entries.length) return finish()
+            setIndex(index + 1)
+            setItemStartedAt(clock.now().getTime())
+          }}
           continueLabel={index + 1 >= entries.length ? 'Ver resultado' : 'Próximo item'}
         />
       </Card>
