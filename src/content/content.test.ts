@@ -125,6 +125,14 @@ describe('integridade do conteúdo', () => {
     expect(problems).toEqual([])
   })
 
+  it('toda fase disponível que não é final tem questões próprias da Revisão', () => {
+    const withSet = new Set(registry.modules.flatMap((mod) => (mod.review ?? []).map((set) => set.phaseId)))
+    const missing = [...registry.phases.values()]
+      .filter(({ phase, isFinal }) => phase.availability === 'available' && !isFinal && !withSet.has(phase.id))
+      .map(({ phase }) => phase.id)
+    expect(missing).toEqual([])
+  })
+
   it('as questões próprias da Revisão seguem o padrão e cobrem os conceitos da fase', () => {
     // Todo conceito ensinado na fase aparece em ao menos uma questão; os de relevância alta, em duas.
     const problems: string[] = []
