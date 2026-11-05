@@ -76,6 +76,32 @@ export function isPhaseCompleted(state: ProgressState, phase: PhaseDef): boolean
   return phase.availability === 'available' && phase.missions.length > 0 && phase.missions.every((m) => isMissionPassed(state, m))
 }
 
+/**
+ * Fases a concluir para liberar e concluir `phase`, em ordem de dependência:
+ * as exigidas pela fase e pelas trilhas exigidas (de forma transitiva) e, por
+ * último, a própria fase. Fases já concluídas ou em construção ficam de fora.
+ */
+export function phasesToComplete(state: ProgressState, reg: Registry, phase: PhaseDef): PhaseDef[] {
+  const out: PhaseDef[] = []
+  const seen = new Set<string>()
+  const visit = (p: PhaseDef) => {
+    if (seen.has(p.id)) return
+    seen.add(p.id)
+    const track = reg.phases.get(p.id)?.track
+    for (const id of track?.requires ?? []) {
+      const required = reg.tracks.get(id)
+      if (required) for (const tp of trackPhases(required)) visit(tp)
+    }
+    for (const id of p.requires) {
+      const required = reg.phases.get(id)?.phase
+      if (required) visit(required)
+    }
+    if (p.availability === 'available' && p.missions.length > 0 && !isPhaseCompleted(state, p)) out.push(p)
+  }
+  visit(phase)
+  return out
+}
+
 export function phaseStatus(state: ProgressState, reg: Registry, phaseId: string): PhaseStatus {
   const ref = reg.phases.get(phaseId)
   if (!ref) return 'locked'
