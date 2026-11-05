@@ -100,3 +100,11 @@
 | `rv:int.f07.m2.a2` | Parecida com `q.int.hot-shard` (0,27) | A resposta coincide; esta parte de shards dobrados sem efeito e cobra por que mais shards não resolvem. |
 | `rv:int.f09.m3.a1` | Parecida com `q.int.write-buffer` (0,28) | A resposta coincide; esta compara a fila com dimensionar o banco para o pico, pelo custo de um dia por mês. |
 | `rv:fil.f07.m2.a2` | Parecida com `q.fil.backup-cold` (0,29) | O Banco configura o frio para o EFS. Esta é de resposta múltipla e cobra quais recursos têm frio (EFS e EBS mensal), com RDS, FSx e o backup contínuo como distratores. |
+| `rv:arq.f04.m2.a2:p4` | Parecida com `q.db.dax` (0,26) | A resposta coincide; esta parte de uma meta de microssegundos sem reescrever o acesso, com o ElastiCache controlado pela aplicação e a capacidade provisionada como distratores. |
+| `rv:arq.f08.m1.a2` | Parecida com `q.arq.pat-events` (0,28) | A resposta coincide; esta parte de chamadas síncronas em sequência que derrubam a reserva, com as chamadas em paralelo como distrator. |
+| `rv:arq.f08.m2.a4` | Parecida com `q.db.aurora-global` (0,29) | A resposta coincide; esta cobra a escolha entre write global e write local, com as tabelas globais do DynamoDB como distrator. |
+| `rv:arq.f08.m3.a2:i3` | Parecida com `q.cmp.beanstalk-bluegreen` (0,29) | Só o vocabulário de blue/green coincide; esta cobra a volta em segundos para o ambiente azul, sem o Beanstalk. |
+| `rv:arq.f08.m3.a2:i5` | Parecida com `q.arq.pat-canary` (0,29) | O Banco descreve o canário; esta descreve parcelas iguais e cobra a diferença para o linear, com o canário como distrator. |
+| `rv:arq.f09.m1.a1` | Parecida com `q.arq.exam-format` (0,32) | A regra coincide (em branco conta como errada); esta parte das 15 questões que não contam e da ideia de que são as difíceis. |
+| `rv:arq.f09.m2.a2:p2` | Parecida com `q.s3x.standard-ia` (0,30) | Só o vocabulário de classes do S3 coincide; a resposta é a Glacier Instant Retrieval, e a questão cobra restrição e requisito decisivo. |
+| `rv:arq.f09.m2.a1:i3` | Parecida com `q.arq.wa-tradeoff` (0,30) | Só o vocabulário de AZ e menor custo coincide; a decisão é a restrição de os dados não saírem da Região, que elimina as opções entre Regiões. |
