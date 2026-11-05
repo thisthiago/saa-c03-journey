@@ -89,36 +89,6 @@ export const F01_SEC_CONCEPTS: ConceptDef[] = [
       notes: 'Sinal: "cifrar arquivos grandes com o KMS". A resposta é a criptografia em envelope com GenerateDataKey; o Encrypt direto só aceita até 4 KB.',
     },
     references: [R.kmsEncrypt, R.kmsKeys],
-    reviewItems: [
-      {
-        id: 'rv:kms.envelope:1',
-        kind: 'decision',
-        title: 'O limite do Encrypt',
-        prompt: 'Uma aplicação precisa cifrar arquivos de 20 MB com uma chave simétrica do KMS. O que ela faz?',
-        concepts: [{ id: 'kms.envelope' }],
-        xp: 5,
-        difficulty: 1,
-        explanation: ['O Encrypt aceita até 4.096 bytes. Para arquivos maiores, a aplicação gera uma chave de dados e cifra o arquivo com ela.'],
-        options: [
-          { id: 'a', text: 'Gera uma chave de dados com GenerateDataKey e cifra o arquivo com ela', correct: true, consequence: 'O KMS só protege a chave de dados.' },
-          { id: 'b', text: 'Manda o arquivo inteiro ao Encrypt', correct: false, consequence: 'O Encrypt recusa mais de 4.096 bytes.' },
-        ],
-      },
-      {
-        id: 'rv:kms.envelope:2',
-        kind: 'decision',
-        title: 'O que fica junto do arquivo',
-        prompt: 'Depois de cifrar o arquivo com a chave de dados, o que a aplicação guarda junto dele?',
-        concepts: [{ id: 'kms.envelope' }],
-        xp: 5,
-        difficulty: 2,
-        explanation: ['Fica só a cópia cifrada da chave de dados; a aberta é descartada. Para ler, o KMS decifra a chave de dados.'],
-        options: [
-          { id: 'a', text: 'Só a cópia cifrada da chave de dados', correct: true, consequence: 'Sem acesso ao KMS, ninguém abre o arquivo.' },
-          { id: 'b', text: 'A cópia aberta da chave de dados', correct: false, consequence: 'Quem pegar o arquivo leva a chave junto.' },
-        ],
-      },
-    ],
     tags: ['seguranca'],
   },
   {
