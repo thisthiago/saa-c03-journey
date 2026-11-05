@@ -170,8 +170,6 @@ export interface ConceptDef {
   exam: { domains: ExamDomainId[]; relevance: 'alta' | 'media' | 'baixa'; notes?: string }
   references: Reference[]
   availability?: Availability
-  /** Desafios curtos usados pela revisão espaçada. */
-  reviewItems?: ActivityDef[]
   /** Categorias para conquistas e painéis (ex.: 'seguranca', 'custos'). */
   tags?: ConceptTag[]
 }
