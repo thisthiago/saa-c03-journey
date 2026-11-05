@@ -454,6 +454,8 @@ export interface MissionProgress {
   startedAt: string
   passedAt?: string
   bonusAwarded: boolean
+  /** Marcada como concluída pelo estudante, sem jogar (ex.: progresso perdido). */
+  manual?: boolean
 }
 
 export interface QuestionProgress {
