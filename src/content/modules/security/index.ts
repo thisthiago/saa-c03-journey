@@ -27,6 +27,7 @@ import { F08_SEC } from './phases/f08/phase'
 import { F09_SEC } from './phases/f09/phase'
 import { FINAL_SEC } from './phases/final/phase'
 import { SECURITY_QUESTIONS } from './questions'
+import { SECURITY_REVIEW } from './review'
 
 export const AWS_SECURITY: TrackDef = {
   id: 'security.aws-security',
@@ -52,4 +53,5 @@ export const securityModule: ContentModule = {
   tracks: [AWS_SECURITY],
   achievements: SECURITY_ACHIEVEMENTS,
   questions: SECURITY_QUESTIONS,
+  review: SECURITY_REVIEW,
 }
