@@ -1,11 +1,13 @@
-import { Check, Info, Lock, Play, RotateCcw, Swords } from 'lucide-react'
+import { Check, CheckCheck, Info, Lock, Play, RotateCcw, Swords } from 'lucide-react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { registry } from '../../content'
 import { masteryTier, TIER_LABEL } from '../../engine/mastery'
-import { missionScore, missionStatus, passThreshold, phaseMedal, phaseStatus, unmetRequirements, unmetTrackRequirements } from '../../engine/selectors'
+import { isMissionPassed, missionScore, missionStatus, passThreshold, phaseMedal, phasesToComplete, phaseStatus, unmetRequirements, unmetTrackRequirements } from '../../engine/selectors'
+import type { MissionDef, PhaseDef } from '../../engine/types'
 import { useGame } from '../../store/gameStore'
 import { useDocumentTitle } from '../../app/hooks'
-import { Badge, ButtonLink, Callout, Card, IconTile } from '../../ui/kit'
+import { Badge, Button, ButtonLink, Callout, Card, IconTile, Modal } from '../../ui/kit'
 import { MEDAL_LABEL, MISSION_STATUS, PHASE_STATUS } from '../map/status'
 import { NotFound } from '../NotFound'
 import s from './phase.module.css'
@@ -16,11 +18,21 @@ export function PhasePage() {
   const ref = registry.phases.get(phaseId)
   useDocumentTitle(ref?.phase.title ?? 'Fase')
   const progress = useGame((st) => st.progress)
+  const markCompleted = useGame((st) => st.markMissionsCompleted)
+  const [confirm, setConfirm] = useState<{ kind: 'mission'; mission: MissionDef } | { kind: 'phase'; phases: PhaseDef[] } | null>(null)
   if (!ref) return <NotFound />
   const { phase, track } = ref
   const st = phaseStatus(progress, registry, phase.id)
   const medal = phaseMedal(progress, phase)
   const missing = unmetRequirements(progress, registry, phase)
+  const canMark = st !== 'completed' && st !== 'in-construction'
+
+  function confirmMark() {
+    if (!confirm) return
+    const missions = confirm.kind === 'mission' ? [confirm.mission] : confirm.phases.flatMap((p) => p.missions)
+    markCompleted(missions.filter((m) => !isMissionPassed(progress, m)).map((m) => m.id))
+    setConfirm(null)
+  }
 
   return (
     <div className="page" style={{ ['--phase' as string]: phase.color }}>
@@ -37,6 +49,11 @@ export function PhasePage() {
             <Badge tone={PHASE_STATUS[st].tone}>{PHASE_STATUS[st].label}</Badge>
             {medal && <Badge tone="xp">{MEDAL_LABEL[medal]}</Badge>}
           </div>
+          {canMark && (
+            <Button variant="ghost" size="small" className={s.markPhase} onClick={() => setConfirm({ kind: 'phase', phases: phasesToComplete(progress, registry, phase) })}>
+              <CheckCheck size={16} aria-hidden="true" /> Já fiz esta fase: marcar como concluída
+            </Button>
+          )}
         </div>
       </header>
 
@@ -83,6 +100,7 @@ export function PhasePage() {
                   <p className={s.meta}>
                     {m.activities.length} desafio(s) · aprovação com {Math.round(passThreshold(m) * 100)}%
                     {attempted && ` · melhor resultado: ${Math.round(score * 100)}%`}
+                    {ms === 'passed' && progress.missions[m.id]?.manual && ' · marcada como concluída sem jogar'}
                   </p>
                 </div>
                 <div className={s.missionAction}>
@@ -93,6 +111,11 @@ export function PhasePage() {
                       {ms === 'passed' ? <RotateCcw size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
                       {ms === 'passed' ? 'Refazer' : ms === 'in-progress' ? 'Continuar' : 'Jogar'}
                     </ButtonLink>
+                  )}
+                  {(ms === 'available' || ms === 'in-progress') && (
+                    <Button variant="ghost" size="small" onClick={() => setConfirm({ kind: 'mission', mission: m })}>
+                      Já fiz: marcar como concluída
+                    </Button>
                   )}
                 </div>
               </Card>
@@ -119,6 +142,52 @@ export function PhasePage() {
           </ul>
         </section>
       )}
+
+      <Modal
+        open={confirm !== null}
+        onClose={() => setConfirm(null)}
+        labelledBy="confirmar-conclusao"
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setConfirm(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={confirmMark}>Marcar como concluída</Button>
+          </>
+        }
+      >
+        {confirm?.kind === 'mission' && (
+          <>
+            <h2 id="confirmar-conclusao">Marcar a missão como concluída?</h2>
+            <p>
+              A missão <strong>{confirm.mission.title}</strong> será marcada como concluída e a próxima fica liberada. Use esta opção se você já fez a missão e perdeu o
+              progresso salvo.
+            </p>
+          </>
+        )}
+        {confirm?.kind === 'phase' && (
+          <>
+            <h2 id="confirmar-conclusao">Marcar a fase como concluída?</h2>
+            <p>
+              Todas as missões de <strong>{phaseMention(phase, track.id)}</strong> serão marcadas como concluídas, e o que depende dela fica liberado. Use esta opção se você já
+              fez a fase e perdeu o progresso salvo.
+            </p>
+            {confirm.phases.length > 1 && (
+              <>
+                <p>Esta fase está bloqueada. Para liberá-la, também serão marcadas como concluídas:</p>
+                <ul className={s.markList}>
+                  {confirm.phases
+                    .filter((p) => p.id !== phase.id)
+                    .map((p) => (
+                      <li key={p.id}>{phaseMention(p, track.id)}</li>
+                    ))}
+                </ul>
+              </>
+            )}
+          </>
+        )}
+        <p>Os conceitos avaliados entram na Revisão do dia, para você confirmar o que lembra. Não há XP: os pontos vêm das atividades jogadas. Você pode refazer qualquer missão depois.</p>
+      </Modal>
 
       {phase.simplifications && phase.simplifications.length > 0 && (
         <section className={s.section} aria-labelledby="simp-title">
