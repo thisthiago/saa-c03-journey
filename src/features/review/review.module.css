@@ -55,6 +55,53 @@
 .summary h1 {
   margin-bottom: var(--space-2);
 }
+.grade {
+  margin: var(--space-3) 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-s);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--success);
+  background: var(--surface-2);
+}
+.grade[data-band='mid'] {
+  border-left-color: var(--warning);
+}
+.grade[data-band='low'] {
+  border-left-color: var(--danger);
+}
+.gradeValue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--text-muted);
+}
+.gradeValue strong {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--text);
+}
+.gradeParts {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-2) 0 0;
+  display: grid;
+  gap: 2px;
+  font-size: 0.92rem;
+}
+.gradeHow {
+  margin-top: var(--space-2);
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+.gradeHow summary {
+  cursor: pointer;
+}
+.gradeHow p {
+  margin: var(--space-2) 0 0;
+}
 .results {
   list-style: none;
   padding: 0;
