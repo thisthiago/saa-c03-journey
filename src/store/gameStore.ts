@@ -23,6 +23,8 @@ interface GameStore {
   submitActivity: (activityId: string, evaluation: Evaluation, hintsUsed: number, solutionViewed: boolean) => GameEvent[]
   submitReview: (conceptId: string, itemId: string, evaluation: Evaluation, opts?: Pick<engine.ReviewSubmission, 'confidence' | 'daily'>) => GameEvent[]
   completeReviewSession: () => GameEvent[]
+  /** Marca missões como concluídas sem jogar (sem XP); os conceitos entram na Revisão. */
+  markMissionsCompleted: (missionIds: string[]) => GameEvent[]
   submitExam: (answers: engine.ExamSubmission['answers'], simulado?: engine.ExamSubmission['simulado']) => GameEvent[]
   discover: (conceptIds: string[]) => void
   startMission: (missionId: string, step: number) => void
@@ -67,6 +69,11 @@ export const useGame = create<GameStore>()((set, get) => ({
   },
   completeReviewSession() {
     const { state, events } = engine.completeReviewSession(get().progress, registry, clock.now())
+    set((s) => ({ progress: state, queue: enqueue(s.queue, events) }))
+    return events
+  },
+  markMissionsCompleted(missionIds) {
+    const { state, events } = engine.markMissionsCompleted(get().progress, registry, missionIds, clock.now())
     set((s) => ({ progress: state, queue: enqueue(s.queue, events) }))
     return events
   },
