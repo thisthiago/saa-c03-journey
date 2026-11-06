@@ -38,3 +38,20 @@
 .columns > * {
   align-content: start;
 }
+.pathBtn {
+  padding: 4px 10px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.pathBtn[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.flowDiagram {
+  margin: var(--space-3) 0 0;
+}
