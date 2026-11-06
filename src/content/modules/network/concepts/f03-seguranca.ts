@@ -92,7 +92,7 @@ export const F03_NET_CONCEPTS: ConceptDef[] = [
     officialName: 'Default and custom network ACLs',
     serviceIds: ['aws.vpc'],
     summary: 'A **ACL padrão** da VPC **permite tudo** nos dois sentidos (regra 100) e vale para toda sub-rede sem outra associação. Uma **ACL personalizada nova nega tudo** até você adicionar regras, inclusive as de resposta.',
-    facts: ['A ACL padrão tem as regras 100 (IPv4) e 101 (IPv6) permitindo tudo, além das regras marcadas com asterisco.', 'Uma ACL personalizada nasce só com as regras marcadas com asterisco, que negam tudo.'],
+    facts: ['A ACL padrão tem a regra 100 (IPv4) permitindo tudo e, quando a VPC tem bloco IPv6, a regra 101 (IPv6), além das regras marcadas com asterisco.', 'Uma ACL personalizada nasce só com as regras marcadas com asterisco, que negam tudo.'],
     commonMistakes: ['Associar uma ACL personalizada nova à sub-rede e derrubar a aplicação inteira'],
     exam: { domains: ['d1'], relevance: 'media' },
     references: [R.naclDefault, R.naclCustom],
