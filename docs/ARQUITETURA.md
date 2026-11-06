@@ -99,6 +99,15 @@ Use o laboratório `architecture`. As dimensões da rubrica (com o domínio do S
 **Novo tipo de atividade**
 1. Declare o tipo em `activities/types.ts`.
 2. Implemente a avaliação em `evaluate.ts`, a interface em `views.tsx` e os casos em `registry.tsx` e `ui-logic.ts`.
+3. Acrescente a validação da configuração em `validateRegistry` (`engine/registry.ts`).
+
+**Desenhos (`DiagramSpec`)**
+`engine/diagram.ts` define desenhos declarativos: caixas (`region`, `vpc`, `zone`, `public`, `private`, `onprem`, `internet`, `account`, `generic`, com `failed` para hachurar), nós com ícone do `Glyph`, ligações (contínuas ou tracejadas, com seta, rótulo, X de "não funciona" e pontos intermediários `via`) e notas. O arquivo é puro: tem as âncoras das ligações e `diagramProblems`, usado por `validateRegistry`. `ui/diagram/Diagram.tsx` desenha em SVG só com os tokens do tema, então o mesmo desenho funciona no claro e no escuro.
+- **Onde aparece:** `IntelCardDef.diagram` (cartão de conceito, que passa a ocupar a linha inteira) e `ActivityBase.diagram` (entre o enunciado e o material de apoio).
+- **Desenho vivo:** os labs de rede geram o desenho a partir da resposta, com funções puras testadas: `vpcnet/ruler.ts` (régua de endereços, HTML), `vpcnet/routing-diagram.ts`, `reach/diagram.ts` (caminho de um fluxo, ponto por ponto), `connect/diagram.ts` e, no desafio final, `ArchConfig.diagram` com `ArchOption.draw` (`archDiagram` em `architecture/model.ts`). O desenho vivo mostra o que foi escolhido; ele não antecipa a nota, exceto quando o próprio laboratório já mostra o resultado ao vivo.
+
+**Montagem (`kind: 'build'`)**
+Peças arrastadas para lugares sobre um desenho (`board`). Cada lugar (`slot`, em coordenadas do desenho) declara quantas cópias de cada peça espera (`expect`); `count` cria cópias iguais; o que sobra vai para a bandeja fixa "Não entra nesta rede" (`__fora`). A avaliação em `activities/build/evaluate.ts` casa multiconjuntos: a nota é a fração de fichas no lugar certo, com uma linha de resultado por tipo de peça e outra por lugar errado. `buildProblems` exige ao menos um distrator. A interface usa o `PlacementBoard` com a prop `canvas` (destinos posicionados em % sobre o desenho; abaixo de 720 px, viram uma lista embaixo do desenho), com o mesmo teclado, toque e arraste das outras atividades.
 
 **Novo laboratório**
 1. Crie `simulators/<domínio>/` com `model.ts`, `lab.ts` (configuração, resposta, solução e avaliação) e a interface.
