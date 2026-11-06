@@ -105,16 +105,17 @@ const inPorts = (p: Ports, port: number) => p === 'all' || (port >= p[0] && port
 const portsText = (p: Ports) => (p === 'all' ? 'todas as portas' : p[0] === p[1] ? `porta ${p[0]}` : `portas ${p[0]}-${p[1]}`)
 
 /** Primeira regra da ACL (em ordem crescente) que casa; sem nenhuma, vale a regra * que nega. */
-export function naclDecision(rules: NaclRule[], ip: string, port: number): { allowed: boolean; rule: string } {
+export function naclDecision(rules: NaclRule[], ip: string, port: number): { allowed: boolean; rule: string; short: string } {
   const n = ipToInt(ip)!
   const sorted = [...rules].sort((a, b) => a.num - b.num)
   for (const r of sorted) {
-    if (containsIp(parseCidr(r.cidr) as Cidr, n) && inPorts(r.ports, port)) return { allowed: r.action === 'allow', rule: `regra ${r.num} (${r.action === 'allow' ? 'permite' : 'nega'} ${r.cidr}, ${portsText(r.ports)})` }
+    if (containsIp(parseCidr(r.cidr) as Cidr, n) && inPorts(r.ports, port))
+      return { allowed: r.action === 'allow', rule: `regra ${r.num} (${r.action === 'allow' ? 'permite' : 'nega'} ${r.cidr}, ${portsText(r.ports)})`, short: `regra ${r.num} ${r.action === 'allow' ? 'permite' : 'nega'}` }
   }
-  return { allowed: false, rule: 'regra * (nega tudo o que nenhuma regra anterior permitiu)' }
+  return { allowed: false, rule: 'regra * (nega tudo o que nenhuma regra anterior permitiu)', short: 'regra * nega' }
 }
 
-function sgAllows(rules: SgRule[], peerIp: string, peerSg: string | undefined, port: number): boolean {
+export function sgAllows(rules: SgRule[], peerIp: string, peerSg: string | undefined, port: number): boolean {
   const n = ipToInt(peerIp)!
   return rules.some((r) => inPorts(r.ports, port) && (r.peer.startsWith('sg-') ? r.peer === peerSg : containsIp(parseCidr(r.peer) as Cidr, n)))
 }
