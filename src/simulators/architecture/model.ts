@@ -4,6 +4,7 @@
  * compartilhado"). As dimensões, o título e o aviso vêm da configuração, então
  * cada trilha define a sua rubrica.
  */
+import type { DiagramSpec } from '../../engine/diagram'
 import type { ExamDomainId } from '../../engine/types'
 
 export type Dimension = string
@@ -24,6 +25,8 @@ export interface ArchOption {
   /** Por que a alternativa é inadequada neste cenário (relatório: "alternativas rejeitadas"). */
   whyNot?: string
   concepts?: string[]
+  /** O que a escolha acrescenta ao desenho do projeto (`ArchConfig.diagram`). */
+  draw?: Pick<DiagramSpec, 'boxes' | 'nodes' | 'links' | 'notes'>
 }
 
 export interface ArchQuestion {
@@ -63,6 +66,8 @@ export interface ArchConfig {
   /** Seções extras do relatório: erros nas perguntas de cada grupo. */
   groups?: { id: string; title: string }[]
   disclaimer?: string
+  /** Desenho de base do projeto; as escolhas acrescentam elementos com `ArchOption.draw`. */
+  diagram?: DiagramSpec
 }
 
 export type ArchAnswers = Record<string, string | undefined>
@@ -138,4 +143,37 @@ export function examDomainScores(c: ArchConfig, r: ArchResult): { domain: ExamDo
   return [...out.entries()]
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([domain, dims]) => ({ domain, dimensions: dims, score: dims.reduce((s, d) => s + r.dimensions[d.id], 0) / dims.length }))
+}
+
+/**
+ * Desenho do projeto até aqui: a base mais o que cada escolha acrescenta. O
+ * desenho mostra o que foi escolhido, sem dizer se está certo; a nota vem do
+ * relatório. Ligações para elementos que não existem são descartadas.
+ */
+export function archDiagram(c: ArchConfig, a: ArchAnswers): DiagramSpec | undefined {
+  if (!c.diagram) return undefined
+  const boxes = [...(c.diagram.boxes ?? [])]
+  const nodes = [...(c.diagram.nodes ?? [])]
+  const links = [...(c.diagram.links ?? [])]
+  const notes = [...(c.diagram.notes ?? [])]
+  const picked: string[] = []
+  for (const s of c.steps)
+    for (const q of s.questions) {
+      const o = q.options.find((x) => x.id === a[q.id])
+      if (!o) continue
+      picked.push(o.label)
+      boxes.push(...(o.draw?.boxes ?? []))
+      nodes.push(...(o.draw?.nodes ?? []))
+      links.push(...(o.draw?.links ?? []))
+      notes.push(...(o.draw?.notes ?? []))
+    }
+  const ids = new Set([...boxes, ...nodes].map((x) => x.id))
+  return {
+    ...c.diagram,
+    label: picked.length ? `${c.diagram.label} Escolhas até aqui: ${picked.join('; ')}.` : `${c.diagram.label} Nenhuma escolha feita ainda.`,
+    boxes,
+    nodes,
+    links: links.filter((l) => ids.has(l.from) && ids.has(l.to)),
+    notes,
+  }
 }
