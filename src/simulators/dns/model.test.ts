@@ -58,7 +58,8 @@ describe('catálogos de escolha', () => {
   it('a conexão híbrida segue banda, criptografia e resiliência', () => {
     const all = Object.keys(HYBRID.options) as Parameters<typeof bestHybrid>[1]
     expect(bestHybrid(['encrypted', 'fast-setup', 'bw-1'], all)).toBe('vpn')
-    expect(bestHybrid(['private-path', 'bw-10'], all)).toBe('dx-dedicated')
+    expect(bestHybrid(['private-path', 'bw-10'], all)).toBe('dx-hosted')
+    expect(bestHybrid(['private-path', 'bw-40'], all)).toBe('dx-dedicated')
     expect(bestHybrid(['private-path', 'bw-10', 'encrypted'], all)).toBe('dx-macsec')
     expect(bestHybrid(['private-path', 'survive-location'], all)).toBe('dx-high')
     expect(bestHybrid(['encrypted', 'fast-setup', 'bw-5'], all)).toBe('vpn-ecmp')

@@ -5,6 +5,7 @@
  * descrito com estes tipos e a lógica de jogo (src/engine) opera sobre eles.
  */
 import type { ActivityDef, DecisionActivity } from '../activities/types'
+import type { DiagramSpec } from './diagram'
 
 // ---------------------------------------------------------------------------
 // Catálogo
@@ -210,6 +211,8 @@ export interface ActivityBase {
   hints?: string[]
   /** Explicação geral mostrada depois de cada tentativa (RichText). */
   explanation: string[]
+  /** Desenho exibido entre o enunciado e o material de apoio. */
+  diagram?: DiagramSpec
   /** Material de apoio exibido abaixo do enunciado (ex.: políticas em JSON). */
   exhibits?: { title: string; code: string }[]
   /** Conceitos com resultado fraco voltam já para a fila de revisão (usado no desafio final). */
@@ -230,6 +233,8 @@ export interface IntelCardDef {
   body?: string[]
   /** Visual ilustrativo registrado em features/mission/visuals. */
   visual?: string
+  /** Desenho declarativo (SVG) mostrado no topo do cartão. */
+  diagram?: DiagramSpec
   /** Alerta de simplificação ligado a este cartão. */
   simplification?: string
 }

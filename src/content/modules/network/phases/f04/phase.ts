@@ -7,6 +7,7 @@ import type { PhaseDef } from '../../../../../engine/types'
 import type { ConnectLabConfig } from '../../../../../simulators/connect/lab'
 import type { Net, Topology } from '../../../../../simulators/connect/model'
 import { META } from '../meta'
+import { ASSOCIATE_PROPAGATE, NON_TRANSITIVE, TGW_TABLES_BOARD } from './diagrams'
 
 const THREE: Net[] = [
   { id: 'a', name: 'VPC de sinistros', cidr: '10.1.0.0/16' },
@@ -121,7 +122,7 @@ export const F04_NET: PhaseDef = {
       },
       intel: [
         { conceptId: 'tgw.peering', body: ['O **peering** liga **duas** VPCs, com rotas nos dois lados. Não tem custo por hora.'] },
-        { conceptId: 'tgw.non-transitive', body: ['A ligada a B e a C **não** faz B alcançar C. Cada par precisa do seu peering.'] },
+        { conceptId: 'tgw.non-transitive', body: ['Se a VPC A tem peering com B e com C, isso **não** faz B alcançar C: o tráfego nunca atravessa a VPC A. Cada par que precisa conversar precisa do seu próprio peering.'], diagram: NON_TRANSITIVE },
         { conceptId: 'tgw.edge-to-edge', body: ['Pelo peering, uma VPC **não usa** a VPN, o Direct Connect, o internet gateway, o NAT ou o endpoint de gateway da vizinha.'] },
       ],
       activities: [
@@ -137,7 +138,7 @@ export const F04_NET: PhaseDef = {
           spec: { sim: 'connect', nets: THREE, topology: HUB, from: 'c', to: 'b' },
           options: [
             { id: 'a', text: 'Não: o tráfego não passa pela VPC de sinistros', outcome: 'no' },
-            { id: 'b', text: 'Sim: as três estão ligadas a sinistros', outcome: 'yes' },
+            { id: 'b', text: 'Sim: as duas estão ligadas a sinistros', outcome: 'yes' },
           ],
         },
         {
@@ -174,11 +175,11 @@ export const F04_NET: PhaseDef = {
           id: 'net.f04.m1.a4',
           kind: 'estimate',
           title: 'A malha completa',
-          prompt: 'Quantos peerings são precisos para que 10 VPCs falem todas com todas?',
+          prompt: 'Quantos peerings são precisos para que 10 VPCs falem todas com todas? Um peering serve aos dois sentidos do par.',
           concepts: [{ id: 'tgw.non-transitive' }],
           xp: 40,
           difficulty: 2,
-          explanation: ['Cada par precisa de um peering: 10 × 9 ÷ 2 = 45. Com o Transit Gateway, seriam 10 anexos.'],
+          explanation: ['Cada par de VPCs precisa de um peering, que serve aos dois sentidos. Cada uma das 10 VPCs se liga às outras 9, e cada peering foi contado duas vezes: 10 × 9 ÷ 2 = 45.'],
           unit: 'peerings',
           min: 1,
           max: 100,
@@ -204,7 +205,14 @@ export const F04_NET: PhaseDef = {
       },
       intel: [
         { conceptId: 'tgw.transit-gateway', body: ['Cada rede se **anexa** uma vez ao **Transit Gateway**, que roteia entre todas. Cobra por hora de anexo e por GB processado.'] },
-        { conceptId: 'tgw.route-tables', body: ['O anexo **se associa** a uma tabela (para onde pode mandar) e **propaga** suas rotas para outras. Tabelas separadas isolam grupos de VPCs.'] },
+        {
+          conceptId: 'tgw.route-tables',
+          body: [
+            'Cada anexo **se associa** a uma tabela do Transit Gateway: é nela que o Transit Gateway procura o destino do tráfego que sai desse anexo.',
+            'O anexo também pode **propagar** as suas rotas para uma ou mais tabelas: assim, quem usa essas tabelas encontra o caminho até ele. Tabelas separadas, com propagações escolhidas, isolam grupos de VPCs.',
+          ],
+          diagram: ASSOCIATE_PROPAGATE,
+        },
       ],
       activities: [
         {
@@ -253,19 +261,28 @@ export const F04_NET: PhaseDef = {
           ],
         },
         {
-          id: 'net.f04.m2.a4',
-          kind: 'order',
-          title: 'Ligar uma VPC ao Transit Gateway',
-          prompt: 'Ordene os passos para a VPC de análise usar o Transit Gateway.',
-          concepts: [{ id: 'tgw.transit-gateway' }, { id: 'tgw.route-tables', weight: 0.5 }],
+          id: 'net.f04.m2.a5',
+          kind: 'build',
+          title: 'As tabelas do Transit Gateway',
+          prompt: 'Decida que rotas cada tabela do Transit Gateway recebe por propagação. As cópias que nenhuma tabela deve receber vão para "Não entra nesta rede".',
+          scenario: ['As três VPCs já estão anexadas, e cada uma está associada à tabela com o seu nome. Produção e desenvolvimento usam os serviços compartilhados (autenticação e logs), mas não podem se alcançar de jeito nenhum.'],
+          concepts: [{ id: 'tgw.route-tables' }, { id: 'tgw.transit-gateway', weight: 0.5 }],
           xp: 50,
           difficulty: 2,
-          explanation: ['O Transit Gateway existe primeiro; depois vem o anexo, com uma sub-rede por zona; então a associação e a propagação nas tabelas do Transit Gateway; por fim, a rota na tabela da sub-rede da VPC, que manda o tráfego ao Transit Gateway.'],
-          steps: [
-            { id: 's1', text: 'Criar o Transit Gateway', explanation: 'É o roteador central.' },
-            { id: 's2', text: 'Criar o anexo da VPC, com uma sub-rede em cada zona usada', explanation: 'Sem sub-rede na zona, os recursos dela não chegam ao Transit Gateway.' },
-            { id: 's3', text: 'Associar o anexo a uma tabela do Transit Gateway e propagar as rotas dele', explanation: 'Define para onde ele manda e quem o alcança.' },
-            { id: 's4', text: 'Adicionar na tabela de rotas da sub-rede a rota para as outras redes, com alvo no Transit Gateway', explanation: 'Sem essa rota, o tráfego nem chega ao Transit Gateway.' },
+          explanation: [
+            'As tabelas de produção e de desenvolvimento recebem só as rotas dos serviços compartilhados: assim, cada uma chega aos serviços e não encontra caminho para a outra.',
+            'A tabela compartilhada recebe as rotas de produção e de desenvolvimento, para que a resposta dos serviços volte aos dois.',
+          ],
+          board: TGW_TABLES_BOARD,
+          pieces: [
+            { id: 'shared', text: 'Rotas da VPC de serviços compartilhados', count: 2, explanation: 'Produção e desenvolvimento precisam chegar aos serviços compartilhados: as tabelas dos dois recebem essas rotas.', concepts: ['tgw.route-tables'] },
+            { id: 'prod', text: 'Rotas da VPC de produção', count: 2, explanation: 'Só a tabela compartilhada precisa delas, para a resposta dos serviços voltar. Na tabela de desenvolvimento, abririam o caminho que o cenário proíbe.', concepts: ['tgw.route-tables'] },
+            { id: 'dev', text: 'Rotas da VPC de desenvolvimento', count: 2, explanation: 'Só a tabela compartilhada precisa delas. Na tabela de produção, abririam o caminho que o cenário proíbe.', concepts: ['tgw.route-tables'] },
+          ],
+          slots: [
+            { id: 'tp', label: 'Propagadas para a tabela de produção', x: 34, y: 104, w: 196, h: 176, expect: { shared: 1 }, explanation: 'Produção só precisa chegar aos serviços compartilhados.' },
+            { id: 'td', label: 'Propagadas para a tabela de desenvolvimento', x: 262, y: 104, w: 196, h: 176, expect: { shared: 1 }, explanation: 'Desenvolvimento só precisa chegar aos serviços compartilhados. Com as rotas de produção aqui, desenvolvimento alcançaria produção.' },
+            { id: 'ts', label: 'Propagadas para a tabela compartilhada', x: 490, y: 104, w: 196, h: 176, expect: { prod: 1, dev: 1 }, explanation: 'Os serviços compartilhados respondem aos dois ambientes, então a tabela deles recebe as rotas de produção e de desenvolvimento.' },
           ],
         },
       ],
@@ -284,7 +301,15 @@ export const F04_NET: PhaseDef = {
         objective: 'Escolher a peça mais simples que atende a cada caso.',
         successCriteria: ['Peering para poucas VPCs', 'Transit Gateway para muitas, com rede da empresa'],
       },
-      intel: [{ conceptId: 'tgw.peering-vs-tgw', body: ['**Poucas VPCs**, só entre si: **peering**, sem custo por hora. **Muitas VPCs**, escritório compartilhado ou isolamento por tabelas: **Transit Gateway**.'] }],
+      intel: [
+        {
+          conceptId: 'tgw.peering-vs-tgw',
+          body: [
+            '**Poucas VPCs**, só entre si: **peering**, sem custo por hora. A falta de transitividade até ajuda a isolar: com peering só até a VPC compartilhada, as outras não se alcançam.',
+            '**Muitas VPCs**, ou uma rede da empresa que todas usam: **Transit Gateway**. Com tabelas separadas, ele também isola grupos de VPCs, mas cobra por anexo e por GB processado.',
+          ],
+        },
+      ],
       activities: [
         {
           id: 'net.f04.m3.a1',

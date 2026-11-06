@@ -157,6 +157,8 @@ Módulo `src/content/modules/network/`, território `redes`. Reaproveita, sem re
 
 **Previsões calculadas.** As previsões `cidr`, `route`, `reach`, `connect` e `dns` usam os simuladores `vpcnet`, `reach`, `connect` e `dns`; a Fase 8 usa a previsão `edge` da Foundations.
 
+**Desenhos e montagens (revisão de 05/11/2026).** Cada fase tem desenhos nos cartões de conceitos (`fNN/diagrams.ts`) e uma montagem (`kind: 'build'`). Os labs das fases 1 a 4 e o final desenham a rede ao vivo. O acompanhamento está em [revisao-trilha-redes/](revisao-trilha-redes/).
+
 **Escolhas.** Os labs `hybrid`, `dns-policy` e `net-chooser` usam o motor genérico `simulators/shared/chooser.ts` e a interface `shared/ChoiceLab.tsx`: cada cartão tem um requisito que decide, a melhor opção vale 1, uma que atende com mais trabalho vale 0,5 e uma que deixa um requisito de fora vale 0. Os testes falham se duas opções empatarem como melhor.
 
 ## Trilha Análise de dados e serviços de IA na AWS
@@ -326,6 +328,15 @@ Regras que valem para todos:
    - conceitos sem avaliação;
    - predições ambíguas;
    - laboratórios cuja solução não chega a 100% ou cujo estado inicial já passa.
+
+## Como escrever desenhos e montagens
+
+- **Desenho no cartão, não na atividade, quando ele entregaria a resposta.** O cartão ensina antes da atividade; o desenho numa atividade só mostra o cenário.
+- **Rótulo (`label`) completo:** descreve o desenho inteiro em frases, para leitores de tela. A legenda (`caption`) diz o que o desenho ensina.
+- **Texto do desenho em PT-BR, sem setas nem "=".** As setas são as ligações; o texto explica.
+- **Montagem:** cada peça exige uma decisão (onde ela existe ou se ela existe); os distratores são confusões típicas, nunca absurdos; a peça só leva ícone quando o ícone é a própria peça (um gateway), e não quando denunciaria o lugar (o escudo do security group). Cada peça e cada lugar têm explicação.
+- **Ids novos:** uma montagem que substitui outra atividade recebe o próximo `aN` livre da missão, para não quebrar rascunhos salvos.
+- **Conferência visual:** abra a atividade no desktop (1440 px) e confira se os rótulos não se cobrem; `tests/e2e/screens.spec.ts` tira as capturas.
 
 ## Questões da Revisão
 

@@ -271,3 +271,13 @@
   gap: 8px;
   font-size: 0.9rem;
 }
+.drawing {
+  margin: 0;
+}
+.drawing > summary {
+  cursor: pointer;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+}

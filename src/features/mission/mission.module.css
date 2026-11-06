@@ -192,6 +192,10 @@
 .intelCard a {
   margin-top: auto;
 }
+/* Cartão com desenho: ocupa a linha inteira, para o desenho ficar legível. */
+.intelWide {
+  grid-column: 1 / -1;
+}
 .activityCard {
   padding: var(--space-5);
 }
@@ -412,6 +416,9 @@
 }
 .prompt {
   font-size: 1.05rem;
+}
+.activityDiagram {
+  margin: var(--space-3) 0 0;
 }
 .exhibits {
   display: grid;

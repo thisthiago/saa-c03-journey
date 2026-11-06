@@ -6,6 +6,7 @@
 import type { PhaseDef } from '../../../../../engine/types'
 import type { EndpointsLabConfig } from '../../../../../simulators/endpoints/lab'
 import { META } from '../meta'
+import { ENDPOINT_SERVICE, GATEWAY_ROUTE, INTERFACE_ZONES, PATHS_BOARD } from './diagrams'
 
 const S3_ROUTES = [
   { destination: '10.60.0.0/16', target: 'local' },
@@ -19,7 +20,7 @@ export const VALOR_CERTO_ENDPOINTS: EndpointsLabConfig = {
     { id: 'backup', name: 'Backups noturnos', description: 'Os servidores da VPC copiam **3.000 GB por mês** para o S3. Hoje, o tráfego passa pelo NAT Gateway, que existe só para isso.', service: 's3', gbMonth: 3000, azs: 2, concepts: ['pl.gateway-endpoint', 'pl.nat-vs-endpoint'] },
     { id: 'filas', name: 'Fila de ordens', description: 'O sistema de ordens troca **800 GB por mês** com o SQS, em duas zonas. O NAT Gateway já existe para outros usos.', service: 'sqs', gbMonth: 800, azs: 2, natShared: true, concepts: ['pl.interface-endpoint', 'pl.nat-vs-endpoint'] },
     { id: 'escritorio', name: 'Relatórios do escritório', description: 'O escritório, ligado por VPN, envia **500 GB por mês** de relatórios para o S3 passando pela VPC.', service: 's3', gbMonth: 500, azs: 2, fromOnPrem: true, concepts: ['pl.gateway-endpoint', 'pl.interface-endpoint'] },
-    { id: 'segredos', name: 'Leitura de segredos', description: 'A aplicação lê senhas do Secrets Manager: cerca de **1 GB por mês**, em duas zonas. O NAT Gateway já existe para outros usos.', service: 'secrets-manager', gbMonth: 1, azs: 2, natShared: true, concepts: ['pl.nat-vs-endpoint'] },
+    { id: 'segredos', name: 'Leitura de segredos', description: 'A aplicação lê senhas do Secrets Manager: cerca de **1 GB por mês**, em duas zonas. O NAT Gateway já existe para outros usos, e a auditoria aceita que esse tráfego, cifrado, saia por ele.', service: 'secrets-manager', gbMonth: 1, azs: 2, natShared: true, concepts: ['pl.nat-vs-endpoint'] },
     { id: 'auditoria', name: 'Trilha de auditoria', description: 'O registro de operações grava **200 GB por mês** no DynamoDB, e a regra da corretora proíbe que esse tráfego passe pelo internet gateway.', service: 'dynamodb', gbMonth: 200, azs: 2, privateOnly: true, concepts: ['pl.gateway-endpoint'] },
   ],
 }
@@ -44,7 +45,7 @@ export const F05_NET: PhaseDef = {
         successCriteria: ['Prever o caminho com o endpoint de gateway', 'Saber quem não pode usar o endpoint de gateway'],
       },
       intel: [
-        { conceptId: 'pl.gateway-endpoint', body: ['O **endpoint de gateway** do S3 e do DynamoDB entra como **rota** com a lista de prefixos do serviço e **não tem custo**. Só serve a quem está **dentro da VPC**.'] },
+        { conceptId: 'pl.gateway-endpoint', body: ['O **endpoint de gateway** do S3 e do DynamoDB entra como **rota** com a lista de prefixos do serviço e **não tem custo**. Só serve a quem está **dentro da VPC**.'], diagram: GATEWAY_ROUTE },
         { conceptId: 'pl.nat-vs-endpoint', body: ['Pelo **NAT Gateway**, cada GB paga processamento. Na tabela da trilha, US$ 0,045 por GB em us-east-1.'] },
       ],
       activities: [
@@ -77,6 +78,7 @@ export const F05_NET: PhaseDef = {
             { id: 'a', text: 'Criar um endpoint de gateway do S3 e associá-lo às tabelas das sub-redes', correct: true, consequence: 'O tráfego do S3 deixa o NAT, e o processamento desses GB some da fatura.' },
             { id: 'b', text: 'Trocar o NAT Gateway por um maior', correct: false, consequence: 'Não existe NAT maior: ele escala sozinho, e a cobrança por GB continua.' },
             { id: 'c', text: 'Dar IP público aos servidores e sair pelo internet gateway', correct: false, consequence: 'Expõe os servidores e paga IPv4 público por hora.' },
+            { id: 'd', text: 'Criar um endpoint de interface do S3 nas duas zonas', correct: false, consequence: 'Funciona e tira o tráfego do NAT, mas cobra por hora em cada zona e por GB, enquanto o de gateway não custa nada.' },
           ],
         },
         {
@@ -105,21 +107,21 @@ export const F05_NET: PhaseDef = {
       briefing: {
         company: 'Corretora Valor Certo',
         role: 'Você tira da internet o tráfego dos demais serviços da AWS.',
-        situation: 'A auditoria quer que o sistema de ordens fale com o SQS e com o Secrets Manager sem sair pela internet, e que, pela VPC, só os buckets da corretora possam ser acessados.',
+        situation: 'A auditoria quer que o sistema de ordens fale com o SQS sem sair pela internet, e que, pela VPC, só os buckets da corretora possam ser acessados.',
         objective: 'Montar os endpoints de interface e limitar o que passa por eles.',
         successCriteria: ['Usar endpoint de interface com DNS privado', 'Evitar ponto único de falha', 'Limitar o acesso com política de endpoint'],
       },
       intel: [
-        { conceptId: 'pl.interface-endpoint', body: ['O **endpoint de interface** cria interfaces com IP privado nas sub-redes, uma por zona. Cobra **por hora em cada zona** e **por GB**.'] },
+        { conceptId: 'pl.interface-endpoint', body: ['O **endpoint de interface** usa o **AWS PrivateLink**: cria interfaces de rede com IP privado nas sub-redes, uma por zona escolhida. Cobra **por hora em cada zona** e **por GB**.'], diagram: INTERFACE_ZONES },
         { conceptId: 'pl.private-dns', body: ['Com **DNS privado**, o nome normal do serviço resolve para o endpoint dentro da VPC. A aplicação não muda.'] },
-        { conceptId: 'pl.endpoint-policy', body: ['A **política de endpoint** limita o que passa por ele. A padrão permite tudo. Ela soma com as políticas de identidade e de recurso, sem substituí-las.'] },
+        { conceptId: 'pl.endpoint-policy', body: ['A **política de endpoint** limita o que passa por ele; a padrão permite tudo. Ela não substitui as outras políticas: o acesso só passa se a política de endpoint, a de identidade e a do recurso (como a do bucket) permitirem.'] },
       ],
       activities: [
         {
           id: 'net.f05.m2.a1',
           kind: 'decision',
           title: 'O SQS sem NAT',
-          prompt: 'O sistema de ordens, numa sub-rede privada sem NAT, precisa chamar o SQS pelo endereço de sempre, sem mudar o código. O que criar?',
+          prompt: 'O sistema de ordens, numa sub-rede privada, precisa chamar o SQS pelo endereço de sempre, sem mudar o código e sem que o tráfego saia pela internet. O que criar?',
           concepts: [{ id: 'pl.interface-endpoint' }, { id: 'pl.private-dns' }],
           xp: 50,
           difficulty: 2,
@@ -127,20 +129,20 @@ export const F05_NET: PhaseDef = {
           options: [
             { id: 'a', text: 'Um endpoint de interface do SQS com DNS privado ligado', correct: true, consequence: 'O código continua igual, e o tráfego fica dentro da rede da AWS.' },
             { id: 'b', text: 'Um endpoint de gateway do SQS', correct: false, consequence: 'Só o S3 e o DynamoDB têm endpoint de gateway.' },
-            { id: 'c', text: 'Um endpoint de interface sem DNS privado, sem mudar nada no código', correct: false, consequence: 'Sem DNS privado, o nome padrão continua indo para o endereço público, que a sub-rede sem NAT não alcança.' },
+            { id: 'c', text: 'Um endpoint de interface sem DNS privado, sem mudar nada no código', correct: false, consequence: 'Sem DNS privado, o nome padrão continua resolvendo para o endereço público do SQS, e o tráfego não passa pelo endpoint.' },
           ],
         },
         {
           id: 'net.f05.m2.a2',
           kind: 'decision',
           title: 'Uma zona só',
-          prompt: 'Para economizar, o endpoint do Secrets Manager foi criado só na zona A. A aplicação roda nas zonas A e B. Qual é o risco?',
+          prompt: 'Para economizar, o endpoint de interface do SQS foi criado só na zona A. O sistema de ordens roda nas zonas A e B. Qual é o risco?',
           concepts: [{ id: 'pl.interface-endpoint' }],
           xp: 40,
           difficulty: 2,
           explanation: ['Os recursos da zona B usam a interface da zona A. Se a zona A ficar indisponível, a zona B perde o acesso ao serviço. A AWS recomenda pelo menos duas zonas por endpoint em produção.'],
           options: [
-            { id: 'a', text: 'Se a zona A cair, a zona B perde o acesso ao Secrets Manager', correct: true, consequence: 'O endpoint numa zona virou ponto único de falha.' },
+            { id: 'a', text: 'Se a zona A cair, a zona B perde o acesso ao SQS', correct: true, consequence: 'O endpoint numa zona virou ponto único de falha.' },
             { id: 'b', text: 'A zona B não consegue usar o endpoint nem com a zona A funcionando', correct: false, consequence: 'Ela usa a interface da zona A, com tráfego entre zonas.' },
             { id: 'c', text: 'Nenhum: o endpoint de interface é regional', correct: false, consequence: 'As interfaces ficam nas sub-redes de cada zona escolhida.' },
           ],
@@ -149,7 +151,7 @@ export const F05_NET: PhaseDef = {
           id: 'net.f05.m2.a3',
           kind: 'decision',
           title: 'Só os buckets da corretora',
-          prompt: 'A auditoria quer que, pelo endpoint do S3, só os buckets da corretora possam ser acessados, mesmo por alguém com credenciais de outra conta. O que usar?',
+          prompt: 'A auditoria quer que, pelo endpoint de gateway do S3, só os buckets da corretora possam ser acessados. Isso vale até para quem, de dentro da VPC, usar credenciais de outra conta, que dariam acesso aos buckets dessa outra conta. O que usar?',
           concepts: [{ id: 'pl.endpoint-policy' }],
           xp: 50,
           difficulty: 3,
@@ -161,24 +163,30 @@ export const F05_NET: PhaseDef = {
           ],
         },
         {
-          id: 'net.f05.m2.a4',
-          kind: 'classify',
-          title: 'Gateway ou interface',
-          prompt: 'Classifique cada característica pelo tipo de endpoint.',
+          id: 'net.f05.m2.a5',
+          kind: 'build',
+          title: 'Os caminhos até os serviços',
+          prompt: 'Coloque cada peça onde ela fica, para os servidores chegarem ao S3, ao DynamoDB e ao SQS sem passar pela internet. As peças que não existem ou não servem vão para "Não entra nesta rede".',
+          scenario: ['As sub-redes privadas, uma em cada zona, usam a mesma tabela de rotas. Os servidores falam com o S3, o DynamoDB e o SQS, e o acesso ao SQS não pode parar se uma zona cair.'],
           concepts: [{ id: 'pl.gateway-endpoint' }, { id: 'pl.interface-endpoint' }],
           xp: 50,
-          difficulty: 1,
-          explanation: ['O endpoint de gateway é uma rota, sem custo, só para S3 e DynamoDB e só dentro da VPC. O de interface cria interfaces de rede com IP privado, cobra por hora e por GB e atende quem chega por VPN, Direct Connect ou Transit Gateway.'],
-          bins: [
-            { id: 'gw', label: 'Endpoint de gateway' },
-            { id: 'if', label: 'Endpoint de interface' },
+          difficulty: 2,
+          explanation: [
+            'Os endpoints de gateway do S3 e do DynamoDB entram como rotas na tabela das sub-redes: não ocupam espaço nas sub-redes e não aceitam security group.',
+            'O SQS só tem endpoint de interface, que põe uma interface de rede com IP privado em cada sub-rede escolhida. Com uma em cada zona, a queda de uma zona não corta o acesso.',
           ],
-          items: [
-            { id: 'route', text: 'Entra como rota com a lista de prefixos do serviço', bin: 'gw', explanation: 'O endpoint de gateway é um alvo de rota.', concepts: ['pl.gateway-endpoint'] },
-            { id: 'free', text: 'Não tem custo extra', bin: 'gw', explanation: 'Só o de interface cobra por hora e por GB.', concepts: ['pl.gateway-endpoint'] },
-            { id: 'eni', text: 'Cria interfaces de rede com IP privado nas sub-redes', bin: 'if', explanation: 'É assim que o PrivateLink funciona.', concepts: ['pl.interface-endpoint'] },
-            { id: 'onprem', text: 'Atende quem chega pela VPN ou pelo Direct Connect', bin: 'if', explanation: 'O de gateway não se estende para fora da VPC.', concepts: ['pl.interface-endpoint'] },
-            { id: 'sqs', text: 'Existe para o SQS e o Secrets Manager', bin: 'if', explanation: 'O de gateway existe só para S3 e DynamoDB.', concepts: ['pl.interface-endpoint'] },
+          board: PATHS_BOARD,
+          pieces: [
+            { id: 'gw-s3', text: 'Endpoint de gateway do S3', explanation: 'É um alvo de rota: entra na tabela de rotas com a lista de prefixos do S3, sem custo.', concepts: ['pl.gateway-endpoint'] },
+            { id: 'gw-ddb', text: 'Endpoint de gateway do DynamoDB', explanation: 'Também é um alvo de rota, com a lista de prefixos do DynamoDB, sem custo.', concepts: ['pl.gateway-endpoint'] },
+            { id: 'eni', text: 'Interface de rede do endpoint do SQS', count: 2, explanation: 'O endpoint de interface do SQS põe uma interface com IP privado em cada sub-rede escolhida. Uma em cada zona evita o ponto único de falha.', concepts: ['pl.interface-endpoint'] },
+            { id: 'gw-sqs', text: 'Endpoint de gateway do SQS', explanation: 'Não existe: só o S3 e o DynamoDB têm endpoint de gateway.', concepts: ['pl.gateway-endpoint'] },
+            { id: 'sg-gw', text: 'Security group para o endpoint de gateway do S3', explanation: 'O endpoint de gateway é só uma rota e não aceita security group. Para limitar o acesso, use a política de endpoint.', concepts: ['pl.gateway-endpoint'] },
+          ],
+          slots: [
+            { id: 'rt', label: 'Tabela de rotas das sub-redes privadas', x: 30, y: 40, w: 480, h: 84, expect: { 'gw-s3': 1, 'gw-ddb': 1 }, explanation: 'A tabela recebe as rotas dos dois endpoints de gateway, uma para a lista de prefixos do S3 e outra para a do DynamoDB.' },
+            { id: 'sa', label: 'Dentro da sub-rede privada A', x: 54, y: 192, w: 182, h: 150, expect: { eni: 1 }, explanation: 'A sub-rede A recebe uma interface do endpoint do SQS.' },
+            { id: 'sb', label: 'Dentro da sub-rede privada B', x: 304, y: 192, w: 182, h: 150, expect: { eni: 1 }, explanation: 'A sub-rede B recebe a outra interface do endpoint do SQS, para o acesso não depender da zona a.' },
           ],
         },
       ],
@@ -197,7 +205,7 @@ export const F05_NET: PhaseDef = {
         objective: 'Oferecer a API sem peering e sem expor a VPC.',
         successCriteria: ['Escolher o serviço de endpoint com Network Load Balancer'],
       },
-      intel: [{ conceptId: 'pl.endpoint-service', body: ['Coloque a API atrás de um **Network Load Balancer** e crie um **serviço de endpoint**. Cada cliente cria um **endpoint de interface** na própria VPC. Blocos sobrepostos não atrapalham, e só o cliente inicia conexões.'] }],
+      intel: [{ conceptId: 'pl.endpoint-service', body: ['Coloque a API atrás de um **Network Load Balancer** e crie um **serviço de endpoint**. Cada cliente cria um **endpoint de interface** na própria VPC. Blocos sobrepostos não atrapalham, e só o cliente inicia conexões.'], diagram: ENDPOINT_SERVICE }],
       activities: [
         {
           id: 'net.f05.m3.a1',
@@ -209,9 +217,10 @@ export const F05_NET: PhaseDef = {
           difficulty: 2,
           explanation: ['O serviço de endpoint do PrivateLink usa um Network Load Balancer na frente da API. Cada cliente cria um endpoint de interface. Não há roteamento entre as VPCs, e por isso blocos sobrepostos não são problema.'],
           options: [
-            { id: 'a', text: 'Um serviço de endpoint com Network Load Balancer; cada cliente cria um endpoint de interface', correct: true, consequence: 'Cada cliente alcança só a API, sem enxergar a VPC da corretora.' },
-            { id: 'b', text: 'Um peering com cada cliente', correct: false, consequence: 'Blocos sobrepostos impedem o peering, e o peering abre a VPC inteira.' },
-            { id: 'c', text: 'Publicar a API num endereço público e liberar os IPs dos clientes', correct: false, consequence: 'O tráfego passa pela internet, o que os clientes não aceitam.' },
+            { id: 'a', text: 'Serviço de endpoint com Network Load Balancer, consumido por endpoints de interface', correct: true, consequence: 'Cada cliente alcança só a API, sem enxergar a VPC da corretora.' },
+            { id: 'b', text: 'Um peering entre a VPC da corretora e a de cada cliente', correct: false, consequence: 'Blocos sobrepostos impedem o peering, e o peering abre a VPC inteira.' },
+            { id: 'c', text: 'A API num endereço público, liberada só para os IPs dos clientes', correct: false, consequence: 'O tráfego passa pela internet, o que os clientes não aceitam.' },
+            { id: 'd', text: 'Um Transit Gateway compartilhado com os clientes pelo RAM', correct: false, consequence: 'O Transit Gateway roteia entre as redes: os blocos sobrepostos entram em conflito, e os clientes passam a enxergar a rede da corretora.' },
           ],
         },
         {

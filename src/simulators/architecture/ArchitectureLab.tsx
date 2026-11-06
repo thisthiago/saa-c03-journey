@@ -6,7 +6,8 @@ import { registry } from '../../content'
 import { Button } from '../../ui/kit'
 import { renderInline } from '../../ui/inline'
 import type { ArchitectureLabConfig, ArchitectureLabResponse } from './lab'
-import { evaluateArchitecture, examDomainScores, ruleFires } from './model'
+import { Diagram } from '../../ui/diagram/Diagram'
+import { archDiagram, evaluateArchitecture, examDomainScores, ruleFires } from './model'
 import s from './architecture.module.css'
 
 interface Props {
@@ -41,6 +42,13 @@ export function ArchitectureLab({ config, value, onChange, disabled, evaluation 
           </li>
         ))}
       </ol>
+
+      {config.diagram && (
+        <details className={s.drawing} open>
+          <summary>Desenho do projeto até aqui</summary>
+          <Diagram spec={archDiagram(config, answers)!} />
+        </details>
+      )}
 
       <div className={s.columns}>
         <section className={s.main} aria-label={`Etapa ${stepIndex + 1}: ${step.title}`}>
@@ -178,7 +186,7 @@ function Report({ config, value }: { config: ArchitectureLabConfig; value: Archi
                 ) : (
                   wrong.map((p) => (
                     <li key={p.question.id}>
-                      <strong>{renderInline(p.question.prompt)}</strong> → {renderInline(p.option?.label ?? 'sem resposta')}. {renderInline(p.option?.consequence ?? '')}
+                      <strong>{renderInline(p.question.prompt)}</strong> Sua resposta: {renderInline(p.option?.label ?? 'sem resposta')}. {renderInline(p.option?.consequence ?? '')}
                     </li>
                   ))
                 )}

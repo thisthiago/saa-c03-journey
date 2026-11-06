@@ -16,6 +16,7 @@ import type { Evaluation, GameEvent, ImpactDimension } from '../../engine/types'
 import { useGame } from '../../store/gameStore'
 import { Badge, Button, Callout } from '../../ui/kit'
 import { Paragraphs } from '../../ui/RichText'
+import { Diagram } from '../../ui/diagram/Diagram'
 import { renderInline } from '../../ui/inline'
 import s from './mission.module.css'
 
@@ -148,6 +149,7 @@ export function ActivityRunner({ activity, onSubmit, onContinue, continueLabel, 
         </div>
         <h2 className={s.activityTitle}>{activity.title}</h2>
         <p className={s.prompt}>{renderInline(activity.prompt)}</p>
+        {activity.diagram && <Diagram spec={activity.diagram} className={s.activityDiagram} />}
         {activity.exhibits?.length ? (
           <div className={s.exhibits}>
             {activity.exhibits.map((x) => (

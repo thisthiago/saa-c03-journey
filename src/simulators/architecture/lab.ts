@@ -22,7 +22,7 @@ export function evaluateArchitectureLab(c: ArchConfig, r: ArchitectureLabRespons
     score: p.value,
     fb: {
       id: p.question.id,
-      label: `${p.question.prompt} → ${p.option?.label ?? 'sem resposta'}`,
+      label: `${p.question.prompt} Resposta: ${p.option?.label ?? 'sem resposta'}`,
       status: p.value >= 0.8 ? 'correct' : p.value >= 0.5 ? 'partial' : 'wrong',
       message: p.option?.consequence ?? 'Pergunta sem resposta.',
     },

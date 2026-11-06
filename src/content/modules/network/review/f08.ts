@@ -13,20 +13,20 @@ export const REVIEW_F08: ReviewSet = {
       kind: 'decision',
       title: 'Folhas de estilo trocadas toda semana',
       prompt:
-        'Um site entregue pelo Amazon CloudFront troca arquivos JavaScript e folhas de estilo várias vezes por semana e hoje **invalida todos os caminhos** a cada publicação. A empresa quer **parar de pagar invalidações** e garantir que nenhum visitante fique com a versão antiga, nem no navegador. Qual prática a AWS recomenda?',
+        'Um site entregue pelo Amazon CloudFront troca arquivos JavaScript e folhas de estilo várias vezes por semana e hoje **invalida cada arquivo do site, um caminho por arquivo**, a cada publicação, passando dos 1.000 caminhos gratuitos por mês. A empresa quer **parar de pagar invalidações** e garantir que nenhum visitante fique com a versão antiga, nem no navegador. Qual prática a AWS recomenda?',
       concepts: [{ id: 'cdn.invalidation' }],
       xp: 5,
       difficulty: 1,
       domain: 'd4',
       options: [
-        { id: 'a', text: 'Invalidar só os arquivos alterados, logo depois de cada publicação.', correct: false, consequence: 'Paga menos caminhos, mas continua pagando, e navegadores e proxies podem manter a versão antiga.' },
+        { id: 'a', text: 'Invalidar só os arquivos alterados, logo depois de cada publicação.', correct: false, consequence: 'Reduz os caminhos pagos, mas navegadores e proxies podem manter a versão antiga, e o visitante continua vendo o arquivo velho.' },
         { id: 'b', text: 'Nomes versionados, como app.v42.js, com as páginas apontando para eles.', correct: true, consequence: 'O arquivo novo nunca esteve em cache: ninguém vê o antigo, e não há invalidação a pagar.' },
         { id: 'c', text: 'Baixar o TTL desses arquivos para zero no comportamento de cache da distribuição.', correct: false, consequence: 'Toda requisição volta à origem, o site fica mais lento e a origem recebe toda a carga.' },
         { id: 'd', text: 'Manter a invalidação de todos os caminhos e avisar os visitantes por e-mail.', correct: false, consequence: 'Mantém o custo, e o navegador de quem já visitou o site pode continuar com a versão antiga.' },
       ],
       explanation: [
         'Para quem atualiza com frequência, a AWS recomenda **nomes versionados**: cada publicação gera um arquivo com nome novo (app.v42.js), e as páginas passam a apontar para ele. O arquivo novo nunca esteve em cache, então ninguém recebe a versão antiga, nem do navegador; não há invalidação a pagar, e voltar atrás é apontar para o nome anterior.',
-        'Invalidar menos caminhos ainda custa e não alcança o cache dos navegadores. TTL zero tira o benefício do CloudFront. E manter a invalidação total mantém o problema.',
+        'Invalidar menos caminhos pode reduzir o custo, mas não alcança o cache dos navegadores. TTL zero tira o benefício do CloudFront. E manter a invalidação total mantém o problema.',
         '**Regra prática:** atualização frequente pede nomes versionados; a invalidação fica para emergências, quando um arquivo publicado precisa sumir dos caches antes do TTL.',
       ],
     },

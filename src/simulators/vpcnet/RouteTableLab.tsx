@@ -5,7 +5,9 @@ import { FactTag, PremiseTag } from '../shared/Tags'
 import c from '../shared/compute.module.css'
 import sh from '../shared/lab.module.css'
 import n from '../shared/net.module.css'
+import { Diagram } from '../../ui/diagram/Diagram'
 import { NEED_LABEL, natWorks, targetLabel, type RouteTableLabConfig, type RouteTableLabResponse, type SubnetRoutes } from './routing'
+import { routeDiagram } from './routing-diagram'
 
 interface Props {
   config: RouteTableLabConfig
@@ -88,6 +90,7 @@ export function RouteTableLab({ config, value, onChange, disabled, evaluation }:
           </tbody>
         </table>
       </div>
+      <Diagram spec={routeDiagram(config, value)} />
       {evaluation && (
         <ul className={n.verdicts}>
           {evaluation.items.map((i) => (

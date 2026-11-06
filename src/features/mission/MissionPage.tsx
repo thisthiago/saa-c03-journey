@@ -15,6 +15,7 @@ import { NotFound } from '../NotFound'
 import { ActivityRunner, type SubmitResult } from './ActivityRunner'
 import { ContextPanel } from './ContextPanel'
 import { Visual } from './visuals'
+import { Diagram } from '../../ui/diagram/Diagram'
 import s from './mission.module.css'
 import { phaseLabel } from '../../app/format'
 
@@ -173,8 +174,9 @@ function MissionRunner({ missionId }: { missionId: string }) {
             {mission.intel.map((card) => {
               const c = registry.concepts.get(card.conceptId)!
               return (
-                <Card key={card.conceptId} className={s.intelCard} as="article">
+                <Card key={card.conceptId} className={card.diagram ? `${s.intelCard} ${s.intelWide}` : s.intelCard} as="article">
                   {card.visual && <Visual id={card.visual} />}
+                  {card.diagram && <Diagram spec={card.diagram} />}
                   <div className={s.intelHead}>
                     <h2 className={s.intelTitle}>{c.title}</h2>
                     <Badge tone="info" title="Nome oficial usado pela AWS">

@@ -7,6 +7,7 @@ import sh from '../shared/lab.module.css'
 import n from '../shared/net.module.css'
 import { blockSize, isCidr, parseCidr, usableIps } from './model'
 import { subnetProblems, vpcChoiceProblems, type VpcPlannerLabConfig, type VpcPlannerLabResponse } from './planner'
+import { AddressRuler } from './AddressRuler'
 
 interface Props {
   config: VpcPlannerLabConfig
@@ -84,6 +85,7 @@ export function VpcPlannerLab({ config, value, onChange, disabled, evaluation }:
             </tbody>
           </table>
         </div>
+        <AddressRuler config={config} value={value} />
       </section>
       {evaluation && (
         <ul className={n.verdicts}>

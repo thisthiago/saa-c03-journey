@@ -58,3 +58,25 @@ describe('arquitetura', () => {
     expect(evaluateArchitecture(ATLAS, bestAnswers(ATLAS)).score).toBe(1)
   })
 })
+
+describe('desenho do projeto de rede', async () => {
+  const { CESTA_CHEIA } = await import('../../content/modules/network/phases/final/phase')
+  const { diagramProblems } = await import('../../engine/diagram')
+  const { archDiagram, bestAnswers } = await import('./model')
+
+  it('toda opção acrescenta algo ao desenho, e cada uma gera um desenho válido', () => {
+    for (const s of CESTA_CHEIA.steps)
+      for (const q of s.questions)
+        for (const o of q.options) {
+          expect(o.draw, `${q.id}.${o.id}`).toBeDefined()
+          expect(diagramProblems(archDiagram(CESTA_CHEIA, { [q.id]: o.id })!), `${q.id}.${o.id}`).toEqual([])
+        }
+  })
+
+  it('o projeto de referência gera um desenho válido, com as escolhas na descrição', () => {
+    const d = archDiagram(CESTA_CHEIA, bestAnswers(CESTA_CHEIA))!
+    expect(diagramProblems(d)).toEqual([])
+    expect(d.label).toContain('Escolhas até aqui: 10.64.0.0/16')
+    expect(d.nodes!.some((n) => n.id === 'tgw')).toBe(true)
+  })
+})

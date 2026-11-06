@@ -171,7 +171,7 @@ import type {
   PredictResponse,
 } from './evaluate'
 import type { ActivityDef } from './types'
-import { ClassifyView, DecisionView, EstimateView, InvestigateView, MatchView, OrderView, PredictView } from './views'
+import { BuildView, ClassifyView, DecisionView, EstimateView, InvestigateView, MatchView, OrderView, PredictView } from './views'
 
 interface ViewArgs {
   activity: ActivityDef
@@ -200,6 +200,8 @@ export function ActivityView({ activity, value, onChange, disabled, evaluation, 
       return <EstimateView activity={activity} value={value as EstimateResponse} onChange={set} {...common} />
     case 'investigate':
       return <InvestigateView activity={activity} value={value as InvestigateResponse} onChange={set} {...common} />
+    case 'build':
+      return <BuildView activity={activity} value={value as PlacementResponse} onChange={set} {...common} />
     case 'lab':
       switch (activity.lab) {
         case 'bucket':

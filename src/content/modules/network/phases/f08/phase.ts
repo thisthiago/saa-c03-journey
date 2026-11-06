@@ -8,6 +8,7 @@ import type { PhaseDef } from '../../../../../engine/types'
 import type { EdgeLabConfig } from '../../../../../simulators/edge/lab'
 import type { EdgeSetup } from '../../../../../simulators/edge/model'
 import { META } from '../meta'
+import { CF_VS_GA, DIST_BOARD, EDGE_HOOKS, EDGE_PATH } from './diagrams'
 
 const BATUQUE_SETUP: EdgeSetup = {
   origin: { kind: 's3', region: 'sa-east-1', label: 'Bucket S3 em sa-east-1' },
@@ -20,7 +21,8 @@ const BATUQUE_SETUP: EdgeSetup = {
 export const BATUQUE_EDGE: EdgeLabConfig = {
   setup: BATUQUE_SETUP,
   ttlOptions: [0, 60, 300, 3600, 86400],
-  allowInvalidation: true,
+  // A invalidação automática cumpriria a meta de atraso com qualquer TTL; a fase ensina nomes versionados.
+  allowInvalidation: false,
   events: [
     { at: 0, kind: 'request', method: 'GET', path: '/capas/samba.jpg' },
     { at: 4, kind: 'request', method: 'GET', path: '/capas/samba.jpg' },
@@ -80,8 +82,10 @@ export const F08_NET: PhaseDef = {
         successCriteria: ['Prever quem responde a uma requisição', 'Escolher entre invalidação e nomes versionados'],
       },
       intel: [
-        { conceptId: 'edge.cloudfront', body: ['O **CloudFront** responde do **POP** quando tem cópia válida; se não tem, pergunta ao **cache regional** e, por fim, à **origem**.'] },
-        { conceptId: 'cdn.invalidation', body: ['Para quem atualiza com frequência, a AWS recomenda **nomes versionados** (capa.v3.jpg) em vez de invalidar a cada mudança.'] },
+        { conceptId: 'edge.cloudfront', body: ['O **CloudFront** responde do **POP** quando tem cópia válida; se não tem, pergunta ao **cache regional** e, por fim, à **origem**.'], diagram: EDGE_PATH },
+        { conceptId: 'edge.pop', body: ['Um **POP** (ponto de presença) é um local da rede do CloudFront perto dos usuários, que guarda cópias dos arquivos. Quando falta espaço, ele descarta primeiro o que é pouco pedido.'] },
+        { conceptId: 'edge.regional-edge-cache', body: ['O **cache regional** fica entre os POPs e a origem. É maior e guarda por mais tempo o que os POPs descartaram, evitando a ida até a origem.'] },
+        { conceptId: 'cdn.invalidation', body: ['A **invalidação** limpa arquivos dos caches do CloudFront, mas não do navegador nem de proxies. Para quem atualiza com frequência, a AWS recomenda **nomes versionados** (capa.v3.jpg) em vez de invalidar a cada mudança.'] },
       ],
       activities: [
         {
@@ -140,7 +144,7 @@ export const F08_NET: PhaseDef = {
           concepts: [{ id: 'cdn.invalidation' }],
           xp: 40,
           difficulty: 2,
-          explanation: ['Nomes versionados controlam a versão até no navegador e em proxies, não pagam invalidação e facilitam voltar atrás. A invalidação fica para emergências.'],
+          explanation: ['Nomes versionados controlam a versão também no navegador e em proxies, guardam o histórico das versões e facilitam voltar atrás. A invalidação limpa só os caches do CloudFront e fica para emergências (os primeiros 1.000 caminhos invalidados por mês são gratuitos).'],
           options: [
             { id: 'a', text: 'Publicar arquivos com nomes versionados (capa.v3.jpg) e apontar as páginas para o nome novo', correct: true, consequence: 'O arquivo novo nunca esteve em cache, e ninguém vê o antigo.' },
             { id: 'b', text: 'Continuar invalidando tudo a cada troca', correct: false, consequence: 'Funciona nos caches do CloudFront, mas navegadores e proxies podem guardar a versão antiga.' },
@@ -164,9 +168,10 @@ export const F08_NET: PhaseDef = {
         successCriteria: ['Usar OAC', 'Saber em que Região fica o certificado', 'Escolher entre URL e cookie assinados'],
       },
       intel: [
-        { conceptId: 'cdn.oac', body: ['Com **OAC**, o bucket fica **privado** e só aceita o CloudFront daquela distribuição. A AWS recomenda o OAC no lugar da antiga OAI.'] },
-        { conceptId: 'cdn.https-acm', body: ['O certificado do ACM para o seu domínio no CloudFront fica em **us-east-1**.'] },
-        { conceptId: 'cdn.signed', body: ['**URL assinada**: um arquivo. **Cookie assinado**: vários arquivos, sem mudar as URLs.'] },
+        { conceptId: 'cdn.oac', body: ['Com **OAC** (origin access control), o CloudFront assina os pedidos que faz ao bucket, e a política do bucket libera só aquela distribuição: o bucket fica **privado**. A antiga **OAI** (origin access identity) faz algo parecido, mas não atende buckets cifrados com SSE-KMS; a AWS recomenda o OAC.'] },
+        { conceptId: 'cdn.https-acm', body: ['O certificado do ACM para o seu domínio no CloudFront fica em **us-east-1**, qualquer que seja a Região da origem.'] },
+        { conceptId: 'cdn.signed', body: ['A **URL assinada** libera um arquivo. O **cookie assinado** libera vários arquivos, sem mudar as URLs.'] },
+        { conceptId: 'cdn.geo-restriction', body: ['A **restrição geográfica** permite ou bloqueia países inteiros: quem está num país bloqueado recebe o erro 403.'] },
       ],
       activities: [
         {
@@ -200,21 +205,35 @@ export const F08_NET: PhaseDef = {
           ],
         },
         {
-          id: 'net.f08.m2.a3',
-          kind: 'match',
-          title: 'Cada proteção, seu caso',
-          prompt: 'Associe cada necessidade ao recurso do CloudFront.',
-          concepts: [{ id: 'cdn.signed' }, { id: 'cdn.geo-restriction' }, { id: 'cdn.oac' }],
+          id: 'net.f08.m2.a4',
+          kind: 'build',
+          title: 'Monte a distribuição',
+          prompt: 'Arraste cada peça para onde ela é configurada: na distribuição, no comportamento /assinantes/* ou no bucket. As que não servem vão para "Não entra nesta rede".',
+          scenario: [
+            'O domínio musica.batuque.com precisa de HTTPS. A área /assinantes/* tem centenas de faixas, e as URLs delas não podem mudar.',
+            'O bucket das músicas fica em sa-east-1 e não pode ser lido sem passar pelo CloudFront. Um contrato proíbe a distribuição em alguns países.',
+          ],
+          concepts: [{ id: 'cdn.oac' }, { id: 'cdn.https-acm' }, { id: 'cdn.signed' }, { id: 'cdn.geo-restriction' }],
           xp: 60,
           difficulty: 2,
-          explanation: ['URL assinada para um arquivo, cookie assinado para muitos arquivos sem trocar as URLs, restrição geográfica para países e OAC para fechar o bucket.'],
-          leftLabel: 'Necessidade',
-          rightLabel: 'Recurso',
-          pairs: [
-            { id: 'url', left: 'Liberar o download de um único álbum comprado', right: 'URL assinada', explanation: 'Restringe o acesso a um arquivo.', concepts: ['cdn.signed'] },
-            { id: 'cookie', left: 'Liberar todas as faixas da área de assinantes sem mudar as URLs', right: 'Cookie assinado', explanation: 'Vale para vários arquivos.', concepts: ['cdn.signed'] },
-            { id: 'geo', left: 'Não distribuir nos países fora do contrato', right: 'Restrição geográfica', explanation: 'Bloqueia países inteiros com 403.', concepts: ['cdn.geo-restriction'] },
-            { id: 'oac', left: 'Impedir o acesso direto ao bucket', right: 'Origin access control', explanation: 'O bucket só aceita a distribuição.', concepts: ['cdn.oac'] },
+          explanation: [
+            'O certificado e a restrição geográfica valem para a distribuição inteira, e o certificado precisa estar em us-east-1. Os cookies assinados entram no comportamento /assinantes/*, porque liberam muitas faixas sem trocar as URLs.',
+            'No bucket, a política libera só a distribuição, pelo OAC, e o acesso público fica bloqueado.',
+          ],
+          board: DIST_BOARD,
+          pieces: [
+            { id: 'cert', text: 'Certificado do ACM em us-east-1', explanation: 'O CloudFront usa certificados do ACM de us-east-1, para o domínio da distribuição inteira.', concepts: ['cdn.https-acm'] },
+            { id: 'geo', text: 'Restrição geográfica para os países do contrato', explanation: 'É uma configuração da distribuição: bloqueia países inteiros com o erro 403.', concepts: ['cdn.geo-restriction'] },
+            { id: 'cookie', text: 'Cookies assinados', explanation: 'Liberam todas as faixas da área de assinantes sem mudar as URLs.', concepts: ['cdn.signed'] },
+            { id: 'oac', text: 'Política do bucket que libera só esta distribuição (OAC)', explanation: 'Com o OAC, o bucket fica privado e só aceita os pedidos assinados pela distribuição.', concepts: ['cdn.oac'] },
+            { id: 'cert-sp', text: 'Certificado do ACM em sa-east-1', explanation: 'O CloudFront só usa certificados do ACM de us-east-1, qualquer que seja a Região da origem.', concepts: ['cdn.https-acm'] },
+            { id: 'public', text: 'Acesso público de leitura no bucket', explanation: 'Deixaria qualquer um baixar as músicas direto do bucket, sem passar pelo CloudFront.', concepts: ['cdn.oac'] },
+            { id: 'url', text: 'Uma URL assinada para cada faixa', explanation: 'As URLs mudariam, e o cenário pede que fiquem iguais. A URL assinada serve para liberar um arquivo, como o .zip de um álbum comprado.', concepts: ['cdn.signed'] },
+          ],
+          slots: [
+            { id: 'dist', label: 'Configuração da distribuição', x: 126, y: 48, w: 348, h: 104, expect: { cert: 1, geo: 1 }, explanation: 'O certificado do domínio e a restrição geográfica valem para a distribuição inteira.' },
+            { id: 'beh', label: 'Comportamento /assinantes/*', x: 126, y: 172, w: 348, h: 124, expect: { cookie: 1 }, explanation: 'O comportamento da área de assinantes exige os cookies assinados.' },
+            { id: 'bucket', label: 'No bucket das músicas', x: 536, y: 96, w: 158, h: 148, expect: { oac: 1 }, explanation: 'O bucket precisa de uma política que libere só a distribuição, pelo OAC.' },
           ],
         },
       ],
@@ -234,8 +253,8 @@ export const F08_NET: PhaseDef = {
         successCriteria: ['Pôr cada função no lugar certo', 'Reconhecer o caso do Global Accelerator'],
       },
       intel: [
-        { conceptId: 'cdn.edge-functions', body: ['**CloudFront Functions**: JavaScript leve, menos de 1 ms, eventos do usuário. **Lambda@Edge**: até 30 s, rede, arquivos e corpo da requisição, também nos eventos da origem.'] },
-        { conceptId: 'cdn.cf-vs-ga', body: ['**Global Accelerator**: dois **IPs anycast fixos**, **TCP e UDP**, sem cache, troca de Região sem depender do DNS.'] },
+        { conceptId: 'cdn.edge-functions', body: ['As **CloudFront Functions** rodam JavaScript leve, em menos de 1 ms, só nos eventos do ouvinte, sem acesso à rede nem ao corpo da requisição. O **Lambda@Edge** roda até 30 segundos, acessa a rede e o corpo da requisição e também roda nos eventos da origem.'], diagram: EDGE_HOOKS },
+        { conceptId: 'cdn.cf-vs-ga', body: ['O **Global Accelerator** dá dois **IPs anycast fixos**, aceita **TCP e UDP**, não tem cache e troca de Região sem depender do DNS.'], diagram: CF_VS_GA },
       ],
       activities: [
         {
@@ -256,7 +275,7 @@ export const F08_NET: PhaseDef = {
             { id: 'header', text: 'Adicionar um cabeçalho de segurança a toda resposta', bin: 'cff', explanation: 'Manipular cabeçalhos é leve e rápido.', concepts: ['cdn.edge-functions'] },
             { id: 'token', text: 'Validar um token JWT no cabeçalho antes de liberar o conteúdo', bin: 'cff', explanation: 'Validação de token está entre os casos das CloudFront Functions.', concepts: ['cdn.edge-functions'] },
             { id: 'api', text: 'Montar a resposta com dados buscados em outro serviço pela rede', bin: 'le', explanation: 'Só o Lambda@Edge tem acesso à rede.', concepts: ['cdn.edge-functions'] },
-            { id: 'body', text: 'Ler o corpo da requisição para decidir a origem', bin: 'le', explanation: 'Só o Lambda@Edge acessa o corpo da requisição.', concepts: ['cdn.edge-functions'] },
+            { id: 'body', text: 'Ler o corpo de um POST para validar o formulário', bin: 'le', explanation: 'Só o Lambda@Edge acessa o corpo da requisição; as CloudFront Functions não leem o corpo.', concepts: ['cdn.edge-functions'] },
           ],
         },
         {
@@ -288,7 +307,7 @@ export const F08_NET: PhaseDef = {
         role: 'Você ajusta a distribuição do CloudFront.',
         situation: 'Hoje, as capas não têm cache, a playlist pessoal de cada ouvinte fica em cache por uma hora e a lista de lançamentos, por um dia. Resultado: lentidão, listas antigas e o risco de um ouvinte ver a playlist de outro.',
         objective: 'Cumprir as três metas de cache.',
-        successCriteria: ['Playlists nunca saem do cache', 'Lançamentos desatualizados por no máximo 5 minutos', 'No máximo 8 requisições chegam a São Paulo'],
+        successCriteria: ['Playlists sempre vêm da origem', 'Lançamentos desatualizados por no máximo 5 minutos', 'No máximo 8 requisições chegam a São Paulo'],
       },
       intel: [{ conceptId: 'edge.cloudfront', body: ['Respostas personalizadas **nunca** vão para o cache. Arquivos estáticos ficam com TTL longo. Arquivos que mudam pedem TTL curto.'] }],
       activities: [
@@ -302,21 +321,25 @@ export const F08_NET: PhaseDef = {
           xp: 200,
           difficulty: 3,
           hints: ['/api/* é pessoal: sem cache.', 'Os lançamentos aceitam até 5 minutos de atraso: um TTL de 60 segundos atende.'],
-          explanation: ['/api/* sem cache, /lancamentos.json com TTL de 60 segundos e o resto, as capas, com TTL de um dia. As playlists vêm sempre da origem, a lista nova aparece em até um minuto e as capas saem do POP ou do cache regional.'],
+          explanation: [
+            '/api/* sem cache, /lancamentos.json com TTL curto e o resto, as capas, com TTL de um dia. As playlists vêm sempre da origem, e as capas saem do POP ou do cache regional.',
+            'Para os lançamentos, 0, 60 ou 300 segundos cumprem as metas: a lista nova aparece em até 5 minutos, e as idas a São Paulo ficam dentro do limite.',
+          ],
           config: BATUQUE_EDGE,
         },
         {
           id: 'net.f08.boss.a2',
           kind: 'decision',
           title: 'Os lançamentos de sexta',
-          prompt: 'Toda sexta à meia-noite sai a lista de lançamentos, e a gravadora quer que ela apareça na hora, sem esperar o TTL. O que fazer?',
+          prompt: 'Toda sexta à meia-noite sai a lista de lançamentos, e a gravadora quer que ela apareça na hora, sem esperar o TTL. O aplicativo dos ouvintes guarda o arquivo por 1 hora. O que fazer?',
           concepts: [{ id: 'cdn.invalidation' }],
           xp: 50,
           difficulty: 2,
-          explanation: ['Publicar a lista com um nome novo (lancamentos-2026-10-23.json) e apontar o site para ele faz a mudança aparecer na hora, sem pagar invalidação e sem depender do cache dos navegadores.'],
+          explanation: ['Publicar a lista com um nome novo (lancamentos-2026-10-23.json) e apontar o site para ele faz a mudança aparecer na hora: o arquivo novo nunca esteve em cache, nem no CloudFront nem no aplicativo.'],
           options: [
             { id: 'a', text: 'Publicar a lista com um nome versionado e apontar o site para o nome novo', correct: true, consequence: 'O arquivo novo nunca esteve em cache.' },
             { id: 'b', text: 'Baixar o TTL de todos os arquivos para zero', correct: false, consequence: 'Todas as capas voltam a ir até São Paulo.' },
+            { id: 'c', text: 'Pedir uma invalidação de /lancamentos.json à meia-noite', correct: false, consequence: 'Limpa os caches do CloudFront, mas o aplicativo guarda o arquivo por 1 hora: quem já baixou continua vendo a lista antiga.' },
           ],
         },
       ],

@@ -425,3 +425,111 @@
   color: var(--text-faint);
   user-select: none;
 }
+
+/* Montagem: destinos sobre um desenho (layout canvas). */
+.board[data-layout='canvas'] {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.canvas {
+  position: relative;
+  border-radius: var(--radius-m);
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
+    var(--surface-2);
+  background-size: 16px 16px;
+}
+.canvasBg {
+  position: absolute;
+  inset: 0;
+}
+.canvasBg > svg {
+  width: 100%;
+  height: 100%;
+}
+.canvasSide {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(220px, 2fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+.canvasSide .pool {
+  padding: var(--space-3);
+}
+.canvasSide .chip {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+.slot {
+  position: absolute;
+  min-height: 0;
+  padding: 4px;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-s);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.slot .targetHead {
+  padding: 1px 4px;
+  margin: 0;
+}
+.slot .targetLabel {
+  font-size: 0.74rem;
+  line-height: 1.2;
+}
+.slot .targetDesc,
+.slot .targetHint {
+  display: none;
+}
+.slot .chips {
+  gap: 3px;
+  min-height: 0;
+}
+.slot .chip {
+  padding: 2px 7px;
+  font-size: 0.74rem;
+  line-height: 1.25;
+  border-radius: 7px;
+  gap: 4px;
+}
+.slot .chip > svg {
+  width: 13px;
+  height: 13px;
+}
+.slot.dropReady {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-soft) 60%, var(--surface));
+}
+@media (max-width: 720px) {
+  .board[data-layout='canvas'],
+  .canvasSide {
+    grid-template-columns: 1fr;
+  }
+  .canvas {
+    aspect-ratio: auto !important;
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+  .canvasBg {
+    position: static;
+  }
+  .slot {
+    position: static;
+    width: auto !important;
+    min-height: 0 !important;
+  }
+}
+.build {
+  display: grid;
+  gap: var(--space-3);
+}
+.buildCaption {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}

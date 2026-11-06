@@ -89,7 +89,7 @@ export const REVIEW_F07: ReviewSet = {
       options: [
         { id: 'a', text: 'Política ponderada, com peso 19 no ambiente atual e 1 no novo.', correct: true, consequence: 'O novo recebe 1 ÷ (19 + 1) = 5% das respostas; basta subir o peso dele para aumentar.' },
         { id: 'b', text: 'Política ponderada, com peso 95 no ambiente atual e 1 no novo.', correct: false, consequence: 'O novo recebe 1 ÷ 96, cerca de 1%, e não 5%.' },
-        { id: 'c', text: 'Política de failover, com o ambiente novo como secundário.', correct: false, consequence: 'O secundário só recebe tráfego quando o primário fica sem saúde; não há divisão de 5%.' },
+        { id: 'c', text: 'Política de failover, com o ambiente novo como secundário.', correct: false, consequence: 'O secundário só recebe tráfego quando o primário deixa de estar saudável; não há divisão de 5%.' },
         { id: 'd', text: 'Política de múltiplas respostas, com um registro para cada ambiente.', correct: false, consequence: 'Os registros saudáveis são devolvidos ao acaso, sem controle da proporção.' },
       ],
       explanation: [
@@ -103,7 +103,7 @@ export const REVIEW_F07: ReviewSet = {
       kind: 'decision',
       title: 'O registro de peso zero',
       prompt:
-        'Um site usa a política ponderada com dois registros, os dois com verificação de saúde: o ambiente atual tem peso 100, e o novo, desativado depois de um teste, tem **peso 0**. Num incidente, o ambiente atual **fica sem saúde**, e o novo continua saudável. O que o Route 53 passa a responder?',
+        'Um site usa a política ponderada com dois registros, os dois com verificação de saúde: o ambiente atual tem peso 100, e o novo, desativado depois de um teste, tem **peso 0**. Num incidente, o ambiente atual **deixa de estar saudável**, e o novo continua saudável. O que o Route 53 passa a responder?',
       concepts: [{ id: 'dns.weighted' }],
       xp: 5,
       difficulty: 3,
@@ -112,12 +112,12 @@ export const REVIEW_F07: ReviewSet = {
         { id: 'a', text: 'O ambiente atual, porque peso 0 nunca recebe tráfego.', correct: false, consequence: 'O peso 0 tira o registro só enquanto houver registros de peso maior saudáveis.' },
         { id: 'b', text: 'Nenhuma resposta, até alguém mudar os pesos à mão.', correct: false, consequence: 'O Route 53 tem uma regra para esse caso e não deixa de responder.' },
         { id: 'c', text: 'O ambiente novo, que passa a ser considerado.', correct: true, consequence: 'Sem registros de peso maior que zero saudáveis, o Route 53 passa a considerar os de peso zero.' },
-        { id: 'd', text: 'Os dois ambientes ao acaso, em proporções iguais.', correct: false, consequence: 'Não há divisão igual: o registro sem saúde fica de fora, e o de peso zero passa a responder.' },
+        { id: 'd', text: 'Os dois ambientes ao acaso, em proporções iguais.', correct: false, consequence: 'Não há divisão igual: o registro não saudável fica de fora, e o de peso zero passa a responder.' },
       ],
       explanation: [
-        'Peso 0 tira um registro do rodízio, mas com uma exceção: **se todos os registros de peso maior que zero ficarem sem saúde**, o Route 53 passa a considerar os de peso zero. Como o ambiente novo está saudável, ele começa a receber o tráfego.',
-        'Peso zero não é "nunca". O Route 53 não fica sem responder enquanto houver um registro saudável. E o ambiente sem saúde não entra numa divisão igual.',
-        '**Regra prática:** antes de deixar um ambiente com peso zero "parado", lembre que ele pode virar o destino de todo o tráfego se os outros ficarem sem saúde. Para tirá-lo de vez, apague o registro.',
+        'Peso 0 tira um registro do rodízio, mas com uma exceção: **se todos os registros de peso maior que zero deixarem de estar saudáveis**, o Route 53 passa a considerar os de peso zero. Como o ambiente novo está saudável, ele começa a receber o tráfego.',
+        'Peso zero não é "nunca". O Route 53 não fica sem responder enquanto houver um registro saudável. E o ambiente não saudável não entra numa divisão igual.',
+        '**Regra prática:** antes de deixar um ambiente com peso zero "parado", lembre que ele pode virar o destino de todo o tráfego se os outros deixarem de estar saudáveis. Para tirá-lo de vez, apague o registro.',
       ],
     },
     {
@@ -125,15 +125,15 @@ export const REVIEW_F07: ReviewSet = {
       kind: 'decision',
       title: 'Quando a Região mais rápida cai',
       prompt:
-        'Uma aplicação roda em sa-east-1, us-east-1 e eu-west-1, e cada usuário deve ser atendido pela **Região de menor latência** para ele. Se uma Região ficar sem saúde, os usuários dela devem ir **automaticamente para a próxima Região mais rápida**. Qual configuração atende?',
+        'Uma aplicação roda em sa-east-1, us-east-1 e eu-west-1, e cada usuário deve ser atendido pela **Região de menor latência** para ele. Se uma Região deixar de estar saudável, os usuários dela devem ir **automaticamente para a próxima Região mais rápida**. Qual configuração atende?',
       concepts: [{ id: 'dns.latency' }],
       xp: 5,
       difficulty: 2,
       domain: 'd2',
       options: [
         { id: 'a', text: 'Política de latência, sem verificações de saúde nos registros.', correct: false, consequence: 'Sem verificação, o Route 53 continua mandando usuários para a Região que caiu.' },
-        { id: 'b', text: 'Política de latência, com verificações de saúde nos registros.', correct: true, consequence: 'A Região sem saúde sai das respostas, e cada usuário vai para a próxima de menor latência.' },
-        { id: 'c', text: 'Política de geolocalização por continente, com registro padrão.', correct: false, consequence: 'Decide pelo local do usuário, não pela latência medida, e não pula Regiões sem saúde sozinha.' },
+        { id: 'b', text: 'Política de latência, com verificações de saúde nos registros.', correct: true, consequence: 'A Região não saudável sai das respostas, e cada usuário vai para a próxima de menor latência.' },
+        { id: 'c', text: 'Política de geolocalização por continente, com registro padrão.', correct: false, consequence: 'Decide pelo local do usuário, não pela latência medida, e não pula Regiões não saudáveis sozinha.' },
         { id: 'd', text: 'Política ponderada, com pesos iguais e verificações de saúde.', correct: false, consequence: 'Divide o tráfego por proporção, sem considerar a latência de cada usuário.' },
       ],
       explanation: [
@@ -265,7 +265,7 @@ export const REVIEW_F07: ReviewSet = {
       options: [
         { id: 'a', text: 'Política simples, com um registro contendo os seis IPs.', correct: false, consequence: 'Devolve os seis IPs, sem verificação de saúde: servidores fora do ar continuam na resposta.' },
         { id: 'b', text: 'Múltiplas respostas, com um registro por servidor e sem verificações.', correct: false, consequence: 'Registro sem verificação de saúde conta como saudável: um servidor caído continuaria sendo devolvido.' },
-        { id: 'c', text: 'Múltiplas respostas, com um registro e uma verificação por servidor.', correct: true, consequence: 'O Route 53 devolve até oito registros saudáveis, e os servidores sem saúde ficam de fora.' },
+        { id: 'c', text: 'Múltiplas respostas, com um registro e uma verificação por servidor.', correct: true, consequence: 'O Route 53 devolve até oito registros saudáveis, e os servidores não saudáveis ficam de fora.' },
         { id: 'd', text: 'Failover, com um servidor primário e os outros como secundários.', correct: false, consequence: 'O failover tem um primário e um secundário e devolve um destino por vez, não vários IPs.' },
       ],
       explanation: [
@@ -279,7 +279,7 @@ export const REVIEW_F07: ReviewSet = {
       kind: 'decision',
       title: 'Uma Região de reserva parada',
       prompt:
-        'Uma empresa roda a aplicação em us-east-1 e mantém uma cópia em us-west-2 só para desastres. A cópia de us-west-2 **só deve receber tráfego se a de us-east-1 ficar sem saúde**. Qual configuração do Route 53 atende?',
+        'Uma empresa roda a aplicação em us-east-1 e mantém uma cópia em us-west-2 só para desastres. A cópia de us-west-2 **só deve receber tráfego se a de us-east-1 deixar de estar saudável**. Qual configuração do Route 53 atende?',
       concepts: [{ id: 'dns.failover' }],
       xp: 5,
       difficulty: 1,
@@ -291,7 +291,7 @@ export const REVIEW_F07: ReviewSet = {
         { id: 'd', text: 'Política de geolocalização: Leste dos EUA para us-east-1 e padrão para us-west-2.', correct: false, consequence: 'Os usuários fora do Leste iriam para us-west-2 o tempo todo, mesmo com us-east-1 saudável.' },
       ],
       explanation: [
-        'A política de **failover** é o ativo-passivo do Route 53: responde com o **primário** enquanto ele está saudável e passa ao **secundário** quando o primário fica sem saúde. Com a verificação de saúde em us-east-1, us-west-2 fica parada até ser necessária.',
+        'A política de **failover** é o ativo-passivo do Route 53: responde com o **primário** enquanto ele está saudável e passa ao **secundário** quando o primário deixa de estar saudável. Com a verificação de saúde em us-east-1, us-west-2 fica parada até ser necessária.',
         'Latência e múltiplas respostas mantêm as duas Regiões ativas. A geolocalização manda parte dos usuários para us-west-2 sempre.',
         '**Regra prática:** "a reserva só recebe tráfego se o principal cair" é failover. Qualquer outra política com verificações de saúde monta um ativo-ativo.',
       ],
