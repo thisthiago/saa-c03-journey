@@ -5,7 +5,8 @@
  * `src/activities/<kind>/evaluate.ts` (funções puras) e a interface em
  * componentes React registrados por `kind`.
  */
-import type { ActivityBase, ImpactDimension } from '../engine/types'
+import type { DiagramSpec } from '../engine/diagram'
+import type { ActivityBase, GlyphName, ImpactDimension } from '../engine/types'
 import type { PredictSpec } from './predict/specs'
 import type { LabSpec } from './lab/specs'
 
@@ -114,6 +115,43 @@ export interface InvestigateActivity extends ActivityBase {
   remediations: { prompt: string; options: { id: string; text: string; correct: boolean; feedback: string }[] }
 }
 
+// --- build ------------------------------------------------------------------
+
+/** Tipo de peça da montagem. `count` cria cópias iguais (padrão: 1). */
+export interface BuildPiece {
+  id: string
+  text: string
+  glyph?: GlyphName
+  count?: number
+  /** O que a peça faz e onde ela fica (RichText). */
+  explanation: string
+  concepts?: string[]
+}
+
+/** Lugar do desenho que recebe peças. Coordenadas no viewBox do `board`. */
+export interface BuildSlot {
+  id: string
+  label: string
+  description?: string
+  x: number
+  y: number
+  w: number
+  h: number
+  /** Quantas cópias de cada peça o lugar precisa. Vazio: o lugar fica sem peça. */
+  expect: Record<string, number>
+  /** Por que o lugar precisa dessas peças (mostrado quando ele está errado). */
+  explanation: string
+}
+
+export interface BuildActivity extends ActivityBase {
+  kind: 'build'
+  scenario?: string[]
+  /** Desenho de fundo. Os lugares ficam por cima dele. */
+  board: DiagramSpec
+  pieces: BuildPiece[]
+  slots: BuildSlot[]
+}
+
 // --- lab --------------------------------------------------------------------
 
 export type LabActivity = ActivityBase & { kind: 'lab' } & LabSpec
@@ -126,6 +164,7 @@ export type ActivityDef =
   | PredictActivity
   | EstimateActivity
   | InvestigateActivity
+  | BuildActivity
   | LabActivity
 
 export type ActivityKind = ActivityDef['kind']
