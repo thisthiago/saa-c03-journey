@@ -6,6 +6,7 @@
 import type { PhaseDef } from '../../../../../engine/types'
 import type { NetChooserLabConfig } from '../../../../../simulators/netchooser/model'
 import { META } from '../meta'
+import { ATTACK_LAYERS, DEFENSE_BOARD, FIREWALL_ROUTE } from './diagrams'
 
 export const PECHINCHA_CHOOSER: NetChooserLabConfig = {
   itemsLabel: 'Requisitos do marketplace',
@@ -46,7 +47,7 @@ export const F09_NET: PhaseDef = {
         successCriteria: ['Usar o WAF onde ele funciona', 'Escolher as regras gerenciadas e a regra por taxa'],
       },
       intel: [
-        { conceptId: 'edgesec.waf', body: ['O **WAF** inspeciona requisições **HTTP(S)** no CloudFront, no ALB, no API Gateway e em outros recursos, e permite ou bloqueia (403).'] },
+        { conceptId: 'edgesec.waf', body: ['O **WAF** inspeciona requisições **HTTP(S)** no CloudFront, no ALB, no API Gateway e em outros recursos, e permite ou bloqueia (403). As regras ficam num **pacote de proteção** (o nome novo da antiga web ACL), associado a cada recurso protegido.'] },
         { conceptId: 'edgesec.waf-managed', body: ['Grupo **SQL database**: injeção de SQL. **Core rule set**: vulnerabilidades comuns, inclusive cross-site scripting.'] },
         { conceptId: 'edgesec.rate-based', body: ['A **regra por taxa** conta as requisições de cada IP e bloqueia quem passa do limite.'] },
       ],
@@ -70,14 +71,15 @@ export const F09_NET: PhaseDef = {
           id: 'net.f09.m1.a2',
           kind: 'decision',
           title: 'Os robôs do login',
-          prompt: 'Robôs testam milhares de senhas por minuto, cada um de poucos IPs. O que usar?',
+          prompt: 'Robôs testam milhares de senhas por minuto no login. Cada robô usa poucos IPs, e os IPs mudam todo dia. O ataque não derruba a loja, mas ameaça as contas dos clientes. O que usar?',
           concepts: [{ id: 'edgesec.rate-based' }],
           xp: 40,
           difficulty: 2,
           explanation: ['A regra por taxa do WAF conta as requisições por IP numa janela de tempo e bloqueia quem passa do limite. Uma declaração de escopo pode limitá-la ao caminho do login.'],
           options: [
             { id: 'a', text: 'Uma regra por taxa no WAF, limitada ao caminho do login', correct: true, consequence: 'Cada IP que passa do limite é bloqueado.' },
-            { id: 'b', text: 'Aumentar o número de servidores', correct: false, consequence: 'Os robôs continuam tentando, agora em mais servidores.' },
+            { id: 'b', text: 'Uma network ACL negando os IPs que atacaram hoje', correct: false, consequence: 'Amanhã os robôs voltam com outros IPs, e a ACL tem um limite pequeno de regras.' },
+            { id: 'c', text: 'Assinar o Shield Advanced', correct: false, consequence: 'O Shield trata de negação de serviço. Robôs testando senhas num ritmo que não derruba a loja são caso para o WAF.' },
           ],
         },
         {
@@ -88,7 +90,7 @@ export const F09_NET: PhaseDef = {
           concepts: [{ id: 'edgesec.waf' }],
           xp: 50,
           difficulty: 2,
-          explanation: ['O WAF protege recursos que recebem requisições web, como CloudFront, ALB, API Gateway (REST), AppSync e Cognito. Ele não se associa a um Network Load Balancer nem a uma instância EC2 diretamente.'],
+          explanation: ['O WAF protege recursos que recebem requisições web, como CloudFront, ALB, APIs REST do API Gateway, AppSync e Cognito. Ele não se associa a um Network Load Balancer, a uma API HTTP do API Gateway nem a uma instância EC2.'],
           bins: [
             { id: 'yes', label: 'Aceita o WAF' },
             { id: 'no', label: 'Não aceita diretamente' },
@@ -99,6 +101,7 @@ export const F09_NET: PhaseDef = {
             { id: 'api', text: 'API REST do API Gateway', bin: 'yes', explanation: 'É um dos recursos protegidos pelo WAF.', concepts: ['edgesec.waf'] },
             { id: 'nlb', text: 'Network Load Balancer', bin: 'no', explanation: 'O NLB não está na lista de recursos do WAF.', concepts: ['edgesec.waf'] },
             { id: 'ec2', text: 'Uma instância EC2', bin: 'no', explanation: 'Para proteger a instância, coloque um ALB ou um CloudFront com WAF na frente.', concepts: ['edgesec.waf'] },
+            { id: 'httpapi', text: 'API HTTP do API Gateway', bin: 'no', explanation: 'O WAF aceita as APIs REST do API Gateway, mas não as APIs HTTP.', concepts: ['edgesec.waf'] },
           ],
         },
       ],
@@ -118,8 +121,8 @@ export const F09_NET: PhaseDef = {
         successCriteria: ['Saber o que vem sem custo', 'Saber o que o Advanced acrescenta e exige'],
       },
       intel: [
-        { conceptId: 'edgesec.shield-standard', body: ['O **Shield Standard** vem ligado para todos, **sem custo extra**, contra os ataques de rede e de transporte mais comuns.'] },
-        { conceptId: 'edgesec.shield-advanced', body: ['O **Shield Advanced** é assinatura: mitigação na camada 7, **equipe de resposta** (exige suporte Business ou Enterprise) e **créditos de custo**. Só protege os recursos que você adiciona.'] },
+        { conceptId: 'edgesec.shield-standard', body: ['O **Shield Standard** vem ligado para todos, **sem custo extra**, contra os ataques mais comuns nas **camadas 3 e 4**: rede (pacotes IP) e transporte (TCP e UDP, como a inundação de SYN).'], diagram: ATTACK_LAYERS },
+        { conceptId: 'edgesec.shield-advanced', body: ['O **Shield Advanced** é assinatura: acrescenta mitigação na **camada 7** (aplicação, as requisições HTTP), **equipe de resposta** (exige suporte Business ou Enterprise) e **créditos de custo**. Só protege os recursos que você adiciona.'] },
       ],
       activities: [
         {
@@ -164,6 +167,8 @@ export const F09_NET: PhaseDef = {
           options: [
             { id: 'a', text: 'Adicionar o CloudFront, o ALB e a zona do Route 53 à proteção', correct: true, consequence: 'Só os recursos adicionados recebem a proteção ampliada.' },
             { id: 'b', text: 'Esperar: a proteção chega em até 90 dias', correct: false, consequence: 'Não há espera; os recursos precisam ser adicionados.' },
+            { id: 'c', text: 'Associar um pacote de proteção do WAF a cada recurso', correct: false, consequence: 'O WAF filtra requisições, mas não inclui os recursos na proteção do Shield Advanced.' },
+            { id: 'd', text: 'Ativar o Shield Standard nos recursos', correct: false, consequence: 'O Standard já vem ligado para todos e não precisa de ativação; o que falta é adicionar os recursos ao Advanced.' },
           ],
         },
       ],
@@ -183,7 +188,7 @@ export const F09_NET: PhaseDef = {
         successCriteria: ['Usar o Network Firewall na borda da VPC', 'Usar o Firewall Manager na organização'],
       },
       intel: [
-        { conceptId: 'edgesec.network-firewall', body: ['O **Network Firewall** filtra o tráfego que entra e sai da VPC, com estado, **regras Suricata** e **filtro por domínio**. Os endpoints dele ficam em sub-redes próprias.'] },
+        { conceptId: 'edgesec.network-firewall', body: ['O **Network Firewall** filtra o tráfego que entra e sai da VPC, com estado, **filtro por domínio** e regras compatíveis com o **Suricata**, um padrão aberto de regras de detecção e bloqueio. Os endpoints dele ficam em sub-redes próprias, e as rotas levam o tráfego até eles.'], diagram: FIREWALL_ROUTE },
         { conceptId: 'edgesec.firewall-manager', body: ['O **Firewall Manager** aplica WAF, Shield Advanced, security groups e Network Firewall em **todas as contas**, inclusive nas novas.'] },
       ],
       activities: [
@@ -214,24 +219,43 @@ export const F09_NET: PhaseDef = {
           options: [
             { id: 'a', text: 'AWS Firewall Manager com uma política de WAF para a organização', correct: true, consequence: 'As contas novas recebem as regras ao entrar.' },
             { id: 'b', text: 'Copiar o pacote de proteção para cada conta à mão', correct: false, consequence: 'Dá trabalho e deixa contas novas de fora.' },
+            { id: 'c', text: 'Uma SCP da organização que exige o WAF', correct: false, consequence: 'A SCP só limita permissões: pode impedir que alguém apague regras, mas não cria nem associa pacotes de proteção nas contas.' },
           ],
         },
         {
-          id: 'net.f09.m3.a3',
-          kind: 'match',
-          title: 'Cada ameaça, sua proteção',
-          prompt: 'Associe cada ameaça à proteção que a enfrenta.',
-          concepts: [{ id: 'net.choose' }, { id: 'edgesec.waf' }, { id: 'edgesec.shield-standard' }, { id: 'edgesec.network-firewall' }],
-          xp: 60,
-          difficulty: 2,
-          explanation: ['Conteúdo malicioso em requisições web: WAF. Inundação de rede: Shield. Tráfego indevido saindo da VPC: Network Firewall. Porta aberta num servidor: security group.'],
-          leftLabel: 'Ameaça',
-          rightLabel: 'Proteção',
-          pairs: [
-            { id: 'xss', left: 'Script malicioso enviado num comentário', right: 'AWS WAF', explanation: 'O Core rule set bloqueia cross-site scripting.', concepts: ['edgesec.waf'] },
-            { id: 'syn', left: 'Inundação de SYN contra o balanceador', right: 'AWS Shield', explanation: 'Ataque de transporte, coberto pelo Shield.', concepts: ['edgesec.shield-standard'] },
-            { id: 'exfil', left: 'Servidor comprometido enviando dados a um domínio desconhecido', right: 'AWS Network Firewall', explanation: 'Filtra a saída da VPC por domínio.', concepts: ['edgesec.network-firewall'] },
-            { id: 'ssh', left: 'Porta 22 aberta para o mundo num servidor', right: 'Security group', explanation: 'Remover a regra fecha a porta.', concepts: ['net.choose'] },
+          id: 'net.f09.m3.a4',
+          kind: 'build',
+          title: 'Defesa em camadas',
+          prompt: 'Coloque cada proteção na camada em que ela atua. As que não existem ou não resolvem vão para "Não entra nesta rede".',
+          scenario: [
+            'O marketplace tem trinta contas numa organização. A loja fica atrás de um CloudFront e de um ALB, e os servidores de aplicação saem para a internet por um NAT Gateway, mas só podem acessar os domínios de pagamento.',
+            'Há injeção de SQL e robôs testando senhas no login, um ataque vindo de uma faixa de IPs conhecida, e a diretoria quer equipe de resposta e créditos em caso de DDoS. Os servidores só devem receber a porta 8080, vinda do balanceador.',
+          ],
+          concepts: [{ id: 'net.choose' }, { id: 'edgesec.waf' }, { id: 'edgesec.shield-advanced' }, { id: 'edgesec.network-firewall' }, { id: 'edgesec.firewall-manager' }],
+          xp: 70,
+          difficulty: 3,
+          explanation: [
+            'Na borda, o WAF filtra as requisições (injeção de SQL e robôs) e o Shield Advanced protege o CloudFront e o Route 53, com equipe de resposta e créditos. O Firewall Manager leva essas proteções a todas as contas.',
+            'Na VPC, o Network Firewall fica no caminho até o NAT e filtra a saída por domínio; a network ACL nega a faixa do ataque na entrada da sub-rede; e o security group de cada servidor só aceita a porta 8080 vinda do balanceador.',
+          ],
+          board: DEFENSE_BOARD,
+          pieces: [
+            { id: 'waf', text: 'AWS WAF com regras gerenciadas e regra por taxa', explanation: 'Filtra as requisições HTTP na borda: injeção de SQL pelas regras gerenciadas e robôs pela regra por taxa.', concepts: ['edgesec.waf'] },
+            { id: 'shield', text: 'Shield Advanced', explanation: 'Protege os recursos da borda adicionados a ele, como o CloudFront e o Route 53, com equipe de resposta e créditos.', concepts: ['edgesec.shield-advanced'] },
+            { id: 'nfw', text: 'AWS Network Firewall com a lista de domínios de pagamento', explanation: 'Fica numa sub-rede própria, no caminho entre a aplicação e o NAT, e só deixa sair para os domínios permitidos.', concepts: ['edgesec.network-firewall'] },
+            { id: 'fm', text: 'AWS Firewall Manager', explanation: 'Aplica o WAF e o Shield Advanced em todas as contas da organização, inclusive nas novas.', concepts: ['edgesec.firewall-manager'] },
+            { id: 'acl', text: 'Network ACL negando a faixa do ataque', explanation: 'Nega a faixa inteira na entrada da sub-rede, antes de chegar a qualquer servidor.', concepts: ['net.choose'] },
+            { id: 'sg', text: 'Security group que só aceita a porta 8080 vinda do balanceador', explanation: 'Fica em cada servidor e usa o grupo do balanceador como origem.', concepts: ['net.choose'] },
+            { id: 'waf-nlb', text: 'AWS WAF num Network Load Balancer', explanation: 'O WAF não se associa ao Network Load Balancer.', concepts: ['edgesec.waf'] },
+            { id: 'waf-http', text: 'AWS WAF numa API HTTP do API Gateway', explanation: 'O WAF aceita as APIs REST do API Gateway, mas não as APIs HTTP.', concepts: ['edgesec.waf'] },
+            { id: 'shield-pw', text: 'Shield Advanced contra os robôs que testam senhas', explanation: 'Robôs testando senhas são caso de regra por taxa no WAF, e não de proteção contra negação de serviço.', concepts: ['edgesec.shield-advanced'] },
+          ],
+          slots: [
+            { id: 'org', label: 'Em todas as contas', x: 460, y: 24, w: 236, h: 62, expect: { fm: 1 }, explanation: 'Para valer nas trinta contas e nas novas, as proteções vêm do Firewall Manager.' },
+            { id: 'edge', label: 'Na borda', x: 40, y: 118, w: 310, h: 64, expect: { waf: 1, shield: 1 }, explanation: 'Na borda ficam o WAF, que filtra as requisições, e o Shield Advanced, que protege o CloudFront e o Route 53.' },
+            { id: 'nfw', label: 'No caminho até o NAT', x: 240, y: 256, w: 150, h: 122, expect: { nfw: 1 }, explanation: 'O Network Firewall fica numa sub-rede própria, por onde as rotas levam a saída da aplicação até o NAT.' },
+            { id: 'sub', label: 'Na entrada da sub-rede de aplicação', x: 424, y: 256, w: 254, h: 58, expect: { acl: 1 }, explanation: 'Negar uma faixa inteira na sub-rede é papel da network ACL.' },
+            { id: 'srv', label: 'Em cada servidor de aplicação', x: 424, y: 322, w: 254, h: 58, expect: { sg: 1 }, explanation: 'O security group de cada servidor só aceita a porta 8080 vinda do balanceador.' },
           ],
         },
       ],
