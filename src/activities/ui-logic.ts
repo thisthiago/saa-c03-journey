@@ -45,6 +45,7 @@ import type {
   PredictResponse,
 } from './evaluate'
 import { labInitialResponse } from './lab/evaluate'
+import { buildChips } from './build/evaluate'
 import { shuffled } from './shared/util'
 import type { ActivityDef } from './types'
 
@@ -54,6 +55,7 @@ export function initialResponse(activity: ActivityDef, seed: string): ActivityRe
       return { selected: [] } satisfies DecisionResponse
     case 'classify':
     case 'match':
+    case 'build':
       return { placements: {} } satisfies PlacementResponse
     case 'order': {
       const ids = activity.steps.map((st) => st.id)
@@ -87,6 +89,8 @@ export function isComplete(activity: ActivityDef, response: ActivityResponse): b
       return activity.items.every((i) => (response as PlacementResponse).placements[i.id])
     case 'match':
       return activity.pairs.every((p) => (response as PlacementResponse).placements[p.id])
+    case 'build':
+      return buildChips(activity).every((c) => (response as PlacementResponse).placements[c.id])
     case 'order':
       return true
     case 'predict':
@@ -237,6 +241,8 @@ export function incompleteHint(activity: ActivityDef): string {
     case 'classify':
     case 'match':
       return 'Posicione todos os itens.'
+    case 'build':
+      return 'Posicione todas as peças. As que não fazem parte desta rede vão para "Não entra nesta rede".'
     case 'predict':
       return 'Escolha sua previsão.'
     case 'investigate':
@@ -256,6 +262,7 @@ export const KIND_LABEL: Record<ActivityDef['kind'], string> = {
   predict: 'Previsão',
   estimate: 'Estimativa',
   investigate: 'Investigação',
+  build: 'Montagem',
   lab: 'Laboratório',
 }
 
