@@ -7,8 +7,8 @@ import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { describe, expect, it } from 'vitest'
 import { evaluateActivity, type PlacementResponse } from './evaluate'
-import type { ClassifyActivity, MatchActivity } from './types'
-import { ClassifyView, MatchView } from './views'
+import type { BuildActivity, ClassifyActivity, MatchActivity } from './types'
+import { BuildView, ClassifyView, MatchView } from './views'
 
 const classify: ClassifyActivity = {
   id: 't.classify',
@@ -60,7 +60,8 @@ function Harness({ kind, onValue }: { kind: 'classify' | 'match'; onValue: (v: P
 }
 
 async function placeWithKeyboard(user: ReturnType<typeof userEvent.setup>, itemName: string, targetName: string) {
-  screen.getByRole('button', { name: new RegExp(itemName) }).focus()
+  // Cópias iguais (montagem): a última do DOM é a que ainda está na lista de peças.
+  screen.getAllByRole('button', { name: new RegExp(itemName) }).at(-1)!.focus()
   await user.keyboard('{Enter}')
   screen.getByRole('button', { name: `Posicionar em ${targetName}` }).focus()
   await user.keyboard('{Enter}')
@@ -91,5 +92,49 @@ describe('interações acessíveis por teclado', () => {
     await placeWithKeyboard(user, 'Standard', 'Acesso frequente')
     await placeWithKeyboard(user, 'Deep Archive', 'Retenção de anos')
     expect(evaluateActivity(match, last).score).toBe(1)
+  })
+
+  it('montagem sobre o desenho só com o teclado, com cópias e bandeja', async () => {
+    const build: BuildActivity = {
+      id: 't.build',
+      kind: 'build',
+      title: 'Teste',
+      prompt: 'Monte',
+      concepts: [{ id: 'x' }],
+      xp: 10,
+      difficulty: 1,
+      explanation: [''],
+      board: { width: 400, height: 200, label: 'Duas zonas', boxes: [{ id: 'z', kind: 'zone', label: 'Zonas', x: 10, y: 10, w: 380, h: 180 }] },
+      pieces: [
+        { id: 'web', text: 'Sub-rede web', count: 2, explanation: '' },
+        { id: 'span', text: 'Sub-rede nas duas zonas', explanation: '' },
+      ],
+      slots: [
+        { id: 'a', label: 'Zona a', x: 20, y: 40, w: 160, h: 80, expect: { web: 1 }, explanation: '' },
+        { id: 'b', label: 'Zona b', x: 220, y: 40, w: 160, h: 80, expect: { web: 1 }, explanation: '' },
+      ],
+    }
+    const user = userEvent.setup()
+    let last: PlacementResponse = { placements: {} }
+    function BuildHarness() {
+      const [value, setValue] = useState<PlacementResponse>({ placements: {} })
+      return (
+        <BuildView
+          activity={build}
+          value={value}
+          onChange={(v) => {
+            setValue(v)
+            last = v
+          }}
+          disabled={false}
+          seed="s"
+        />
+      )
+    }
+    render(<BuildHarness />)
+    await placeWithKeyboard(user, '^Sub-rede web$', 'Zona a')
+    await placeWithKeyboard(user, '^Sub-rede web$', 'Zona b')
+    await placeWithKeyboard(user, 'Sub-rede nas duas zonas', 'Não entra nesta rede')
+    expect(evaluateActivity(build, last).score).toBe(1)
   })
 })
