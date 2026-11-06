@@ -1,11 +1,14 @@
 /** Interface do laboratório "O pacote chega?": regras para ligar e o resultado de cada fluxo, ao vivo. */
+import { useState } from 'react'
 import type { Evaluation } from '../../engine/types'
+import { Diagram } from '../../ui/diagram/Diagram'
 import { renderInline } from '../../ui/inline'
 import { FactTag, PremiseTag } from '../shared/Tags'
 import c from '../shared/compute.module.css'
 import sh from '../shared/lab.module.css'
 import n from '../shared/net.module.css'
 import { applyRules, judgeFlow, type ReachLabConfig, type ReachLabResponse } from './lab'
+import { flowDiagram } from './diagram'
 import { OUTCOME_LABEL, traceFlow } from './model'
 
 interface Props {
@@ -18,6 +21,8 @@ interface Props {
 
 export function ReachLab({ config, value, onChange, disabled, evaluation }: Props) {
   const enabled = value.enabled ?? config.initial
+  const [shown, setShown] = useState(config.flows[0]?.id)
+  const shownFlow = config.flows.find((f) => f.id === shown) ?? config.flows[0]
   const w = applyRules(config, enabled)
   const toggle = (id: string, on: boolean) => onChange({ enabled: on ? [...enabled, id] : enabled.filter((x) => x !== id) })
   const targetName = (id: string) => {
@@ -70,6 +75,7 @@ export function ReachLab({ config, value, onChange, disabled, evaluation }: Prop
                 <th>Fluxo</th>
                 <th>Requisito</th>
                 <th>Resultado agora</th>
+                <th>Caminho</th>
               </tr>
             </thead>
             <tbody>
@@ -86,12 +92,18 @@ export function ReachLab({ config, value, onChange, disabled, evaluation }: Prop
                       </span>{' '}
                       {OUTCOME_LABEL[r.outcome]}
                     </td>
+                    <td>
+                      <button type="button" className={n.pathBtn} aria-pressed={f.id === shownFlow?.id} onClick={() => setShown(f.id)}>
+                        Ver caminho
+                      </button>
+                    </td>
                   </tr>
                 )
               })}
             </tbody>
           </table>
         </div>
+        {shownFlow && <Diagram spec={flowDiagram(w, shownFlow)} className={n.flowDiagram} />}
       </section>
       {evaluation && (
         <ul className={n.verdicts}>
