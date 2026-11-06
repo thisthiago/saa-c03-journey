@@ -6,6 +6,8 @@
  * mudar para receber uma nova trilha ou serviço.
  */
 import type { ActivityDef } from '../activities/types'
+import { diagramProblems } from './diagram'
+import { buildProblems } from '../activities/build/evaluate'
 import type {
   AchievementDef,
   ConceptDef,
@@ -177,7 +179,10 @@ export function validateRegistry(reg: Registry): string[] {
         for (const m of p.missions) {
           unique('missão', m.id)
           if (m.activities.length === 0) errors.push(`Missão ${m.id}: sem atividades`)
-          for (const card of m.intel) if (!reg.concepts.has(card.conceptId)) errors.push(`Missão ${m.id}: intel com conceito inexistente ${card.conceptId}`)
+          for (const card of m.intel) {
+            if (!reg.concepts.has(card.conceptId)) errors.push(`Missão ${m.id}: intel com conceito inexistente ${card.conceptId}`)
+            if (card.diagram) for (const p of diagramProblems(card.diagram)) errors.push(`Missão ${m.id}: desenho do cartão ${card.conceptId}: ${p}`)
+          }
           for (const a of m.activities) {
             unique('atividade', a.id)
             validateActivity(reg, a, `Atividade ${a.id}`, errors)
@@ -245,6 +250,7 @@ function validateActivity(reg: Registry, a: ActivityDef, label: string, errors: 
   for (const c of a.concepts) if (!reg.concepts.has(c.id)) errors.push(`${label}: conceito inexistente ${c.id}`)
   if (a.explanation.length === 0) errors.push(`${label}: sem explicação`)
   if (a.xp <= 0) errors.push(`${label}: XP inválido`)
+  if (a.diagram) for (const p of diagramProblems(a.diagram)) errors.push(`${label}: desenho: ${p}`)
   switch (a.kind) {
     case 'decision':
       if (!a.options.some((o) => o.correct)) errors.push(`${label}: nenhuma opção correta`)
@@ -253,6 +259,11 @@ function validateActivity(reg: Registry, a: ActivityDef, label: string, errors: 
       break
     case 'classify':
       for (const i of a.items) if (!a.bins.some((b) => b.id === i.bin)) errors.push(`${label}: item ${i.id} em categoria inexistente`)
+      break
+    case 'build':
+      for (const p of diagramProblems(a.board)) errors.push(`${label}: desenho da montagem: ${p}`)
+      for (const p of buildProblems(a)) errors.push(`${label}: ${p}`)
+      for (const p of a.pieces) for (const c of p.concepts ?? []) if (!reg.concepts.has(c)) errors.push(`${label}: peça com conceito inexistente ${c}`)
       break
     case 'investigate':
       if (!a.artifacts.some((art) => art.lines.some((l) => l.isIssue))) errors.push(`${label}: nenhuma evidência relevante`)
