@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { place, progressWithFirstMission, seedProgress } from './helpers'
+import { place, progressWithFirstMission, progressWithPhase1, seedProgress } from './helpers'
 
 test('quem começa agora recebe a primeira missão da AWS Foundations', async ({ page }) => {
   await page.goto('/')
@@ -334,4 +334,108 @@ test('arrastar com o mouse: o bloco fica colado no cursor e cai no destino', asy
   await page.mouse.up()
   await expect(ghost).toHaveCount(0)
   await expect(page.locator('[data-drop]').filter({ hasText: 'Bloco (Amazon EBS)' }).getByRole('button', { name: /Volume de boot/ })).toBeVisible()
+})
+
+test('montagem: posicionar as peças sobre o desenho da VPC, errar uma zona e chegar a 100%', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await seedProgress(page, progressWithFirstMission())
+  await page.goto('/#/missao/net.f01.m1')
+  await page.getByRole('button', { name: 'Ver conceitos-chave' }).click()
+  await expect(page.getByRole('img', { name: /VPC 10\.40\.0\.0\/16 ocupando a Região inteira/ })).toBeVisible()
+  await page.getByRole('button', { name: 'Entendi, ir para o desafio' }).click()
+  await expect(page.getByRole('heading', { name: 'Monte a VPC da loja' })).toBeVisible()
+
+  // Cópias iguais: a última ficha com o nome é a que ainda está na lista de peças.
+  const put = async (piece: string, target: string) => {
+    await page.getByRole('button', { name: piece, exact: true }).last().click()
+    await page.getByRole('button', { name: `Posicionar em ${target}` }).click()
+  }
+  const correct: [string, string][] = [
+    ['Internet gateway', 'Borda da VPC'],
+    ['Security group dos servidores web', 'Toda a VPC, em qualquer zona'],
+    ['Sub-rede web', 'Dentro da zona a'],
+    ['Sub-rede web', 'Dentro da zona b'],
+    ['Servidor web (instância EC2)', 'Dentro da zona a'],
+    ['Servidor web (instância EC2)', 'Dentro da zona b'],
+    ['Sub-rede web que cobre as duas zonas', 'Não entra nesta rede'],
+    ['Segundo internet gateway, um para cada zona', 'Não entra nesta rede'],
+  ]
+  // Primeiro, os dois servidores na mesma zona.
+  for (const [piece, target] of correct.map(([p, t], i) => [p, i === 5 ? 'Dentro da zona a' : t] as [string, string])) await put(piece, target)
+  await page.getByRole('button', { name: 'Verificar' }).click()
+  await expect(page.getByText('Resultado: 88%', { exact: true })).toBeVisible()
+  await expect(page.getByText('A zona b também precisa da própria sub-rede web e de um servidor lançado nela.')).toBeVisible()
+  await page.screenshot({ path: 'screenshots/desktop-net-f1-montagem-resultado.png', fullPage: true })
+
+  await page.getByRole('button', { name: 'Tentar 100%' }).click()
+  for (const [piece, target] of correct) await put(piece, target)
+  await page.getByRole('button', { name: 'Verificar' }).click()
+  await expect(page.getByText('Perfeito!')).toBeVisible()
+})
+
+test('plano de endereços: a régua mostra sub-redes sobrepostas e fora da VPC', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  const base = progressWithPhase1(new Date(), { missions: ['net.f01.m1', 'net.f01.m2', 'net.f01.m3'] })
+  await seedProgress(page, { ...base, resume: { missionId: 'net.f01.boss', step: 2, at: new Date().toISOString() } })
+  await page.goto('/#/missao/net.f01.boss')
+  await expect(page.getByText('Escolha um bloco de VPC aceito para ver a régua de endereços.')).toBeVisible()
+  await page.getByLabel('Bloco CIDR da VPC').selectOption('10.40.0.0/22')
+  await page.getByLabel('Bloco da sub-rede aplicação A').fill('10.40.0.0/24')
+  await page.getByLabel('Bloco da sub-rede web A').fill('10.40.0.128/25')
+  await page.getByLabel('Bloco da sub-rede banco A').fill('10.50.0.0/27')
+  await expect(page.getByRole('img', { name: /web A em 10\.40\.0\.128\/25, sobreposta a outra sub-rede/ })).toBeVisible()
+  await expect(page.getByText('Fora do bloco da VPC: banco A (10.50.0.0/27).')).toBeVisible()
+  await page.screenshot({ path: 'screenshots/desktop-net-f1-regua.png', fullPage: true })
+})
+
+test('tabelas de rotas: o desenho mostra cada rota, a sub-rede pública e o NAT sem saída', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  const before = ['f01', 'f02'].flatMap((f) => ['m1', 'm2', 'm3', 'boss'].map((m) => `net.${f}.${m}`)).filter((m) => m !== 'net.f02.boss')
+  await seedProgress(page, { ...progressWithPhase1(new Date(), { missions: before }), resume: { missionId: 'net.f02.boss', step: 2, at: new Date().toISOString() } })
+  await page.goto('/#/missao/net.f02.boss')
+  await expect(page.getByRole('img', { name: /Sem saída para a internet: NAT Gateway A e NAT Gateway B/ })).toBeVisible()
+  await page.getByLabel('Rota 0.0.0.0/0 de pública A (balanceador)').selectOption('igw')
+  await page.getByLabel('Rota 0.0.0.0/0 de aplicação A').selectOption('nat-a')
+  await page.getByLabel('Rota 0.0.0.0/0 de aplicação B').selectOption('nat-b')
+  await page.getByLabel('Rota ::/0 de aplicação A').selectOption('eigw')
+  await expect(page.getByRole('img', { name: /aplicação A: 0\.0\.0\.0\/0 para NAT Gateway A, ::\/0 para egress-only internet gateway.*Sem saída para a internet: NAT Gateway B\./ })).toBeVisible()
+  await page.screenshot({ path: 'screenshots/desktop-net-f2-rotas-desenho.png', fullPage: true })
+})
+
+test('topologias: o desenho mostra as ligações escolhidas e risca o que não alcança', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  const before = ['f01', 'f02', 'f03', 'f04'].flatMap((f) => ['m1', 'm2', 'm3', 'boss'].map((m) => `net.${f}.${m}`)).filter((m) => m !== 'net.f04.boss')
+  await seedProgress(page, { ...progressWithPhase1(new Date(), { missions: before }), resume: { missionId: 'net.f04.boss', step: 2, at: new Date().toISOString() } })
+  await page.goto('/#/missao/net.f04.boss')
+  const doze = page.getByRole('region', { name: 'Doze VPCs e o escritório' })
+  await doze.getByRole('combobox').selectOption({ label: 'Peering da VPC 1 com cada uma das outras, com a VPN ligada à VPC 1' })
+  await expect(doze.getByRole('img', { name: /VPC 3 não alcança escritório/ })).toBeVisible()
+  const amb = page.getByRole('region', { name: 'Produção, desenvolvimento e serviços compartilhados' })
+  await amb.getByRole('combobox').selectOption({ label: 'Transit Gateway com tabelas separadas: produção e desenvolvimento só veem os serviços compartilhados' })
+  await expect(amb.getByRole('img', { name: /Transit Gateway com 3 tabelas\./ })).toBeVisible()
+  await page.screenshot({ path: 'screenshots/desktop-net-f4-topologias-desenho.png', fullPage: true })
+})
+
+test('desafio final de redes: o desenho do projeto cresce a cada escolha', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  const before = ['f01', 'f02', 'f03', 'f04', 'f05', 'f06', 'f07', 'f08', 'f09'].flatMap((f) => ['m1', 'm2', 'm3', 'boss'].map((m) => `net.${f}.${m}`))
+  await seedProgress(page, { ...progressWithPhase1(new Date(), { missions: before }), resume: { missionId: 'net.final.projeto', step: 2, at: new Date().toISOString() } })
+  await page.goto('/#/missao/net.final.projeto')
+  await expect(page.getByRole('img', { name: /Nenhuma escolha feita ainda/ })).toBeVisible()
+  const pick = (label: string) => page.getByRole('radio', { name: label, exact: true }).click()
+  const next = () => page.getByRole('button', { name: 'Próxima etapa' }).click()
+  await pick('10.64.0.0/16, 10.65.0.0/16 e 10.66.0.0/16')
+  await pick('Sub-redes públicas, de aplicação e de banco em cada uma das três zonas')
+  await next()
+  await pick('Um NAT Gateway regional (ou um zonal em cada zona), com as sub-redes de aplicação apontando para ele')
+  await next()
+  await pick('Security group do banco aceitando a porta 5432 do security group da aplicação')
+  await pick('VPC Flow Logs enviados ao S3')
+  await next()
+  await pick('Um Transit Gateway com as VPCs e as conexões das lojas anexadas')
+  await next()
+  await pick('Endpoint de gateway do S3')
+  await pick('Endpoint de interface do SQS com DNS privado, em duas zonas')
+  await expect(page.getByRole('img', { name: /Escolhas até aqui: 10\.64\.0\.0\/16/ })).toBeVisible()
+  await page.screenshot({ path: 'screenshots/desktop-net-final-desenho.png', fullPage: true })
 })
