@@ -7,11 +7,12 @@ import type { PhaseDef } from '../../../../../engine/types'
 import type { ReachLabConfig } from '../../../../../simulators/reach/lab'
 import { DEFAULT_NACL, type ReachWorld } from '../../../../../simulators/reach/model'
 import { META } from '../meta'
+import { LAYERS_BOARD, SG_CARDS, STATEFUL_RETURN } from './diagrams'
 
 const ALL = '0.0.0.0/0'
 
 /** Mundo usado nas previsões: sub-rede pública com o servidor web e privada com o banco. */
-const SABER_WORLD = (webNaclOut = DEFAULT_NACL): ReachWorld => ({
+const SABER_WORLD = (webNaclOut = DEFAULT_NACL, webNoOutbound = false): ReachWorld => ({
   subnets: [
     { id: 'pub', name: 'pública', cidr: '10.50.1.0/24', public: true, naclIn: DEFAULT_NACL, naclOut: webNaclOut },
     { id: 'priv', name: 'privada', cidr: '10.50.2.0/24', naclIn: DEFAULT_NACL, naclOut: DEFAULT_NACL },
@@ -22,7 +23,7 @@ const SABER_WORLD = (webNaclOut = DEFAULT_NACL): ReachWorld => ({
     { id: 'db', name: 'banco', subnet: 'priv', ip: '10.50.2.30', sg: 'sg-db' },
   ],
   groups: [
-    { id: 'sg-web', name: 'sg-web', inbound: [{ peer: ALL, ports: [443, 443] }] },
+    { id: 'sg-web', name: 'sg-web', inbound: [{ peer: ALL, ports: [443, 443] }], ...(webNoOutbound ? { outbound: [] } : {}) },
     { id: 'sg-rel', name: 'sg-rel', inbound: [] },
     { id: 'sg-db', name: 'sg-db', inbound: [{ peer: 'sg-web', ports: [5432, 5432] }] },
   ],
@@ -36,10 +37,12 @@ export const SABER_LAB: ReachLabConfig = {
     ],
     instances: [
       { id: 'web', name: 'servidor web', subnet: 'pub', ip: '10.50.1.10', publicIp: true, sg: 'sg-web' },
+      { id: 'relatorio', name: 'servidor de relatórios', subnet: 'pub', ip: '10.50.1.20', sg: 'sg-rel' },
       { id: 'db', name: 'banco', subnet: 'priv', ip: '10.50.2.30', sg: 'sg-db' },
     ],
     groups: [
       { id: 'sg-web', name: 'sg-web', inbound: [] },
+      { id: 'sg-rel', name: 'sg-rel', inbound: [] },
       { id: 'sg-db', name: 'sg-db', inbound: [] },
     ],
   },
@@ -62,10 +65,11 @@ export const SABER_LAB: ReachLabConfig = {
     { id: 'ssh', label: 'Alguém na internet tenta SSH no servidor web (porta 22)', from: 'internet', to: 'web', port: 22, clientPort: 52000, expect: 'deny', concepts: ['ec2.security-group'] },
     { id: 'ataque', label: 'A faixa 198.51.100.0/24, que está atacando, abre o site (porta 443)', from: 'internet', fromIp: '198.51.100.7', to: 'web', port: 443, clientPort: 52000, expect: 'deny', concepts: ['sg.nacl', 'sg.nacl-order'] },
     { id: 'app-db', label: 'O servidor web consulta o banco (porta 5432)', from: 'web', to: 'db', port: 5432, clientPort: 40000, expect: 'allow', concepts: ['sg.reference', 'sg.stateful-stateless', 'sg.ephemeral-ports'] },
+    { id: 'rel-db', label: 'O servidor de relatórios tenta consultar o banco (porta 5432)', from: 'relatorio', to: 'db', port: 5432, clientPort: 41000, expect: 'deny', concepts: ['sg.reference'] },
     { id: 'net-db', label: 'Alguém na internet tenta chegar ao banco (porta 5432)', from: 'internet', to: 'db', port: 5432, clientPort: 52000, expect: 'deny', concepts: ['sg.reference'] },
   ],
   initial: ['web-443', 'web-22', 'db-all', 'pub-in-all', 'pub-in-443'],
-  solution: ['web-443', 'db-sg', 'pub-in-deny', 'pub-in-443', 'pub-in-eph', 'pub-out-eph', 'pub-out-db', 'priv-in-db', 'priv-out-eph'],
+  solution: ['web-443', 'db-sg', 'pub-in-deny', 'pub-in-443', 'pub-in-eph', 'pub-out-eph', 'priv-in-db', 'priv-out-eph'],
 }
 
 // Mundo com o mesmo atacante, para a previsão da ordem das regras.
@@ -99,22 +103,22 @@ export const F03_NET: PhaseDef = {
       },
       intel: [
         { conceptId: 'ec2.security-group', body: ['O **security group** só tem regras de **permissão** e **tem estado**: se a entrada passou, a resposta volta sem outra regra.'] },
-        { conceptId: 'sg.reference', body: ['A origem de uma regra pode ser **outro security group**: "o banco aceita 5432 de quem está em sg-web". Quem entra no grupo ganha o acesso, e quem sai perde.'] },
+        { conceptId: 'sg.reference', body: ['A origem de uma regra pode ser **outro security group**: "o banco aceita 5432 de quem está em sg-web". Quem entra no grupo ganha o acesso, e quem sai perde.'], diagram: SG_CARDS },
       ],
       activities: [
         {
           id: 'net.f03.m1.a1',
           kind: 'predict',
           title: 'O aluno abre o site',
-          prompt: 'O sg-web permite a porta 443 de 0.0.0.0/0 e não tem regra de saída extra. As ACLs são as padrão. Um aluno abre o site. O que acontece?',
+          prompt: 'O sg-web permite a entrada na porta 443 de 0.0.0.0/0 e não tem nenhuma regra de saída: a regra padrão, que permitia toda a saída, foi apagada. As ACLs são as padrão. Um aluno abre o site. O que acontece?',
           concepts: [{ id: 'ec2.security-group' }],
           xp: 40,
           difficulty: 1,
-          explanation: ['A entrada na porta 443 é permitida. Como o security group tem estado, a resposta sai sem precisar de regra de saída. As ACLs padrão permitem tudo.'],
-          spec: { sim: 'reach', world: SABER_WORLD(), flow: { id: 'f', from: 'internet', to: 'web', port: 443 } },
+          explanation: ['A entrada na porta 443 é permitida. Como o security group tem estado, a resposta sai sem precisar de regra de saída: as regras de saída valem só para conexões que o próprio servidor inicia. As ACLs padrão permitem tudo.'],
+          spec: { sim: 'reach', world: SABER_WORLD(DEFAULT_NACL, true), flow: { id: 'f', from: 'internet', to: 'web', port: 443 } },
           options: [
             { id: 'a', text: 'A conexão funciona', outcome: 'delivered' },
-            { id: 'b', text: 'A resposta é bloqueada, porque falta uma regra de saída', outcome: 'nacl-response' },
+            { id: 'b', text: 'O security group bloqueia a resposta, porque não há regra de saída', outcome: 'sg-out' },
             { id: 'c', text: 'O security group bloqueia a entrada', outcome: 'sg-in' },
           ],
         },
@@ -166,8 +170,8 @@ export const F03_NET: PhaseDef = {
         successCriteria: ['Lembrar da regra de resposta', 'Ordenar negação antes da permissão', 'Saber como nasce uma ACL nova'],
       },
       intel: [
-        { conceptId: 'sg.stateful-stateless', body: ['A **ACL não tem estado**: a resposta é outro pacote. Liberou 443 na entrada? Libere a **saída para as portas efêmeras** do cliente.'] },
-        { conceptId: 'sg.nacl-order', body: ['As regras são lidas do **menor número para o maior**, e a **primeira** que casa decide. A negação precisa vir **antes** da permissão ampla.'] },
+        { conceptId: 'sg.stateful-stateless', body: ['A **ACL não tem estado**: para ela, a resposta é outro pacote. Se a entrada libera a porta 443, a saída precisa liberar as **portas efêmeras** do cliente, para onde a resposta vai.'], diagram: STATEFUL_RETURN },
+        { conceptId: 'sg.nacl-order', body: ['As regras são lidas do **menor número para o maior**, e a **primeira** que casa decide. A negação precisa vir **antes** da permissão ampla.', 'Toda ACL termina numa regra marcada com asterisco, a `*`, que **nega tudo** o que nenhuma regra numerada permitiu. Ela não pode ser apagada.'] },
         { conceptId: 'sg.ephemeral-ports', body: ['Linux usa 32768-61000; Windows Server 2008 ou mais novo, 49152-65535; NAT Gateway, ELB e Lambda, **1024-65535**.'] },
       ],
       activities: [
@@ -203,24 +207,30 @@ export const F03_NET: PhaseDef = {
           ],
         },
         {
-          id: 'net.f03.m2.a3',
-          kind: 'classify',
-          title: 'Security group ou ACL',
-          prompt: 'Classifique cada característica.',
-          concepts: [{ id: 'sg.nacl' }, { id: 'sg.stateful-stateless' }],
+          id: 'net.f03.m2.a6',
+          kind: 'build',
+          title: 'Cada regra na sua camada',
+          prompt: 'Coloque cada regra na camada em que ela deve ficar, para que os alunos abram o site, o atacante seja barrado e só o servidor web chegue ao banco. A regra desnecessária ou que abre demais vai para "Não entra nesta rede".',
+          scenario: ['As network ACLs das duas sub-redes são as padrão, que permitem tudo nos dois sentidos. Os security groups sg-web e sg-db ainda não têm regras de entrada. A faixa 198.51.100.0/24 está atacando o site.'],
+          concepts: [{ id: 'sg.nacl' }, { id: 'ec2.security-group' }, { id: 'sg.reference' }, { id: 'sg.stateful-stateless' }],
           xp: 60,
-          difficulty: 1,
-          explanation: ['O security group fica no recurso, só permite, avalia todas as regras e tem estado. A network ACL fica na sub-rede, permite e nega, segue a ordem dos números e não tem estado.'],
-          bins: [
-            { id: 'sg', label: 'Security group' },
-            { id: 'nacl', label: 'Network ACL' },
+          difficulty: 2,
+          explanation: [
+            'Só a network ACL nega, então o atacante é barrado na ACL da sub-rede pública. O security group abre o que cada instância atende: 443 no sg-web e 5432 no sg-db, com origem no grupo sg-web.',
+            'Com as ACLs padrão e o security group com estado, as respostas voltam sem regra extra.',
           ],
-          items: [
-            { id: 'res', text: 'Vale para o recurso ao qual está associado', bin: 'sg', explanation: 'O security group atua no nível da instância (ou da interface).', concepts: ['ec2.security-group'] },
-            { id: 'sub', text: 'Vale para tudo o que entra e sai da sub-rede', bin: 'nacl', explanation: 'A ACL atua no nível da sub-rede.', concepts: ['sg.nacl'] },
-            { id: 'deny', text: 'Tem regras que negam', bin: 'nacl', explanation: 'Só a ACL tem regras de negação.', concepts: ['sg.nacl'] },
-            { id: 'state', text: 'A resposta volta sozinha', bin: 'sg', explanation: 'O security group tem estado.', concepts: ['sg.stateful-stateless'] },
-            { id: 'order', text: 'A primeira regra que casa, em ordem numérica, decide', bin: 'nacl', explanation: 'A ACL segue a ordem dos números.', concepts: ['sg.nacl-order'] },
+          board: LAYERS_BOARD,
+          pieces: [
+            { id: 'deny', text: 'Negar todo o tráfego de 198.51.100.0/24', explanation: 'Só a network ACL tem regra de negação. Ela fica na entrada da sub-rede pública, com número menor que qualquer permissão.', concepts: ['sg.nacl'] },
+            { id: 'https', text: 'Permitir TCP 443 de 0.0.0.0/0', explanation: 'É no security group do servidor web que se abre a porta do site. A ACL padrão já permite a entrada.', concepts: ['ec2.security-group'] },
+            { id: 'db-sg', text: 'Permitir TCP 5432 do grupo sg-web', explanation: 'Só o security group aceita outro grupo como origem: o banco atende o servidor web e mais ninguém, mesmo que os IPs mudem.', concepts: ['sg.reference'] },
+            { id: 'db-cidr', text: 'Permitir TCP 5432 de 10.50.1.0/24', explanation: 'Liberar a sub-rede pública inteira deixaria o servidor de relatórios chegar ao banco.', concepts: ['sg.reference'] },
+            { id: 'resp', text: 'Permitir a saída das respostas para 1024-65535', explanation: 'O security group tem estado e devolve a resposta sozinho, e as ACLs padrão já permitem a saída. Essa regra só faria falta numa ACL personalizada.', concepts: ['sg.stateful-stateless'] },
+          ],
+          slots: [
+            { id: 'acl-pub', label: 'ACL da sub-rede pública', x: 250, y: 44, w: 220, h: 72, expect: { deny: 1 }, explanation: 'A ACL da sub-rede pública é a única camada que nega. É nela que o atacante é barrado, antes de chegar a qualquer instância.' },
+            { id: 'sg-web', label: 'sg-web (servidor web)', x: 56, y: 134, w: 200, h: 82, expect: { https: 1 }, explanation: 'O sg-web abre a porta 443 para todos. Com as ACLs padrão, nenhuma outra regra é necessária para o site funcionar.' },
+            { id: 'sg-db', label: 'sg-db (banco)', x: 478, y: 134, w: 194, h: 82, expect: { 'db-sg': 1 }, explanation: 'O sg-db aceita a porta 5432 só de quem está no grupo sg-web, e não da sub-rede inteira.' },
           ],
         },
         {
@@ -234,7 +244,7 @@ export const F03_NET: PhaseDef = {
           explanation: ['A ACL padrão da VPC permite tudo, mas uma ACL personalizada nova nasce só com as regras marcadas com asterisco, que negam tudo. Ao trocar a associação, a sub-rede passou a negar todo o tráfego.'],
           options: [
             { id: 'a', text: 'Saiu do ar: uma ACL personalizada nova nega tudo até receber regras', correct: true, consequence: 'É preciso criar as regras de entrada e de saída, inclusive as de resposta.' },
-            { id: 'b', text: 'Nada mudou: uma ACL nova copia as regras da padrão', correct: false, consequence: 'A ACL nova não herda as regras 100 e 101 da padrão.' },
+            { id: 'b', text: 'Nada mudou: uma ACL nova copia as regras da padrão', correct: false, consequence: 'A ACL nova não herda a regra 100 da padrão, que permite tudo.' },
             { id: 'c', text: 'Só o SSH parou', correct: false, consequence: 'Todo o tráfego para a sub-rede passou a ser negado.' },
           ],
         },
@@ -242,13 +252,14 @@ export const F03_NET: PhaseDef = {
           id: 'net.f03.m2.a5',
           kind: 'decision',
           title: 'Clientes Windows',
-          prompt: 'A regra de saída da ACL pública libera as respostas só para 32768-61000. Alunos com Windows 10 reclamam que o site não abre. Qual regra resolve sem abrir demais?',
+          prompt: 'A regra de saída da ACL pública libera as respostas só para 32768-61000. Alunos com Windows 10 reclamam que o site não abre, e os outros alunos usam Linux, macOS e celulares. Que mudança na ACL resolve para todos?',
           concepts: [{ id: 'sg.ephemeral-ports' }],
           xp: 50,
           difficulty: 3,
-          explanation: ['Clientes Windows recentes usam 49152-65535, e a regra para em 61000. Para atender clientes variados, a AWS sugere liberar 1024-65535 na saída e negar as portas maliciosas dessa faixa com regras de número menor.'],
+          explanation: ['Clientes Windows recentes usam 49152-65535, e a regra para em 61000. Como cada sistema escolhe a porta efêmera numa faixa diferente, a AWS sugere liberar 1024-65535 na saída para atender clientes variados. Se for preciso fechar alguma porta dessa faixa, uma regra de negação com número menor faz isso.'],
           options: [
-            { id: 'a', text: 'Liberar a saída para 1024-65535, negando antes as portas maliciosas dessa faixa', correct: true, consequence: 'Respostas para Linux, Windows e outros clientes passam.' },
+            { id: 'a', text: 'Liberar a saída para 1024-65535, a faixa que cobre as portas efêmeras de qualquer cliente', correct: true, consequence: 'Respostas para Linux, Windows e outros clientes passam.' },
+            { id: 'd', text: 'Trocar a faixa por 49152-65535, a do Windows', correct: false, consequence: 'Os clientes Windows voltam, mas os Linux, que usam a partir de 32768, deixam de receber as respostas.' },
             { id: 'b', text: 'Liberar a saída só para a porta 443', correct: false, consequence: 'A resposta vai para a porta efêmera do cliente, e não para a 443.' },
             { id: 'c', text: 'Trocar a ACL por uma regra de saída no security group', correct: false, consequence: 'O security group já deixa a resposta sair; quem bloqueia é a ACL.' },
           ],
@@ -278,15 +289,15 @@ export const F03_NET: PhaseDef = {
           id: 'net.f03.m3.a1',
           kind: 'decision',
           title: 'Quem está sendo rejeitado',
-          prompt: 'A equipe quer ver, nos últimos dias, quais conexões chegaram à sub-rede e foram rejeitadas. Qual recurso usar?',
+          prompt: 'A VPC tem os Flow Logs ligados há um mês, enviando para o CloudWatch Logs. A equipe quer ver quais conexões chegaram à sub-rede nos últimos dias e foram rejeitadas. Onde procurar?',
           concepts: [{ id: 'sg.flow-logs' }],
           xp: 40,
           difficulty: 1,
-          explanation: ['Os Flow Logs registram os metadados de cada fluxo, inclusive se foi aceito ou rejeitado. Precisam estar ligados antes para que haja histórico.'],
+          explanation: ['Os Flow Logs registram os metadados de cada fluxo, inclusive se foi aceito ou rejeitado. Como já estão ligados há um mês, o histórico dos últimos dias existe.'],
           options: [
-            { id: 'a', text: 'VPC Flow Logs da sub-rede', correct: true, consequence: 'Cada registro traz origem, destino, portas e ACCEPT ou REJECT.' },
-            { id: 'b', text: 'Um espelhamento de todo o conteúdo dos pacotes', correct: false, consequence: 'O problema é saber o que foi rejeitado, e o Flow Log responde isso sem guardar conteúdo.' },
-            { id: 'c', text: 'O histórico da tabela de rotas', correct: false, consequence: 'A tabela de rotas não guarda registro de tráfego.' },
+            { id: 'a', text: 'Nos VPC Flow Logs, filtrando os registros REJECT', correct: true, consequence: 'Cada registro traz origem, destino, portas e ACCEPT ou REJECT.' },
+            { id: 'b', text: 'No Traffic Mirroring, que copia o conteúdo dos pacotes', correct: false, consequence: 'O espelhamento copia os pacotes a partir de quando é ligado, sem histórico, e o problema é só saber o que foi rejeitado.' },
+            { id: 'c', text: 'No AWS CloudTrail da conta', correct: false, consequence: 'O CloudTrail registra chamadas de API, como quem mudou a ACL, e não o tráfego.' },
           ],
         },
         {
@@ -313,7 +324,7 @@ export const F03_NET: PhaseDef = {
           xp: 80,
           difficulty: 3,
           explanation: ['A chamada do parceiro chega e é aceita na porta 443, mas a resposta do servidor para a porta 55012 do parceiro é rejeitada na saída. A revisão deixou a ACL de saída só com 32768-50000. Como a ACL não tem estado, a resposta precisa de regra própria para a faixa efêmera do cliente.'],
-          scenario: ['Formato simplificado: horário, origem:porta, destino:porta, sentido e ação.'],
+          scenario: ['Formato simplificado dos Flow Logs: horário, origem:porta, destino:porta, sentido e ação.'],
           artifacts: [
             {
               id: 'flow',
@@ -323,7 +334,15 @@ export const F03_NET: PhaseDef = {
                 { id: 'l1', text: '10:02:01  203.0.113.80:55012  10.50.1.10:443    entrada  ACCEPT', isIssue: false, explanation: 'A requisição do parceiro chega e é aceita.' },
                 { id: 'l2', text: '10:02:01  10.50.1.10:443     203.0.113.80:55012 saída   REJECT', isIssue: true, explanation: 'A resposta para a porta efêmera 55012 do parceiro é rejeitada.' },
                 { id: 'l3', text: '10:03:15  198.51.100.4:61022  10.50.1.10:22     entrada  REJECT', isIssue: false, explanation: 'Uma tentativa de SSH bloqueada, como esperado.' },
-                { id: 'l4', text: 'ACL de saída: 100 permite TCP 32768-50000 para 0.0.0.0/0', isIssue: true, explanation: 'A faixa para em 50000 e não cobre a porta 55012.' },
+              ],
+            },
+            {
+              id: 'acl',
+              title: 'Regras de saída da ACL da sub-rede pública, depois da revisão',
+              format: 'table',
+              lines: [
+                { id: 'l4', text: '100  permite  TCP  32768-50000  para 0.0.0.0/0', isIssue: true, explanation: 'A faixa para em 50000 e não cobre a porta 55012 do parceiro.' },
+                { id: 'l5', text: '*    nega     tudo              para 0.0.0.0/0', isIssue: false, explanation: 'É a regra final de toda ACL. Ela nega a resposta, mas só porque a regra 100 não cobriu a porta: o problema está na 100.' },
               ],
             },
           ],
@@ -338,7 +357,7 @@ export const F03_NET: PhaseDef = {
           remediations: {
             prompt: 'Quais correções fazem sentido?',
             options: [
-              { id: 'a', text: 'Liberar a saída para 1024-65535 e negar antes as portas maliciosas dessa faixa', correct: true, feedback: 'Cobre as portas efêmeras de clientes variados.' },
+              { id: 'a', text: 'Ampliar a regra 100 de saída para 1024-65535', correct: true, feedback: 'Cobre as portas efêmeras de clientes variados.' },
               { id: 'b', text: 'Validar a mudança com o Reachability Analyzer antes de avisar o parceiro', correct: true, feedback: 'Confirma o caminho sem depender de novos testes do parceiro.' },
               { id: 'c', text: 'Adicionar uma regra de saída no security group para a porta 55012', correct: false, feedback: 'O security group já deixa a resposta sair; o bloqueio é da ACL.' },
             ],
@@ -356,9 +375,9 @@ export const F03_NET: PhaseDef = {
       briefing: {
         company: 'Escola Online Saber Mais',
         role: 'Você monta as duas camadas de defesa da escola.',
-        situation: 'A sub-rede pública ganhou uma ACL personalizada, e a privada também. Os alunos precisam abrir o site, o servidor web precisa do banco, e a faixa que está atacando, o SSH aberto e o acesso direto ao banco precisam ser barrados.',
-        objective: 'Ligar só as regras necessárias.',
-        successCriteria: ['Os dois fluxos legítimos funcionam', 'Os três fluxos proibidos são barrados'],
+        situation: 'A sub-rede pública ganhou uma ACL personalizada, e a privada também. Os alunos precisam abrir o site e o servidor web precisa do banco. A faixa que está atacando, o SSH vindo da internet, o servidor de relatórios e qualquer acesso da internet ao banco precisam ser barrados.',
+        objective: 'Fazer cada fluxo ter o resultado pedido, sem abrir nada além disso.',
+        successCriteria: ['Os dois fluxos legítimos funcionam', 'Os quatro fluxos proibidos são barrados'],
       },
       intel: [
         { conceptId: 'sg.stateful-stateless', body: ['Cada fluxo que atravessa uma ACL personalizada precisa de **ida** e de **volta** nas duas sub-redes.'] },
@@ -369,15 +388,16 @@ export const F03_NET: PhaseDef = {
           id: 'net.f03.boss.a1',
           kind: 'lab',
           lab: 'reach',
-          title: 'Cinco fluxos',
+          title: 'Seis fluxos',
           prompt: 'Marque as regras que devem existir. A tabela mostra, ao vivo, o resultado de cada fluxo.',
           concepts: [{ id: 'ec2.security-group' }, { id: 'sg.reference' }, { id: 'sg.nacl' }, { id: 'sg.nacl-order' }, { id: 'sg.stateful-stateless' }, { id: 'sg.ephemeral-ports' }],
           xp: 220,
           difficulty: 3,
-          hints: ['O banco aceita o grupo sg-web, e não 0.0.0.0/0.', 'Cada sub-rede precisa da regra de resposta para as portas efêmeras, na saída e na entrada.'],
+          hints: ['O banco aceita o grupo sg-web, e não 0.0.0.0/0: o servidor de relatórios está na mesma sub-rede do site.', 'Cada sub-rede precisa da regra de resposta para as portas efêmeras, na saída e na entrada. Use "Ver caminho" para ver onde cada fluxo para.'],
           explanation: [
             'Security groups: sg-web com HTTPS de 0.0.0.0/0, sem SSH; sg-db com 5432 do grupo sg-web.',
-            'ACL pública, entrada: 50 nega 198.51.100.0/24, 100 permite 443, 110 permite as respostas do banco (1024-65535 de 10.50.2.0/24). Saída: 100 permite 1024-65535 para 0.0.0.0/0 e 110 permite 5432 para a sub-rede privada.',
+            'ACL pública, entrada: 50 nega 198.51.100.0/24, 100 permite 443, 110 permite as respostas do banco (1024-65535 de 10.50.2.0/24). Saída: 100 permite 1024-65535 para 0.0.0.0/0, que serve às respostas dos alunos e também cobre a porta 5432 do banco. Uma regra só para 5432 seria redundante.',
+            'O servidor de relatórios passa pelas duas ACLs, porque está na mesma sub-rede do servidor web. Quem o barra é o sg-db, que só aceita o grupo sg-web: com 5432 de 0.0.0.0/0, ele chegaria ao banco.',
             'ACL privada: entrada 100 permite 5432 da sub-rede pública; saída 100 permite 1024-65535 para a sub-rede pública.',
           ],
           config: SABER_LAB,
