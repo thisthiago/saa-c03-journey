@@ -1,5 +1,6 @@
 /** Interface do laboratório "Conectar as VPCs": a topologia de cada cenário, com alcance, conexões e custo ao vivo. */
 import type { Evaluation } from '../../engine/types'
+import { Diagram } from '../../ui/diagram/Diagram'
 import { renderInline } from '../../ui/inline'
 import { usd } from '../compute-prices'
 import { NET_PRICE_DATE, networkPrices } from '../network-prices'
@@ -8,6 +9,7 @@ import c from '../shared/compute.module.css'
 import sh from '../shared/lab.module.css'
 import n from '../shared/net.module.css'
 import { checkOption, type ConnectLabConfig, type ConnectLabResponse } from './lab'
+import { topologyDiagram } from './diagram'
 import { reaches } from './model'
 
 interface Props {
@@ -83,6 +85,7 @@ export function ConnectLab({ config, value, onChange, disabled, evaluation }: Pr
                 {k.problems.length ? `Não dá para montar: ${k.problems.join('; ')}.` : `${k.connections} ${k.connections === 1 ? 'conexão' : 'conexões'} para manter · ${usd(k.monthly)}/mês`}
               </p>
             )}
+            <Diagram spec={topologyDiagram(s, opt)} className={n.flowDiagram} />
             {fb && (
               <div className={sh.verdict} data-status={fb.status} aria-live="polite">
                 <strong>{fb.label}</strong>
