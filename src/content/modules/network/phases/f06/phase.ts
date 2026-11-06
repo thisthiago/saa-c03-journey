@@ -6,6 +6,7 @@
 import type { PhaseDef } from '../../../../../engine/types'
 import type { HybridLabConfig } from '../../../../../simulators/hybrid/model'
 import { META } from '../meta'
+import { FACTORY_BOARD, RESILIENCE_MODELS, VIF_TYPES, VPN_TUNNELS } from './diagrams'
 
 export const FERRO_FORTE_HYBRID: HybridLabConfig = {
   itemsLabel: 'Necessidades da metalúrgica',
@@ -13,7 +14,7 @@ export const FERRO_FORTE_HYBRID: HybridLabConfig = {
   items: [
     { id: 'filial', text: 'A filial de Betim precisa falar com a VPC a partir de amanhã, com 300 Mbps e tráfego criptografado', dominant: 'fast-setup', needs: ['fast-setup', 'encrypted', 'bw-1'], concepts: ['hyb.site-to-site-vpn'] },
     { id: 'ponte', text: 'Enquanto o Direct Connect não fica pronto, a fábrica precisa de cerca de 4 Gbps criptografados nesta semana', dominant: 'bw-5', needs: ['fast-setup', 'encrypted', 'bw-5'], concepts: ['hyb.vpn-bandwidth'] },
-    { id: 'replica', text: 'A réplica do ERP transfere 8 Gbps contínuos e precisa de latência estável', dominant: 'bw-10', needs: ['private-path', 'bw-10'], concepts: ['hyb.direct-connect'] },
+    { id: 'replica', text: 'A réplica do ERP transfere 40 Gbps contínuos e precisa de latência estável', dominant: 'bw-40', needs: ['private-path', 'bw-40'], concepts: ['hyb.direct-connect'] },
     { id: 'pequena', text: 'O laboratório de qualidade precisa de 200 Mbps estáveis, sem passar pela internet', dominant: 'private-path', needs: ['private-path', 'bw-1'], concepts: ['hyb.direct-connect'] },
     { id: 'auditoria', text: 'A auditoria exige criptografia no link privado de 10 Gbps com a AWS', dominant: 'encrypted', needs: ['private-path', 'bw-10', 'encrypted'], concepts: ['hyb.dx-encryption'] },
     { id: 'reserva', text: 'O link privado de 2 Gbps não pode deixar a fábrica isolada se cair, mas o orçamento é curto', dominant: 'survive-link', needs: ['private-path', 'bw-5', 'survive-link'], concepts: ['hyb.dx-resiliency'] },
@@ -42,7 +43,7 @@ export const F06_NET: PhaseDef = {
         successCriteria: ['Escolher a VPN para ligação rápida', 'Calcular túneis para mais banda'],
       },
       intel: [
-        { conceptId: 'hyb.site-to-site-vpn', body: ['A **Site-to-Site VPN** cria **túneis IPsec** pela internet. Cada conexão tem **dois túneis**. Termina num virtual private gateway (uma VPC) ou num Transit Gateway.'] },
+        { conceptId: 'hyb.site-to-site-vpn', body: ['A **Site-to-Site VPN** cria **túneis IPsec** pela internet, entre o roteador da empresa (o **customer gateway**) e a AWS. Cada conexão tem **dois túneis**. Do lado da AWS, ela termina num **virtual private gateway**, preso a uma VPC, ou num **Transit Gateway**.'], diagram: VPN_TUNNELS },
         { conceptId: 'hyb.vpn-bandwidth', body: ['Um túnel padrão leva **até 1,25 Gbps**. Para somar túneis, use **várias VPNs no Transit Gateway com ECMP**, que exige **roteamento dinâmico (BGP)**.'] },
       ],
       activities: [
@@ -58,18 +59,18 @@ export const F06_NET: PhaseDef = {
           options: [
             { id: 'a', text: 'Uma Site-to-Site VPN entre o roteador da filial e a AWS', correct: true, consequence: 'Funciona amanhã, criptografada, pela internet.' },
             { id: 'b', text: 'Um Direct Connect dedicado de 1 Gbps', correct: false, consequence: 'O circuito físico não fica pronto em um dia.' },
-            { id: 'c', text: 'Liberar o ERP na internet para o IP da filial', correct: false, consequence: 'Expõe o ERP e não criptografa o caminho.' },
+            { id: 'c', text: 'Liberar o ERP na internet para o IP da filial', correct: false, consequence: 'O ERP ganha um endereço público, e só os protocolos que já usam TLS vão criptografados. A VPN cifra todo o tráfego entre as duas redes.' },
           ],
         },
         {
           id: 'net.f06.m1.a2',
           kind: 'estimate',
           title: 'Quantos túneis',
-          prompt: 'Contando com até 1,25 Gbps por túnel padrão, quantos túneis ativos, no mínimo, são precisos para levar 4 Gbps?',
+          prompt: 'Cada conexão VPN tem dois túneis, e cada túnel padrão leva até 1,25 Gbps. Quantos túneis ativos, no mínimo, são precisos para levar 4 Gbps?',
           concepts: [{ id: 'hyb.vpn-bandwidth' }],
           xp: 40,
           difficulty: 2,
-          explanation: ['Três túneis chegam a 3,75 Gbps, que não basta. Quatro túneis chegam a 5 Gbps. Para somá-los, as VPNs ficam no Transit Gateway com ECMP e BGP.'],
+          explanation: ['Três túneis chegam a 3,75 Gbps, que não basta. Quatro túneis chegam a 5 Gbps. Como cada conexão tem dois túneis, duas conexões bastam, desde que os quatro túneis fiquem ativos ao mesmo tempo: para isso, as VPNs terminam no Transit Gateway com ECMP e BGP.'],
           unit: 'túneis',
           min: 1,
           max: 10,
@@ -89,7 +90,7 @@ export const F06_NET: PhaseDef = {
           options: [
             { id: 'a', text: 'Usar roteamento dinâmico (BGP) nas VPNs', correct: true, consequence: 'Com BGP, o Transit Gateway distribui o tráfego entre os túneis.' },
             { id: 'b', text: 'Trocar o Transit Gateway por um virtual private gateway', correct: false, consequence: 'O ECMP para somar VPNs é recurso do Transit Gateway.' },
-            { id: 'c', text: 'Aumentar o tamanho dos túneis no console', correct: false, consequence: 'O túnel padrão tem limite fixo de 1,25 Gbps.' },
+            { id: 'c', text: 'Ligar a aceleração das VPNs (Accelerated VPN)', correct: false, consequence: 'A aceleração leva os túneis pela rede global da AWS, mas não faz o ECMP dividir o tráfego: isso exige BGP.' },
           ],
         },
       ],
@@ -110,25 +111,50 @@ export const F06_NET: PhaseDef = {
       },
       intel: [
         { conceptId: 'hyb.direct-connect', body: ['O **Direct Connect** é uma conexão física, sem internet. **Dedicada**: 1, 10, 100 ou 400 Gbps. **Hospedada**, por parceiro: de 50 Mbps a 25 Gbps.'] },
-        { conceptId: 'hyb.vif', body: ['Interface **privada**: uma VPC. **Pública**: serviços públicos como o S3. **De trânsito**: Transit Gateways, por um Direct Connect gateway.'] },
+        {
+          conceptId: 'hyb.vif',
+          body: [
+            'Uma **interface virtual** é uma ligação lógica, com VLAN e sessão BGP próprias, dentro da conexão física. A **privada** chega a VPCs; a **pública**, aos serviços públicos da AWS, como o S3; a **de trânsito**, a Transit Gateways.',
+          ],
+          diagram: VIF_TYPES,
+        },
+        { conceptId: 'hyb.dx-gateway', body: ['O **Direct Connect gateway** é um recurso **global**: liga interfaces privadas ou de trânsito a VPCs e Transit Gateways de várias Regiões e contas, menos as da China.'] },
         { conceptId: 'hyb.dx-encryption', body: ['O Direct Connect **não é criptografado por padrão**. Opções: **MACsec** (dedicada de 10, 100 ou 400 Gbps) ou **VPN por dentro** do link.'] },
       ],
       activities: [
         {
-          id: 'net.f06.m2.a1',
-          kind: 'match',
-          title: 'Que interface virtual?',
-          prompt: 'Associe cada necessidade à interface virtual do Direct Connect.',
-          concepts: [{ id: 'hyb.vif' }],
-          xp: 50,
+          id: 'net.f06.m2.a5',
+          kind: 'build',
+          title: 'Ligue a fábrica às duas Regiões',
+          prompt: 'Monte a ligação da fábrica com a AWS: arraste cada peça para onde ela fica. As peças que não servem neste cenário vão para "Não entra nesta rede".',
+          scenario: [
+            'A fábrica contratou uma conexão dedicada do Direct Connect num local de São Paulo. Pelo mesmo link, ela precisa chegar por IP privado às VPCs de São Paulo e da Virgínia e enviar arquivos ao S3 sem passar pela internet. Não há Transit Gateway.',
+            'Se o link cair, a fábrica aceita seguir mais devagar, pela internet.',
+          ],
+          concepts: [{ id: 'hyb.vif' }, { id: 'hyb.dx-gateway' }, { id: 'hyb.dx-resiliency', weight: 0.5 }],
+          xp: 60,
           difficulty: 2,
-          explanation: ['A interface privada chega a VPCs por IP privado; a pública, aos serviços públicos da AWS; a de trânsito, a Transit Gateways por um Direct Connect gateway.'],
-          leftLabel: 'Necessidade',
-          rightLabel: 'Interface virtual',
-          pairs: [
-            { id: 'vpc', left: 'Chegar à VPC do ERP por IP privado', right: 'Interface privada', explanation: 'Leva a uma VPC (ou a várias, por um Direct Connect gateway).', concepts: ['hyb.vif'] },
-            { id: 's3', left: 'Enviar arquivos ao S3 sem passar pela internet', right: 'Interface pública', explanation: 'Alcança os serviços públicos da AWS.', concepts: ['hyb.vif'] },
-            { id: 'tgw', left: 'Chegar a dezenas de VPCs ligadas a Transit Gateways', right: 'Interface de trânsito', explanation: 'Liga-se a Transit Gateways por um Direct Connect gateway.', concepts: ['hyb.vif'] },
+          explanation: [
+            'Dentro da conexão passam duas interfaces virtuais: a privada, que vai ao Direct Connect gateway, e a pública, que chega ao S3. O Direct Connect gateway é global e se associa aos virtual private gateways das duas VPCs.',
+            'A Site-to-Site VPN de reserva vai pela internet até os mesmos virtual private gateways e assume se o link cair.',
+          ],
+          board: FACTORY_BOARD,
+          pieces: [
+            { id: 'vif-priv', text: 'Interface virtual privada', explanation: 'Leva o tráfego por IP privado até o Direct Connect gateway, e dele às VPCs.', concepts: ['hyb.vif'] },
+            { id: 'vif-pub', text: 'Interface virtual pública', explanation: 'Chega aos serviços públicos da AWS, como o S3, sem passar pela internet.', concepts: ['hyb.vif'] },
+            { id: 'dxgw', text: 'Direct Connect gateway', glyph: 'waypoints', explanation: 'É global: uma interface privada chega por ele a VPCs de São Paulo e da Virgínia.', concepts: ['hyb.dx-gateway'] },
+            { id: 'vgw', text: 'Virtual private gateway', glyph: 'router', count: 2, explanation: 'É o lado da AWS ligado a cada VPC. O Direct Connect gateway se associa aos dois, e a VPN de reserva termina neles.', concepts: ['hyb.dx-gateway'] },
+            { id: 'vpn', text: 'Site-to-Site VPN de reserva', explanation: 'Vai pela internet e assume se o Direct Connect cair, com menos banda.', concepts: ['hyb.dx-resiliency'] },
+            { id: 'vif-tr', text: 'Interface virtual de trânsito', explanation: 'Só serve para chegar a Transit Gateways, e o cenário não tem nenhum.', concepts: ['hyb.vif'] },
+            { id: 'peering', text: 'Peering entre as VPCs de São Paulo e da Virgínia', explanation: 'Pelo peering, a VPC da Virgínia não usa o Direct Connect da VPC de São Paulo. Quem leva o link às duas Regiões é o Direct Connect gateway.', concepts: ['hyb.dx-gateway'] },
+            { id: 'igw', text: 'Internet gateway para chegar ao S3', explanation: 'Mandaria os arquivos pela internet. A interface pública chega ao S3 pelo link privado.', concepts: ['hyb.vif'] },
+          ],
+          slots: [
+            { id: 'link', label: 'Dentro da conexão do Direct Connect', x: 160, y: 136, w: 150, h: 150, expect: { 'vif-priv': 1, 'vif-pub': 1 }, explanation: 'A conexão física leva duas interfaces virtuais: a privada, para as VPCs, e a pública, para o S3.' },
+            { id: 'global', label: 'Entre a conexão e as Regiões', x: 348, y: 166, w: 124, h: 96, expect: { dxgw: 1 }, explanation: 'O Direct Connect gateway, global, leva a interface privada às VPCs das duas Regiões.' },
+            { id: 'vpc-sp', label: 'Na VPC de São Paulo', x: 525, y: 62, w: 160, h: 64, expect: { vgw: 1 }, explanation: 'A VPC de São Paulo precisa do seu virtual private gateway.' },
+            { id: 'vpc-va', label: 'Na VPC da Virgínia', x: 525, y: 276, w: 160, h: 54, expect: { vgw: 1 }, explanation: 'A VPC da Virgínia também precisa do seu virtual private gateway.' },
+            { id: 'net', label: 'Pela internet, se o link cair', x: 220, y: 344, w: 250, h: 54, expect: { vpn: 1 }, explanation: 'A reserva barata que o cenário aceita é uma VPN pela internet.' },
           ],
         },
         {
@@ -141,7 +167,7 @@ export const F06_NET: PhaseDef = {
           difficulty: 2,
           explanation: ['O Direct Connect gateway é global: liga a conexão a VPCs de várias Regiões e contas, exceto as da China.'],
           options: [
-            { id: 'a', text: 'Um Direct Connect gateway associado às VPCs das duas Regiões', correct: true, consequence: 'Um link alcança as duas Regiões.' },
+            { id: 'a', text: 'Um Direct Connect gateway associado aos virtual private gateways das VPCs das duas Regiões', correct: true, consequence: 'Um link alcança as duas Regiões.' },
             { id: 'b', text: 'Um segundo Direct Connect na Virgínia é obrigatório', correct: false, consequence: 'O Direct Connect gateway alcança outras Regiões pelo mesmo link.' },
             { id: 'c', text: 'Um peering entre as VPCs, para a da Virgínia usar o link da de São Paulo', correct: false, consequence: 'Pelo peering, uma VPC não usa o Direct Connect da outra.' },
           ],
@@ -156,9 +182,9 @@ export const F06_NET: PhaseDef = {
           difficulty: 2,
           explanation: ['O caminho é privado, mas não é criptografado por padrão. Na porta dedicada de 10 Gbps, o MACsec criptografa o trecho entre o roteador da empresa e o equipamento da AWS; outra opção é uma VPN IPsec por dentro do Direct Connect.'],
           options: [
-            { id: 'a', text: 'Não por padrão; dá para criptografar com MACsec na porta dedicada ou com uma VPN por dentro do link', correct: true, consequence: 'A auditoria recebe uma resposta exata e duas formas de atender.' },
-            { id: 'b', text: 'Sim: o Direct Connect não passa pela internet, então é criptografado', correct: false, consequence: 'Privado não quer dizer criptografado.' },
-            { id: 'c', text: 'Só com uma conexão hospedada, que vem com MACsec', correct: false, consequence: 'O MACsec não está disponível em conexões hospedadas.' },
+            { id: 'a', text: 'Não por padrão; dá para usar MACsec na porta ou uma VPN por dentro do link', correct: true, consequence: 'A auditoria recebe uma resposta exata e duas formas de atender.' },
+            { id: 'b', text: 'Sim: como o link não passa pela internet, ele já vai criptografado', correct: false, consequence: 'Privado não quer dizer criptografado.' },
+            { id: 'c', text: 'Só se a conexão for hospedada, que já vem com MACsec ligado', correct: false, consequence: 'O MACsec não está disponível em conexões hospedadas.' },
           ],
         },
         {
@@ -175,7 +201,7 @@ export const F06_NET: PhaseDef = {
             { id: 'host', label: 'Conexão hospedada' },
           ],
           items: [
-            { id: 'speeds', text: 'Portas de 1, 10, 100 ou 400 Gbps', bin: 'ded', explanation: 'São as velocidades da porta dedicada.', concepts: ['hyb.direct-connect'] },
+            { id: 'speeds', text: 'Porta física exclusiva de 100 ou 400 Gbps', bin: 'ded', explanation: 'A dedicada tem portas de 1, 10, 100 ou 400 Gbps; a hospedada vai só até 25 Gbps.', concepts: ['hyb.direct-connect'] },
             { id: 'small', text: 'Velocidades a partir de 50 Mbps', bin: 'host', explanation: 'A hospedada vai de 50 Mbps a 25 Gbps.', concepts: ['hyb.direct-connect'] },
             { id: 'partner', text: 'Um parceiro provisiona a conexão em nome do cliente', bin: 'host', explanation: 'A hospedada não é pedida pelo console.', concepts: ['hyb.direct-connect'] },
             { id: 'macsec', text: 'Pode usar MACsec', bin: 'ded', explanation: 'MACsec vale para dedicadas de 10, 100 e 400 Gbps.', concepts: ['hyb.dx-encryption'] },
@@ -193,12 +219,19 @@ export const F06_NET: PhaseDef = {
       briefing: {
         company: 'Metalúrgica Ferro Forte',
         role: 'Você define a resiliência das ligações e o acesso remoto.',
-        situation: 'O sistema de pedidos não pode ficar isolado da AWS, e o laboratório tem um orçamento curto. Além disso, oitenta engenheiros passaram a trabalhar de casa.',
+        situation: 'O sistema de pedidos não pode ficar isolado da AWS, e o link privado de 2 Gbps da fábrica precisa de uma reserva com orçamento curto. Além disso, oitenta engenheiros passaram a trabalhar de casa.',
         objective: 'Escolher o nível de resiliência de cada ligação e o acesso dos engenheiros.',
         successCriteria: ['Distinguir resistir à queda de um link e à queda de um local', 'Usar a Client VPN para pessoas'],
       },
       intel: [
-        { conceptId: 'hyb.dx-resiliency', body: ['Uma conexão só é **ponto único de falha**. **Alta resiliência**: dois locais. **Máxima**: dispositivos separados em mais de um local. **VPN de reserva**: opção barata, com menos banda.'] },
+        {
+          conceptId: 'hyb.dx-resiliency',
+          body: [
+            'Uma conexão só é **ponto único de falha**. **Desenvolvimento e teste**: duas conexões no mesmo local, em equipamentos diferentes. **Alta resiliência**: conexões em dois locais. **Máxima**: duas conexões em cada um de dois locais.',
+            'Uma **VPN de reserva** é a opção barata: assume se o link cair, com menos banda e pela internet.',
+          ],
+          diagram: RESILIENCE_MODELS,
+        },
         { conceptId: 'hyb.client-vpn', body: ['A **Client VPN** é para **pessoas**: cada uma conecta o próprio computador com um cliente OpenVPN.'] },
       ],
       activities: [
@@ -221,7 +254,7 @@ export const F06_NET: PhaseDef = {
           id: 'net.f06.m3.a2',
           kind: 'decision',
           title: 'Reserva barata',
-          prompt: 'O laboratório tem um link privado e um orçamento curto. Se o link cair, basta continuar funcionando, ainda que mais devagar. O que usar como reserva?',
+          prompt: 'A fábrica tem um link privado de 2 Gbps e um orçamento curto. Se o link cair, basta continuar funcionando, ainda que mais devagar. O que usar como reserva?',
           concepts: [{ id: 'hyb.dx-resiliency' }, { id: 'hyb.site-to-site-vpn', weight: 0.5 }],
           xp: 40,
           difficulty: 2,
@@ -229,6 +262,7 @@ export const F06_NET: PhaseDef = {
           options: [
             { id: 'a', text: 'Uma Site-to-Site VPN de reserva', correct: true, consequence: 'Barata e pronta a assumir, com menos banda.' },
             { id: 'b', text: 'Um segundo Direct Connect em outro local', correct: false, consequence: 'Funciona, mas custa muito mais do que o caso pede.' },
+            { id: 'c', text: 'Uma segunda conexão no mesmo local do Direct Connect', correct: false, consequence: 'Resiste à falha de um equipamento, mas não à queda do local, e custa bem mais que a VPN.' },
           ],
         },
         {
@@ -273,9 +307,9 @@ export const F06_NET: PhaseDef = {
           concepts: [{ id: 'hyb.site-to-site-vpn' }, { id: 'hyb.vpn-bandwidth' }, { id: 'hyb.direct-connect' }, { id: 'hyb.dx-encryption' }, { id: 'hyb.dx-resiliency' }, { id: 'hyb.client-vpn' }],
           xp: 200,
           difficulty: 3,
-          hints: ['Leia primeiro o requisito que decide: prazo, banda, criptografia, resiliência ou acesso de pessoas.', '200 Mbps estáveis sem internet cabem numa conexão hospedada.'],
+          hints: ['Leia primeiro o requisito que decide: prazo, banda, criptografia, resiliência ou acesso de pessoas.', 'A conexão hospedada vai de 50 Mbps a 25 Gbps; acima disso, só a dedicada.'],
           explanation: [
-            'Filial: Site-to-Site VPN. Ponte de 4 Gbps: várias VPNs no Transit Gateway com ECMP. Réplica de 8 Gbps: Direct Connect dedicado. Laboratório de 200 Mbps: Direct Connect hospedado.',
+            'Filial: Site-to-Site VPN. Ponte de 4 Gbps: várias VPNs no Transit Gateway com ECMP. Réplica de 40 Gbps: Direct Connect dedicado, porque a conexão hospedada vai só até 25 Gbps. Laboratório de 200 Mbps: Direct Connect hospedado.',
             'Auditoria de 10 Gbps: Direct Connect dedicado com MACsec. Reserva barata: Direct Connect com VPN de reserva. Pedidos: Direct Connect em dois locais. Engenheiros: Client VPN.',
           ],
           config: FERRO_FORTE_HYBRID,
