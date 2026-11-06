@@ -18,7 +18,10 @@ import type {
 import { PlacementBoard } from './shared/PlacementBoard'
 import s from './shared/shared.module.css'
 import { shuffled, statusMap } from './shared/util'
+import { BUILD_OUT, BUILD_OUT_LABEL, buildChips, chipStatus } from './build/evaluate'
+import { DiagramSvg } from '../ui/diagram/Diagram'
 import type {
+  BuildActivity,
   ClassifyActivity,
   DecisionActivity,
   EstimateActivity,
@@ -158,6 +161,41 @@ export function MatchView({ activity, value, onChange, disabled, evaluation, see
       poolLabel={activity.leftLabel}
       layout="pairs"
     />
+  )
+}
+
+// --- build -------------------------------------------------------------------
+
+export function BuildView({ activity, value, onChange, disabled, evaluation, seed }: ViewProps<BuildActivity, PlacementResponse>) {
+  const items = useMemo(() => {
+    const byId = new Map(activity.pieces.map((p) => [p.id, p]))
+    return shuffled(buildChips(activity), seed).map((c) => ({ id: c.id, text: byId.get(c.pieceId)!.text, glyph: byId.get(c.pieceId)!.glyph }))
+  }, [activity, seed])
+  const targets = useMemo(
+    () => [
+      ...activity.slots.map((sl) => ({ id: sl.id, label: sl.label, description: sl.description })),
+      { id: BUILD_OUT, label: BUILD_OUT_LABEL, description: 'Peças que não fazem parte da solução pedida.' },
+    ],
+    [activity.slots],
+  )
+  const positions = useMemo(() => Object.fromEntries(activity.slots.map((sl) => [sl.id, { x: sl.x, y: sl.y, w: sl.w, h: sl.h }])), [activity.slots])
+  const status = evaluation ? chipStatus(activity, value.placements) : undefined
+  return (
+    <div className={s.build}>
+      <Scenario lines={activity.scenario} />
+      <p className="sr-only">{activity.board.label}</p>
+      <PlacementBoard
+        items={items}
+        targets={targets}
+        placements={value.placements}
+        onChange={(placements) => onChange({ placements })}
+        disabled={disabled}
+        itemStatus={status}
+        poolLabel="Peças"
+        canvas={{ width: activity.board.width, height: activity.board.height, background: <DiagramSvg spec={activity.board} />, positions }}
+      />
+      {activity.board.caption && <p className={s.buildCaption}>{activity.board.caption}</p>}
+    </div>
   )
 }
 
