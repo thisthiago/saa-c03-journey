@@ -5,14 +5,18 @@
  *  - mouse/caneta: arrastar o item e soltar no destino.
  */
 import { Check, X } from 'lucide-react'
-import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import type { Rect } from '../../engine/diagram'
+import type { GlyphName } from '../../engine/types'
+import { Glyph } from '../../ui/Glyph'
 import { renderInline } from '../../ui/inline'
 import s from './shared.module.css'
 
 export interface PlaceItem {
   id: string
   text: string
+  glyph?: GlyphName
 }
 
 export interface PlaceTarget {
@@ -33,9 +37,14 @@ interface Props {
   itemStatus?: Record<string, 'correct' | 'wrong' | 'missed' | 'partial'>
   poolLabel?: string
   layout?: 'bins' | 'pairs'
+  /**
+   * Destinos sobre um desenho: os que têm posição ficam por cima do fundo
+   * (coordenadas no viewBox `width` × `height`); os outros ficam ao lado, com a lista.
+   */
+  canvas?: { width: number; height: number; background: ReactNode; positions: Record<string, Rect> }
 }
 
-export function PlacementBoard({ items, targets, placements, onChange, disabled, itemStatus, poolLabel = 'Itens para posicionar', layout = 'bins' }: Props) {
+export function PlacementBoard({ items, targets, placements, onChange, disabled, itemStatus, poolLabel = 'Itens para posicionar', layout = 'bins', canvas }: Props) {
   const [selected, setSelected] = useState<string | null>(null)
   const [drag, setDrag] = useState<{ id: string; left: number; top: number; width: number } | null>(null)
   const [announce, setAnnounce] = useState('')
@@ -131,46 +140,80 @@ export function PlacementBoard({ items, targets, placements, onChange, disabled,
       >
         {status === 'correct' && <Check size={16} aria-label="correto" />}
         {(status === 'wrong' || status === 'missed') && <X size={16} aria-label="incorreto" />}
+        {!status && item.glyph && <Glyph name={item.glyph} size={15} />}
         <span>{renderInline(item.text)}</span>
       </button>
     )
   }
 
+  const renderTarget = (t: PlaceTarget, style?: CSSProperties) => {
+    const placed = items.filter((i) => placements[i.id] === t.id)
+    return (
+      <div key={t.id} className={[s.target, style && s.slot, selected && s.dropReady].filter(Boolean).join(' ')} style={style} data-drop={t.id}>
+        <button
+          type="button"
+          className={s.targetHead}
+          onClick={() => onTargetClick(t.id)}
+          disabled={disabled || !selected}
+          aria-label={`Posicionar em ${t.label}`}
+          title={style ? t.description : undefined}
+        >
+          <span className={s.targetLabel}>{renderInline(t.label)}</span>
+          {t.description && <span className={s.targetDesc}>{t.description}</span>}
+          {selected && !disabled && <span className={s.targetHint}>Toque para posicionar aqui</span>}
+        </button>
+        <div className={s.chips}>{placed.map(chip)}</div>
+      </div>
+    )
+  }
+
+  const poolBox = (
+    <div
+      className={[s.pool, selected && placements[selected] && s.dropReady].filter(Boolean).join(' ')}
+      data-drop="__pool"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onTargetClick(null)
+      }}
+    >
+      <div className={s.poolHead}>
+        <span className={s.poolLabel}>{poolLabel}</span>
+        <span className="muted">{pool.length > 0 ? `${pool.length} restante(s)` : 'Todos posicionados'}</span>
+        {selected && placements[selected] && !disabled && (
+          <button type="button" className={s.linkBtn} onClick={() => onTargetClick(null)}>
+            Devolver à lista
+          </button>
+        )}
+      </div>
+      <div className={s.chips}>{pool.map(chip)}</div>
+    </div>
+  )
+
+  const pct = (n: number, of: number) => `${(n / of) * 100}%`
+
   return (
-    <div className={s.board} data-layout={layout}>
-      <div
-        className={[s.pool, selected && placements[selected] && s.dropReady].filter(Boolean).join(' ')}
-        data-drop="__pool"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) onTargetClick(null)
-        }}
-      >
-        <div className={s.poolHead}>
-          <span className={s.poolLabel}>{poolLabel}</span>
-          <span className="muted">{pool.length > 0 ? `${pool.length} restante(s)` : 'Todos posicionados'}</span>
-          {selected && placements[selected] && !disabled && (
-            <button type="button" className={s.linkBtn} onClick={() => onTargetClick(null)}>
-              Devolver à lista
-            </button>
-          )}
-        </div>
-        <div className={s.chips}>{pool.map(chip)}</div>
-      </div>
-      <div className={s.targets}>
-        {targets.map((t) => {
-          const placed = items.filter((i) => placements[i.id] === t.id)
-          return (
-            <div key={t.id} className={[s.target, selected && s.dropReady].filter(Boolean).join(' ')} data-drop={t.id}>
-              <button type="button" className={s.targetHead} onClick={() => onTargetClick(t.id)} disabled={disabled || !selected} aria-label={`Posicionar em ${t.label}`}>
-                <span className={s.targetLabel}>{renderInline(t.label)}</span>
-                {t.description && <span className={s.targetDesc}>{t.description}</span>}
-                {selected && !disabled && <span className={s.targetHint}>Toque para posicionar aqui</span>}
-              </button>
-              <div className={s.chips}>{placed.map(chip)}</div>
-            </div>
-          )
-        })}
-      </div>
+    <div className={s.board} data-layout={canvas ? 'canvas' : layout}>
+      {canvas ? (
+        <>
+          <div className={s.canvas} style={{ aspectRatio: `${canvas.width} / ${canvas.height}` }}>
+            <div className={s.canvasBg}>{canvas.background}</div>
+            {targets
+              .filter((t) => canvas.positions[t.id])
+              .map((t) => {
+                const r = canvas.positions[t.id]
+                return renderTarget(t, { left: pct(r.x, canvas.width), top: pct(r.y, canvas.height), width: pct(r.w, canvas.width), minHeight: pct(r.h, canvas.height) })
+              })}
+          </div>
+          <div className={s.canvasSide}>
+            {poolBox}
+            {targets.filter((t) => !canvas.positions[t.id]).map((t) => renderTarget(t))}
+          </div>
+        </>
+      ) : (
+        <>
+          {poolBox}
+          <div className={s.targets}>{targets.map((t) => renderTarget(t))}</div>
+        </>
+      )}
       {/* Portal no body: um ancestral com transform (animação do card) mudaria a referência do position: fixed. */}
       {drag &&
         createPortal(
