@@ -17,6 +17,7 @@ import type {
 } from './types'
 import { resolvePredict } from './predict/resolve'
 import { evaluateLab, labSolution } from './lab/evaluate'
+import { buildReference, evaluateBuild } from './build/evaluate'
 
 export interface DecisionResponse {
   selected: string[]
@@ -267,6 +268,8 @@ export function evaluateActivity(activity: ActivityDef, response: ActivityRespon
       return evaluateEstimate(activity, response as EstimateResponse)
     case 'investigate':
       return evaluateInvestigate(activity, response as InvestigateResponse)
+    case 'build':
+      return evaluateBuild(activity, (response as PlacementResponse).placements ?? {})
     case 'lab':
       return evaluateLabActivity(activity, response)
   }
@@ -304,6 +307,8 @@ export function referenceResponse(activity: ActivityDef): ActivityResponse {
         rootCause: activity.rootCause.options.find((o) => o.correct)?.id,
         remediations: activity.remediations.options.filter((o) => o.correct).map((o) => o.id),
       }
+    case 'build':
+      return { placements: buildReference(activity) }
     case 'lab':
       return labReference(activity)
   }
