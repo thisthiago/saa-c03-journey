@@ -2,6 +2,7 @@
 import type { PhaseDef } from '../../../../../engine/types'
 import type { ArchitectureLabConfig } from '../../../../../simulators/architecture/lab'
 import { META } from '../meta'
+import { CESTA_BASE, DRAW } from './diagrams'
 
 export const CESTA_CHEIA: ArchitectureLabConfig = {
   title: 'Relatório do Projeto de Rede',
@@ -15,6 +16,7 @@ export const CESTA_CHEIA: ArchitectureLabConfig = {
   minDimension: 0.5,
   groups: [{ id: 'sobra', title: 'Custo ou esforço além do que o requisito pede' }],
   disclaimer: 'A rubrica e os pesos são pedagógicos, definidos pelo AWS Quest. Os fatos sobre os serviços foram conferidos na documentação da AWS em 21/10/2026.',
+  diagram: CESTA_BASE,
   steps: [
     {
       id: 'enderecos',
@@ -25,7 +27,8 @@ export const CESTA_CHEIA: ArchitectureLabConfig = {
           id: 'blocos',
           prompt: 'Que blocos usar nas três VPCs?',
           options: [
-            { id: 'distintos', label: '10.64.0.0/16, 10.65.0.0/16 e 10.66.0.0/16, fora da faixa das lojas', scores: { requisitos: 1, resiliente: 1, seguro: 1 }, consequence: 'Nenhuma sobreposição: as VPCs e as lojas podem ser ligadas depois.', concepts: ['vpc.cidr', 'tgw.overlap'] },
+            { id: 'distintos', label: '10.64.0.0/16, 10.65.0.0/16 e 10.66.0.0/16', scores: { requisitos: 1, resiliente: 1, seguro: 1 }, consequence: 'Nenhuma sobreposição: as VPCs e as lojas podem ser ligadas depois.', concepts: ['vpc.cidr', 'tgw.overlap'] },
+            { id: 'dentro', label: '10.1.0.0/16, 10.2.0.0/16 e 10.3.0.0/16', scores: { requisitos: 0.2, resiliente: 0.5, seguro: 0.8 }, consequence: 'As três não se sobrepõem entre si, mas ficam dentro de 10.0.0.0/12, a faixa das lojas: a ligação com as lojas não funciona.', whyNot: '10.0.0.0/12 vai de 10.0.0.0 a 10.15.255.255 e contém esses três blocos.', concepts: ['vpc.cidr', 'tgw.overlap'] },
             { id: 'iguais', label: '10.0.0.0/16 nas três, o padrão do assistente', scores: { requisitos: 0, resiliente: 0.3, seguro: 0.6 }, consequence: 'As três VPCs se sobrepõem entre si e às lojas: nenhuma ligação funciona.', whyNot: 'Redes que serão ligadas precisam de blocos que não se sobreponham.', concepts: ['tgw.overlap'] },
             { id: 'grande', label: 'Um /8 para cada VPC, para nunca faltar', scores: { requisitos: 0, resiliente: 0.3, seguro: 0.6 }, consequence: 'A AWS recusa: o maior bloco de VPC é /16.', whyNot: 'Blocos de VPC vão de /16 a /28.', concepts: ['vpc.cidr'] },
           ],
@@ -35,6 +38,7 @@ export const CESTA_CHEIA: ArchitectureLabConfig = {
           prompt: 'Como organizar as sub-redes da loja virtual?',
           options: [
             { id: 'tres-zonas', label: 'Sub-redes públicas, de aplicação e de banco em cada uma das três zonas', scores: { resiliente: 1, seguro: 1, requisitos: 1 }, consequence: 'Cada camada sobrevive à queda de uma zona, e o banco fica sem acesso direto da internet.', concepts: ['vpc.subnet'] },
+            { id: 'duas-zonas', label: 'Sub-redes públicas, de aplicação e de banco em duas das três zonas', scores: { resiliente: 0.6, seguro: 1, requisitos: 0.5 }, consequence: 'A loja roda em três zonas, mas a terceira fica sem sub-redes, e os servidores dela não têm onde ser lançados.', whyNot: 'Cada zona usada precisa das próprias sub-redes.', concepts: ['vpc.subnet'] },
             { id: 'uma-grande', label: 'Uma sub-rede pública grande, com tudo dentro', scores: { resiliente: 0.2, seguro: 0.1, requisitos: 0.4 }, consequence: 'Tudo numa zona e exposto: a queda da zona derruba a loja.', whyNot: 'Sub-rede fica numa zona só, e banco não deve ficar em sub-rede pública.', concepts: ['vpc.subnet', 'rt.public-private'] },
           ],
         },
@@ -59,7 +63,7 @@ export const CESTA_CHEIA: ArchitectureLabConfig = {
     {
       id: 'seguranca',
       title: 'Segurança na VPC',
-      intro: 'O banco só pode ser acessado pelos servidores de aplicação, que sobem e descem com o Auto Scaling. A auditoria quer saber quais conexões foram recusadas nos últimos meses.',
+      intro: 'O banco só pode ser acessado pelos servidores de aplicação, que sobem e descem com o Auto Scaling. A cada trimestre, a auditoria pede a lista das conexões recusadas nos meses anteriores.',
       questions: [
         {
           id: 'banco',
@@ -75,6 +79,7 @@ export const CESTA_CHEIA: ArchitectureLabConfig = {
           prompt: 'Como mostrar à auditoria as conexões recusadas?',
           options: [
             { id: 'flow', label: 'VPC Flow Logs enviados ao S3', scores: { seguro: 1, requisitos: 1, custo: 1 }, consequence: 'Cada fluxo fica registrado com ACCEPT ou REJECT.', concepts: ['sg.flow-logs'] },
+            { id: 'cloudtrail', label: 'Uma trilha do AWS CloudTrail para a conta', scores: { seguro: 0.6, requisitos: 0.2, custo: 0.8 }, consequence: 'Registra as chamadas de API, como mudanças nas regras, mas não as conexões recusadas.', whyNot: 'Conexões aceitas e recusadas ficam nos Flow Logs.', concepts: ['sg.flow-logs'] },
             { id: 'nada', label: 'Recriar os testes quando a auditoria pedir', scores: { seguro: 0.2, requisitos: 0.1, custo: 1 }, consequence: 'Não há registro do que aconteceu nos meses anteriores.', whyNot: 'Só os Flow Logs ligados antes guardam esse histórico.', concepts: ['sg.flow-logs'] },
           ],
         },
@@ -83,14 +88,14 @@ export const CESTA_CHEIA: ArchitectureLabConfig = {
     {
       id: 'vpcs',
       title: 'Conexão entre VPCs',
-      intro: 'As três VPCs precisam falar entre si e com as lojas, e o grupo vai incorporar mais VPCs de redes compradas nos próximos anos.',
+      intro: 'As três VPCs precisam falar entre si e com as lojas, que vão chegar por VPN ou Direct Connect (etapa 6). O grupo vai incorporar mais VPCs de redes compradas nos próximos anos.',
       questions: [
         {
           id: 'hub',
           prompt: 'Como ligar as VPCs e as lojas?',
           options: [
-            { id: 'tgw', label: 'Um Transit Gateway com as VPCs e a conexão das lojas anexadas', scores: { requisitos: 1, resiliente: 1, desempenho: 1 }, consequence: 'Todas as redes se alcançam, e cada VPC nova é só mais um anexo.', concepts: ['tgw.transit-gateway', 'tgw.peering-vs-tgw'] },
-            { id: 'peering', label: 'Peering entre as três VPCs, com a conexão das lojas na VPC de sistemas internos', scores: { requisitos: 0.4, resiliente: 0.6, desempenho: 1, custo: 1 }, consequence: 'As VPCs se falam, mas a loja virtual e a de dados não alcançam as lojas pela conexão da VPC vizinha.', whyNot: 'Pelo peering, uma VPC não usa a VPN ou o Direct Connect da outra.', concepts: ['tgw.edge-to-edge', 'tgw.non-transitive'] },
+            { id: 'tgw', label: 'Um Transit Gateway com as VPCs e as conexões das lojas anexadas', scores: { requisitos: 1, resiliente: 1, desempenho: 1 }, consequence: 'Todas as redes se alcançam, e cada VPC nova é só mais um anexo.', concepts: ['tgw.transit-gateway', 'tgw.peering-vs-tgw'] },
+            { id: 'peering', label: 'Peering entre as três VPCs, com as conexões das lojas chegando à VPC de sistemas internos', scores: { requisitos: 0.4, resiliente: 0.6, desempenho: 1, custo: 1 }, consequence: 'As VPCs se falam, mas a loja virtual e a de dados não alcançam as lojas pela conexão da VPC vizinha.', whyNot: 'Pelo peering, uma VPC não usa a VPN ou o Direct Connect da outra.', concepts: ['tgw.edge-to-edge', 'tgw.non-transitive'] },
           ],
         },
       ],
@@ -123,7 +128,7 @@ export const CESTA_CHEIA: ArchitectureLabConfig = {
     {
       id: 'lojas',
       title: 'Conexão com as lojas',
-      intro: 'O centro de distribuição precisa de 5 Gbps estáveis para a VPC, e o sistema de pedidos não pode parar se um local do Direct Connect cair. As lojas pequenas precisam de conexão criptografada em poucos dias.',
+      intro: 'O centro de distribuição, onde roda o sistema de pedidos, precisa de 5 Gbps estáveis até a VPC, e esse sistema não pode parar se um local do Direct Connect cair. As lojas pequenas precisam ligar a rede delas à AWS, com criptografia, em poucos dias.',
       questions: [
         {
           id: 'cd',
@@ -139,6 +144,7 @@ export const CESTA_CHEIA: ArchitectureLabConfig = {
           prompt: 'Como ligar as lojas pequenas?',
           options: [
             { id: 'vpn-tgw', label: 'Site-to-Site VPN de cada loja para o Transit Gateway', scores: { requisitos: 1, seguro: 1, custo: 1 }, consequence: 'Fica pronta em dias, é criptografada e alcança todas as VPCs.', concepts: ['hyb.site-to-site-vpn'] },
+            { id: 'client-vpn', label: 'Client VPN para os funcionários de cada loja', scores: { requisitos: 0.3, seguro: 1, custo: 0.6 }, consequence: 'Serve a pessoas, uma a uma: os caixas e os sistemas da loja continuam sem rede até a AWS.', whyNot: 'Ligar a rede inteira da loja é papel da Site-to-Site VPN.', concepts: ['hyb.site-to-site-vpn'] },
             { id: 'dx-loja', label: 'Um Direct Connect hospedado em cada loja', scores: { requisitos: 0.3, seguro: 0.6, custo: 0.2 }, consequence: 'Não fica pronto em poucos dias, não é criptografado por padrão e custa muito para lojas pequenas.', whyNot: 'Prazo curto e criptografia pedem VPN.', concepts: ['hyb.direct-connect', 'hyb.dx-encryption'] },
           ],
         },
@@ -147,13 +153,13 @@ export const CESTA_CHEIA: ArchitectureLabConfig = {
     {
       id: 'dns',
       title: 'DNS e entrega de conteúdo',
-      intro: 'A loja virtual roda em São Paulo e na Virgínia. O domínio cestacheia.com deve levar cada cliente à Região mais rápida, e as fotos dos produtos estão num bucket do S3.',
+      intro: 'A loja virtual ganhou uma cópia na Virgínia, numa quarta VPC, para os clientes de fora do Brasil. O domínio cestacheia.com deve levar cada cliente à Região mais rápida, e as fotos dos produtos estão num bucket do S3.',
       questions: [
         {
           id: 'roteamento',
           prompt: 'Como configurar o domínio?',
           options: [
-            { id: 'alias-lat', label: 'Registros alias com política de latência, apontando para os balanceadores das duas Regiões, com saúde do alvo avaliada', scores: { desempenho: 1, resiliente: 1, requisitos: 1, custo: 1 }, consequence: 'Cada cliente vai à Região mais rápida, e uma Região sem saúde sai da resposta.', concepts: ['dns.alias', 'dns.latency'] },
+            { id: 'alias-lat', label: 'Registros alias com política de latência para os balanceadores das duas Regiões, com "Avaliar a saúde do alvo" ligado', scores: { desempenho: 1, resiliente: 1, requisitos: 1, custo: 1 }, consequence: 'Cada cliente vai à Região mais rápida, e uma Região não saudável sai da resposta.', concepts: ['dns.alias', 'dns.latency'] },
             { id: 'cname', label: 'Um CNAME no ápice apontando para o balanceador de São Paulo', scores: { desempenho: 0.4, resiliente: 0.3, requisitos: 0 }, consequence: 'CNAME no ápice da zona não é permitido.', whyNot: 'No ápice, use alias.', concepts: ['dns.alias'] },
             { id: 'geo', label: 'Geolocalização, com o Brasil em São Paulo e o resto na Virgínia, sem registro padrão', scores: { desempenho: 0.6, resiliente: 0.5, requisitos: 0.5 }, consequence: 'Locais sem registro e IPs sem local conhecido ficam sem resposta.', whyNot: 'Para a Região mais rápida, a política é a de latência.', concepts: ['dns.geolocation'] },
           ],
@@ -163,6 +169,7 @@ export const CESTA_CHEIA: ArchitectureLabConfig = {
           prompt: 'Como entregar as fotos dos produtos?',
           options: [
             { id: 'cf-oac', label: 'CloudFront com origin access control, bucket privado', scores: { desempenho: 1, seguro: 1, custo: 1, requisitos: 1 }, consequence: 'Fotos em cache perto do cliente, e ninguém acessa o bucket direto.', concepts: ['edge.cloudfront', 'cdn.oac'] },
+            { id: 'cf-site', label: 'CloudFront com o bucket configurado como site estático público', scores: { desempenho: 1, seguro: 0.4, custo: 1, requisitos: 0.7 }, consequence: 'Entrega rápido, mas o bucket continua público e pode ser acessado sem o CloudFront.', whyNot: 'Com OAC, o bucket fica privado.', concepts: ['cdn.oac'] },
             { id: 'publico', label: 'Bucket público acessado direto pelos clientes', scores: { desempenho: 0.4, seguro: 0.2, custo: 0.6, requisitos: 0.5 }, consequence: 'Cada foto vai e volta de uma Região, e o bucket fica exposto.', whyNot: 'CloudFront com OAC entrega mais rápido e mantém o bucket privado.', concepts: ['cdn.oac'] },
           ],
         },
@@ -171,13 +178,14 @@ export const CESTA_CHEIA: ArchitectureLabConfig = {
     {
       id: 'borda',
       title: 'Proteção de borda e custo',
-      intro: 'A loja já sofreu tentativas de injeção de SQL e um ataque DDoS na última promoção. O grupo tem 25 contas e quer as mesmas regras em todas.',
+      intro: 'A loja já sofreu tentativas de injeção de SQL e robôs testando senhas no login. Um ataque DDoS na última promoção inflou a fatura, e a diretoria quer especialistas da AWS durante o próximo ataque e proteção para o custo dele. O grupo tem 25 contas e quer as mesmas regras em todas.',
       questions: [
         {
           id: 'waf',
           prompt: 'Como proteger a aplicação?',
           options: [
             { id: 'waf-fm', label: 'WAF com regras gerenciadas e regra por taxa no CloudFront, aplicado a todas as contas pelo Firewall Manager', scores: { seguro: 1, requisitos: 1, resiliente: 1 }, consequence: 'Injeção de SQL e robôs barrados em todas as contas, inclusive nas novas.', concepts: ['edgesec.waf-managed', 'edgesec.firewall-manager', 'edgesec.rate-based'] },
+            { id: 'shield', label: 'Shield Advanced em todas as contas, sem WAF', scores: { seguro: 0.5, requisitos: 0.3, resiliente: 0.8 }, consequence: 'Ajuda contra DDoS, mas não barra injeção de SQL nem robôs no login.', whyNot: 'Injeção de SQL e robôs se barram no WAF.', concepts: ['edgesec.waf', 'edgesec.shield-advanced'] },
             { id: 'acl', label: 'Network ACLs negando os IPs dos ataques anteriores', scores: { seguro: 0.3, requisitos: 0.2, resiliente: 0.4 }, consequence: 'Os ataques seguintes vêm de outros IPs, e a ACL não enxerga injeção de SQL.', whyNot: 'Injeção de SQL se barra no WAF.', concepts: ['sg.nacl', 'edgesec.waf'] },
           ],
         },
@@ -186,7 +194,7 @@ export const CESTA_CHEIA: ArchitectureLabConfig = {
           prompt: 'Que proteção contra DDoS contratar?',
           group: 'sobra',
           options: [
-            { id: 'advanced', label: 'Shield Advanced nos recursos da borda, com suporte Business, pela exigência de resposta especializada e créditos', scores: { seguro: 1, resiliente: 1, requisitos: 1 }, consequence: 'Equipe de resposta e créditos de custo na próxima promoção.', concepts: ['edgesec.shield-advanced'] },
+            { id: 'advanced', label: 'Shield Advanced nos recursos da borda, com suporte Business', scores: { seguro: 1, resiliente: 1, requisitos: 1 }, consequence: 'Equipe de resposta e créditos de custo na próxima promoção.', concepts: ['edgesec.shield-advanced'] },
             { id: 'standard', label: 'Só o Shield Standard, que já vem sem custo', scores: { seguro: 0.6, resiliente: 0.6, requisitos: 0.4, custo: 1 }, consequence: 'Cobre os ataques comuns de rede, mas não traz equipe de resposta nem créditos, que a diretoria exigiu.', whyNot: 'A diretoria pediu resposta especializada e proteção de custo.', concepts: ['edgesec.shield-standard'] },
           ],
         },
@@ -197,11 +205,11 @@ export const CESTA_CHEIA: ArchitectureLabConfig = {
     {
       id: 'sobreposicao',
       when: [
-        ['blocos', ['iguais']],
+        ['blocos', ['iguais', 'dentro']],
         ['hub', ['tgw', 'peering']],
       ],
       penalty: { requisitos: 0.3 },
-      message: 'Blocos sobrepostos e a ligação entre as VPCs: nem o peering nem o Transit Gateway roteiam entre redes com os mesmos endereços.',
+      message: 'Blocos sobrepostos e a ligação entre as redes: nem o peering nem o Transit Gateway roteiam entre redes com endereços em comum.',
       concepts: ['tgw.overlap'],
     },
     {
@@ -226,6 +234,9 @@ export const CESTA_CHEIA: ArchitectureLabConfig = {
     },
   ],
 }
+
+// Cada opção acrescenta ao desenho do projeto o que ela representa.
+for (const step of CESTA_CHEIA.steps) for (const q of step.questions) for (const o of q.options) o.draw = DRAW[q.id]?.[o.id]
 
 export const FINAL_NET: PhaseDef = {
   ...META.final,
@@ -298,7 +309,7 @@ export const FINAL_NET: PhaseDef = {
           reviewWeakNow: true,
           hints: ['Cada requisito do enunciado de uma etapa costuma eliminar uma ou duas opções.', 'Antes de ligar redes, confira se os blocos não se sobrepõem.'],
           explanation: [
-            'Projeto de referência: blocos distintos fora da faixa das lojas, sub-redes por camada nas três zonas, NAT regional (ou um por zona), security group do banco referenciando a aplicação e Flow Logs no S3.',
+            'Projeto de referência: blocos que não se sobrepõem entre si nem à faixa das lojas (10.0.0.0/12), sub-redes por camada nas três zonas, NAT regional (ou um por zona), security group do banco referenciando a aplicação e Flow Logs no S3.',
             'Transit Gateway com as VPCs e as lojas; endpoint de gateway para o S3 e de interface para o SQS; Direct Connect em dois locais para o centro de distribuição e VPN para as lojas pequenas; alias com latência e CloudFront com OAC; WAF pelo Firewall Manager e Shield Advanced.',
             'Os conceitos ligados às decisões erradas entram na sua revisão imediatamente.',
           ],
