@@ -6,6 +6,7 @@ import type { PhaseDef } from '../../../../../engine/types'
 import type { DnsPolicyLabConfig } from '../../../../../simulators/dns/policy'
 import type { DnsRecord } from '../../../../../simulators/dns/model'
 import { META } from '../meta'
+import { GEO_NESTED, HYBRID_DNS_BOARD, WHAT_DECIDES } from './diagrams'
 
 const LEITOR_BR = { country: 'BR', continent: 'SA', latency: { 'sa-east-1': 18, 'us-east-1': 125, 'eu-west-1': 190 } }
 
@@ -23,7 +24,7 @@ export const AGORA_POLICIES: DnsPolicyLabConfig = {
     { id: 'regioes', text: 'O portal roda em São Paulo, na Virgínia e na Irlanda, e cada leitor deve cair na Região mais rápida para ele', dominant: 'lowest-latency', needs: ['lowest-latency'], concepts: ['dns.latency'] },
     { id: 'reserva', text: 'Se o portal cair, mostrar uma página estática de aviso guardada no S3', dominant: 'active-passive', needs: ['active-passive'], concepts: ['dns.failover'] },
     { id: 'direitos', text: 'Vídeos de futebol só podem ser servidos aos leitores do Brasil, por contrato', dominant: 'by-country', needs: ['by-country'], concepts: ['dns.geolocation'] },
-    { id: 'deslocar', text: 'Levar mais tráfego para o novo data center da Irlanda, ampliando a área que ele atende', dominant: 'by-resource-location', needs: ['by-resource-location'], concepts: ['dns.geolocation'] },
+    { id: 'deslocar', text: 'Levar mais tráfego para o novo data center da Irlanda, ampliando a área geográfica que ele atende', dominant: 'by-resource-location', needs: ['by-resource-location'], concepts: ['dns.geolocation'] },
     { id: 'ips', text: 'O serviço de notificações tem seis servidores, sem balanceador; o DNS deve devolver só os saudáveis', dominant: 'many-healthy', needs: ['many-healthy'], concepts: ['dns.multivalue'] },
     { id: 'provedor', text: 'Assinantes de um provedor parceiro, identificados pela faixa de IP, devem ir para um servidor exclusivo', dominant: 'by-client-ip', needs: ['by-client-ip'], concepts: ['dns.routing-policies'] },
   ],
@@ -85,7 +86,7 @@ export const F07_NET: PhaseDef = {
             { id: 'apex', text: 'Pode ficar no ápice da zona', bin: 'alias', explanation: 'O CNAME não pode.', concepts: ['dns.alias'] },
             { id: 'free', text: 'Consultas a recursos da AWS não são cobradas', bin: 'alias', explanation: 'O Route 53 cobra as consultas CNAME.', concepts: ['dns.alias'] },
             { id: 'any', text: 'Aponta para qualquer nome, até em outro provedor de DNS', bin: 'cname', explanation: 'O alias só aponta para recursos selecionados da AWS ou para registros da mesma zona.', concepts: ['dns.alias'] },
-            { id: 'two', text: 'Para outro registro do Route 53, cada consulta conta como duas', bin: 'cname', explanation: 'A segunda consulta busca o registro de destino.', concepts: ['dns.alias'] },
+            { id: 'two', text: 'Não pode existir junto com outros registros do mesmo nome', bin: 'cname', explanation: 'Um nome com CNAME não pode ter outros registros, como MX ou TXT. Por isso o CNAME não fica no ápice, que precisa dos registros SOA e NS.', concepts: ['dns.alias'] },
           ],
         },
         {
@@ -100,6 +101,7 @@ export const F07_NET: PhaseDef = {
           options: [
             { id: 'a', text: 'Uma zona hospedada privada associada à VPC', correct: true, consequence: 'O nome resolve dentro da VPC e não existe na internet.' },
             { id: 'b', text: 'Registros na zona pública com IPs privados', correct: false, consequence: 'Qualquer um na internet descobre os nomes e endereços internos.' },
+            { id: 'c', text: 'Registros na zona pública, num subdomínio difícil de adivinhar', correct: false, consequence: 'Quem descobrir o nome resolve o endereço: esconder o nome não impede a resolução pela internet.' },
           ],
         },
       ],
@@ -119,9 +121,17 @@ export const F07_NET: PhaseDef = {
         successCriteria: ['Calcular a proporção da ponderada', 'Lembrar do registro padrão na geolocalização'],
       },
       intel: [
-        { conceptId: 'dns.routing-policies', body: ['Simples, **ponderada**, **latência**, **failover**, **geolocalização**, geoproximidade, baseada em IP e **múltiplas respostas**.'] },
-        { conceptId: 'dns.weighted', body: ['Proporção = **peso do registro ÷ soma dos pesos**.'] },
-        { conceptId: 'dns.geolocation', body: ['A região menor vence. Sem **registro padrão**, quem está num local sem registro fica **sem resposta**.'] },
+        {
+          conceptId: 'dns.routing-policies',
+          body: [
+            'Cada política responde a uma pergunta diferente. Duas delas aparecem menos: a **geoproximidade** decide pela distância entre o usuário e o **recurso**, e um **viés** (bias) amplia ou reduz a área que cada recurso atende; a **baseada em IP** decide pela **faixa de IP** de quem pergunta.',
+          ],
+          diagram: WHAT_DECIDES,
+        },
+        { conceptId: 'dns.weighted', body: ['A proporção de cada registro é o **peso dele dividido pela soma dos pesos**.'] },
+        { conceptId: 'dns.latency', body: ['A política de **latência** responde com a Região que tem a **menor latência medida** entre a rede do usuário e a AWS. Não é a distância no mapa nem uma Região padrão.'] },
+        { conceptId: 'dns.geolocation', body: ['Vence o registro da **área mais específica** que contém o usuário: para um leitor brasileiro, o registro do Brasil vence o da América do Sul. Sem **registro padrão**, quem está num local sem registro fica **sem resposta**.'], diagram: GEO_NESTED },
+        { conceptId: 'dns.multivalue', body: ['A política de **múltiplas respostas** devolve até **oito** registros saudáveis, escolhidos ao acaso. Ela espalha a carga, mas não substitui um balanceador.'] },
       ],
       activities: [
         {
@@ -144,7 +154,7 @@ export const F07_NET: PhaseDef = {
           id: 'net.f07.m2.a2',
           kind: 'predict',
           title: 'Três Regiões',
-          prompt: 'O portal usa a política de latência com registros em sa-east-1, us-east-1 e eu-west-1. Para um leitor no Brasil, a latência é de 18, 125 e 190 ms. Qual registro ele recebe?',
+          prompt: 'O portal usa a política de latência com registros em São Paulo (sa-east-1), na Virgínia (us-east-1) e na Irlanda (eu-west-1). Para um leitor no Brasil, a latência até São Paulo é de 18 ms, até a Virgínia, de 125 ms, e até a Irlanda, de 190 ms. Qual registro ele recebe?',
           concepts: [{ id: 'dns.latency' }, { id: 'dns.routing-policies', weight: 0.5 }],
           xp: 40,
           difficulty: 1,
@@ -193,7 +203,7 @@ export const F07_NET: PhaseDef = {
           id: 'net.f07.m2.a4',
           kind: 'predict',
           title: 'Os servidores de notificação',
-          prompt: 'Três registros de múltiplas respostas apontam para os servidores A, B e C, com verificação de saúde. B está sem saúde. O que o Route 53 devolve?',
+          prompt: 'Três registros de múltiplas respostas apontam para os servidores A, B e C, com verificação de saúde. B não está saudável. O que o Route 53 devolve?',
           concepts: [{ id: 'dns.multivalue' }, { id: 'dns.health-checks', weight: 0.5 }],
           xp: 40,
           difficulty: 2,
@@ -214,8 +224,24 @@ export const F07_NET: PhaseDef = {
             { id: 'c', text: 'Só A', outcome: 'a' },
           ],
         },
+        {
+          id: 'net.f07.m2.a5',
+          kind: 'decision',
+          title: 'Mais leitores para a Irlanda',
+          prompt: 'O portal abriu um data center na Irlanda e quer que ele atenda leitores de uma área maior ao redor dele, tirando parte dos que hoje vão para outros lugares. Cada leitor deve continuar indo para o recurso mais próximo, e a equipe não quer manter uma lista de países. O que usar?',
+          concepts: [{ id: 'dns.routing-policies' }],
+          xp: 40,
+          difficulty: 2,
+          explanation: ['A geoproximidade decide pela distância entre o leitor e cada recurso. Um viés positivo no registro da Irlanda amplia a área que ele atende, sem listar países.'],
+          options: [
+            { id: 'a', text: 'Geoproximidade, com um viés positivo no registro da Irlanda', correct: true, consequence: 'O viés amplia a área da Irlanda com um número só.' },
+            { id: 'b', text: 'Geolocalização, com um registro para cada país vizinho da Irlanda', correct: false, consequence: 'Funciona país a país, mas é a lista que a equipe não quer manter.' },
+            { id: 'c', text: 'Ponderada, com peso maior no registro da Irlanda', correct: false, consequence: 'O peso divide os leitores em proporção, sem olhar onde eles estão: leitores do Brasil iriam para a Irlanda.' },
+            { id: 'd', text: 'Latência, que manda cada leitor para a Região mais rápida', correct: false, consequence: 'A latência segue a medição e não deixa ampliar a área de um recurso.' },
+          ],
+        },
       ],
-      debrief: { takeaways: ['Ponderada: peso ÷ soma.', 'Latência: a Região mais rápida para o usuário.', 'Geolocalização sem registro padrão deixa locais sem resposta.', 'Múltiplas respostas: até oito saudáveis.'] },
+      debrief: { takeaways: ['Ponderada: peso dividido pela soma dos pesos.', 'Latência: a Região mais rápida para o usuário.', 'Geolocalização sem registro padrão deixa locais sem resposta.', 'Múltiplas respostas: até oito saudáveis.'] },
     },
     // -----------------------------------------------------------------------
     {
@@ -226,25 +252,31 @@ export const F07_NET: PhaseDef = {
       briefing: {
         company: 'Portal de Notícias Agora',
         role: 'Você prepara o portal para falhas e liga o DNS da redação à AWS.',
-        situation: 'Num pico de acessos, o portal caiu e os leitores viram erro. A diretoria quer uma página de aviso automática. A redação, ligada por VPN, também precisa resolver os nomes da zona privada.',
+        situation: 'Num pico de acessos, o portal caiu e os leitores viram erro. A diretoria quer uma página de aviso automática. A redação, ligada por VPN, precisa resolver os nomes da zona privada, e os servidores da VPC precisam resolver os nomes internos da redação.',
         objective: 'Configurar o failover e o DNS híbrido.',
         successCriteria: ['Prever o failover', 'Verificar a saúde de recurso privado', 'Escolher os endpoints do Resolver'],
       },
       intel: [
-        { conceptId: 'dns.failover', body: ['**Failover**: o primário responde enquanto está saudável; quando fica sem saúde, entra o **secundário**.'] },
-        { conceptId: 'dns.health-checks', body: ['A verificação de saúde olha um **endpoint pela internet**, **outras verificações** ou um **alarme do CloudWatch**. Recurso privado: alarme do CloudWatch.'] },
-        { conceptId: 'dns.resolver', body: ['**Endpoint de entrada**: a empresa resolve nomes da AWS. **Endpoint de saída** com regras: a VPC resolve nomes da empresa.'] },
+        { conceptId: 'dns.failover', body: ['No **failover**, o primário responde enquanto está saudável; quando deixa de estar, entra o **secundário**.'] },
+        { conceptId: 'dns.health-checks', body: ['A verificação de saúde pode olhar um **endpoint**, **outras verificações** ou um **alarme do CloudWatch**. Os verificadores de endpoint ficam na **internet**: só alcançam o que a internet alcança.'] },
+        {
+          conceptId: 'dns.resolver',
+          body: [
+            'Toda VPC tem o **Route 53 Resolver** no endereço base da VPC **mais dois** (10.70.0.2 numa VPC 10.70.0.0/16). Ele só atende quem está dentro da VPC.',
+            'Um **endpoint de entrada** dá à empresa IPs dentro da VPC para onde mandar consultas. Um **endpoint de saída**, com **regras de encaminhamento** por domínio, manda consultas da VPC para o DNS da empresa.',
+          ],
+        },
       ],
       activities: [
         {
           id: 'net.f07.m3.a1',
           kind: 'predict',
           title: 'O primário caiu',
-          prompt: 'Failover: o primário é o balanceador do portal, e o secundário é o site estático de aviso no S3. O primário está sem saúde e o secundário está saudável. O que o Route 53 responde?',
+          prompt: 'Failover: o primário é o balanceador do portal, e o secundário é o site estático de aviso no S3. O primário não está saudável, e o secundário está. O que o Route 53 responde?',
           concepts: [{ id: 'dns.failover' }],
           xp: 40,
           difficulty: 1,
-          explanation: ['Com o primário sem saúde, o Route 53 passa a responder com o secundário.'],
+          explanation: ['Com o primário não saudável, o Route 53 passa a responder com o secundário.'],
           spec: {
             sim: 'dns',
             records: [
@@ -276,22 +308,36 @@ export const F07_NET: PhaseDef = {
           ],
         },
         {
-          id: 'net.f07.m3.a3',
-          kind: 'decision',
-          title: 'A redação e a zona privada',
-          prompt: 'A redação, ligada por VPN, precisa resolver os nomes da zona privada da AWS, e os servidores da VPC precisam resolver os nomes do servidor de DNS da redação. O que montar?',
+          id: 'net.f07.m3.a4',
+          kind: 'build',
+          title: 'O DNS da redação e da VPC',
+          prompt: 'Monte o DNS híbrido: a redação precisa resolver os nomes da zona privada, e os servidores da VPC precisam resolver os nomes de redacao.local. Arraste cada peça para onde ela fica; as que não servem vão para "Não entra nesta rede".',
+          scenario: ['A redação chega à VPC por uma VPN. O Resolver da VPC, no endereço 10.70.0.2, só responde a quem está dentro da VPC.'],
           concepts: [{ id: 'dns.resolver' }],
-          xp: 50,
+          xp: 60,
           difficulty: 3,
-          explanation: ['O endpoint de entrada recebe as consultas da redação; o endpoint de saída, com regras de encaminhamento por domínio, manda as consultas da VPC para o DNS da redação.'],
-          options: [
-            { id: 'a', text: 'Endpoint de entrada do Resolver para a redação e endpoint de saída com regras para os nomes da redação', correct: true, consequence: 'Os dois lados resolvem os nomes um do outro pela VPN.' },
-            { id: 'b', text: 'Apontar o DNS da redação para o endereço base mais dois da VPC', correct: false, consequence: 'Esse endereço não é alcançável de fora da VPC.' },
-            { id: 'c', text: 'Copiar a zona privada para uma zona pública', correct: false, consequence: 'Publica os nomes internos para toda a internet.' },
+          explanation: [
+            'Da redação para a AWS: o servidor DNS da redação encaminha os nomes da zona privada para os IPs do endpoint de entrada, que os entrega ao Resolver.',
+            'Da AWS para a redação: uma regra de encaminhamento diz ao Resolver que os nomes de redacao.local vão para o DNS da redação, pelo endpoint de saída.',
+          ],
+          board: HYBRID_DNS_BOARD,
+          pieces: [
+            { id: 'inbound', text: 'Endpoint de entrada do Resolver', explanation: 'Dá à redação IPs dentro da VPC para onde mandar as consultas da zona privada, pela VPN.', concepts: ['dns.resolver'] },
+            { id: 'outbound', text: 'Endpoint de saída do Resolver', explanation: 'É por onde as consultas da VPC saem em direção ao DNS da redação.', concepts: ['dns.resolver'] },
+            { id: 'rule', text: 'Regra de encaminhamento: redacao.local para o DNS da redação', explanation: 'Diz ao Resolver que os nomes de redacao.local vão para o DNS da redação, pelo endpoint de saída.', concepts: ['dns.resolver'] },
+            { id: 'cond', text: 'Encaminhador condicional: interno.agoranoticias.com para o endpoint de entrada', explanation: 'No DNS da redação, manda as consultas dos nomes da zona privada para os IPs do endpoint de entrada.', concepts: ['dns.resolver'] },
+            { id: 'dot2', text: 'Apontar o DNS da redação para 10.70.0.2', explanation: 'O Resolver no endereço base mais dois só atende quem está dentro da VPC. A redação precisa do endpoint de entrada.', concepts: ['dns.resolver'] },
+            { id: 'pubzone', text: 'Zona hospedada pública com os nomes internos', explanation: 'Publicaria os nomes internos para a internet inteira.', concepts: ['dns.resolver'] },
+            { id: 'igw', text: 'Internet gateway para chegar ao DNS da redação', explanation: 'O DNS da redação é privado e fica do outro lado da VPN: a internet não chega a ele.', concepts: ['dns.resolver'] },
+          ],
+          slots: [
+            { id: 'red', label: 'No servidor DNS da redação', x: 30, y: 170, w: 210, h: 150, expect: { cond: 1 }, explanation: 'O DNS da redação precisa saber que os nomes da zona privada são resolvidos pelo endpoint de entrada.' },
+            { id: 'in', label: 'Na VPC, recebendo consultas da redação', x: 350, y: 118, w: 200, h: 100, expect: { inbound: 1 }, explanation: 'As consultas da redação chegam à VPC pelo endpoint de entrada.' },
+            { id: 'out', label: 'Na VPC, mandando consultas para a redação', x: 350, y: 236, w: 200, h: 100, expect: { outbound: 1, rule: 1 }, explanation: 'As consultas da VPC para redacao.local saem pelo endpoint de saída, guiadas pela regra de encaminhamento.' },
           ],
         },
       ],
-      debrief: { takeaways: ['Failover: secundário quando o primário fica sem saúde.', 'Recurso privado: verificação por alarme do CloudWatch.', 'DNS híbrido: endpoints de entrada e de saída do Resolver.'] },
+      debrief: { takeaways: ['Failover: secundário quando o primário deixa de estar saudável.', 'Recurso privado: verificação por alarme do CloudWatch.', 'DNS híbrido: endpoints de entrada e de saída do Resolver.'] },
     },
     // -----------------------------------------------------------------------
     {
