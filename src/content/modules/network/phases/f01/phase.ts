@@ -5,11 +5,12 @@
 import type { PhaseDef } from '../../../../../engine/types'
 import type { VpcPlannerLabConfig } from '../../../../../simulators/vpcnet/planner'
 import { META } from '../meta'
+import { RESERVED_RULER, STORE_VPC_BOARD, SUBNET_HALVES, VPC_IN_REGION } from './diagrams'
 
 export const PONTO_CERTO_PLAN: VpcPlannerLabConfig = {
   vpcOptions: [
     { cidr: '10.0.0.0/16', note: 'o bloco que o assistente sugere' },
-    { cidr: '10.40.0.0/8', note: 'bem grande, para nunca faltar' },
+    { cidr: '10.0.0.0/8', note: 'bem grande, para nunca faltar' },
     { cidr: '10.40.0.0/22' },
     { cidr: '10.40.0.0/24' },
   ],
@@ -45,29 +46,37 @@ export const F01_NET: PhaseDef = {
         successCriteria: ['Saber o que vale para a Região e o que vale para uma zona', 'Escolher um bloco aceito pela AWS e sem conflito com o escritório'],
       },
       intel: [
-        { conceptId: 'vpc.what', body: ['A **VPC** vale para a Região inteira. Cada **sub-rede** fica inteira dentro de **uma zona de disponibilidade**.'] },
+        { conceptId: 'vpc.what', body: ['A **VPC** vale para a Região inteira. Cada **sub-rede** fica inteira dentro de **uma zona de disponibilidade**.'], diagram: VPC_IN_REGION },
         { conceptId: 'vpc.cidr', body: ['O bloco da VPC vai de **/16** (65.536 endereços) a **/28** (16). Prefira faixas privadas, como 10.0.0.0/8, e **não repita** o bloco de redes que um dia serão ligadas.'] },
       ],
       activities: [
         {
-          id: 'net.f01.m1.a1',
-          kind: 'classify',
-          title: 'Região ou zona',
-          prompt: 'Classifique cada recurso de rede pelo alcance: vale para a Região inteira ou fica numa zona de disponibilidade só?',
+          id: 'net.f01.m1.a5',
+          kind: 'build',
+          title: 'Monte a VPC da loja',
+          prompt: 'Arraste cada peça para onde ela existe: na borda da VPC, valendo para a VPC inteira ou dentro de uma zona. As peças que não existem na AWS vão para "Não entra nesta rede".',
+          scenario: ['A loja virtual precisa continuar no ar se uma zona de disponibilidade falhar. Por isso, cada zona recebe um servidor web.'],
           concepts: [{ id: 'vpc.what' }, { id: 'vpc.subnet' }],
           xp: 50,
           difficulty: 1,
-          explanation: ['A VPC e o que se prende a ela (internet gateway, security group) valem para a Região. A sub-rede fica numa zona, e o que se lança numa sub-rede, como uma instância ou um NAT Gateway zonal, fica na zona dela.'],
-          bins: [
-            { id: 'region', label: 'Região inteira' },
-            { id: 'az', label: 'Uma zona de disponibilidade' },
+          explanation: [
+            'A VPC vale para a Região inteira, e o que se prende a ela também: o internet gateway, que é um só por VPC, e o security group, que serve a instâncias de qualquer zona.',
+            'A sub-rede fica numa zona só, e a instância fica na zona da sub-rede em que foi lançada. Por isso a loja tem uma sub-rede web e um servidor em cada zona.',
           ],
-          items: [
-            { id: 'vpc', text: 'A VPC', bin: 'region', explanation: 'A VPC abrange todas as zonas da Região.', concepts: ['vpc.what'] },
-            { id: 'subnet', text: 'Uma sub-rede', bin: 'az', explanation: 'Cada sub-rede fica inteira dentro de uma zona e não se estende a outra.', concepts: ['vpc.subnet'] },
-            { id: 'ec2', text: 'Uma instância EC2', bin: 'az', explanation: 'A instância fica na sub-rede em que foi lançada, e portanto na zona dela.', concepts: ['vpc.subnet'] },
-            { id: 'igw', text: 'O internet gateway', bin: 'region', explanation: 'Ele se liga à VPC, e não a uma zona.', concepts: ['vpc.what'] },
-            { id: 'sg', text: 'Um security group', bin: 'region', explanation: 'O security group pertence à VPC e pode ser usado por recursos em qualquer zona dela.', concepts: ['vpc.what'] },
+          board: STORE_VPC_BOARD,
+          pieces: [
+            { id: 'igw', text: 'Internet gateway', glyph: 'globe', explanation: 'Liga a VPC à internet. É um só por VPC e fica preso à VPC inteira, e não a uma zona.', concepts: ['vpc.what'] },
+            { id: 'sg', text: 'Security group dos servidores web', glyph: 'shield', explanation: 'Pertence à VPC e pode ser usado por instâncias em qualquer zona dela.', concepts: ['vpc.what'] },
+            { id: 'web', text: 'Sub-rede web', glyph: 'network', count: 2, explanation: 'Cada sub-rede fica inteira numa zona. Para a loja sobreviver à falha de uma zona, é preciso uma sub-rede web em cada zona.', concepts: ['vpc.subnet'] },
+            { id: 'ec2', text: 'Servidor web (instância EC2)', glyph: 'server', count: 2, explanation: 'A instância fica na sub-rede em que foi lançada, e portanto na zona dela. Um servidor em cada zona mantém a loja no ar se uma zona cair.', concepts: ['vpc.subnet'] },
+            { id: 'span', text: 'Sub-rede web que cobre as duas zonas', glyph: 'network', explanation: 'Não existe: uma sub-rede nunca atravessa zonas. Para cobrir duas zonas, crie uma sub-rede em cada uma.', concepts: ['vpc.subnet'] },
+            { id: 'igw2', text: 'Segundo internet gateway, um para cada zona', glyph: 'globe', explanation: 'Não existe: a VPC aceita um único internet gateway, e ele já atende todas as zonas.', concepts: ['vpc.what'] },
+          ],
+          slots: [
+            { id: 'edge', label: 'Borda da VPC', x: 250, y: 50, w: 220, h: 66, expect: { igw: 1 }, explanation: 'O internet gateway se liga à VPC e fica entre ela e a internet. Um só atende todas as zonas.' },
+            { id: 'vpcwide', label: 'Toda a VPC, em qualquer zona', x: 48, y: 126, w: 624, h: 54, expect: { sg: 1 }, explanation: 'O que pertence à VPC, como o security group, vale para todas as zonas: a mesma regra serve aos servidores das duas.' },
+            { id: 'za', label: 'Dentro da zona a', x: 60, y: 214, w: 280, h: 144, expect: { web: 1, ec2: 1 }, explanation: 'A zona a precisa da própria sub-rede web e de um servidor lançado nela.' },
+            { id: 'zb', label: 'Dentro da zona b', x: 380, y: 214, w: 280, h: 144, expect: { web: 1, ec2: 1 }, explanation: 'A zona b também precisa da própria sub-rede web e de um servidor lançado nela.' },
           ],
         },
         {
@@ -132,8 +141,8 @@ export const F01_NET: PhaseDef = {
         successCriteria: ['Descontar os cinco endereços reservados', 'Reconhecer blocos sobrepostos'],
       },
       intel: [
-        { conceptId: 'vpc.reserved-ips', body: ['Em cada sub-rede, a AWS guarda os **quatro primeiros** endereços e o **último**. Uma /24 tem 256 endereços e **251** utilizáveis.'] },
-        { conceptId: 'vpc.subnet', body: ['Sub-redes da mesma VPC **não podem se sobrepor**. 10.0.1.0/25 vai de .0 a .127; 10.0.1.128/25, de .128 a .255.'] },
+        { conceptId: 'vpc.reserved-ips', body: ['Em cada sub-rede, a AWS guarda os **quatro primeiros** endereços e o **último**. Uma /24 tem 256 endereços e **251** utilizáveis.'], diagram: RESERVED_RULER },
+        { conceptId: 'vpc.subnet', body: ['Sub-redes da mesma VPC **não podem se sobrepor**. 10.0.1.0/25 vai de .0 a .127; 10.0.1.128/25, de .128 a .255.'], diagram: SUBNET_HALVES },
       ],
       activities: [
         {
@@ -224,21 +233,21 @@ export const F01_NET: PhaseDef = {
           id: 'net.f01.m3.a1',
           kind: 'classify',
           title: 'O que já vem pronto',
-          prompt: 'Classifique cada item: ele já vem pronto na VPC padrão ou não vem nem na VPC padrão nem numa VPC criada por você?',
+          prompt: 'Classifique cada item: ele já vem pronto na VPC padrão, ou você precisa configurar à mão, mesmo na VPC padrão?',
           concepts: [{ id: 'vpc.default-vpc' }],
           xp: 50,
           difficulty: 2,
-          explanation: ['A VPC padrão traz internet gateway, rota 0.0.0.0/0 para ele, uma sub-rede /20 em cada zona e IPv4 público automático nas sub-redes padrão. A rota ::/0 para o internet gateway e o IPv6 automático não vêm em nenhuma das duas.'],
+          explanation: ['A VPC padrão traz internet gateway, rota 0.0.0.0/0 para ele, uma sub-rede /20 em cada zona e IPv4 público automático nas sub-redes padrão. O IPv6 não vem configurado: o bloco IPv6, a rota ::/0 e o endereço IPv6 automático são feitos à mão, na VPC padrão e em qualquer outra.'],
           bins: [
-            { id: 'default', label: 'Vem pronto na VPC padrão' },
-            { id: 'none', label: 'Não vem em nenhuma das duas' },
+            { id: 'default', label: 'Já vem pronto na VPC padrão' },
+            { id: 'none', label: 'Você configura à mão, mesmo na VPC padrão' },
           ],
           items: [
             { id: 'igw', text: 'Um internet gateway ligado à VPC', bin: 'default', explanation: 'A VPC padrão já nasce com ele; a criada por você, não.', concepts: ['vpc.default-vpc'] },
             { id: 'route4', text: 'A rota 0.0.0.0/0 para o internet gateway', bin: 'default', explanation: 'Ela já está na tabela principal da VPC padrão.', concepts: ['vpc.default-vpc'] },
             { id: 'pubip', text: 'IPv4 público automático para cada instância nova', bin: 'default', explanation: 'As sub-redes padrão atribuem IPv4 público automaticamente.', concepts: ['vpc.default-vpc'] },
-            { id: 'route6', text: 'A rota ::/0 para o internet gateway', bin: 'none', explanation: 'Nem a VPC padrão traz rota de IPv6 para a internet.', concepts: ['vpc.default-vpc'] },
-            { id: 'ipv6', text: 'Um endereço IPv6 para cada instância nova', bin: 'none', explanation: 'O IPv6 automático não vem ligado em nenhuma das duas.', concepts: ['vpc.default-vpc'] },
+            { id: 'route6', text: 'A rota ::/0 para o internet gateway', bin: 'none', explanation: 'Nem a VPC padrão traz rota de IPv6 para a internet: você cria a rota depois de associar um bloco IPv6.', concepts: ['vpc.default-vpc'] },
+            { id: 'ipv6', text: 'Um endereço IPv6 para cada instância nova', bin: 'none', explanation: 'O IPv6 automático fica desligado. Você associa um bloco IPv6 à VPC e à sub-rede e liga a atribuição automática.', concepts: ['vpc.default-vpc'] },
           ],
         },
         {
@@ -303,7 +312,7 @@ export const F01_NET: PhaseDef = {
           difficulty: 3,
           hints: ['O bloco 10.0.0.0/16 colide com o escritório, e o /8 não é aceito.', 'Aplicação: /24; web: /25; banco: /27. Comece pelas /24.'],
           explanation: [
-            'A VPC fica com 10.40.0.0/22 (1.024 endereços): 10.0.0.0/16 colide com o escritório, 10.40.0.0/8 é grande demais e 10.40.0.0/24 não comporta as seis sub-redes.',
+            'A VPC fica com 10.40.0.0/22 (1.024 endereços): 10.0.0.0/16 colide com o escritório, 10.0.0.0/8 é grande demais (além de conter o bloco do escritório) e 10.40.0.0/24 não comporta as seis sub-redes.',
             'Um plano possível: aplicação em 10.40.0.0/24 e 10.40.1.0/24, web em 10.40.2.0/25 e 10.40.2.128/25, banco em 10.40.3.0/27 e 10.40.3.32/27.',
           ],
           config: PONTO_CERTO_PLAN,
